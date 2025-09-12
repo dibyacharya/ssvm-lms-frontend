@@ -1,0 +1,15 @@
+chatbot:
+  imageRepository: "chatbot"
+  dockerfilePath: "chatbot/Dockerfile"
+  containerapp_name: "chatbot"
+
+question_generation:
+  imageRepository: "qgen"
+  dockerfilePath: "question_generation/Dockerfile"
+  containerapp_name: "qgen"
+  google_api_key: "AIzaSyCgfnxJ_kDJoFVPdJO-nmP8EkWJuLjKIyc"
+
+transcript_azure:
+  imageRepository: "transcript_azure"
+  dockerfilePath: "transcript_azure/Dockerfile"
+  containerapp_name: "transcript_azure"
