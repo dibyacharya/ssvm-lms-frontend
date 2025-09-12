@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant UI
+    participant AUTH
+    participant DASHBOARD
+    participant CONTENT
+    participant QUIZ
+    participant GRADES
+    participant COURSE
+    participant GRADING
+    participant ADMIN
+    participant REPORT
+    participant SETTINGS
+    participant HEALTH
+
+    UI->>AUTH: login()
+    AUTH-->>UI: JWT
+    UI->>DASHBOARD: fetchDashboard()
+    DASHBOARD-->>UI: dashboardData
+    UI->>CONTENT: uploadLecture()
+    CONTENT-->>UI: uploadStatus
+    UI->>QUIZ: takeQuiz()
+    QUIZ-->>UI: quizResults
+    UI->>GRADES: viewGrades()
+    GRADES-->>UI: gradesData
+    UI->>COURSE: createCourse()
+    COURSE-->>UI: courseCreationStatus
+    UI->>GRADING: gradeAssignments()
+    GRADING-->>UI: gradingStatus
+    UI->>ADMIN: manageUsers()
+    ADMIN-->>UI: userManagementStatus
+    UI->>REPORT: generateReports()
+    REPORT-->>UI: reportData
+    UI->>SETTINGS: configureSettings()
+    SETTINGS-->>UI: settingsStatus
+    UI->>HEALTH: monitorHealth()
+    HEALTH-->>UI: healthMetrics

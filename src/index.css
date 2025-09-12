@@ -1,0 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './fonts.css';
+
+
+:root{
+  --color-accent1:#1aa100;
+  --color-accent2:#a3f294;
+}
+[data-color-scheme="blue"] {
+ 
+  --color-accent1: #3b82f6;
+  --color-accent2: #bfdbfe;
+}
+
+[data-color-scheme="purple"] {
+ 
+  --color-accent1: #8b5cf6;
+  --color-accent2: #ddd6fe;
+}
+
+[data-color-scheme="amber"] {
+ 
+  --color-accent1: #D97706;
+  --color-accent2: #ffedd5;
+}
+
+ html {
+  font-family: "SF Pro Display" !important;
+ }
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.5s forwards;
+}
+
+.slide-out {
+  animation: slideOut 0.5s forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.3s ease-out forwards;
+}

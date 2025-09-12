@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant UI
+    participant AUTH
+    participant DASHBOARD
+    participant CONTENT
+    participant QUIZ
+    participant GRADING
+    participant USER
+
+    UI->>AUTH: login()
+    AUTH-->>UI: JWT
+    UI->>DASHBOARD: fetchDashboard()
+    DASHBOARD-->>UI: dashboardData
+    UI->>CONTENT: uploadLecture()
+    CONTENT-->>UI: uploadStatus
+    UI->>QUIZ: takeQuiz()
+    QUIZ-->>UI: quizResults
+    UI->>GRADING: gradeAssignment()
+    GRADING-->>UI: gradingStatus
+    UI->>USER: manageUsers()
+    USER-->>UI: userManagementStatus
