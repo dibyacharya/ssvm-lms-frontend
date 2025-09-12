@@ -14,30 +14,9 @@ stages:
       Build_ImageRepository: '${{ parameters.imageRepository }}'
       Build_Dockerfile: '${{ parameters.dockerfilePath }}'
     jobs:
-      - job: 'printstageparameters'
-        displayName: 'Print Stage Parameters'
-        steps:
-          - script: |
-              echo "DEBUG (Build Stage): Parameters received by template:"
-              echo "containerRegistry: ${{ parameters.containerRegistry }}"
-              echo "imageRepository: ${{ parameters.imageRepository }}"
-              echo "dockerfilePath: ${{ parameters.dockerfilePath }}"
-              echo "tag: ${{ parameters.tag }}"
-              echo ""
-              echo "DEBUG (Build Stage): Stage-level variables derived from parameters:"
-              echo "Build_ImageRepository: $(Build_ImageRepository)"
-              echo "Build_Dockerfile: $(Build_Dockerfile)"
-            displayName: 'Print Parameters and Stage Vars'
-    
       - job: 'BuildDockerImage'
         displayName: 'Build Docker Image'
         steps:
-          - script: |
-              echo "DEBUG (Build Job): Variables used by Docker task:"
-              echo "Dockerfile: $(Build_Dockerfile)"
-              echo "repository: $(Build_ImageRepository)"
-            displayName: 'Print Vars for Docker Task'
-
           - task: Docker@2
             displayName: 'Build Docker Image'
             inputs:
