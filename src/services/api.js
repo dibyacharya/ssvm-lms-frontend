@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://kit-final-backend.vercel.app/api";
+const API_URL = "https://lmsbackend.bluehill-eb07d9c6.centralindia.azurecontainerapps.io";
 
 const api = axios.create({
   baseURL: API_URL,
