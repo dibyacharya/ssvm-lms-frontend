@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://lmsbackend.bluehill-eb07d9c6.centralindia.azurecontainerapps.io";
+const API_URL = "https://lmsbackend.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api";
 
 const api = axios.create({
   baseURL: API_URL,
