@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCourse } from "../../../../context/CourseContext";
 import SaveButton from "../../../../utils/CourseSaveButton";
+import AssessmentPlan from "./AssessmentPlan";
 import { useParams } from "react-router-dom";
 
 const CourseBrief = () => {
@@ -337,8 +338,9 @@ const CourseBrief = () => {
           </div>
         </div>
 
-        {/* Right Column - Credit Points */}
-        <div className="col-span-12 lg:col-span-4">
+        {/* Right Column - Credit Points and Assessment Plan */}
+        <div className="col-span-12 lg:col-span-4 space-y-6">
+          {/* Credit Points */}
           <div className="bg-white rounded-2xl border border-tertiary/10 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-tertiary/10">
               {renderSectionHeader(
@@ -372,6 +374,9 @@ const CourseBrief = () => {
               {activeSection === "credits" && renderActionButtons("credits")}
             </div>
           </div>
+
+          {/* Assessment Plan */}
+          <AssessmentPlan />
         </div>
       </div>
     </div>

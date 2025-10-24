@@ -49,6 +49,7 @@ import { useAuth } from "../../../context/AuthContext";
 import ProfileDropdown from "../../../utils/ProfileDropDown";
 import AllActivities from "../../Activity/teacher/AllActivities";
 import BlogCreator from "./course/Blog/BlogCreator";
+import ContinuousAssessment from "./course/ContinuousAssessment";
 import { useMeeting } from "../../../context/MeetingContext";
 
 const CourseManagement = () => {
@@ -188,6 +189,7 @@ const CourseManagement = () => {
         { label: "Subjective", icon: <FileText className="w-5 h-5" /> },
         { label: "Objective", icon: <Layout className="w-5 h-5" /> },
         { label: "Practical Activity", icon: <Activity className="w-5 h-5" /> },
+        { label: "Continuous Assessment", icon: <BarChart2 className="w-5 h-5" /> },
       ],
     },
   };
@@ -247,6 +249,7 @@ const CourseManagement = () => {
               <AnnouncementManagement courseID={courseID} />
             )}
             {selectedOption === "Grade Sheet" && <StudentGradingTable />}
+            {selectedOption === "Continuous Assessment" && <ContinuousAssessment />}
             {selectedOption === "Discussion" && <DiscussionForum />}
           </div>
         </div>
