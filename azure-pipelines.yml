@@ -22,10 +22,10 @@ stages:
   - template: devops_template/azure-image-deploy.yml
     parameters:
       tag: $(tag)
-      imageRepository: $[ stageDependencies.DetectAndSetModule.ModuleDetection.outputs['setModuleConfig.imageRepository'] ]
+      imageRepository: 'kiit_lms_frontend'
       registry_name: '$(registry_name)'
       acrusername: '$(acrusername)'
       acrpassword: '$(acrpassword)'
-      containerapp_name: $[ stageDependencies.DetectAndSetModule.ModuleDetection.outputs['setModuleConfig.containerapp_name'] ]
+      containerapp_name: 'lmsfrontend'
       # google_api_key: '$(google_api_key)'
       # groq_api_key: '$(groq_api_key)'
