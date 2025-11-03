@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionItem,
@@ -8,11 +8,72 @@ import {
 } from "react-accessible-accordion";
 import "react-accessible-accordion/dist/fancy-example.css";
 import { Book, CheckSquare, Calendar, Bell } from "lucide-react";
+import { getAllStudentCourses } from "../../../services/course.service";
+import LoadingSpinner from "../../../utils/LoadingAnimation";
 
 import DashboardSemesterContent from "./DashBoardSemContent";
 
 export default function DashboardSemester({ setActiveSection }) {
   const [showNotification, setShowNotification] = useState(false);
+  const [semesterTabs, setSemesterTabs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [defaultExpanded, setDefaultExpanded] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await getAllStudentCourses();
+        
+        // Extract unique semNumbers from courses
+        const semNumbersWithCourses = [...new Set(data.courses
+          .map(course => course.semNumber || course.semester?.semNumber)
+          .filter(semNum => semNum != null)
+        )].sort((a, b) => a - b);
+        
+        // Find the maximum semester number (or use a default range like 1-8)
+        const maxSemNumber = semNumbersWithCourses.length > 0 
+          ? Math.max(...semNumbersWithCourses, 8) // Show at least up to 8, or max if higher
+          : 8;
+        
+        // Create tabs for all semesters from 1 to maxSemNumber
+        // All semesters with courses will be marked as accessible and selectable
+        const tabs = [];
+        for (let i = 1; i <= maxSemNumber; i++) {
+          const hasCourses = semNumbersWithCourses.includes(i);
+          tabs.push({
+            semNumber: i,
+            name: `SEMESTER ${i}`,
+            accessible: hasCourses
+          });
+        }
+        
+        setSemesterTabs(tabs);
+        
+        // Set default expanded semester to first available semester (one with courses)
+        if (semNumbersWithCourses.length > 0) {
+          setDefaultExpanded([`semester-${semNumbersWithCourses[0]}`]);
+        } else {
+          setDefaultExpanded([]);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto p-6 max-w-7xl">
+        <div className="flex justify-center items-center h-screen">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto p-6 max-w-7xl">
@@ -48,27 +109,32 @@ export default function DashboardSemester({ setActiveSection }) {
         </div>
       )}
 
-      <Accordion allowZeroExpanded preExpanded={["semester-1"]}>
-        {/* Semester 1 - Active */}
-        <AccordionItem uuid="semester-1">
-          <AccordionItemHeading>
-            <AccordionItemButton className="dark:bg-gray-400 dark:text-white bg-white p-4 rounded-lg flex justify-between items-center text-xl font-semibold cursor-pointer">
-              SEMESTER 1
-            </AccordionItemButton>
-          </AccordionItemHeading>
-          <AccordionItemPanel>
-            <DashboardSemesterContent setActiveSection={setActiveSection} />
-          </AccordionItemPanel>
-        </AccordionItem>
-
-        {/* Disabled Semesters */}
-        {["semester-2", "semester-3", "semester-4"].map((sem) => (
-          <AccordionItem key={sem} uuid={sem} disabled>
+      <Accordion allowZeroExpanded preExpanded={defaultExpanded}>
+        {semesterTabs.map((semester) => (
+          <AccordionItem 
+            key={`semester-${semester.semNumber}`} 
+            uuid={`semester-${semester.semNumber}`}
+            disabled={!semester.accessible}
+          >
             <AccordionItemHeading>
-              <AccordionItemButton className="dark:bg-gray-700 dark:text-white bg-gray-100 p-4 rounded-lg text-xl font-semibold cursor-not-allowed opacity-50">
-                {sem.replace("-", " ").toUpperCase()}
+              <AccordionItemButton 
+                className={
+                  semester.accessible
+                    ? "dark:bg-gray-400 dark:text-white bg-white p-4 rounded-lg flex justify-between items-center text-xl font-semibold cursor-pointer"
+                    : "dark:bg-gray-700 dark:text-white bg-gray-100 p-4 rounded-lg text-xl font-semibold cursor-not-allowed opacity-50"
+                }
+              >
+                {semester.name}
               </AccordionItemButton>
             </AccordionItemHeading>
+            {semester.accessible && (
+              <AccordionItemPanel>
+                <DashboardSemesterContent 
+                  setActiveSection={setActiveSection} 
+                  semNumber={semester.semNumber}
+                />
+              </AccordionItemPanel>
+            )}
           </AccordionItem>
         ))}
       </Accordion>
