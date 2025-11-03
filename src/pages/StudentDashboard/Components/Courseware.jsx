@@ -4,15 +4,6 @@ import { Book, PlayCircle, Clock, Calendar } from "lucide-react";
 import { getAllStudentCourses } from "../../../services/course.service";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 
-const semesters = [
-  { name: "Semester 1", accessible: true },
-  { name: "Semester 2", accessible: false },
-  { name: "Semester 3", accessible: false },
-  { name: "Semester 4", accessible: false },
-  { name: "Semester 5", accessible: false },
-  { name: "Semester 6", accessible: false },
-];
-
 function calculateSemesterWeeks(startDate, endDate) {
   // 1. Create Date objects from the input strings
   const start = new Date(startDate);
@@ -40,11 +31,12 @@ const DEFAULT_COURSE_IMAGE =
   "https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 const Courseware = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeSemNumber, setActiveSemNumber] = useState(null);
+  const [allCourses, setAllCourses] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
-  const [availableSemesters, setAvailableSemesters] = useState([]);
+  const [semesterTabs, setSemesterTabs] = useState([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -58,12 +50,37 @@ const Courseware = () => {
           }
         });
         
-        // Extract unique semesters from courses
-        const uniqueSemesters = [...new Set(data.courses.map(course => course.semester.name))];
-        setAvailableSemesters(uniqueSemesters);
+        // Extract unique semNumbers from courses
+        const semNumbersWithCourses = [...new Set(data.courses
+          .map(course => course.semNumber || course.semester?.semNumber)
+          .filter(semNum => semNum != null)
+        )].sort((a, b) => a - b);
         
-        setCourses(data.courses || []);
+        // Find the maximum semester number (or use a default range like 1-8)
+        const maxSemNumber = semNumbersWithCourses.length > 0 
+          ? Math.max(...semNumbersWithCourses, 8) // Show at least up to 8, or max if higher
+          : 8;
+        
+        // Create tabs for all semesters from 1 to maxSemNumber
+        // All semesters with courses will be marked as accessible and selectable
+        const tabs = [];
+        for (let i = 1; i <= maxSemNumber; i++) {
+          const hasCourses = semNumbersWithCourses.includes(i);
+          tabs.push({
+            semNumber: i,
+            name: `Semester ${i}`,
+            accessible: hasCourses
+          });
+        }
+        
+        setSemesterTabs(tabs);
+        setAllCourses(data.courses || []);
         setUserInfo(data.user);
+        
+        // Set default active tab to first available semester (one with courses)
+        if (semNumbersWithCourses.length > 0) {
+          setActiveSemNumber(semNumbersWithCourses[0]);
+        }
       } catch (error) {
         console.error("Error fetching courses:", error);
       } finally {
@@ -73,6 +90,19 @@ const Courseware = () => {
 
     fetchCourses();
   }, []);
+
+  // Filter courses based on active semNumber
+  useEffect(() => {
+    if (activeSemNumber !== null && semesterTabs.length > 0) {
+      const filteredCourses = allCourses.filter(course => {
+        const courseSemNumber = course.semNumber || course.semester?.semNumber;
+        return courseSemNumber === activeSemNumber;
+      });
+      setCourses(filteredCourses);
+    } else {
+      setCourses([]);
+    }
+  }, [activeSemNumber, allCourses, semesterTabs]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', { 
@@ -111,18 +141,23 @@ const Courseware = () => {
             
             {/* Semester Navigation */}
             <ul className="flex space-x-2 overflow-x-auto pb-2">
-              {semesters.map((semester, index) => (
-                <li key={index}>
+              {semesterTabs.map((semester) => (
+                <li key={semester.semNumber}>
                   <button
-                    onClick={() => semester.accessible && setActiveTab(index)}
+                    onClick={() => {
+                      if (semester.accessible) {
+                        setActiveSemNumber(semester.semNumber);
+                      }
+                    }}
                     className={`px-6 py-3 rounded-xl transition-all duration-200 text-sm font-medium whitespace-nowrap ${
-                      activeTab === index
+                      activeSemNumber === semester.semNumber
                         ? "bg-accent1 dark:bg-accent1  text-white shadow-lg shadow-green-600/25 dark:shadow-green-500/25"
                         : semester.accessible
                         ? "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md dark:hover:shadow-lg"
-                        : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
                     }`}
                     disabled={!semester.accessible}
+                    aria-label={`${semester.name}${!semester.accessible ? ' (No courses available)' : ''}`}
                   >
                     {semester.name}
                   </button>
@@ -137,7 +172,7 @@ const Courseware = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl p-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {semesters[activeTab].name} Courses
+                {activeSemNumber !== null ? `Semester ${activeSemNumber} Courses` : 'Courses'}
               </h2>
               <div className="text-sm text-gray-500 dark:text-gray-400">
                 {courses.length} {courses.length === 1 ? 'course' : 'courses'} available

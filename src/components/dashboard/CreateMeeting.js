@@ -12,6 +12,8 @@ import {
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { useMeeting } from "../../context/MeetingContext";
+import { getAllStudentCourses } from "../../services/course.service";
+import { generateTimetableEvents, getAvailableSemesters } from "../data/timetableData";
 
 // Set up the localizer for react-big-calendar
 const localizer = momentLocalizer(moment);
@@ -27,7 +29,7 @@ const EventComponent = ({ event }) => (
     data-tooltip-id={`tooltip-${event._id}`}
   >
     <span className="text-white text-sm font-medium truncate">
-      {event.subject}
+      {event.subject || event.title}
     </span>
   </div>
 );
@@ -36,8 +38,17 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
   <div className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md dark:hover:shadow-lg transition-shadow duration-300">
     <div className="flex justify-between items-start mb-4">
       <div>
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">{meeting.subject}</h2>
-        <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">{meeting.description}</p>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+          {meeting.subject || meeting.title}
+        </h2>
+        {meeting.isTimetable && (
+          <span className="mt-1 inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+            Sem {meeting.semester} Timetable
+          </span>
+        )}
+        <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
+          {meeting.description || 'Regular class schedule'}
+        </p>
       </div>
       <div
         className="w-3 h-3 rounded-full"
@@ -47,7 +58,7 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
     <div className="space-y-2 mb-4">
       <div className="flex items-center text-gray-600 dark:text-gray-300">
         <FaUserTie className="mr-2 text-gray-400 dark:text-gray-500" />
-        <span>{meeting.instructor}</span>
+        <span>{meeting.instructor || 'Scheduled Class'}</span>
       </div>
       <div className="flex items-center text-gray-600 dark:text-gray-300">
         <FaClock className="mr-2 text-gray-400 dark:text-gray-500" />
@@ -58,32 +69,38 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
       </div>
       <div className="flex items-center text-gray-600 dark:text-gray-300">
         <FaCalendarAlt className="mr-2 text-gray-400 dark:text-gray-500" />
-        <span>{moment(meeting.date).format("dddd, MMMM D, YYYY")}</span>
+        <span>{moment(meeting.date || meeting.start).format("dddd, MMMM D, YYYY")}</span>
       </div>
-      <div className="flex items-center text-gray-600 dark:text-gray-300">
-        <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
-        <span>{meeting.roomNumber}</span>
-      </div>
-      <div className="flex items-center text-gray-600 dark:text-gray-300">
-        <FaUsers className="mr-2 text-gray-400 dark:text-gray-500" />
-        <span>{meeting.participants} participants</span>
-      </div>
+      {meeting.roomNumber && (
+        <div className="flex items-center text-gray-600 dark:text-gray-300">
+          <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
+          <span>{meeting.roomNumber}</span>
+        </div>
+      )}
+      {!meeting.isTimetable && meeting.participants !== undefined && (
+        <div className="flex items-center text-gray-600 dark:text-gray-300">
+          <FaUsers className="mr-2 text-gray-400 dark:text-gray-500" />
+          <span>{meeting.participants} participants</span>
+        </div>
+      )}
     </div>
-    <a
-      href={meeting.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block w-full bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
-      onClick={(e) => {
-        e.preventDefault();
-        onJoin(meeting);
-      }}
-    >
-      <div className="flex items-center justify-center">
-        <FaVideo className="mr-2" />
-        Join Meeting
-      </div>
-    </a>
+    {!meeting.isTimetable && meeting.link && meeting.link !== '#' && (
+      <a
+        href={meeting.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
+        onClick={(e) => {
+          e.preventDefault();
+          onJoin(meeting);
+        }}
+      >
+        <div className="flex items-center justify-center">
+          <FaVideo className="mr-2" />
+          Join Meeting
+        </div>
+      </a>
+    )}
   </div>
 );
 
@@ -98,17 +115,83 @@ const CreateMeeting = () => {
   const [view, setView] = useState("cards"); // 'calendar' or 'cards'
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMeeting, setSelectedMeeting] = useState(null);
+  const [studentSemesters, setStudentSemesters] = useState([]); // Array of semester numbers the student has
+  const [timetableEvents, setTimetableEvents] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+
+  // Check if user has any semesters with timetable data and generate events
+  useEffect(() => {
+    const checkSemesterAndGenerateTimetable = async () => {
+      try {
+        setCoursesLoading(true);
+        const data = await getAllStudentCourses();
+        
+        if (data && data.courses) {
+          // Get available semesters that have timetable data
+          const availableSemesters = getAvailableSemesters();
+          
+          // Extract unique semester numbers from student's courses
+          const courseSemesters = [...new Set(
+            data.courses
+              .map(course => {
+                const semNumber = course.semNumber || course.semester?.semNumber;
+                return semNumber;
+              })
+              .filter(semNum => semNum != null && availableSemesters.includes(semNum))
+          )].sort((a, b) => a - b);
+          
+          setStudentSemesters(courseSemesters);
+          
+          // Generate timetable events for all semesters the student has
+          if (courseSemesters.length > 0) {
+            const today = new Date();
+            const endDate = new Date(today);
+            endDate.setMonth(endDate.getMonth() + 3); // Generate 3 months ahead
+            
+            // Generate events for each semester
+            const allEvents = [];
+            courseSemesters.forEach(semester => {
+              const generatedEvents = generateTimetableEvents(semester, today, endDate);
+              allEvents.push(...generatedEvents);
+            });
+            
+            setTimetableEvents(allEvents);
+          } else {
+            setTimetableEvents([]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching courses for timetable:", error);
+        setStudentSemesters([]);
+        setTimetableEvents([]);
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+
+    checkSemesterAndGenerateTimetable();
+  }, []);
 
   // Process meetings from context into a format for the calendar
   // useMemo prevents reprocessing on every render, improving performance
   const processedMeetings = useMemo(() => {
-    return meetings.map((meeting) => ({
+    const meetingsProcessed = meetings.map((meeting) => ({
       ...meeting,
       date: new Date(meeting.date),
       start: new Date(meeting.start),
       end: new Date(meeting.end),
     }));
-  }, [meetings]);
+    
+    // Merge timetable events with regular meetings
+    const allMeetings = [...meetingsProcessed, ...timetableEvents];
+    
+    // Remove duplicates based on _id and sort by start time
+    const uniqueMeetings = Array.from(
+      new Map(allMeetings.map(meeting => [meeting._id, meeting])).values()
+    ).sort((a, b) => new Date(a.start) - new Date(b.start));
+    
+    return uniqueMeetings;
+  }, [meetings, timetableEvents]);
 
   // Filter meetings for the selected date when in "List View"
   const filteredMeetings =
@@ -133,16 +216,18 @@ const CreateMeeting = () => {
   };
 
   // Format meetings for react-big-calendar's `events` prop
-  const calendarEvents = processedMeetings.map((meeting) => ({
-    ...meeting,
-    title: meeting.subject,
-  }));
+  const calendarEvents = useMemo(() => {
+    return processedMeetings.map((meeting) => ({
+      ...meeting,
+      title: meeting.subject || meeting.title,
+    }));
+  }, [processedMeetings]);
 
   const calendarComponents = {
     event: EventComponent,
   };
 
-  if (loading) {
+  if (loading || coursesLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
@@ -172,6 +257,11 @@ const CreateMeeting = () => {
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
               Schedule and join your virtual classroom sessions
+              {studentSemesters.length > 0 && (
+                <span className="ml-2 text-blue-600 dark:text-blue-400">
+                  ({studentSemesters.map(sem => `Semester ${sem}`).join(', ')} Timetable Included)
+                </span>
+              )}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-1 flex">
@@ -296,13 +386,20 @@ const CreateMeeting = () => {
           }}
           content={
             <div className="p-2 max-w-xs">
-              <div className="font-bold mb-1">{meeting.subject}</div>
-              <div className="text-sm">{meeting.instructor}</div>
+              <div className="font-bold mb-1">{meeting.subject || meeting.title}</div>
+              <div className="text-sm">{meeting.instructor || 'Scheduled Class'}</div>
               <div className="text-sm">
                 {moment(meeting.start).format("h:mm A")} -{" "}
                 {moment(meeting.end).format("h:mm A")}
               </div>
-              <div className="text-sm mt-1">{meeting.description}</div>
+              {meeting.isTimetable && (
+                <div className="text-xs mt-1 text-blue-600 dark:text-blue-400">
+                  Semester {meeting.semester} Timetable
+                </div>
+              )}
+              {meeting.description && (
+                <div className="text-sm mt-1">{meeting.description}</div>
+              )}
             </div>
           }
         />
@@ -313,13 +410,20 @@ const CreateMeeting = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-600 shadow-xl">
             <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-              {selectedMeeting.subject}
+              {selectedMeeting.subject || selectedMeeting.title}
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">{selectedMeeting.description}</p>
+            {selectedMeeting.isTimetable && (
+              <div className="mb-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-md text-sm inline-block">
+                Semester {selectedMeeting.semester} Timetable
+              </div>
+            )}
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              {selectedMeeting.description || 'Regular class schedule'}
+            </p>
             <div className="space-y-2 mb-4">
               <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <FaUserTie className="mr-2 text-gray-400 dark:text-gray-500" />
-                <span>{selectedMeeting.instructor}</span>
+                <span>{selectedMeeting.instructor || 'Scheduled Class'}</span>
               </div>
               <div className="flex items-center text-gray-600 dark:text-gray-300">
                 <FaClock className="mr-2 text-gray-400 dark:text-gray-500" />
@@ -328,21 +432,29 @@ const CreateMeeting = () => {
                   {moment(selectedMeeting.end).format("h:mm A")}
                 </span>
               </div>
-              <div className="flex items-center text-gray-600 dark:text-gray-300">
-                <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
-                <span>{selectedMeeting.roomNumber}</span>
-              </div>
+              {selectedMeeting.roomNumber && (
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
+                  <span>{selectedMeeting.roomNumber}</span>
+                </div>
+              )}
             </div>
             <div className="flex space-x-2 mt-6">
+              {!selectedMeeting.isTimetable && selectedMeeting.link && (
+                <button
+                  className="flex-1 bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
+                  onClick={() => window.open(selectedMeeting.link, "_blank")}
+                >
+                  <FaVideo className="mr-2" />
+                  Join Meeting
+                </button>
+              )}
               <button
-                className="flex-1 bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
-                onClick={() => window.open(selectedMeeting.link, "_blank")}
-              >
-                <FaVideo className="mr-2" />
-                Join Meeting
-              </button>
-              <button
-                className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg transition-colors duration-200"
+                className={`${
+                  selectedMeeting.isTimetable
+                    ? "w-full"
+                    : "bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500"
+                } text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg transition-colors duration-200`}
                 onClick={() => setSelectedMeeting(null)}
               >
                 Close

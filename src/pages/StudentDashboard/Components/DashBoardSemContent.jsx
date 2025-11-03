@@ -14,16 +14,17 @@ import {
 // 1. Import the context hook
 import { useMeeting } from "../../../context/MeetingContext";
 import toast from "react-hot-toast";
-import { getAllCourses } from "../../../services/course.service";
+import { getAllStudentCourses } from "../../../services/course.service";
 import calculateAttendance from "../../../utils/Functions/CalculateStudentAttendencePercentage";
 import AssignmentStatusChart from "./AssignmentStatusChart";
 
-const DashboardSemesterContent = ({ setActiveSection }) => {
+const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   const navigate = useNavigate();
   // 2. Get meetings and their state from the context
   const { meetings, loading: meetingsLoading, error: meetingsError } = useMeeting();
   
-  const [coursesData, setCoursesData] = useState([]);
+  const [coursesData, setCoursesData] = useState({ courses: [], user: {} });
+  const [allCoursesData, setAllCoursesData] = useState({ courses: [], user: {} });
   const [loading, setLoading] = useState(true);
 
   console.log("course meetings",meetings);
@@ -102,9 +103,9 @@ const DashboardSemesterContent = ({ setActiveSection }) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const data = await getAllCourses();
+        const data = await getAllStudentCourses();
       
-        setCoursesData(data);
+        setAllCoursesData(data);
         
       } catch (err) {
         console.log(err);
@@ -116,6 +117,26 @@ const DashboardSemesterContent = ({ setActiveSection }) => {
 
     fetchCourses();
   }, []);
+
+  // Filter courses based on semNumber when it changes
+  useEffect(() => {
+    if (!allCoursesData.courses || allCoursesData.courses.length === 0) {
+      return;
+    }
+
+    if (semNumber != null) {
+      const filteredCourses = allCoursesData.courses.filter(course => {
+        const courseSemNumber = course.semNumber || course.semester?.semNumber;
+        return courseSemNumber === semNumber;
+      });
+      setCoursesData({
+        ...allCoursesData,
+        courses: filteredCourses
+      });
+    } else {
+      setCoursesData(allCoursesData);
+    }
+  }, [semNumber, allCoursesData]);
   
   // Effect to handle meeting loading errors
   useEffect(() => {
