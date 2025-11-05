@@ -18,6 +18,8 @@ import { getAllStudentCourses } from "../../../services/course.service";
 import calculateAttendance from "../../../utils/Functions/CalculateStudentAttendencePercentage";
 import AssignmentStatusChart from "./AssignmentStatusChart";
 
+const DEFAULT_IMAGE = "https://img.freepik.com/free-vector/online-school-platform-abstract-concept-illustration-homeschooling-online-education-platform-digital-classes-virtual-courses-lms-school_335657-3486.jpg";
+
 const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   const navigate = useNavigate();
   // 2. Get meetings and their state from the context
@@ -315,7 +317,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                 {/* Course Image */}
                 <div className="relative h-40 w-full">
                   <img
-                    src={course.coverImage || "/course.png"}
+                    src={course.coverImage || DEFAULT_IMAGE}
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
@@ -406,7 +408,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                 <div className="relative h-40">
                   {/* Using a generic placeholder image as none is provided in the data */}
                   <img
-                    src={"/course.png"}
+                    src={DEFAULT_IMAGE}
                     alt={event.subject}
                     className="w-full h-full object-cover"
                   />
