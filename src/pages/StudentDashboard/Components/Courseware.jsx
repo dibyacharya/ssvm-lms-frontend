@@ -21,14 +21,14 @@ function calculateSemesterWeeks(startDate, endDate) {
   return numberOfWeeks;
 }
 
-const courseImages = [
-  "https://thumbs.dreamstime.com/b/businessman-looking-dice-sketch-thoughtful-chalkboard-connected-game-probability-theory-73451825.jpg",
-  "https://i.ytimg.com/vi/96bNsQgv10A/maxresdefault.jpg",
-  "https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=2070&auto=format&fit=crop"
-];
-
 const DEFAULT_COURSE_IMAGE =
-  "https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+  "https://img.freepik.com/free-vector/online-school-platform-abstract-concept-illustration-homeschooling-online-education-platform-digital-classes-virtual-courses-lms-school_335657-3486.jpg";
+
+const courseImages = [
+  DEFAULT_COURSE_IMAGE,
+  DEFAULT_COURSE_IMAGE,
+  DEFAULT_COURSE_IMAGE
+];
 
 const Courseware = () => {
   const [activeSemNumber, setActiveSemNumber] = useState(null);
@@ -43,9 +43,9 @@ const Courseware = () => {
       try {
         const data = await getAllStudentCourses();
         
-        // Assign course images
+        // Assign a consistent default cover image when missing
         courseImages.forEach((img, index) => {
-          if (data.courses[index]) {
+          if (data.courses[index] && !data.courses[index].coverImage) {
             data.courses[index].coverImage = img;
           }
         });
@@ -202,7 +202,7 @@ const Courseware = () => {
                       <img
                         src={course.coverImage || DEFAULT_COURSE_IMAGE}
                         alt={course.title}
-                        className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-48 object-contain transition-transform duration-300 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute top-4 right-4">

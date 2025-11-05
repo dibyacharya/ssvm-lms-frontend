@@ -10,7 +10,7 @@ export default function SyllabusAccordion({ course }) {
   const modules = course?.syllabus?.modules;
 
   return (
-    <div className="max-w-4xl mx-auto mt-8">
+    <div className="w-full mt-8">
       <div className="border border-gray-200 dark:border-gray-600 rounded-lg shadow-md dark:shadow-lg overflow-hidden bg-white dark:bg-gray-800">
         <button
           onClick={() => setIsOpen(!isOpen)}
