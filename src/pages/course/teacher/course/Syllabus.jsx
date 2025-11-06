@@ -156,7 +156,7 @@ const SyllabusManager = () => {
             {expandedModule === module.moduleNumber && (
               <div className="p-6 bg-white">
                 <div className="space-y-4">
-                  {module.topics.length > 0 ? (
+                  {module?.topics?.length > 0 ? (
                     module.topics.map((topic, topicIndex) => (
                       <div
                         key={topicIndex}

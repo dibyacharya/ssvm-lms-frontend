@@ -124,8 +124,28 @@ const CourseManagement = () => {
         setLoading(true);
         const response = await getCoursesById(courseId);
 
+        // Normalize syllabus shape to { modules: [] }
+        const normalizedSyllabus = (() => {
+          if (!response?.syllabus) return { modules: [] };
+          
+          let modules = [];
+          if (Array.isArray(response.syllabus)) {
+            modules = response.syllabus;
+          } else if (Array.isArray(response.syllabus.modules)) {
+            modules = response.syllabus.modules;
+          }
+          
+          // Ensure each module has a topics array
+          modules = modules.map(module => ({
+            ...module,
+            topics: Array.isArray(module.topics) ? module.topics : []
+          }));
+          
+          return { modules };
+        })();
+
         // Update the entire course data with what we got from API
-        setCourseData(response);
+        setCourseData({ ...response, syllabus: normalizedSyllabus });
         console.log({ ...response });
         setLoading(false);
       } catch (err) {

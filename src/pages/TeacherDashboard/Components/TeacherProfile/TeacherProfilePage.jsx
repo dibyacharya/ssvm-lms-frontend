@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -21,21 +21,45 @@ import {
   X,
   Plus,
 } from "lucide-react";
+import { useAuth } from "../../../../context/AuthContext";
 
 const TeacherProfilePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // State for teacher details
   const [teacherDetails, setTeacherDetails] = useState({
-    name: "Prof. Ipsita Mohanty",
-    department: "Concrete Technology",
-    position: "Associate Professor",
-    facultyId: "CSF2015021",
-    email: "michael.roberts@university.edu",
-    phone: "+1 (555) 987-6543",
-    officeLocation: "University Campus, Faculty Building A, Room 304",
-    specialization: "Artificial Intelligence & Data Science",
+    name: "",
+    department: "",
+    position: "",
+    facultyId: "",
+    email: "",
+    phone: "",
+    officeLocation: "",
+    specialization: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setTeacherDetails((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phone: user.mobileNo || prev.phone,
+        position: user.role || prev.position,
+      }));
+    }
+  }, [user]);
+
+  const userInitials = useMemo(() => {
+    const n = user?.name || "";
+    return n
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((s) => s[0]?.toUpperCase())
+      .join("");
+  }, [user]);
 
   // State for academic details
   const [academicDetails, setAcademicDetails] = useState({
@@ -137,12 +161,10 @@ const TeacherProfilePage = () => {
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 h-16"></div>
           <div className="p-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="w-36 h-40 rounded-lg overflow-hidden shadow-lg">
-                <img
-                  src="https://t4.ftcdn.net/jpg/03/78/43/25/360_F_378432516_6IlKiCLDAqSCGcfc6o8VqWhND51XqfFm.jpg"
-                  alt="Teacher Profile"
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-36 h-40 rounded-lg overflow-hidden shadow-lg bg-gray-200 flex items-center justify-center">
+                <div className="w-28 h-28 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-700">
+                  {userInitials || "T"}
+                </div>
               </div>
               <div className="flex-grow">
                 <h1 className="text-2xl text-center md:text-left font-bold text-gray-800">
@@ -309,6 +331,24 @@ const TeacherProfilePage = () => {
               <span className="text-gray-600">
                 {teacherDetails.officeLocation}
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Address Information */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-green-600" />
+            Address
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-green-600 font-medium mb-1">Permanent Address</div>
+              <div className="text-gray-700 break-words">{user?.fullPermanentAddress || "—"}</div>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-green-600 font-medium mb-1">Correspondence Address</div>
+              <div className="text-gray-700 break-words">{user?.fullCorrespondenceAddress || "—"}</div>
             </div>
           </div>
         </div>
