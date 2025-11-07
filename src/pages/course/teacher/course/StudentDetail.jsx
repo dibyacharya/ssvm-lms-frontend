@@ -116,7 +116,7 @@ const StudentTable = () => {
               {/* <SortableHeader label="Roll No." sortKey="rollNo" /> */}
               <SortableHeader label="Name" sortKey="name" />
               <SortableHeader label="Email" sortKey="email" />
-              <SortableHeader label="Program" sortKey="program" />
+              {/* <SortableHeader label="Program" sortKey="program" /> */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -126,7 +126,7 @@ const StudentTable = () => {
                 {/* <td className="px-4 py-3">{item.rollNo}</td> */}
                 <td className="px-4 py-3">{item.name}</td>
                 <td className="px-4 py-3">{item.email}</td>
-                <td className="px-4 py-3">{item.program}</td>
+                {/* <td className="px-4 py-3">{item.program}</td> */}
               </tr>
             ))}
           </tbody>
