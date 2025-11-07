@@ -14,9 +14,19 @@ const TeacherCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSemester, setFilterSemester] = useState("All");
   const [filterYear, setFilterYear] = useState("All");
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   // 2. Get meetings data from the context
   const { meetings } = useMeeting();
+
+  // Update current time every minute to check if meeting should be active
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   const image = [
     "https://thumbs.dreamstime.com/b/businessman-looking-dice-sketch-thoughtful-chalkboard-connected-game-probability-theory-73451825.jpg",
@@ -94,6 +104,38 @@ const TeacherCourses = () => {
         if (liveMeeting) return liveMeeting; // Return the first one found
     }
     return null; // No live meetings found in this semester
+  };
+
+  // Helper function to check for temporary meeting for XCT 3002
+  const findTempLiveMeetingForSemester = (semesterCourses) => {
+    if (!semesterCourses) return null;
+    
+    // Check if any course in this semester has code "XCT 3002"
+    const xct3002Course = semesterCourses.find(course => {
+      const courseCode = course.courseCode || course.code || course.course_code;
+      return courseCode === 'XCT 3002';
+    });
+    
+    if (!xct3002Course) return null;
+    
+    const now = currentTime;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
+    
+    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
+    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
+    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
+    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
+    
+    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
+      return {
+        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
+        isTemporary: true
+      };
+    }
+    
+    return null;
   };
 
 
@@ -187,6 +229,8 @@ const TeacherCourses = () => {
         filteredCourses.map((semester, index) => {
           // 4. For each semester, check if there's a live meeting
           const liveMeeting = findLiveMeetingForSemester(semester.courses, meetings);
+          const tempLiveMeeting = findTempLiveMeetingForSemester(semester.courses);
+          const activeMeeting = liveMeeting || tempLiveMeeting;
 
           return (
             <div key={semester.semesterId || index} className="mb-12">
@@ -200,9 +244,9 @@ const TeacherCourses = () => {
                   </span>
                 </div>
                 {/* 5. DYNAMIC BUTTON - Renders as a link if active, or a disabled button if not */}
-                {liveMeeting ? (
+                {activeMeeting ? (
                   <a
-                    href={liveMeeting.link}
+                    href={activeMeeting.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-red-600 dark:bg-red-500 text-white px-6 py-2 rounded-md text-sm hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center gap-2 animate-pulse"

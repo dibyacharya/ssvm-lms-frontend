@@ -126,7 +126,7 @@ const ScheduleCalendar = ({ events = [] }) => {
       {/* Announcement Section */}
       <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
         <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-          Welcome to DhammaNexus !
+          Welcome to OneCampus !
         </h2>
         <div className="w-full h-[300px]">
           <iframe
