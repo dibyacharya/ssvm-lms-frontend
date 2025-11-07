@@ -19,9 +19,9 @@ import {
   Edit,
   Save,
   X,
-  Plus,
 } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
+import api from "../../../../services/api";
 
 const TeacherProfilePage = () => {
   const navigate = useNavigate();
@@ -79,14 +79,26 @@ const TeacherProfilePage = () => {
 
   // New state for mentor details
   const [mentorDetails, setMentorDetails] = useState({
-    title: "Professor of AI & Machine Learning at Harvard University",
-    bio: "Prof. Ipsita Mohanty is a leading researcher in Artificial Intelligence and has published over 50 research papers. He specializes in deep learning, neural networks, and AI ethics. With 15+ years of experience, he has mentored numerous PhD students and contributed to AI policy discussions globally.",
-    socialLinks: [
-      { name: "LinkedIn", url: "#" },
-      { name: "Scopus", url: "#" },
-      { name: "Google Scholar", url: "#" },
-    ],
+    profTitle: "",
+    profDesc: "",
+    googleScholarLink: "",
+    scopusLink: "",
+    linkedInLink: "",
   });
+
+  // Load mentor details from user object if available
+  useEffect(() => {
+    if (user) {
+      setMentorDetails((prev) => ({
+        ...prev,
+        profTitle: user.profTitle || "",
+        profDesc: user.profDesc || "",
+        googleScholarLink: user.googleScholarLink || "",
+        scopusLink: user.scopusLink || "",
+        linkedInLink: user.linkedInLink || "",
+      }));
+    }
+  }, [user]);
 
   // Edit mode states
   const [editingSection, setEditingSection] = useState(null);
@@ -109,40 +121,50 @@ const TeacherProfilePage = () => {
     });
   };
 
-  // Handle social link change
-  const handleSocialLinkChange = (index, field, value) => {
-    const updatedLinks = [...mentorDetails.socialLinks];
-    updatedLinks[index] = {
-      ...updatedLinks[index],
-      [field]: value,
-    };
-    setMentorDetails({
-      ...mentorDetails,
-      socialLinks: updatedLinks,
-    });
-  };
+  // Update teacher profile API function
+  const updateTeacherProfile = async (profileData) => {
+    try {
+      const response = await api.put("/teachers/profile", profileData);
+      const data = response.data;
 
-  // Add new social link
-  const handleAddSocialLink = () => {
-    setMentorDetails({
-      ...mentorDetails,
-      socialLinks: [...mentorDetails.socialLinks, { name: "", url: "" }],
-    });
-  };
-
-  // Remove social link
-  const handleRemoveSocialLink = (index) => {
-    const updatedLinks = [...mentorDetails.socialLinks];
-    updatedLinks.splice(index, 1);
-    setMentorDetails({
-      ...mentorDetails,
-      socialLinks: updatedLinks,
-    });
+      if (data.success) {
+        alert("Profile updated successfully!");
+        return data.teacher;
+      } else {
+        alert(`Error: ${data.message || "Failed to update profile"}`);
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to update profile. Please try again.";
+      alert(errorMessage);
+      return null;
+    }
   };
 
   // Save mentor details changes
-  const saveMentorDetails = () => {
-    setEditingSection(null);
+  const saveMentorDetails = async () => {
+    const profileData = {
+      profTitle: mentorDetails.profTitle,
+      profDesc: mentorDetails.profDesc,
+      googleScholarLink: mentorDetails.googleScholarLink,
+      scopusLink: mentorDetails.scopusLink,
+      linkedInLink: mentorDetails.linkedInLink,
+    };
+
+    const updatedTeacher = await updateTeacherProfile(profileData);
+    if (updatedTeacher) {
+      setEditingSection(null);
+      // Update local state with the updated data
+      setMentorDetails((prev) => ({
+        ...prev,
+        profTitle: updatedTeacher.profTitle || prev.profTitle,
+        profDesc: updatedTeacher.profDesc || prev.profDesc,
+        googleScholarLink: updatedTeacher.googleScholarLink || prev.googleScholarLink,
+        scopusLink: updatedTeacher.scopusLink || prev.scopusLink,
+        linkedInLink: updatedTeacher.linkedInLink || prev.linkedInLink,
+      }));
+    }
   };
 
   return (
@@ -178,9 +200,7 @@ const TeacherProfilePage = () => {
                   <span className="text-green-600 font-semibold">
                     {teacherDetails.position}
                   </span>
-                  <span className="text-gray-500">
-                    ID: {teacherDetails.facultyId}
-                  </span>
+                  
                 </div>
               </div>
             </div>
@@ -210,25 +230,29 @@ const TeacherProfilePage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title
+                  Professional Title
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={mentorDetails.title}
+                  name="profTitle"
+                  value={mentorDetails.profTitle}
                   onChange={handleMentorChange}
+                  placeholder="e.g., Associate Professor of AI"
+                  maxLength={200}
                   className="w-full p-2 border border-gray-300 rounded-md"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bio
+                  Professional Description
                 </label>
                 <textarea
-                  name="bio"
-                  value={mentorDetails.bio}
+                  name="profDesc"
+                  value={mentorDetails.profDesc}
                   onChange={handleMentorChange}
                   rows={4}
+                  placeholder="Enter your professional bio/description"
+                  maxLength={2000}
                   className="w-full p-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -238,40 +262,47 @@ const TeacherProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Social Links
                 </label>
-                {mentorDetails.socialLinks.map((link, index) => (
-                  <div key={index} className="flex items-center gap-2 mb-2">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Google Scholar Link
+                    </label>
                     <input
-                      type="text"
-                      value={link.name}
-                      onChange={(e) =>
-                        handleSocialLinkChange(index, "name", e.target.value)
-                      }
-                      placeholder="Platform Name"
-                      className="p-2 border border-gray-300 rounded-md w-1/3"
+                      type="url"
+                      name="googleScholarLink"
+                      value={mentorDetails.googleScholarLink}
+                      onChange={handleMentorChange}
+                      placeholder="https://scholar.google.com/..."
+                      className="w-full p-2 border border-gray-300 rounded-md"
                     />
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) =>
-                        handleSocialLinkChange(index, "url", e.target.value)
-                      }
-                      placeholder="URL"
-                      className="p-2 border border-gray-300 rounded-md flex-grow"
-                    />
-                    <button
-                      onClick={() => handleRemoveSocialLink(index)}
-                      className="bg-red-100 text-red-600 p-2 rounded-md hover:bg-red-200"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
                   </div>
-                ))}
-                <button
-                  onClick={handleAddSocialLink}
-                  className="mt-2 bg-blue-100 text-blue-600 px-3 py-1 rounded-md text-sm hover:bg-blue-200 flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" /> Add Link
-                </button>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Scopus Link
+                    </label>
+                    <input
+                      type="url"
+                      name="scopusLink"
+                      value={mentorDetails.scopusLink}
+                      onChange={handleMentorChange}
+                      placeholder="https://www.scopus.com/..."
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      LinkedIn Link
+                    </label>
+                    <input
+                      type="url"
+                      name="linkedInLink"
+                      value={mentorDetails.linkedInLink}
+                      onChange={handleMentorChange}
+                      placeholder="https://www.linkedin.com/..."
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -286,27 +317,65 @@ const TeacherProfilePage = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <p className="text-gray-700">{mentorDetails.title}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700">{mentorDetails.bio}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <div className="flex gap-2">
-                  {mentorDetails.socialLinks.map((link, index) => (
-                    <a
-                      key={index}
-                      href={link.url}
-                      className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-200"
-                    >
-                      {link.name}
-                    </a>
-                  ))}
+              {mentorDetails.profTitle && (
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <p className="text-gray-700">{mentorDetails.profTitle}</p>
                 </div>
-              </div>
+              )}
+              {mentorDetails.profDesc && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-gray-700">{mentorDetails.profDesc}</p>
+                </div>
+              )}
+              {(mentorDetails.googleScholarLink ||
+                mentorDetails.scopusLink ||
+                mentorDetails.linkedInLink) && (
+                <div className="flex items-center gap-3">
+                  <Globe className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <div className="flex gap-2 flex-wrap">
+                    {mentorDetails.googleScholarLink && (
+                      <a
+                        href={mentorDetails.googleScholarLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-200"
+                      >
+                        Google Scholar
+                      </a>
+                    )}
+                    {mentorDetails.scopusLink && (
+                      <a
+                        href={mentorDetails.scopusLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-200"
+                      >
+                        Scopus
+                      </a>
+                    )}
+                    {mentorDetails.linkedInLink && (
+                      <a
+                        href={mentorDetails.linkedInLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm hover:bg-blue-200"
+                      >
+                        LinkedIn
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!mentorDetails.profTitle &&
+                !mentorDetails.profDesc &&
+                !mentorDetails.googleScholarLink &&
+                !mentorDetails.scopusLink &&
+                !mentorDetails.linkedInLink && (
+                  <p className="text-gray-500 italic">
+                    No mentor details available. Click edit to add information.
+                  </p>
+                )}
             </div>
           )}
         </div>
@@ -354,7 +423,7 @@ const TeacherProfilePage = () => {
         </div>
 
         {/* Specialization Row */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        {/* <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Book className="w-5 h-5 text-green-600" />
             Specialization
@@ -364,105 +433,13 @@ const TeacherProfilePage = () => {
               {teacherDetails.specialization}
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Academic Details Row */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-green-600" />
-            Academic Background
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg">
-              <GraduationCap className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-              <div>
-                <div className="text-sm text-green-600 font-medium">
-                  Education
-                </div>
-                <div className="text-gray-700">{academicDetails.education}</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg">
-              <Briefcase className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-              <div>
-                <div className="text-sm text-green-600 font-medium">
-                  Experience
-                </div>
-                <div className="text-gray-700">
-                  {academicDetails.experience}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg">
-              <Book className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-              <div>
-                <div className="text-sm text-green-600 font-medium">
-                  Research Areas
-                </div>
-                <div className="text-gray-700">{academicDetails.research}</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg">
-              <FileText className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-              <div>
-                <div className="text-sm text-green-600 font-medium">
-                  Publications
-                </div>
-                <div className="text-gray-700">
-                  {academicDetails.publications}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Office Hours Row */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-green-600" />
-            Office Hours
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Calendar className="w-5 h-5 text-green-600" />
-              <div>
-                <span className="text-sm text-green-600 font-medium">
-                  Monday:{" "}
-                </span>
-                <span className="text-gray-700">{officeHours.monday}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Calendar className="w-5 h-5 text-green-600" />
-              <div>
-                <span className="text-sm text-green-600 font-medium">
-                  Wednesday:{" "}
-                </span>
-                <span className="text-gray-700">{officeHours.wednesday}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Calendar className="w-5 h-5 text-green-600" />
-              <div>
-                <span className="text-sm text-green-600 font-medium">
-                  Friday:{" "}
-                </span>
-                <span className="text-gray-700">{officeHours.friday}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Mail className="w-5 h-5 text-green-600" />
-              <div>
-                <span className="text-sm text-green-600 font-medium">
-                  By Appointment:{" "}
-                </span>
-                <span className="text-gray-700">
-                  {officeHours.byAppointment}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+       
       </div>
     </div>
   );

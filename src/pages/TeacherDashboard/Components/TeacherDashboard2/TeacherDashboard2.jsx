@@ -39,7 +39,7 @@ const TeacherDashboard2 = () => {
   }, []);
 
   // --- STATS CALCULATIONS (course & grade data still comes from dashboardData) ---
-
+ 
   const activeCoursesCount = dashboardData?.courses?.length || 0;
 
   const totalStudentsCount = useMemo(() => {
@@ -128,7 +128,7 @@ const TeacherDashboard2 = () => {
             </h2>
           </div>
           <p className="text-4xl font-bold text-gray-800 dark:text-white">
-            {activeCoursesCount}
+            {dashboardData?.user?.totalCourses}
           </p>
           <div className="mt-4 flex items-center space-x-2 text-primary dark:text-primary/90">
             <TrendingUp className="h-4 w-4" />
@@ -147,7 +147,7 @@ const TeacherDashboard2 = () => {
             </h2>
           </div>
           <p className="text-4xl font-bold text-gray-800 dark:text-white">
-            {totalStudentsCount}
+            {dashboardData?.user?.totalStudents}
           </p>
           <div className="mt-4 flex items-center space-x-2 text-primary dark:text-primary/90">
             <TrendingUp className="h-4 w-4" />

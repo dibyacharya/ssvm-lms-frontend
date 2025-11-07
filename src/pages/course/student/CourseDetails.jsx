@@ -82,10 +82,20 @@ const CourseDetails = () => {
   const navigate = useNavigate();
   const { courseData: course, setCourseData } = useCourse();
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const dropdownRefs = useRef({});
 
   // 2. Get meetings data from the context
   const { meetings } = useMeeting();
+
+  // Update current time every minute to check if meeting should be active
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -158,6 +168,43 @@ const CourseDetails = () => {
       return now >= startTime && now <= endTime;
     });
   }, [meetings, courseID]); // This will re-check whenever meetings data changes
+
+  // Check for temporary meeting for XCT 3002 between 2:30 PM and 3:30 PM
+  const tempLiveMeeting = useMemo(() => {
+    if (!course) return null;
+    
+    const courseCode = course.courseCode || course.code || course.course_code;
+    if (courseCode !== 'XCT 3002') return null;
+    
+    const now = currentTime;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
+    
+    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
+    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
+    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
+    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
+    
+    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
+      return {
+        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
+        isTemporary: true
+      };
+    }
+    
+    return null;
+  }, [course, currentTime]);
+
+  // Handler for joining live class
+  const handleJoinLiveClass = () => {
+    const activeMeeting = liveMeeting || tempLiveMeeting;
+    if (activeMeeting) {
+      window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
+    } else {
+      alert("There is no live class to join at the moment.");
+    }
+  };
 
 
   const toggleDropdown = (menu) => {
@@ -274,7 +321,14 @@ const CourseDetails = () => {
       case "Class Rec.": return <LecturePanel />;
       case "E-Learning": return <StudentContentSection />;
       case "Graded": return <StudentAssignmentSection courseID={courseID} selectedID="0" />;
-      case "Self Assessment": return <SelfQuiz />;
+      case "Self Assessment": return (
+          <div className="min-h-[300px] flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-3xl font-semibold text-primary dark:text-blue-400 mb-2">Coming Soon</div>
+              <div className="text-tertiary dark:text-gray-300">Self-assessment quizzes will be available here shortly.</div>
+            </div>
+          </div>
+        );
       case "Activity": return <StudentActivitySection courseID={courseID} selectedID="0" />;
       case "Assignments": return <AssignmentsList />;
       case "Announcements": return <AllAnnouncements />;
@@ -332,15 +386,27 @@ const CourseDetails = () => {
     </div>
     
     {/* Live Class Button */}
-    <div className="ml-8">
-      <button
-        disabled
-        className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"
-      >
-        <MdLiveTv />
-        No Live Class Now
-      </button>
-    </div>
+    {(liveMeeting || tempLiveMeeting) ? (
+      <div className="ml-8">
+        <button
+          onClick={handleJoinLiveClass}
+          className="relative z-[900] flex justify-center items-center gap-2 text-lg px-6 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors animate-pulse"
+        >
+          <MdLiveTv />
+          Join Live Class
+        </button>
+      </div>
+    ) : (
+      <div className="ml-8">
+        <button
+          disabled
+          className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"
+        >
+          <MdLiveTv />
+          No Live Class Now
+        </button>
+      </div>
+    )}
   </div>
 
   {/* Tab Navigation */}

@@ -57,6 +57,7 @@ const CourseManagement = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   // Get courseId from URL parameters
   const { courseID } = useParams();
   const { logout } = useAuth();
@@ -70,6 +71,15 @@ const CourseManagement = () => {
 
   // Get meetings data from the context
   const { meetings } = useMeeting();
+
+  // Update current time every minute to check if meeting should be active
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Check for a currently live meeting for THIS specific course
 // This logic makes the button active based on the exact time in the API string
@@ -92,15 +102,44 @@ const CourseManagement = () => {
     });
   }, [meetings, courseID]);
 
+  const { courseData, setCourseData } = useCourse();
+
+  // Check for temporary meeting for XCT 3002 between 2:30 PM and 3:30 PM
+  const tempLiveMeeting = useMemo(() => {
+    if (!courseData) return null;
+    
+    const courseCode = courseData.courseCode || courseData.code || courseData.course_code;
+    if (courseCode !== 'XCT 3002') return null;
+    
+    const now = currentTime;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
+    
+    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
+    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
+    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
+    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
+    
+    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
+      return {
+        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
+        isTemporary: true
+      };
+    }
+    
+    return null;
+  }, [courseData, currentTime]);
+
   // Create the handler function for the button
   const handleJoinLiveClass = () => {
-    if (liveMeeting) {
-      window.open(liveMeeting.link, '_blank', 'noopener,noreferrer');
+    const activeMeeting = liveMeeting || tempLiveMeeting;
+    if (activeMeeting) {
+      window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
     } else {
       alert("There is no live class to join at the moment.");
     }
   };
-  const { courseData, setCourseData } = useCourse();
 
   // Function to extract course ID from URL path
   const extractCourseIdFromPath = () => {
@@ -400,17 +439,16 @@ const CourseManagement = () => {
       </header>
 
       {/* Live Class Buttons */}
-      {liveMeeting && (
+      {(liveMeeting || tempLiveMeeting) && (
         <button
           onClick={handleJoinLiveClass}
-          className=" absolute top-20 flex justify-center items-center gap-2  right-8 text-lg px-6 py-2 bg-primary/80 text-white rounded-lg hover:bg-primary transition-colors z-50"
+          className=" absolute top-20 flex justify-center items-center gap-2  right-8 text-lg px-6 py-2 bg-primary/80 text-white rounded-lg hover:bg-primary transition-colors z-[900]"
         >
           <MdLiveTv />
           Join Live Class
         </button>
       )}
-    
-
+      
       {/* Course Header Banner */}
       <div className="w-[90%] m-auto pt-4">
         <div className="flex items-center justify-between mb-6">
@@ -424,7 +462,7 @@ const CourseManagement = () => {
           </div>
           
           {/* Live Class Button */}
-         {!liveMeeting && <div className="ml-8">
+         {!(liveMeeting || tempLiveMeeting) && <div className="ml-8">
             <button
               disabled
               className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"

@@ -117,68 +117,7 @@ const initialCourseData = {
       ],
     },
   },
-  students: [
-    {
-      id: "student001",
-      rollNo: "CS101",
-      name: "John Smith",
-      program: "Computer Science",
-    },
-    {
-      id: "student002",
-      rollNo: "CS102",
-      name: "Emily Johnson",
-      program: "Computer Science",
-    },
-    {
-      id: "student003",
-      rollNo: "CS103",
-      name: "Michael Brown",
-      program: "Computer Science",
-    },
-    {
-      id: "student004",
-      rollNo: "CS104",
-      name: "Sarah Davis",
-      program: "Computer Science",
-    },
-    {
-      id: "student005",
-      rollNo: "CS105",
-      name: "David Wilson",
-      program: "Computer Science",
-    },
-    {
-      id: "student006",
-      rollNo: "CS106",
-      name: "Jessica Martinez",
-      program: "Computer Science",
-    },
-    {
-      id: "student007",
-      rollNo: "CS107",
-      name: "Robert Taylor",
-      program: "Computer Science",
-    },
-    {
-      id: "student008",
-      rollNo: "CS108",
-      name: "Jennifer Anderson",
-      program: "Computer Science",
-    },
-    {
-      id: "student009",
-      rollNo: "CS109",
-      name: "Christopher Thomas",
-      program: "Computer Science",
-    },
-    {
-      id: "student010",
-      rollNo: "CS110",
-      name: "Amanda Jackson",
-      program: "Computer Science",
-    },
-  ],
+  students: [], // Students will be loaded from API
 };
 
 // Create the context

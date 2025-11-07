@@ -30,23 +30,10 @@ const StudentHome = ({ setSelectedOption }) => {
   const { courseData } = useCourse();
   const { courseID } = useParams();
   const { setCurrentModuleIndex } = useUtilityContext();
-
+  console.log("heddd", courseData)
   // Dummy data for elements not present in the courseData object
   const upcomingEvents = [
-    {
-      id: 1,
-      title: "Statistics Lab Session",
-      date: "April 23, 2025",
-      time: "10:00 AM - 12:00 PM",
-      location: "Room 304",
-    },
-    {
-      id: 2,
-      title: "Office Hours",
-      date: "April 22, 2025",
-      time: "2:00 PM - 4:00 PM",
-      location: "Online (Zoom)",
-    },
+   
   ];
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,15 +126,15 @@ const StudentHome = ({ setSelectedOption }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-tertiary dark:text-gray-400 text-sm">Total Students</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">32</h3>
+              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">{courseData?.stats?.totalStudentsEnrolled}</h3>
             </div>
             <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
               <Users className="w-6 h-6 text-primary dark:text-blue-400" />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-            <span className="text-primary dark:text-blue-400 font-medium">5</span>
-            <span className="mx-1">study buddies in your group</span>
+            {/* <span className="text-primary dark:text-blue-400 font-medium">5</span> */}
+            <span className="mx-1">study buddies in this group</span>
           </div>
         </div>
         
@@ -157,7 +144,7 @@ const StudentHome = ({ setSelectedOption }) => {
             <div>
               <p className="text-tertiary dark:text-gray-400 text-sm">Course Progress</p>
               <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">
-                {courseProgress}%
+                0%
               </h3>
             </div>
             <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
@@ -165,7 +152,7 @@ const StudentHome = ({ setSelectedOption }) => {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-            <span>{completedTopics} of {totalTopics} topics completed</span>
+            <span>course just started</span>
           </div>
         </div>
 
@@ -194,7 +181,7 @@ const StudentHome = ({ setSelectedOption }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-tertiary dark:text-gray-400 text-sm">Upcoming</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">4</h3>
+              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">0</h3>
             </div>
             <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
               <Calendar className="w-6 h-6 text-primary dark:text-blue-400" />

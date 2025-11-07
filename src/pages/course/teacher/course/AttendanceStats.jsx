@@ -160,7 +160,7 @@ const AttendanceStats = () => {
                     Sl. No.
                   </th>
                   <th className="p-3 font-medium text-tertiary text-left">
-                    Roll No.
+                    Student Name
                   </th>
                   <th className="p-3 font-medium text-tertiary text-center">
                     <div className="flex items-center justify-center">
@@ -193,7 +193,7 @@ const AttendanceStats = () => {
                       >
                         <td className="p-3 text-primary">{index + 1}</td>
                         <td className="p-3 text-primary font-medium">
-                          {student.rollNo}
+                          {student?.name}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center justify-center">

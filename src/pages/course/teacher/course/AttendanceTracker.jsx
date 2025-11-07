@@ -336,9 +336,9 @@ const AttendanceTracker = () => {
                 <th className="py-4 px-6 text-left font-medium text-tertiary">
                   #
                 </th>
-                <th className="py-4 px-6 text-left font-medium text-tertiary">
+                {/* <th className="py-4 px-6 text-left font-medium text-tertiary">
                   Roll No.
-                </th>
+                </th> */}
                 <th className="py-4 px-6 text-left font-medium text-tertiary">
                   Name
                 </th>
@@ -357,9 +357,9 @@ const AttendanceTracker = () => {
                   className="border-b border-tertiary/10 hover:bg-gray-50 transition-colors duration-150"
                 >
                   <td className="py-4 px-6 text-primary">{index + 1}</td>
-                  <td className="py-4 px-6 text-primary font-medium">
+                  {/* <td className="py-4 px-6 text-primary font-medium">
                     {student.rollNo}
-                  </td>
+                  </td> */}
                   <td className="py-4 px-6 text-primary">{student.name}</td>
                   <td className="py-4 px-6 text-tertiary">{student.program}</td>
                   <td className="py-4 px-6">
