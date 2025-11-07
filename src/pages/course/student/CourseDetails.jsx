@@ -96,7 +96,25 @@ const CourseDetails = () => {
     const fetchCourse = async () => {
       try {
         const response = await getCoursesById(courseID);
-        setCourseData(response);
+        const normalizedSyllabus = (() => {
+          if (!response?.syllabus) return { modules: [] };
+          
+          let modules = [];
+          if (Array.isArray(response.syllabus)) {
+            modules = response.syllabus;
+          } else if (Array.isArray(response.syllabus.modules)) {
+            modules = response.syllabus.modules;
+          }
+          
+          // Ensure each module has a topics array
+          modules = modules.map(module => ({
+            ...module,
+            topics: Array.isArray(module.topics) ? module.topics : []
+          }));
+          
+          return { modules };
+        })();
+        setCourseData({ ...response, syllabus: normalizedSyllabus });
       } catch (error) {
         console.error("Error fetching course:", error);
       } finally {
@@ -243,7 +261,7 @@ const CourseDetails = () => {
             <div className="p-10 flex flex-col gap-2">
               <div className="flex gap-4 ">
                 <div className="flex flex-col w-[50%]">
-                  <MentorInfo />
+                  <MentorInfo teacher={course?.teacher} />
                   <SyllabusAccordion course={course} />
                 </div>
                 <CourseInfo course={course} />
@@ -356,3 +374,4 @@ const CourseDetails = () => {
 };
 
 export default CourseDetails;
+ 

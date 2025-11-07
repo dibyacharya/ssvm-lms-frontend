@@ -48,8 +48,9 @@ const initialCourseData = {
     },
   ],
 
-  // syllabus
-  syllabus: [
+  // syllabus (normalized shape)
+  syllabus: {
+    modules: [
     {
       moduleNumber: 1,
       moduleTitle: "Introduction to Programming",
@@ -65,6 +66,7 @@ const initialCourseData = {
       topics: ["Arrays and Lists", "Stacks and Queues", "Trees and Graphs"],
     },
   ],
+  },
   //schedule
   courseSchedule: {
     classStartDate: "",
@@ -285,103 +287,167 @@ export const CourseProvider = ({ children }) => {
     });
   };
 
-  // Add a new module
+  // Add a new module (handles null/legacy shapes)
   const addModule = () => {
-    setCourseData((prev) => ({
-      ...prev,
-      syllabus: [
-        ...prev.syllabus,
-        {
-          moduleNumber: prev.syllabus.length + 1,
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      const newModule = {
+        moduleNumber: currentModules.length + 1,
           moduleTitle: "New Module",
           topics: [],
+      };
+
+      return {
+        ...prev,
+        syllabus: {
+          modules: [...currentModules, newModule],
         },
-      ],
-    }));
+      };
+    });
   };
 
   // Update module title
   const updateModuleTitle = (moduleNumber, newTitle) => {
-    setCourseData((prev) => ({
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      return {
       ...prev,
-      syllabus: prev.syllabus.map((module) =>
+        syllabus: {
+          modules: currentModules.map((module) =>
         module.moduleNumber === moduleNumber
           ? { ...module, moduleTitle: newTitle }
           : module
       ),
-    }));
+        },
+      };
+    });
   };
 
   // Add topic to a module
   const addTopicToModule = (moduleNumber) => {
-    setCourseData((prev) => ({
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      return {
       ...prev,
-      syllabus: prev.syllabus.map((module) =>
+        syllabus: {
+          modules: currentModules.map((module) =>
         module.moduleNumber === moduleNumber
-          ? { ...module, topics: [...module.topics, "New Topic"] }
+          ? { ...module, topics: [...(Array.isArray(module.topics) ? module.topics : []), "New Topic"] }
           : module
       ),
-    }));
+        },
+      };
+    });
   };
 
   // Update topic in a module
   const updateTopic = (moduleNumber, topicIndex, newTopic) => {
-    setCourseData((prev) => ({
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      return {
       ...prev,
-      syllabus: prev.syllabus.map((module) =>
+        syllabus: {
+          modules: currentModules.map((module) =>
         module.moduleNumber === moduleNumber
           ? {
               ...module,
-              topics: module.topics.map((topic, index) =>
+              topics: (Array.isArray(module.topics) ? module.topics : []).map((topic, index) =>
                 index === topicIndex ? newTopic : topic
               ),
             }
           : module
       ),
-    }));
+        },
+      };
+    });
   };
 
   // Remove topic from a module
   const removeTopic = (moduleNumber, topicIndex) => {
-    setCourseData((prev) => ({
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      return {
       ...prev,
-      syllabus: prev.syllabus.map((module) =>
+        syllabus: {
+          modules: currentModules.map((module) =>
         module.moduleNumber === moduleNumber
           ? {
               ...module,
-              topics: module.topics.filter((_, index) => index !== topicIndex),
+              topics: (Array.isArray(module.topics) ? module.topics : []).filter((_, index) => index !== topicIndex),
             }
           : module
       ),
-    }));
+        },
+      };
+    });
   };
 
   // Remove an entire module
   const removeModule = (moduleNumber) => {
-    setCourseData((prev) => ({
-      ...prev,
-      syllabus: prev.syllabus
+    setCourseData((prev) => {
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      const filtered = currentModules
         .filter((module) => module.moduleNumber !== moduleNumber)
-        .map((module, index) => ({
-          ...module,
-          moduleNumber: index + 1,
-        })),
-    }));
+        .map((module, index) => ({ ...module, moduleNumber: index + 1 }));
+
+      return {
+      ...prev,
+        syllabus: { modules: filtered },
+      };
+    });
   };
 
   // Reorder modules
   const reorderModules = (startIndex, endIndex) => {
     setCourseData((prev) => {
-      const newSyllabus = Array.from(prev.syllabus);
-      const [removed] = newSyllabus.splice(startIndex, 1);
-      newSyllabus.splice(endIndex, 0, removed);
+      const currentModules = Array.isArray(prev?.syllabus?.modules)
+        ? prev.syllabus.modules
+        : Array.isArray(prev?.syllabus)
+        ? prev.syllabus
+        : [];
+
+      const newModules = Array.from(currentModules);
+      const [removed] = newModules.splice(startIndex, 1);
+      newModules.splice(endIndex, 0, removed);
 
       return {
         ...prev,
-        syllabus: newSyllabus.map((module, index) => ({
+        syllabus: {
+          modules: newModules.map((module, index) => ({
           ...module,
           moduleNumber: index + 1,
         })),
+        },
       };
     });
   };
