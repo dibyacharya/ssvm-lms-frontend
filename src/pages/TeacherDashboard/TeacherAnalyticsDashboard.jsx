@@ -770,7 +770,7 @@ const TeacherAnalyticsDashboard = () => {
         {activeSection === "predictive" && (
           <>
             {/* At-Risk Students */}
-            <div className="bg-white p-6 rounded-lg shadow mb-6">
+            {/* <div className="bg-white p-6 rounded-lg shadow mb-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">
                 Students at Risk
               </h2>
@@ -851,7 +851,7 @@ const TeacherAnalyticsDashboard = () => {
                   scheduling individual check-ins.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* Comparative Performance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
