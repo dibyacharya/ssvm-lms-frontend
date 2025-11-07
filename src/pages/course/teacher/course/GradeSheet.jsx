@@ -1,74 +1,49 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
+import { useCourse } from "../../../../context/CourseContext";
 
 const StudentGradingTable = () => {
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      rollNumber: "2305016",
-      name: "AGGARWAL SOUMIL",
-      assignment1: 9,
-      assignment2: 9,
-      quiz1: 8,
-      quiz2: 8,
-      activity1: 9,
-      activity2: 9,
-      midSem: 18,
-      endSem: 40,
-    },
-    {
-      id: 2,
-      rollNumber: "2305347",
-      name: "AHUJA AASTHA",
-      assignment1: 9,
-      assignment2: 9,
-      quiz1: 8,
-      quiz2: 8,
-      activity1: 4,
-      activity2: 9,
-      midSem: 19,
-      endSem: 48,
-    },
-    {
-      id: 3,
-      rollNumber: "2305597",
-      name: "ROUT ANANYA",
-      assignment1: 9,
-      assignment2: 8,
-      quiz1: 6,
-      quiz2: 8,
-      activity1: 9,
-      activity2: 9,
-      midSem: 14,
-      endSem: 43,
-    },
-    {
-      id: 4,
-      rollNumber: "2305605",
-      name: "KANUNGO ARCHI",
-      assignment1: 9,
-      assignment2: 9,
-      quiz1: 8,
-      quiz2: 8,
-      activity1: 9,
-      activity2: 9,
-      midSem: 18,
-      endSem: 49,
-    },
-    {
-      id: 5,
-      rollNumber: "2305606",
-      name: "CHANDA ARJU",
-      assignment1: 4,
-      assignment2: 7,
-      quiz1: 8,
-      quiz2: 8,
-      activity1: 9,
-      activity2: 9,
-      midSem: 17,
-      endSem: 42,
-    },
-  ]);
+  const { courseData } = useCourse();
+  
+  // Initialize students from courseData or empty array
+  const [students, setStudents] = useState(() => {
+    if (courseData?.students && courseData.students.length > 0) {
+      // Map course students to grading format with default values
+      return courseData.students.map((student, index) => ({
+        id: student.id || index + 1,
+        name: student.name || "",
+        assignment1: 0,
+        assignment2: 0,
+        quiz1: 0,
+        quiz2: 0,
+        activity1: 0,
+        activity2: 0,
+        midSem: 0,
+        endSem: 0,
+      }));
+    }
+    return [];
+  });
+
+  // Update students when courseData changes
+  useEffect(() => {
+    if (courseData?.students && courseData.students.length > 0) {
+      setStudents(
+        courseData.students.map((student, index) => ({
+          id: student.id || index + 1,
+          name: student.name || "",
+          assignment1: 0,
+          assignment2: 0,
+          quiz1: 0,
+          quiz2: 0,
+          activity1: 0,
+          activity2: 0,
+          midSem: 0,
+          endSem: 0,
+        }))
+      );
+    }
+  }, [courseData]);
 
   // Function to calculate equivalent quiz (average of quiz1 and quiz2)
   const calculateEquivalentQuiz = (quiz1, quiz2) => {
@@ -129,7 +104,7 @@ const StudentGradingTable = () => {
   // Export to Excel
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
-      students.map((student) => {
+      students.map((student, index) => {
         const equivalentQuiz = calculateEquivalentQuiz(
           student.quiz1,
           student.quiz2
@@ -152,8 +127,7 @@ const StudentGradingTable = () => {
         const grade = determineGrade(total100);
 
         return {
-          "Sl.No": student.id,
-          "Roll Number": student.rollNumber,
+          "Sl.No": index + 1,
           Name: student.name,
           "Assignment-1 (10 Marks)": student.assignment1,
           "Assignment-2 (10 Marks)": student.assignment2,
@@ -229,9 +203,6 @@ const StudentGradingTable = () => {
             <tr>
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-left text-xs font-medium uppercase tracking-wider">
                 Sl.No
-              </th>
-              <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-left text-xs font-medium uppercase tracking-wider">
-                Roll Number
               </th>
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-left text-xs font-medium uppercase tracking-wider">
                 Name
@@ -341,13 +312,10 @@ const StudentGradingTable = () => {
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                 >
                   <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                    {student.id}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {student.rollNumber}
+                    {index + 1}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                    {student.name}
+                    {student.name || "—"}
                   </td>
 
                   <td className="px-4 py-3">

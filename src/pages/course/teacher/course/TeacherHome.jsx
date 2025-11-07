@@ -32,47 +32,11 @@ const TeacherHome = ({ setSelectedOption }) => {
 
   // Dummy data (can be replaced with actual data from backend if available)
   const assignments = [
-    {
-      id: 1,
-      title: "Descriptive Statistics Quiz",
-      dueDate: "April 25, 2025",
-      submissions: 12,
-      totalStudents: 30,
-      status: "active",
-    },
-    {
-      id: 2,
-      title: "Probability Assignment",
-      dueDate: "May 2, 2025",
-      submissions: 0,
-      totalStudents: 30,
-      status: "upcoming",
-    },
-    {
-      id: 3,
-      title: "Data Visualization Project",
-      dueDate: "May 10, 2025",
-      submissions: 0,
-      totalStudents: 30,
-      status: "upcoming",
-    },
+  
   ];
 
   const upcomingEvents = [
-    {
-      id: 1,
-      title: "Statistics Lab Session",
-      date: "April 23, 2025",
-      time: "10:00 AM - 12:00 PM",
-      location: "Room 304",
-    },
-    {
-      id: 2,
-      title: "Office Hours",
-      date: "April 22, 2025",
-      time: "2:00 PM - 4:00 PM",
-      location: "Online (Zoom)",
-    },
+   
   ];
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);

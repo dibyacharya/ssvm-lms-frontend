@@ -17,7 +17,12 @@ export const subjectColors = {
   SSCT: '#2196F3',      // Blue
   CPCM: '#9C27B0',      // Purple
   MOS: '#FF9800',       // Orange
-  'Smart Surveying': '#F44336' // Red
+  'Smart Surveying': '#F44336', // Red
+  // Semester 6 colors
+  SD: '#4CAF50',        // Green
+  EE: '#2196F3',        // Blue
+  FRRS: '#9C27B0',      // Purple
+  'Minor Project': '#FF9800' // Orange
 };
 
 /**
@@ -301,6 +306,147 @@ export const semesterTimetables = [
             startTime: '19:30', // 7:30 PM
             endTime: '20:30',   // 8:30 PM
             color: subjectColors.PCT
+          }
+        ]
+      }
+    ]
+  },
+  
+  // Semester 6 Timetable
+  {
+    semester: 6,
+    weekdayTimetable: [
+      {
+        day: 'Monday',
+        slots: [
+          {
+            subject: 'SD',
+            startTime: '17:30', // 5:30 PM
+            endTime: '18:30',   // 6:30 PM
+            color: subjectColors.SD
+          },
+          {
+            subject: 'SD',
+            startTime: '18:30', // 6:30 PM
+            endTime: '19:30',   // 7:30 PM
+            color: subjectColors.SD
+          }
+        ]
+      },
+      {
+        day: 'Tuesday',
+        slots: [
+          {
+            subject: 'EE',
+            startTime: '17:30',
+            endTime: '18:30',
+            color: subjectColors.EE
+          },
+          {
+            subject: 'EE',
+            startTime: '18:30',
+            endTime: '19:30',
+            color: subjectColors.EE
+          }
+        ]
+      },
+      {
+        day: 'Wednesday',
+        slots: [
+          {
+            subject: 'IE',
+            startTime: '17:30',
+            endTime: '18:30',
+            color: subjectColors.IE
+          },
+          {
+            subject: 'IE',
+            startTime: '18:30',
+            endTime: '19:30',
+            color: subjectColors.IE
+          }
+        ]
+      },
+      {
+        day: 'Thursday',
+        slots: [
+          {
+            subject: 'FRRS',
+            startTime: '17:30',
+            endTime: '18:30',
+            color: subjectColors.FRRS
+          },
+          {
+            subject: 'FRRS',
+            startTime: '18:30',
+            endTime: '19:30',
+            color: subjectColors.FRRS
+          }
+        ]
+      },
+      {
+        day: 'Friday',
+        slots: [
+          {
+            subject: 'EE',
+            startTime: '17:30',
+            endTime: '18:30',
+            color: subjectColors.EE
+          },
+          {
+            subject: 'EE',
+            startTime: '18:30',
+            endTime: '19:30',
+            color: subjectColors.EE
+          }
+        ]
+      }
+    ],
+    weekendTimetable: [
+      {
+        day: 'Saturday',
+        slots: [
+          {
+            subject: 'Minor Project',
+            startTime: '13:30', // 1:30 PM
+            endTime: '14:30',   // 2:30 PM
+            color: subjectColors['Minor Project']
+          },
+          {
+            subject: 'SD',
+            startTime: '14:30', // 2:30 PM
+            endTime: '15:30',   // 3:30 PM
+            color: subjectColors.SD
+          },
+          {
+            subject: 'SD',
+            startTime: '15:30', // 3:30 PM
+            endTime: '16:30',   // 4:30 PM
+            color: subjectColors.SD
+          },
+          {
+            subject: 'IE',
+            startTime: '16:30', // 4:30 PM
+            endTime: '17:30',   // 5:30 PM
+            color: subjectColors.IE
+          },
+          {
+            subject: 'IE',
+            startTime: '17:30', // 5:30 PM
+            endTime: '18:30',   // 6:30 PM
+            color: subjectColors.IE
+          },
+          {
+            subject: 'FRRS',
+            startTime: '18:30', // 6:30 PM
+            endTime: '19:30',   // 7:30 PM
+            color: subjectColors.FRRS
+          },
+          {
+            subject: 'FRRS',
+            startTime: '19:30', // 7:30 PM
+            endTime: '20:30',   // 8:30 PM
+            color: subjectColors.FRRS
           }
         ]
       }

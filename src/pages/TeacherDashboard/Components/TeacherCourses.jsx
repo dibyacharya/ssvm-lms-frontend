@@ -233,7 +233,7 @@ const TeacherCourses = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-50 transition-opacity duration-300"></div>
                         <div className="absolute bottom-2 left-2 bg-primary dark:bg-primary/90 text-white text-xs font-medium px-2 py-1 rounded-md shadow-md">
-                          {course.students} Students
+                          {course?.studentCount} Students
                         </div>
                       </div>
                       <div className="p-4">
