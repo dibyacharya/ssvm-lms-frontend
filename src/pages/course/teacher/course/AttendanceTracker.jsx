@@ -342,9 +342,9 @@ const AttendanceTracker = () => {
                 <th className="py-4 px-6 text-left font-medium text-tertiary">
                   Name
                 </th>
-                <th className="py-4 px-6 text-left font-medium text-tertiary">
+                {/* <th className="py-4 px-6 text-left font-medium text-tertiary">
                   Program
-                </th>
+                </th> */}
                 <th className="py-4 px-6 text-center font-medium text-tertiary">
                   Status
                 </th>
@@ -361,7 +361,7 @@ const AttendanceTracker = () => {
                     {student.rollNo}
                   </td> */}
                   <td className="py-4 px-6 text-primary">{student.name}</td>
-                  <td className="py-4 px-6 text-tertiary">{student.program}</td>
+                 
                   <td className="py-4 px-6">
                     <div className="flex justify-center">
                       <button
