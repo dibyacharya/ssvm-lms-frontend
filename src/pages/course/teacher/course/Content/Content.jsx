@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Video, Presentation, Plus, Edit, Trash2, Upload, Eye, Download, Link, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCourse } from '../../../../../context/CourseContext';
 import { 
-  getCourseSyllabus, 
-  getModuleById, 
   addModuleContent, 
   updateContentItem, 
   deleteContentItem 
 } from '../../../../../services/content.service';
+import { getCoursesById } from '../../../../../services/course.service';
 
 const ContentSection = () => {
   const { courseData, setCourseData } = useCourse();
@@ -17,6 +16,7 @@ const ContentSection = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [expandedModule, setExpandedModule] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Content type configurations
   const contentTypes = {
@@ -45,21 +45,34 @@ const ContentSection = () => {
     }
   };
 
-  // Fixed function - properly set the content type first, then fetch module data
+  // Properly set the content type; do not refetch here to keep it lightweight
   const handleContentTypeSelect = async (module, contentType) => {
-    setIsLoading(true);
-    
-    // Set the content type immediately
     setSelectedContentType(contentType);
-    
-    try {
-      const moduleData = await getModuleById(courseData.id, module._id);
-      setSelectedModule(moduleData);
-    } catch (error) {
-      console.error('Error fetching module:', error);
-    } finally {
-      setIsLoading(false);
+    setSelectedModule(module);
+  };
+
+  const normalizeSyllabus = (responseCourse) => {
+    if (!responseCourse?.syllabus) return { modules: [] };
+    let modules = [];
+    if (Array.isArray(responseCourse.syllabus)) {
+      modules = responseCourse.syllabus;
+    } else if (Array.isArray(responseCourse.syllabus.modules)) {
+      modules = responseCourse.syllabus.modules;
     }
+    modules = modules.map(m => ({ ...m, topics: Array.isArray(m.topics) ? m.topics : [] }));
+    return { modules };
+  };
+
+  const refreshCourseAndModule = async (moduleId) => {
+    const freshCourse = await getCoursesById(courseData.id);
+    const normalizedSyllabus = normalizeSyllabus(freshCourse);
+    const newCourseData = { ...freshCourse, syllabus: normalizedSyllabus };
+    setCourseData(newCourseData);
+    const freshModule = newCourseData.syllabus.modules.find(m => m._id === moduleId);
+    if (freshModule) {
+      setSelectedModule(freshModule);
+    }
+    setRefreshKey((k) => k + 1);
   };
 
   const handleAddContent = async (contentData, file, thumbnail) => {
@@ -87,16 +100,10 @@ const ContentSection = () => {
         formData.append('thumbnail', thumbnail);
       }
 
-      const response = await addModuleContent(courseData.id, selectedModule._id, formData);
-      
-      // Refresh the entire course data to update counts and content
-      const updatedCourseData = await getCourseSyllabus({ courseID: courseData.id });
-      setCourseData({ ...courseData, syllabus: updatedCourseData });
-      
-      // Update the selected module with fresh data
-      const updatedModule = await getModuleById(courseData.id, selectedModule._id);
-      setSelectedModule(updatedModule);
-      
+      await addModuleContent(courseData.id, selectedModule._id, formData);
+
+      // Force-refresh full course and selected module from /courses
+      await refreshCourseAndModule(selectedModule._id);
       setShowAddModal(false);
     } catch (error) {
       console.error('Error adding content:', error);
@@ -110,15 +117,11 @@ const ContentSection = () => {
 
     setIsLoading(true);
     try {
-      await deleteContentItem(courseData.id, selectedModule._id, contentId);
+      const contentType = selectedContentType.slice(0, -1); // Remove 's' from end
+      await deleteContentItem(courseData.id, selectedModule._id, contentType, contentId);
       
-      // Refresh the entire course data to update counts and content
-      const updatedCourseData = await getCourseSyllabus({ courseID: courseData.id });
-      setCourseData({ ...courseData, syllabus: updatedCourseData });
-      
-      // Update the selected module with fresh data
-      const updatedModule = await getModuleById(courseData.id, selectedModule._id);
-      setSelectedModule(updatedModule);
+      // Force-refresh full course and selected module from /courses
+      await refreshCourseAndModule(selectedModule._id);
     } catch (error) {
       console.error('Error deleting content:', error);
     } finally {
@@ -135,7 +138,6 @@ const ContentSection = () => {
       formData.append('name', updatedData.name);
       formData.append('description', updatedData.description || '');
       
-      // For links, add the URL
       if (selectedContentType === 'links' && updatedData.url) {
         formData.append('url', updatedData.url);
       }
@@ -148,15 +150,11 @@ const ContentSection = () => {
         formData.append('thumbnail', thumbnail);
       }
 
-      await updateContentItem(courseData.id, selectedModule._id, editingItem._id, formData);
+      const contentType = selectedContentType.slice(0, -1);
+      await updateContentItem(courseData.id, selectedModule._id, contentType, editingItem._id, formData);
       
-      // Refresh the entire course data to update counts and content
-      const updatedCourseData = await getCourseSyllabus({ courseID: courseData.id });
-      setCourseData({ ...courseData, syllabus: updatedCourseData });
-      
-      // Update the selected module with fresh data
-      const updatedModule = await getModuleById(courseData.id, selectedModule._id);
-      setSelectedModule(updatedModule);
+      // Force-refresh full course and selected module from /courses
+      await refreshCourseAndModule(selectedModule._id);
       
       setEditingItem(null);
     } catch (error) {
@@ -195,7 +193,7 @@ const ContentSection = () => {
     const items = selectedModule[selectedContentType];
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div key={`${selectedModule._id}-${selectedContentType}-${refreshKey}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
           <ContentCard 
             key={item._id} 
