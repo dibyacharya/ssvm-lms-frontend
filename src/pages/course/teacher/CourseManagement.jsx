@@ -242,13 +242,13 @@ const CourseManagement = () => {
       ],
     },
     assignment: {
-      title: "Assignment",
+      title: "Assessment",
       icon: <Activity className="w-5 h-5" />,
       items: [
         { label: "Subjective", icon: <FileText className="w-5 h-5" /> },
         { label: "Objective", icon: <Layout className="w-5 h-5" /> },
         { label: "Practical Activity", icon: <Activity className="w-5 h-5" /> },
-        { label: "Continuous Assessment", icon: <BarChart2 className="w-5 h-5" /> },
+        { label: "Continuous\nAssessment Plan", icon: <BarChart2 className="w-5 h-5" /> },
       ],
     },
   };
@@ -308,7 +308,7 @@ const CourseManagement = () => {
               <AnnouncementManagement courseID={courseID} />
             )}
             {selectedOption === "Grade Sheet" && <StudentGradingTable />}
-            {selectedOption === "Continuous Assessment" && <ContinuousAssessment />}
+            {(selectedOption === "Continuous Assessment Plan" || selectedOption === "Continuous\nAssessment Plan") && <ContinuousAssessment />}
             {selectedOption === "Discussion" && <DiscussionForum />}
           </div>
         </div>
@@ -368,7 +368,7 @@ const CourseManagement = () => {
         </button>
 
         {openDropdown === menuKey && (
-          <div className="absolute left-0 mt-2 w-[440px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-4 z-50">
+          <div className="absolute left-0 mt-2 w-[520px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-4 z-50">
             <div className="grid grid-cols-2 gap-4 px-4">
               {items.map((item) => (
                 <button
@@ -384,7 +384,7 @@ const CourseManagement = () => {
                   }`}
                 >
                   <div
-                    className={`p-2 rounded-lg ${
+                    className={`p-2 rounded-lg flex-shrink-0 ${
                       selectedOption === item.label
                         ? "bg-accent1/20 dark:bg-accent1/30"
                         : "bg-gray-100 dark:bg-gray-700"
@@ -392,7 +392,7 @@ const CourseManagement = () => {
                   >
                     {item.icon}
                   </div>
-                  <span className="font-medium text-left">{item.label}</span>
+                  <span className="font-medium text-left whitespace-pre-line">{item.label}</span>
                 </button>
               ))}
             </div>

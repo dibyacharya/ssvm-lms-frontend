@@ -28,9 +28,12 @@ const ContentSection = () => {
 
   useEffect(() => {
     if (courseData?.syllabus?.modules?.length > 0) {
-      const firstModule = courseData.syllabus.modules[0];
-      setExpandedModule(firstModule._id);
-      setSelectedModule(firstModule);
+      // Only auto-select first module if no module is currently selected
+      if (!selectedModule && !expandedModule) {
+        const firstModule = courseData.syllabus.modules[0];
+        setExpandedModule(firstModule._id);
+        setSelectedModule(firstModule);
+      }
     }
   }, [courseData]);
 
@@ -325,8 +328,8 @@ const ContentSection = () => {
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-gray-400 mb-4">
+            <div className="text-center items-center justify-center ">
+              <div className="text-gray-400 mb-4 w-full flex items-center justify-center">
                 <FileText size={64} />
               </div>
               <h2 className="text-xl font-medium text-gray-600">Select a Module</h2>

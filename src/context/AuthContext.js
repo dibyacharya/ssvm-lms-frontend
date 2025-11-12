@@ -35,8 +35,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser((prevUser) => {
+      const mergedUser = { ...prevUser, ...updatedUserData };
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+      return mergedUser;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
