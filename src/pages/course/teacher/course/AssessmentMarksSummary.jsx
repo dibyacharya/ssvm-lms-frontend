@@ -127,7 +127,7 @@ const AssessmentMarksSummary = () => {
             <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 mb-4">No assessment plan created yet</p>
             <p className="text-sm text-gray-400">
-              Go to Assignment → Continuous Assessment to create your assessment plan
+              Go to Assessment → Continuous Assessment Plan to create your assessment plan
             </p>
           </div>
         )}

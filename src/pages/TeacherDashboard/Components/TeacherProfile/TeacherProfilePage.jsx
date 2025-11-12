@@ -25,7 +25,7 @@ import api from "../../../../services/api";
 
 const TeacherProfilePage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // State for teacher details
   const [teacherDetails, setTeacherDetails] = useState({
@@ -164,6 +164,14 @@ const TeacherProfilePage = () => {
         scopusLink: updatedTeacher.scopusLink || prev.scopusLink,
         linkedInLink: updatedTeacher.linkedInLink || prev.linkedInLink,
       }));
+      // Update the user data in AuthContext/store
+      updateUser({
+        profTitle: updatedTeacher.profTitle,
+        profDesc: updatedTeacher.profDesc,
+        googleScholarLink: updatedTeacher.googleScholarLink,
+        scopusLink: updatedTeacher.scopusLink,
+        linkedInLink: updatedTeacher.linkedInLink,
+      });
     }
   };
 
@@ -198,7 +206,7 @@ const TeacherProfilePage = () => {
                     <span>{teacherDetails.department}</span>
                   </div>
                   <span className="text-green-600 font-semibold">
-                    {teacherDetails.position}
+                    Professor
                   </span>
                   
                 </div>
