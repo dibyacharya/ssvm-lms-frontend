@@ -2,18 +2,48 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/api";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
+
+// Carousel images
+const carouselImages = [
+  "/image1.jpg",
+  "/image2.jpg",
+  "/image3.jpg",
+  "/image4.jpg",
+  "/image5.jpg"
+];
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  // Preload images
+  useEffect(() => {
+    carouselImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % carouselImages.length;
+        return nextIndex;
+      });
+    }, 3000); // Change image every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,13 +84,21 @@ const Login = () => {
   return (
     <div className="min-h-screen w-screen flex flex-col lg:flex-row font-sans">
       {/* Left side - Image and Welcome Text */}
-      <div className="relative hidden lg:flex w-full lg:w-1/2 items-end justify-center p-12 bg-gradient-to-r from-green-700 to-green-700 bg-cover bg-center">
-        <img
-          src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"
-          alt="University Campus"
-          className="absolute inset-0 object-cover w-full h-full opacity-40"
-          onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/1000x1200/111827/ffffff?text=Campus'; }}
-        />
+      <div className="relative hidden lg:flex w-full lg:w-1/2 items-end justify-center p-12 bg-gradient-to-r from-green-700 to-green-700 bg-cover bg-center overflow-hidden">
+        {/* Carousel Images */}
+        {carouselImages.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`Carousel ${index + 1}`}
+            className="absolute inset-0 object-cover w-full h-full transition-opacity duration-1000 ease-in-out"
+            style={{
+              opacity: index === currentImageIndex ? 0.4 : 0,
+              zIndex: 0
+            }}
+            onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/1000x1200/111827/ffffff?text=Campus'; }}
+          />
+        ))}
          <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
