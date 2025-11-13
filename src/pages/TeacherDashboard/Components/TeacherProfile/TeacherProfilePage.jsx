@@ -201,12 +201,9 @@ const TeacherProfilePage = () => {
                   {teacherDetails.name}
                 </h1>
                 <div className="flex flex-col md:flex-row items-center gap-4 mt-2 text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-green-600" />
-                    <span>{teacherDetails.department}</span>
-                  </div>
+                  
                   <span className="text-green-600 font-semibold">
-                    Professor
+                    Faculity
                   </span>
                   
                 </div>
@@ -403,17 +400,17 @@ const TeacherProfilePage = () => {
               <Phone className="w-5 h-5 text-green-600" />
               <span className="text-gray-600">{teacherDetails.phone}</span>
             </div>
-            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+            {/* <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
               <MapPin className="w-5 h-5 text-green-600" />
               <span className="text-gray-600">
                 {teacherDetails.officeLocation}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Address Information */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        {/* <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-green-600" />
             Address
@@ -428,7 +425,7 @@ const TeacherProfilePage = () => {
               <div className="text-gray-700 break-words">{user?.fullCorrespondenceAddress || "—"}</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Specialization Row */}
         {/* <div className="bg-white rounded-xl shadow-lg p-6">
