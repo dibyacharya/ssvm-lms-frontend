@@ -10,6 +10,7 @@ import {
   Users,
   Award,
   ClipboardCheck,
+  FileText,
 } from "lucide-react";
 import AssignmentSectionRevamp from "./CreateAssignmentNew";
 import EditAssignmentForm from "./EditAssignment";
@@ -221,14 +222,20 @@ const AssignmentCard = ({
   );
 };
 
-const AllAssignments = ({ courseID }) => {
+const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false }) => {
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState(null);
   const [assignments, setAssignments] = useState([]);
+  const [allAssignments, setAllAssignments] = useState([]); // Store all assignments
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(initialTab); // 'subjective' or 'objective'
+  const [createAssignmentType, setCreateAssignmentType] = useState(initialTab);
+  
+  // If hideTabs is true, lock the tab to initialTab and prevent switching
+  const lockedTab = hideTabs ? initialTab : null;
 
   // Fetch assignments from API
   const fetchAssignments = async () => {
@@ -242,33 +249,65 @@ const AllAssignments = ({ courseID }) => {
       const courseAssignments = response.assignments || [];
 
       // Map to the format expected by the component
-      const formattedAssignments = courseAssignments.map((assignment) => ({
-        id: assignment._id,
-        title: assignment.title,
-        description: assignment.description,
-        courseId: assignment.course,
-        dueDate: assignment.dueDate
-          ? `Due ${new Date(assignment.dueDate).toLocaleDateString()}`
-          : "",
-        originalDueDate: assignment.dueDate,
-        date: assignment.createdAt
-          ? `Posted ${new Date(assignment.createdAt).toLocaleDateString()}`
-          : "",
-        stats: {
-          turnedIn: assignment.stats?.turnedIn || 0,
-          assigned: assignment.stats?.assigned || assignment.stats?.total || 0,
-          graded: assignment.stats?.graded || 0,
-        },
-        attachments: assignment.attachments || [],
-        grade: assignment.totalPoints || 100,
-        allowLateSubmissions: assignment.allowLateSubmissions !== false,
-        topic: assignment.description
-          ? assignment.description.substring(0, 20) + "..."
-          : "N/A",
-        isActive: assignment.isActive !== false,
-      }));
+      const formattedAssignments = courseAssignments.map((assignment) => {
+        // Determine assignment type based on questions
+        const questions = assignment.questions || [];
+        const hasSubjective = questions.some(q => q.type === 'subjective');
+        const hasObjective = questions.some(q => q.type === 'objective');
+        
+        // Determine primary type: if only one type exists, use that; otherwise use first question type
+        let assignmentType = 'subjective'; // default
+        if (hasObjective && !hasSubjective) {
+          assignmentType = 'objective';
+        } else if (hasSubjective && !hasObjective) {
+          assignmentType = 'subjective';
+        } else if (questions.length > 0) {
+          assignmentType = questions[0].type || 'subjective';
+        }
+        
+        return {
+          id: assignment._id,
+          title: assignment.title,
+          description: assignment.description,
+          courseId: assignment.course,
+          dueDate: assignment.dueDate
+            ? `Due ${new Date(assignment.dueDate).toLocaleDateString()}`
+            : "",
+          originalDueDate: assignment.dueDate,
+          date: assignment.createdAt
+            ? `Posted ${new Date(assignment.createdAt).toLocaleDateString()}`
+            : "",
+          stats: {
+            turnedIn: assignment.stats?.turnedIn || 0,
+            assigned: assignment.stats?.assigned || assignment.stats?.total || 0,
+            graded: assignment.stats?.graded || 0,
+          },
+          attachments: assignment.attachments || [],
+          grade: assignment.totalPoints || 100,
+          allowLateSubmissions: assignment.allowLateSubmissions !== false,
+          topic: assignment.description
+            ? assignment.description.substring(0, 20) + "..."
+            : "N/A",
+          isActive: assignment.isActive !== false,
+          assignmentType: assignmentType, // Add assignment type
+          questions: questions, // Store questions for filtering
+        };
+      });
 
-      setAssignments(formattedAssignments);
+      setAllAssignments(formattedAssignments);
+      
+      // Filter assignments based on active tab
+      const filtered = formattedAssignments.filter(assignment => {
+        if (activeTab === 'subjective') {
+          // Show assignments with at least one subjective question
+          return assignment.questions?.some(q => q.type === 'subjective');
+        } else {
+          // Show assignments with at least one objective question
+          return assignment.questions?.some(q => q.type === 'objective');
+        }
+      });
+      
+      setAssignments(filtered);
     } catch (err) {
       console.error("Error fetching assignments:", err);
       const errorMessage = err.response?.data?.message || "Failed to load assignments. Please try again later.";
@@ -285,8 +324,29 @@ const AllAssignments = ({ courseID }) => {
     }
   }, [courseID]);
 
-  const handleOpenCreateModal = () => {
+  // Filter assignments when tab changes
+  useEffect(() => {
+    if (allAssignments.length > 0) {
+      // If tabs are hidden, use the locked tab, otherwise use activeTab
+      const filterTab = lockedTab || activeTab;
+      const filtered = allAssignments.filter(assignment => {
+        if (filterTab === 'subjective') {
+          // Show assignments with at least one subjective question
+          return assignment.questions?.some(q => q.type === 'subjective');
+        } else {
+          // Show assignments with at least one objective question
+          return assignment.questions?.some(q => q.type === 'objective');
+        }
+      });
+      setAssignments(filtered);
+    }
+  }, [activeTab, allAssignments, lockedTab]);
+
+  const handleOpenCreateModal = (type = null) => {
     setIsCreateModalOpen(true);
+    // If type is provided, it will be passed to CreateAssignmentNew
+    // Otherwise, use the active tab
+    setCreateAssignmentType(type || activeTab);
   };
 
   const handleOpenEditModal = (assignment) => {
@@ -336,27 +396,63 @@ const AllAssignments = ({ courseID }) => {
     );
   }
 
+  // Count assignments by type
+  const subjectiveCount = allAssignments.filter(a => a.questions?.some(q => q.type === 'subjective')).length;
+  const objectiveCount = allAssignments.filter(a => a.questions?.some(q => q.type === 'objective')).length;
+  
+  // Determine which tab to show based on hideTabs prop
+  const displayTab = lockedTab || activeTab;
+
   return (
     <div className="bg-gray-50 md:px-[15%] rounded-lg shadow-sm">
-      <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>
-            <p className="text-sm text-gray-600 max-w-2xl">
-              Manage and track all course assignments. Create new assignments, view submission statistics, grade student work, and monitor assignment progress.
-            </p>
-          </div>
-          {!isCreateModalOpen && (
+      {/* Header Section - Only show when NOT creating assignment */}
+      {!isCreateModalOpen && (
+        <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>
+              <p className="text-sm text-gray-600 max-w-2xl">
+                Manage and track all course assignments. Create new assignments, view submission statistics, grade student work, and monitor assignment progress.
+              </p>
+            </div>
             <button
               className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors shadow-sm"
-              onClick={handleOpenCreateModal}
+              onClick={() => handleOpenCreateModal(displayTab)}
             >
               <Plus size={18} />
               New Assignment
             </button>
+          </div>
+          
+          {/* Tab Navigation - Only show if hideTabs is false */}
+          {!hideTabs && (
+            <div className="flex gap-2 mt-4 border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('subjective')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'subjective'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <FileText size={16} />
+                Subjective ({subjectiveCount})
+              </button>
+              <button
+                onClick={() => setActiveTab('objective')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'objective'
+                    ? 'border-green-600 text-green-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <CheckCircle size={16} />
+                Objective ({objectiveCount})
+              </button>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* Create Assignment Form - Displayed below nav */}
       {isCreateModalOpen && (
@@ -364,6 +460,7 @@ const AllAssignments = ({ courseID }) => {
           <AssignmentSectionRevamp
             courseID={courseID}
             inModal={false}
+            assignmentType={createAssignmentType}
             onSave={(data) => {
               console.log('Assignment saved:', data);
               // Refresh assignments from API
@@ -400,7 +497,7 @@ const AllAssignments = ({ courseID }) => {
             </div>
             <button
               className="mt-4 inline-flex items-center gap-2 text-primary hover:text-primary/90 font-medium"
-              onClick={handleOpenCreateModal}
+              onClick={() => handleOpenCreateModal(displayTab)}
             >
               <Plus size={18} />
               Create your first assignment

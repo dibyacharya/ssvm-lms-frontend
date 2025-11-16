@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, Sparkles, FileText, Edit, Trash, CheckCircle2 } from 'lucide-react';
 import MCQGenerator from './MCQGenerator';
 import AIApprovalModal from './AIApprovalModal';
@@ -7,7 +7,8 @@ import { parseFile } from '../utils/questionParser';
 const QuestionsStep = ({
   questions, setQuestions,
   activeTab, setActiveTab,
-  courseData
+  courseData,
+  assignmentType = null // 'subjective' or 'objective' - if set, restricts to that type only
 }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [showMCQGenerator, setShowMCQGenerator] = useState(false);
@@ -30,7 +31,16 @@ const QuestionsStep = ({
     setUploadedFile(file);
     try {
       const parsedQuestions = await parseFile(file);
-      setQuestions(prev => [...prev, ...parsedQuestions]);
+      // If assignmentType is restricted, only add questions of that type
+      const validQuestions = assignmentType 
+        ? parsedQuestions.filter(q => q.type === assignmentType)
+        : parsedQuestions;
+      
+      if (assignmentType && validQuestions.length < parsedQuestions.length) {
+        alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
+      }
+      
+      setQuestions(prev => [...prev, ...validQuestions]);
     } catch (error) {
       alert(`Error parsing file: ${error.message}`);
     }
@@ -90,7 +100,17 @@ const QuestionsStep = ({
       ...q,
       status: 'approved'
     }));
-    setQuestions(prev => [...prev, ...approved]);
+    
+    // If assignmentType is restricted, only add questions of that type
+    const validQuestions = assignmentType 
+      ? approved.filter(q => q.type === assignmentType)
+      : approved;
+    
+    if (assignmentType && validQuestions.length < approved.length) {
+      alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
+    }
+    
+    setQuestions(prev => [...prev, ...validQuestions]);
     setPendingAIQuestions([]);
   };
 
@@ -117,6 +137,22 @@ const QuestionsStep = ({
 
   const subjectiveQuestions = questions.filter(q => q.type === 'subjective');
   const objectiveQuestions = questions.filter(q => q.type === 'objective');
+  
+  // If assignmentType is restricted, ensure activeTab matches and filter questions
+  useEffect(() => {
+    if (assignmentType) {
+      setActiveTab(assignmentType);
+      // Filter out questions that don't match the assignment type
+      setQuestions(prev => {
+        const validQuestions = prev.filter(q => q.type === assignmentType);
+        // Only update if there are invalid questions
+        if (validQuestions.length !== prev.length) {
+          return validQuestions;
+        }
+        return prev;
+      });
+    }
+  }, [assignmentType, setActiveTab, setQuestions]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -125,40 +161,81 @@ const QuestionsStep = ({
           <Sparkles className="text-blue-500" size={24} />
           <div>
             <h2 className="text-2xl font-bold">Questions</h2>
-            <p className="text-gray-600">Add subjective and objective questions</p>
+            <p className="text-gray-600">
+              {assignmentType === 'subjective' 
+                ? 'Add subjective questions' 
+                : assignmentType === 'objective'
+                ? 'Add objective (MCQ) questions'
+                : 'Add subjective and objective questions'}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">
-            {questions.length} questions ({subjectiveQuestions.length} subjective, {objectiveQuestions.length} objective)
+            {questions.length} questions 
+            {!assignmentType && (
+              <> ({subjectiveQuestions.length} subjective, {objectiveQuestions.length} objective)</>
+            )}
+            {assignmentType === 'subjective' && (
+              <> ({subjectiveQuestions.length} subjective)</>
+            )}
+            {assignmentType === 'objective' && (
+              <> ({objectiveQuestions.length} objective)</>
+            )}
           </span>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {[
-          { key: 'subjective', icon: FileText, label: `Subjective (${subjectiveQuestions.length})` },
-          { key: 'objective', icon: CheckCircle2, label: `Objective (${objectiveQuestions.length})` }
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === tab.key
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <tab.icon size={16} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab Navigation - Only show if assignmentType is not restricted */}
+      {!assignmentType && (
+        <div className="flex mb-6 bg-gray-100 p-1 rounded-lg w-fit">
+          {[
+            { key: 'subjective', icon: FileText, label: `Subjective (${subjectiveQuestions.length})` },
+            { key: 'objective', icon: CheckCircle2, label: `Objective (${objectiveQuestions.length})` }
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === tab.key
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <tab.icon size={16} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+      
+      {/* Show type indicator if assignmentType is restricted */}
+      {assignmentType && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            {assignmentType === 'subjective' ? (
+              <>
+                <FileText className="text-blue-600" size={20} />
+                <span className="text-sm font-medium text-blue-900">
+                  Creating Subjective Assignment - Only subjective questions are allowed
+                </span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="text-green-600" size={20} />
+                <span className="text-sm font-medium text-green-900">
+                  Creating Objective Assignment - Only objective (MCQ) questions are allowed
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div className="min-h-[500px]">
-        {activeTab === 'subjective' && (
+        {/* If assignmentType is set, only show that type's content */}
+        {(activeTab === 'subjective' || assignmentType === 'subjective') && assignmentType !== 'objective' && (
           <div className="space-y-6">
             {/* AI Generation Section */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -291,7 +368,8 @@ const QuestionsStep = ({
           </div>
         )}
 
-        {activeTab === 'objective' && (
+        {/* If assignmentType is set, only show that type's content */}
+        {(activeTab === 'objective' || assignmentType === 'objective') && assignmentType !== 'subjective' && (
           <div className="space-y-6">
             {/* Upload Section */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -420,7 +498,16 @@ const QuestionsStep = ({
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
             <MCQGenerator
               onSave={(generatedQuestions) => {
-                setQuestions(prev => [...prev, ...generatedQuestions]);
+                // If assignmentType is restricted, only add questions of that type
+                const validQuestions = assignmentType 
+                  ? generatedQuestions.filter(q => q.type === assignmentType)
+                  : generatedQuestions;
+                
+                if (assignmentType && validQuestions.length < generatedQuestions.length) {
+                  alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
+                }
+                
+                setQuestions(prev => [...prev, ...validQuestions]);
                 setShowMCQGenerator(false);
               }}
               onCancel={() => setShowMCQGenerator(false)}

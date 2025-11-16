@@ -284,9 +284,11 @@ const CourseManagement = () => {
             {selectedOption === "Weekly Plan" && <WeeklyPlanManager />}
             {selectedOption === "Class List" && <StudentTable />}
             {selectedOption === "Subjective" && (
-              <AllAssignments courseID={courseID} />
+              <AllAssignments courseID={courseID} initialTab="subjective" hideTabs={true} />
             )}
-            {selectedOption === "Objective" && <QuizCreator />}
+            {selectedOption === "Objective" && (
+              <AllAssignments courseID={courseID} initialTab="objective" hideTabs={true} />
+            )}
             {selectedOption === "Practical Activity" && (
               <AllActivities courseID={courseID} />
             )}

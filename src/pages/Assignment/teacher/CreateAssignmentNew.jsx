@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { createAssignment } from '../../../services/assignment.service';
 import AssignmentDetailsStep from '../components/AssignmentDetailsStep';
 import QuestionsStep from '../components/QuestionsStep';
@@ -29,7 +28,7 @@ const getDummyCourseData = () => ({
   }
 });
 
-const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
+const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignmentType = 'subjective' }) => {
   const { courseData: contextCourseData } = useCourse();
   const courseData = contextCourseData || getDummyCourseData();
   
@@ -53,9 +52,9 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('23:59');
 
-  // Questions State
+  // Questions State - set activeTab based on assignmentType
   const [questions, setQuestions] = useState([]);
-  const [activeTab, setActiveTab] = useState('subjective');
+  const [activeTab, setActiveTab] = useState(assignmentType);
 
   const steps = [
     { number: 1, title: 'Assignment Details', subtitle: 'Basic information and settings' },
@@ -65,9 +64,23 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
 
   const handleNext = () => {
     if (currentStep < 3) {
-      if (currentStep === 1 && !assignmentTitle) {
-        alert('Please provide an assignment title');
-        return;
+      if (currentStep === 1) {
+        if (!assignmentTitle) {
+          toast.error('Please provide an assignment title');
+          return;
+        }
+        if (!description || description.trim() === '') {
+          toast.error('Please provide an assignment description');
+          return;
+        }
+        if (!selectedModule) {
+          toast.error('Please select a module');
+          return;
+        }
+        if (!dueDate) {
+          toast.error('Please select a due date');
+          return;
+        }
       }
       setCurrentStep(currentStep + 1);
     }
@@ -177,24 +190,21 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
   return (
     <div className={inModal ? "bg-gray-50" : "bg-gray-50"}>
       {!inModal && (
-        <div className="bg-white border-b px-6 py-4">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
-            <div className="flex items-center gap-4">
-              <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                <ArrowLeft size={20} />
-                Back to Assignments
-              </button>
-              <div className="border-l border-gray-300 pl-4">
-                <h1 className="text-2xl font-bold">Create Assignment</h1>
-                <p className="text-gray-600">Design and configure your assignment</p>
-              </div>
+        <div className="bg-transparent px-6 py-4">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div>
+              <h1 className="text-2xl font-bold">Create Assignment</h1>
+              <p className="text-gray-600">Design and configure your assignment</p>
             </div>
+            <button onClick={onBack} className="text-gray-600 hover:text-gray-900">
+              Back
+            </button>
           </div>
         </div>
       )}
 
       <div className={inModal ? "py-4" : "px-6 py-8"}>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <StepIndicator steps={steps} currentStep={currentStep} />
           
           <div className="mt-8">
@@ -224,6 +234,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 courseData={courseData}
+                assignmentType={assignmentType}
               />
             )}
             {currentStep === 3 && (
@@ -243,7 +254,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
           </div>
 
           {currentStep < 3 && (
-            <div className="flex justify-between mt-12 max-w-6xl mx-auto">
+            <div className="flex justify-between mt-12  mx-auto ">
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
@@ -253,7 +264,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
               </button>
               <button
                 onClick={handleNext}
-                disabled={currentStep === 1 && !assignmentTitle}
+                disabled={currentStep === 1 && (!assignmentTitle || !description?.trim() || !selectedModule || !dueDate)}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
               >
                 Next Step
@@ -266,7 +277,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false }) => {
   );
 };
 
-export default function AssignmentSectionRevamp({ onSave, onCancel, courseID, inModal = false }) {
+export default function AssignmentSectionRevamp({ onSave, onCancel, courseID, inModal = false, assignmentType = 'subjective' }) {
   return (
     <AssignmentCreator 
       onBack={onCancel}
@@ -276,6 +287,7 @@ export default function AssignmentSectionRevamp({ onSave, onCancel, courseID, in
       }}
       courseID={courseID}
       inModal={inModal}
+      assignmentType={assignmentType}
     />
   );
 }

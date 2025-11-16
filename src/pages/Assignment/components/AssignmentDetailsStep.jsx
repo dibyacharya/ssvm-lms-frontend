@@ -23,21 +23,31 @@ const AssignmentDetailsStep = ({
         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Assignment Title</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Assignment Title <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={assignmentTitle}
               onChange={(e) => setAssignmentTitle(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                !assignmentTitle ? 'border-red-300' : 'border-gray-300'
+              }`}
               placeholder="Enter assignment title"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description <span className="text-red-500">*</span>
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                !description || description.trim() === '' ? 'border-red-300' : 'border-gray-300'
+              }`}
               rows="4"
               placeholder="Brief description of the assignment"
             />
@@ -53,11 +63,16 @@ const AssignmentDetailsStep = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Module</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Module <span className="text-red-500">*</span>
+              </label>
               <select
                 value={selectedModule}
                 onChange={(e) => setSelectedModule(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  !selectedModule ? 'border-red-300' : 'border-gray-300'
+                }`}
               >
                 <option value="">Select module</option>
                 {courseData?.syllabus?.modules?.map(module => (
@@ -105,12 +120,17 @@ const AssignmentDetailsStep = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Due Date <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    !dueDate ? 'border-red-300' : 'border-gray-300'
+                  }`}
                 />
               </div>
               <div>
