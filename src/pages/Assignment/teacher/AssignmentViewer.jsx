@@ -66,7 +66,7 @@ export default function AssignmentViewer() {
       // Prepare student submission data by merging courseData.students with assignment.submissions
       const mergedData = courseData.students.map((student) => {
         const submission = assignment.submissions.find(
-          (sub) => sub.student === student.id
+          (sub) => sub.studentId === student.id
         );
 
         return {
@@ -366,7 +366,7 @@ export default function AssignmentViewer() {
                                 (student) => {
                                   const updatedSubmission =
                                     response.assignment.submissions.find(
-                                      (sub) => sub.student === student.id
+                                      (sub) => sub.studentId === student.id
                                     );
 
                                   return {

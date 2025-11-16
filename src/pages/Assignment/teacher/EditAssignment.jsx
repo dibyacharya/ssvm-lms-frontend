@@ -138,7 +138,13 @@ const EditAssignmentForm = ({
       formData.append("description", description);
       formData.append("totalPoints", totalPoints.toString());
       formData.append("dueDate", dueDate);
-      formData.append("isActive", isActive.toString()); // Add isActive to form data
+      formData.append("isActive", isActive.toString());
+      formData.append("allowLateSubmissions", isActive.toString()); // Map isActive to allowLateSubmissions
+      
+      // If assignment has questions, preserve them
+      if (assignment.questions && assignment.questions.length > 0) {
+        formData.append("questions", JSON.stringify(assignment.questions));
+      }
 
       // Process attachments:
       // 1. Existing attachment objects (with _id) will be kept as-is

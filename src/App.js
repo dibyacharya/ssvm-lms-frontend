@@ -17,6 +17,7 @@ import LecturePanel from "./pages/lecture/LecturePanel";
 import StudentProfilePage from "./pages/StudentDashboard/Components/ProfileSection";
 import CourseManagement from "./pages/course/teacher/CourseManagement";
 import AssignmentViewer from "./pages/Assignment/teacher/AssignmentViewer.jsx";
+import TeacherAssignmentGrading from "./pages/Assignment/teacher/TeacherAssignmentGrading.jsx";
 import ActivityViewer from "./pages/Activity/teacher/ActivityViewer.jsx";
 import { CourseProvider } from "./context/CourseContext.js";
 import EContentViewer from "./pages/Econtent/EcontentViewer.jsx";
@@ -86,6 +87,14 @@ const Layout = () => {
             element={
               <PrivateRoute roles={["teacher"]}>
                 <AssignmentViewer />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/assignment/:assignmentId/grade"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <TeacherAssignmentGrading />
               </PrivateRoute>
             }
           />

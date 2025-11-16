@@ -10,19 +10,14 @@ import {
 } from "lucide-react";
 import { useCourse } from "../../../context/CourseContext";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
-import {
-  getAllCourseAssignments,
-  submitAssignment,
-} from "../../../services/assignment.service";
+import { useAssignmentStore } from "../hooks/useAssignmentStore";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 
 const StudentAssignmentSection = ({ courseID, selectedID }) => {
-  const { user } = useAuth();
+  const { getAssignmentsByCourse, addSubmission, getCurrentStudentId } = useAssignmentStore();
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [submission, setSubmission] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -30,71 +25,73 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   const [objectiveAnswers, setObjectiveAnswers] = useState({});
   const { courseData } = useCourse();
   const navigate = useNavigate();
+  const currentStudentId = getCurrentStudentId();
 
-  // Fetch assignments from API
-  const fetchAssignments = async () => {
-    if (!courseID) return;
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await getAllCourseAssignments({ courseID });
-      const courseAssignments = response.assignments || [];
-      setAssignments(courseAssignments);
-      
-      // Find selected assignment
-      if (courseAssignments.length > 0) {
-        let found = null;
-        if (selectedID) {
-          // Try to find by ID first
-          found = courseAssignments.find(a => a._id === selectedID);
-        }
-        // If not found by ID, use first assignment
-        if (!found) {
-          found = courseAssignments[0];
-        }
-        
-        if (found) {
-          setSelectedAssignment(found);
-          // Load submission from assignment object
-          loadSubmissionFromAssignment(found);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching assignments:", err);
-      const errorMessage = err.response?.data?.message || "Failed to load assignments.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load submission from assignment object (studentSubmission field from API)
-  const loadSubmissionFromAssignment = (assignment) => {
-    if (!assignment) return;
-    
-    // The API returns studentSubmission field for students
-    const submissionData = assignment.studentSubmission || null;
-    setSubmission(submissionData);
-    
-    // Load answers from submission if it exists
-    if (submissionData?.answers) {
-      setSubjectiveAnswers(submissionData.answers.subjective || {});
-      setObjectiveAnswers(submissionData.answers.objective || {});
-    } else {
-      // Clear answers if no submission
-      setSubjectiveAnswers({});
-      setObjectiveAnswers({});
-    }
-  };
-
+  // Fetch assignments
   useEffect(() => {
     if (courseID) {
-      fetchAssignments();
+      setIsLoading(true);
+      try {
+        const courseAssignments = getAssignmentsByCourse(courseID);
+        setAssignments(courseAssignments);
+        
+        if (courseAssignments && courseAssignments.length > 0) {
+          // Use selectedID as index if provided, otherwise use 0
+          const index = selectedID ? parseInt(selectedID) : 0;
+          const found = courseAssignments[index] || courseAssignments[0];
+          if (found) {
+            setSelectedAssignment(found);
+            // Load existing submission if any
+            const existingSubmission = found.submissions?.find(
+              sub => sub.student === currentStudentId
+            );
+            if (existingSubmission?.answers) {
+              setSubjectiveAnswers(existingSubmission.answers.subjective || {});
+              setObjectiveAnswers(existingSubmission.answers.objective || {});
+            } else {
+              // Clear answers if no submission
+              setSubjectiveAnswers({});
+              setObjectiveAnswers({});
+            }
+          }
+        }
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching assignments:", err);
+        setError("Failed to load assignments.");
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [courseID, selectedID]);
+  }, [courseID, selectedID, getAssignmentsByCourse, currentStudentId]);
+
+  // Get current submission - reactive to selectedAssignment changes
+  const submission = useMemo(() => {
+    if (!selectedAssignment || !currentStudentId) return null;
+    return selectedAssignment.submissions?.find(
+      sub => sub.student === currentStudentId
+    ) || null;
+  }, [selectedAssignment, currentStudentId]);
+
+  // Load answers from submission when it changes (only on initial load or when submission status changes)
+  const [hasLoadedSubmission, setHasLoadedSubmission] = useState(false);
+  useEffect(() => {
+    if (submission?.answers && !hasLoadedSubmission) {
+      setSubjectiveAnswers(submission.answers.subjective || {});
+      setObjectiveAnswers(submission.answers.objective || {});
+      setHasLoadedSubmission(true);
+    } else if (submission === null && selectedAssignment && !hasLoadedSubmission) {
+      // Clear answers if no submission exists (only on initial load)
+      setSubjectiveAnswers({});
+      setObjectiveAnswers({});
+      setHasLoadedSubmission(true);
+    }
+  }, [submission, selectedAssignment, hasLoadedSubmission]);
+
+  // Reset hasLoadedSubmission when assignment changes
+  useEffect(() => {
+    setHasLoadedSubmission(false);
+  }, [selectedAssignment?._id]);
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -125,12 +122,18 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
     setSubjectiveAnswers({});
     setObjectiveAnswers({});
     setSelectedFile(null);
-    // Load submission from assignment object
-    loadSubmissionFromAssignment(assignment);
+    // Load existing submission if any
+    const existingSubmission = assignment.submissions?.find(
+      sub => sub.student === currentStudentId
+    );
+    if (existingSubmission?.answers) {
+      setSubjectiveAnswers(existingSubmission.answers.subjective || {});
+      setObjectiveAnswers(existingSubmission.answers.objective || {});
+    }
   };
 
   // Handle submit
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!selectedAssignment) {
       toast.error("Please select an assignment");
       return;
@@ -163,39 +166,54 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       }
     }
 
-    try {
-      setIsLoading(true);
-      
-      // Create FormData for submission
-      const formData = new FormData();
-      
-      // Add answers as JSON string
-      formData.append('answers', JSON.stringify({
+    // Calculate objective score
+    let objectiveScore = 0;
+    const totalObjectivePoints = objectiveQuestions.reduce((sum, q) => sum + (q.points || 0), 0);
+    
+    objectiveQuestions.forEach(q => {
+      const qId = q._id || q.id;
+      if (objectiveAnswers[qId] === q.correctAnswer) {
+        objectiveScore += (q.points || 0);
+      }
+    });
+
+    // Create submission
+    const submissionData = {
+      _id: `sub_${Date.now()}`,
+      student: currentStudentId,
+      submissionDate: new Date().toISOString(),
+      answers: {
         subjective: subjectiveAnswers,
         objective: objectiveAnswers
-      }));
-      
-      // Add file if selected
-      if (selectedFile) {
-        formData.append('submissionFile', selectedFile);
-      }
+      },
+      submissionFile: selectedFile ? URL.createObjectURL(selectedFile) : null,
+      status: 'submitted',
+      objectiveScore: objectiveScore,
+      totalObjectivePoints: totalObjectivePoints,
+      grade: objectiveScore, // Auto-calculated score for objective questions
+      feedback: null
+    };
 
-      // Submit to API
-      const response = await submitAssignment(selectedAssignment._id, formData);
-      
-      // Refresh assignments to get updated submission data
-      await fetchAssignments();
-      
-      // Clear file selection
-      setSelectedFile(null);
-      
-      // Success message is handled in the service
-    } catch (error) {
-      // Error is already handled in the service with toast
-      console.error("Error submitting assignment:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    // Save submission
+    addSubmission(selectedAssignment._id, submissionData);
+    
+    toast.success(
+      objectiveQuestions.length > 0 
+        ? `Assignment submitted! Your score: ${objectiveScore}/${totalObjectivePoints}`
+        : "Assignment submitted successfully!"
+    );
+
+    // Refresh assignments from localStorage
+    setTimeout(() => {
+      const updated = getAssignmentsByCourse(courseID);
+      setAssignments(updated);
+      const updatedAssignment = updated.find(a => a._id === selectedAssignment._id);
+      if (updatedAssignment) {
+        setSelectedAssignment(updatedAssignment);
+        // Reset the loaded flag so submission data reloads
+        setHasLoadedSubmission(false);
+      }
+    }, 100);
   };
 
   // Format date
@@ -264,9 +282,10 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
         </div>
         <div className="space-y-2">
           {assignments.map((assignment, index) => {
-            // Check if student has submitted (using studentSubmission field from API)
-            const hasSubmitted = assignment.studentSubmission !== null && assignment.studentSubmission !== undefined;
-            const isSelected = selectedAssignment?._id === assignment._id;
+            const hasSubmitted = assignment.submissions?.some(
+              sub => sub.student === currentStudentId
+            );
+            const isSelected = selectedAssignment._id === assignment._id;
 
             return (
               <div
@@ -350,20 +369,12 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   View Submission File
                 </a>
               )}
-              {/* Show grade if available (only show if teacher has graded) */}
+              {/* Show grade if available */}
               {submission.grade !== null && submission.grade !== undefined && (
                 <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
                   <div className="text-sm font-semibold text-green-800 dark:text-green-300 mb-1">Your Grade:</div>
                   <div className="text-2xl font-bold text-green-700 dark:text-green-400">
                     {submission.grade} / {selectedAssignment.totalPoints}
-                  </div>
-                </div>
-              )}
-              {/* Show pending message if subjective questions exist but not graded yet */}
-              {(submission.grade === null || submission.grade === undefined) && subjectiveQuestions.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
-                  <div className="text-sm text-green-800 dark:text-green-300">
-                    Your submission is pending teacher review. You will see your grade once the teacher has graded your assignment.
                   </div>
                 </div>
               )}

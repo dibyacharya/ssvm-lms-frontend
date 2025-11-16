@@ -70,7 +70,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       return "not_started";
     }
 
-    const userSubmission = assignment.submissions.find(sub => sub.student === userId);
+    const userSubmission = assignment.submissions.find(sub => sub.studentId === userId);
     if (userSubmission) {
       if (userSubmission.status === "graded") {
         return "submitted";

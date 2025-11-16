@@ -114,7 +114,7 @@ const StudentAssignmentSectionCourse = () => {
     if (!selectedAssignment || !courseData?.student?.id) return null;
 
     return selectedAssignment.submissions.find(
-      (submission) => submission.student === courseData.student.id
+      (submission) => submission.studentId === courseData.student.id
     );
   };
 
@@ -155,7 +155,7 @@ const StudentAssignmentSectionCourse = () => {
         <div className="space-y-2">
           {assignments.map((assignment) => {
             const hasSubmitted = assignment.submissions.some(
-              (sub) => sub.student === courseData?.student?.id
+              (sub) => sub.studentId === courseData?.student?.id
             );
 
             return (
