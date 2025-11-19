@@ -242,3 +242,17 @@ export const bulkGradeSubmissions = async (assignmentID, grades) => {
 
 // Legacy function name for backward compatibility
 export const updateAssignmentGrade = gradeSubmission;
+
+/**
+ * Get student assignment statistics across all enrolled courses
+ * @returns {Promise} Response with assignment stats including allAssignments, submitted, pending, and courses with latestAssignment
+ */
+export const getStudentAssignmentStats = async () => {
+  try {
+    const response = await api.get(`/assignment/student/stats`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching student assignment stats:", error);
+    throw error;
+  }
+};

@@ -1,14 +1,15 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { ArrowRight } from "lucide-react";
 
 const AssignmentStatusChart = ({ 
   allAssignmentsCount, 
-  pendingAssignmentsCount, 
-  setActiveSection 
+  pendingAssignmentsCount,
+  submittedAssignmentsCount: propSubmittedCount
 }) => {
-  // Calculate assignment data
-  const submittedAssignmentsCount = allAssignmentsCount - pendingAssignmentsCount;
+  // Use provided submitted count or calculate from difference
+  const submittedAssignmentsCount = propSubmittedCount !== undefined 
+    ? propSubmittedCount 
+    : (allAssignmentsCount - pendingAssignmentsCount);
 
   // Data for the chart
   const assignmentData = [
@@ -126,13 +127,6 @@ const AssignmentStatusChart = ({
           </span>
         </div>
       </div>
-
-      <button
-        className="w-full mt-4 py-2 text-sm font-medium text-accent1 dark:text-blue-400 hover:text-accent1 dark:hover:text-blue-300 flex items-center justify-center border border-primary/30 dark:border-blue-400/30 rounded-lg hover:bg-accent2/10 dark:hover:bg-blue-400/10 transition-colors"
-        onClick={() => setActiveSection("Assignment")}
-      >
-        View Assignments <ArrowRight className="ml-2 h-4 w-4" />
-      </button>
 
       {/* CSS Variables for Tooltip Styling */}
       <style jsx>{`
