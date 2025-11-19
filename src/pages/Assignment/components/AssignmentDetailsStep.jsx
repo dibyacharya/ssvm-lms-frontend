@@ -9,8 +9,13 @@ const AssignmentDetailsStep = ({
   totalPoints, setTotalPoints,
   dueDate, setDueDate,
   dueTime, setDueTime,
-  courseData
-}) => (
+  courseData,
+  isUngraded, setIsUngraded
+}) => {
+  // Get today's date in YYYY-MM-DD format for min date validation
+  const today = new Date().toISOString().split('T')[0];
+  
+  return (
   <div className="max-w-6xl mx-auto">
     <div className="flex items-center gap-2 mb-6">
       <BookOpen className="text-blue-500" size={24} />
@@ -105,18 +110,66 @@ const AssignmentDetailsStep = ({
             <h3 className="text-lg font-semibold">Scheduling</h3>
           </div>
           <div className="space-y-4">
+            {/* Ungraded Toggle */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ungraded Assignment
+                </label>
+                <p className="text-xs text-gray-500">
+                  This assignment will not be scored or graded
+                </p>
+              </div>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={isUngraded}
+                  onChange={(e) => {
+                    setIsUngraded(e.target.checked);
+                    if (e.target.checked) {
+                      setTotalPoints(0);
+                    }
+                  }}
+                />
+                <div
+                  className={`block w-14 h-8 rounded-full transition-colors cursor-pointer ${
+                    isUngraded ? "bg-blue-500" : "bg-gray-300"
+                  }`}
+                  onClick={() => {
+                    const newValue = !isUngraded;
+                    setIsUngraded(newValue);
+                    if (newValue) {
+                      setTotalPoints(0);
+                    }
+                  }}
+                >
+                  <div
+                    className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform transform ${
+                      isUngraded ? "translate-x-6" : ""
+                    }`}
+                  ></div>
+                </div>
+              </div>
+            </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Total Points</label>
-              <select
+              <label className={`block text-sm font-medium mb-2 ${isUngraded ? 'text-gray-400' : 'text-gray-700'}`}>
+                Total Points
+              </label>
+              <input
+                type="number"
                 value={totalPoints}
                 onChange={(e) => setTotalPoints(Number(e.target.value))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value={100}>100</option>
-                <option value={50}>50</option>
-                <option value={25}>25</option>
-                <option value={10}>10</option>
-              </select>
+                min="0"
+                step="1"
+                disabled={isUngraded}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  isUngraded 
+                    ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'border-gray-300'
+                }`}
+                placeholder="Enter total points"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -127,6 +180,7 @@ const AssignmentDetailsStep = ({
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
+                  min={today}
                   required
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     !dueDate ? 'border-red-300' : 'border-gray-300'
@@ -148,7 +202,8 @@ const AssignmentDetailsStep = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default AssignmentDetailsStep;
 

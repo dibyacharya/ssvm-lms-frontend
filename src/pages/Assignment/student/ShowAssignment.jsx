@@ -7,6 +7,9 @@ import {
   ArrowLeft,
   CheckCircle2,
   Send,
+  Paperclip,
+  Maximize,
+  X,
 } from "lucide-react";
 import { useCourse } from "../../../context/CourseContext";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +31,9 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [subjectiveAnswers, setSubjectiveAnswers] = useState({});
   const [objectiveAnswers, setObjectiveAnswers] = useState({});
+  const [activeTab, setActiveTab] = useState('questions'); // 'questions' or 'attachments'
+  const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { courseData } = useCourse();
   const navigate = useNavigate();
 
@@ -95,6 +101,26 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       fetchAssignments();
     }
   }, [courseID, selectedID]);
+
+  // Reset selected attachment index and set default tab when assignment changes
+  useEffect(() => {
+    if (selectedAssignment) {
+      setSelectedAttachmentIndex(0);
+      const assignmentQuestions = selectedAssignment.questions || [];
+      const assignmentAttachments = selectedAssignment.attachments || [];
+      const hasQuestions = assignmentQuestions.length > 0;
+      const hasAttachments = assignmentAttachments.length > 0;
+      
+      // Set default tab: questions if available, otherwise attachments if available
+      if (hasQuestions) {
+        setActiveTab('questions');
+      } else if (hasAttachments) {
+        setActiveTab('attachments');
+      } else {
+        setActiveTab('questions');
+      }
+    }
+  }, [selectedAssignment?._id]);
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -169,15 +195,49 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       // Create FormData for submission
       const formData = new FormData();
       
-      // Add answers as JSON string
-      formData.append('answers', JSON.stringify({
-        subjective: subjectiveAnswers,
-        objective: objectiveAnswers
-      }));
+      // Check if there are any answers to send
+      const hasSubjectiveAnswers = Object.keys(subjectiveAnswers).length > 0 && 
+        Object.values(subjectiveAnswers).some(answer => answer?.trim());
+      const hasObjectiveAnswers = Object.keys(objectiveAnswers).length > 0;
       
-      // Add file if selected
-      if (selectedFile) {
+      // Only add answers if there are actual answers (not empty objects)
+      if (hasSubjectiveAnswers || hasObjectiveAnswers) {
+        formData.append('answers', JSON.stringify({
+          subjective: subjectiveAnswers,
+          objective: objectiveAnswers
+        }));
+      }
+      
+      // Add file if selected - ensure it's a valid File object
+      if (selectedFile && selectedFile instanceof File) {
         formData.append('submissionFile', selectedFile);
+        console.log('Adding file to FormData:', {
+          name: selectedFile.name,
+          size: selectedFile.size,
+          type: selectedFile.type
+        });
+      } else if (selectedFile) {
+        console.warn('Selected file is not a valid File object:', selectedFile);
+        toast.error('Invalid file selected. Please choose a file again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Validate that we have either answers or a file
+      if (!hasSubjectiveAnswers && !hasObjectiveAnswers && !selectedFile) {
+        toast.error('Please provide answers or upload a file');
+        setIsLoading(false);
+        return;
+      }
+
+      // Log FormData contents for debugging
+      console.log('FormData contents:');
+      for (let pair of formData.entries()) {
+        if (pair[1] instanceof File) {
+          console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes, type: ${pair[1].type})`);
+        } else {
+          console.log(`${pair[0]}: ${pair[1]}`);
+        }
       }
 
       // Submit to API
@@ -254,6 +314,137 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   const questions = selectedAssignment.questions || [];
   const subjectiveQuestions = questions.filter(q => q.type === 'subjective');
   const objectiveQuestions = questions.filter(q => q.type === 'objective');
+  
+  // Get attachments from assignment
+  const attachments = selectedAssignment.attachments || [];
+  const hasAttachments = attachments.length > 0;
+  
+  // Helper function to get file type from attachment
+  const getFileType = (attachment) => {
+    if (!attachment.type && !attachment.name) return 'unknown';
+    const type = attachment.type?.toLowerCase() || '';
+    const name = attachment.name?.toLowerCase() || '';
+    
+    if (type.includes('pdf') || name.endsWith('.pdf')) return 'pdf';
+    if (type.includes('image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(name)) return 'image';
+    if (type.includes('powerpoint') || type.includes('presentation') || name.endsWith('.ppt') || name.endsWith('.pptx')) return 'ppt';
+    if (type.includes('word') || name.endsWith('.doc') || name.endsWith('.docx')) return 'doc';
+    return 'other';
+  };
+  
+  // Helper function to get file URL
+  const getFileUrl = (attachment) => {
+    return attachment.url || attachment.fileUrl || '';
+  };
+
+  // Render attachment viewer content
+  const renderAttachmentViewer = (attachment, showFullscreenButton = false) => {
+    if (!attachment) return null;
+    
+    const fileType = getFileType(attachment);
+    const fileUrl = getFileUrl(attachment);
+    const fileName = attachment.name || `Attachment ${selectedAttachmentIndex + 1}`;
+
+    if (fileType === 'pdf') {
+      return (
+        <div className="relative w-full h-full">
+          {showFullscreenButton && (
+            <button
+              onClick={() => setIsFullscreen(true)}
+              className="absolute top-4 right-4 z-10 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Fullscreen"
+            >
+              <Maximize className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+          )}
+          <iframe
+            src={`${fileUrl}#toolbar=1&navpanes=1`}
+            className="w-full h-full border-0"
+            title={fileName}
+          />
+        </div>
+      );
+    } else if (fileType === 'image') {
+      return (
+        <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-4 relative">
+          {showFullscreenButton && (
+            <button
+              onClick={() => setIsFullscreen(true)}
+              className="absolute top-4 right-4 z-10 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Fullscreen"
+            >
+              <Maximize className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+          )}
+          <img
+            src={fileUrl}
+            alt={fileName}
+            className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+          />
+        </div>
+      );
+    } else if (fileType === 'ppt' || fileType === 'pptx') {
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-6">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-orange-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+                PPT
+              </div>
+              <h3 className="ml-3 font-semibold text-lg text-gray-900 dark:text-white">
+                {fileName}
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              PowerPoint presentations cannot be previewed directly. You can download the file to view it.
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={fileUrl}
+                download={fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                Download Presentation
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-6">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-gray-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+                FILE
+              </div>
+              <h3 className="ml-3 font-semibold text-lg text-gray-900 dark:text-white">
+                {fileName}
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              This file type cannot be previewed. You can download it to view.
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={fileUrl}
+                download={fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                Download File
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="flex bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -317,9 +508,17 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   <Calendar className="h-5 w-5" />
                   <span className="text-sm">{formatDate(selectedAssignment.dueDate)}</span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {selectedAssignment.totalPoints} points
-                </p>
+                {selectedAssignment.isUngraded ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
+                      Ungraded
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {selectedAssignment.totalPoints} points
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -359,8 +558,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   </div>
                 </div>
               )}
-              {/* Show pending message if subjective questions exist but not graded yet */}
-              {(submission.grade === null || submission.grade === undefined) && subjectiveQuestions.length > 0 && (
+              {/* Show pending message if subjective questions exist but not graded yet (only for graded assignments) */}
+              {(submission.grade === null || submission.grade === undefined) && subjectiveQuestions.length > 0 && !selectedAssignment.isUngraded && (
                 <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
                   <div className="text-sm text-green-800 dark:text-green-300">
                     Your submission is pending teacher review. You will see your grade once the teacher has graded your assignment.
@@ -379,15 +578,48 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
             </div>
           )}
 
-          {/* Questions Section */}
-          {questions.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-              <p className="text-gray-500 dark:text-gray-400">
-                No questions available for this assignment.
-              </p>
+          {/* Tabs Section - Only show if there are attachments */}
+          {hasAttachments && questions.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <nav className="flex space-x-1 px-4" aria-label="Tabs">
+                  <button
+                    onClick={() => setActiveTab('questions')}
+                    className={`px-4 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'questions'
+                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    Questions
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('attachments')}
+                    className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
+                      activeTab === 'attachments'
+                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    Attachments ({attachments.length})
+                  </button>
+                </nav>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-6">
+          )}
+
+          {/* Questions Section */}
+          {activeTab === 'questions' && (
+            <>
+              {questions.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No questions available for this assignment.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
               {/* Subjective Questions */}
               {subjectiveQuestions.length > 0 && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -552,6 +784,141 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   </button>
                 </div>
               )}
+            </div>
+          )}
+            </>
+          )}
+
+          {/* Attachments Section */}
+          {activeTab === 'attachments' && hasAttachments && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="flex flex-col h-[calc(100vh-300px)] min-h-[600px]">
+                {/* Attachment List Sidebar */}
+                {attachments.length > 1 && (
+                  <div className="border-b border-gray-200 dark:border-gray-700 p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Select Attachment:
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((attachment, index) => {
+                        const fileType = getFileType(attachment);
+                        const isSelected = selectedAttachmentIndex === index;
+                        return (
+                          <button
+                            key={attachment._id || index}
+                            onClick={() => setSelectedAttachmentIndex(index)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isSelected
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="max-w-[200px] truncate">
+                              {attachment.name || `Attachment ${index + 1}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* PDF Viewer */}
+                <div className="flex-1 relative">
+                  {attachments[selectedAttachmentIndex] && renderAttachmentViewer(attachments[selectedAttachmentIndex], true)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Show attachments tab if no questions but has attachments */}
+          {questions.length === 0 && hasAttachments && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="flex flex-col h-[calc(100vh-300px)] min-h-[600px]">
+                {/* Attachment List Sidebar */}
+                {attachments.length > 1 && (
+                  <div className="border-b border-gray-200 dark:border-gray-700 p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Select Attachment:
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((attachment, index) => {
+                        const fileType = getFileType(attachment);
+                        const isSelected = selectedAttachmentIndex === index;
+                        return (
+                          <button
+                            key={attachment._id || index}
+                            onClick={() => setSelectedAttachmentIndex(index)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isSelected
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="max-w-[200px] truncate">
+                              {attachment.name || `Attachment ${index + 1}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* PDF Viewer */}
+                <div className="flex-1 relative">
+                  {attachments[selectedAttachmentIndex] && renderAttachmentViewer(attachments[selectedAttachmentIndex], true)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Fullscreen Modal */}
+          {isFullscreen && attachments[selectedAttachmentIndex] && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-semibold">
+                    {attachments[selectedAttachmentIndex].name || `Attachment ${selectedAttachmentIndex + 1}`}
+                  </h3>
+                  {attachments.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedAttachmentIndex(Math.max(0, selectedAttachmentIndex - 1))}
+                        disabled={selectedAttachmentIndex === 0}
+                        className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <span className="text-sm">
+                        {selectedAttachmentIndex + 1} / {attachments.length}
+                      </span>
+                      <button
+                        onClick={() => setSelectedAttachmentIndex(Math.min(attachments.length - 1, selectedAttachmentIndex + 1))}
+                        disabled={selectedAttachmentIndex === attachments.length - 1}
+                        className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setIsFullscreen(false)}
+                  className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                  title="Exit Fullscreen (Esc)"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Fullscreen Viewer */}
+              <div className="flex-1 overflow-auto">
+                {renderAttachmentViewer(attachments[selectedAttachmentIndex], false)}
+              </div>
             </div>
           )}
         </div>

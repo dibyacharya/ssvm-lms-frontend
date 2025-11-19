@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, FileText, CheckCircle2, XCircle, Search, Download } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle2, XCircle, Search, Download, Paperclip, Maximize, X } from 'lucide-react';
 import { 
   getAssignmentById, 
   getAllSubmissions, 
@@ -20,8 +20,10 @@ const TeacherAssignmentGrading = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [grades, setGrades] = useState({});
   const [feedback, setFeedback] = useState({});
-  const [sortBy, setSortBy] = useState('all'); // all, graded, ungraded
+  const [sortBy, setSortBy] = useState('all'); // all, submitted, unsubmitted
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('answers'); // 'answers' or 'file'
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // Fetch assignment and submissions
   const fetchData = useCallback(async () => {
     if (!assignmentId) {
@@ -159,6 +161,129 @@ const TeacherAssignmentGrading = () => {
   console.log('[TeacherAssignmentGrading] Subjective questions:', subjectiveQuestions.length);
   console.log('[TeacherAssignmentGrading] Objective questions:', objectiveQuestions.length);
 
+  // Helper function to get file type from submission file URL
+  const getFileType = (fileUrl) => {
+    if (!fileUrl) return 'unknown';
+    const url = fileUrl.toLowerCase();
+    if (url.endsWith('.pdf')) return 'pdf';
+    if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url)) return 'image';
+    if (url.endsWith('.ppt') || url.endsWith('.pptx')) return 'ppt';
+    if (url.endsWith('.doc') || url.endsWith('.docx')) return 'doc';
+    return 'other';
+  };
+
+  // Render file viewer content
+  const renderFileViewer = (fileUrl, fileName, showFullscreenButton = false) => {
+    if (!fileUrl) return null;
+    
+    const fileType = getFileType(fileUrl);
+
+    if (fileType === 'pdf') {
+      return (
+        <div className="relative w-full h-full">
+          {showFullscreenButton && (
+            <button
+              onClick={() => setIsFullscreen(true)}
+              className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors"
+              title="Fullscreen"
+            >
+              <Maximize className="h-5 w-5 text-gray-700" />
+            </button>
+          )}
+          <iframe
+            src={`${fileUrl}#toolbar=1&navpanes=1`}
+            className="w-full h-full border-0"
+            title={fileName}
+          />
+        </div>
+      );
+    } else if (fileType === 'image') {
+      return (
+        <div className="flex items-center justify-center h-full bg-gray-100 p-4 relative">
+          {showFullscreenButton && (
+            <button
+              onClick={() => setIsFullscreen(true)}
+              className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors"
+              title="Fullscreen"
+            >
+              <Maximize className="h-5 w-5 text-gray-700" />
+            </button>
+          )}
+          <img
+            src={fileUrl}
+            alt={fileName}
+            className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+          />
+        </div>
+      );
+    } else if (fileType === 'ppt' || fileType === 'pptx') {
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-orange-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+                PPT
+              </div>
+              <h3 className="ml-3 font-semibold text-lg">{fileName}</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              PowerPoint presentations cannot be previewed directly. You can download the file to view it.
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={fileUrl}
+                download={fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                Download Presentation
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-gray-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+                FILE
+              </div>
+              <h3 className="ml-3 font-semibold text-lg">{fileName}</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              This file type cannot be previewed. You can download it to view.
+            </p>
+            <div className="flex justify-center">
+              <a
+                href={fileUrl}
+                download={fileName}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                Download File
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  // Reset tab when student changes
+  useEffect(() => {
+    if (selectedStudent?.submission?.submissionFile) {
+      setActiveTab('file'); // Default to file tab if file exists
+    } else {
+      setActiveTab('answers');
+    }
+  }, [selectedStudent?.id]);
+
   // Get students from courseData and map with their submissions
   // Match student.id from courseData.students with submission.userId or submission.studentId
   console.log('[TeacherAssignmentGrading] Mapping students with submissions...');
@@ -239,8 +364,8 @@ const TeacherAssignmentGrading = () => {
     }
     
     // Sort filter
-    if (sortBy === 'graded' && !student.hasGrade) return false;
-    if (sortBy === 'ungraded' && (student.hasGrade || !student.submission)) return false;
+    if (sortBy === 'submitted' && !student.submission) return false;
+    if (sortBy === 'unsubmitted' && student.submission) return false;
     
     return true;
   });
@@ -282,6 +407,13 @@ const TeacherAssignmentGrading = () => {
       studentName: student.name,
       hasSubmission: !!student.submission
     });
+
+    // Check if assignment is ungraded
+    if (assignment.isUngraded) {
+      console.log('[TeacherAssignmentGrading] Cannot save grade - assignment is ungraded');
+      toast.error('This assignment is ungraded and cannot be scored');
+      return;
+    }
 
     if (!student.submission) {
       console.log('[TeacherAssignmentGrading] Cannot save grade - student has not submitted');
@@ -373,19 +505,17 @@ const TeacherAssignmentGrading = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft size={20} />
-              Back
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold">{assignment.title}</h1>
-              <p className="text-gray-600">Grade student submissions</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold">{assignment.title}</h1>
+            <p className="text-gray-600">Grade student submissions</p>
           </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft size={20} />
+            Back
+          </button>
         </div>
       </div>
 
@@ -412,16 +542,16 @@ const TeacherAssignmentGrading = () => {
                   All
                 </button>
                 <button
-                  onClick={() => setSortBy('graded')}
-                  className={`px-3 py-1 rounded ${sortBy === 'graded' ? 'bg-green-100 text-green-600' : 'text-gray-600'}`}
+                  onClick={() => setSortBy('submitted')}
+                  className={`px-3 py-1 rounded ${sortBy === 'submitted' ? 'bg-green-100 text-green-600' : 'text-gray-600'}`}
                 >
-                  Graded
+                  Submitted
                 </button>
                 <button
-                  onClick={() => setSortBy('ungraded')}
-                  className={`px-3 py-1 rounded ${sortBy === 'ungraded' ? 'bg-yellow-100 text-yellow-600' : 'text-gray-600'}`}
+                  onClick={() => setSortBy('unsubmitted')}
+                  className={`px-3 py-1 rounded ${sortBy === 'unsubmitted' ? 'bg-yellow-100 text-yellow-600' : 'text-gray-600'}`}
                 >
-                  Ungraded
+                  Unsubmitted
                 </button>
               </div>
             </div>
@@ -471,7 +601,7 @@ const TeacherAssignmentGrading = () => {
                             <XCircle size={16} className="text-red-500" />
                           )}
                           {student.hasGrade && (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                               Graded
                             </span>
                           )}
@@ -486,6 +616,19 @@ const TeacherAssignmentGrading = () => {
 
           {/* Grading Area */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border p-6">
+            {assignment.isUngraded && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center gap-2 text-yellow-800">
+                  <XCircle size={20} />
+                  <div>
+                    <p className="font-medium">This assignment is ungraded</p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      This assignment is for practice only and cannot be scored or graded.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {!selectedStudent ? (
               <div className="text-center py-12 text-gray-500">
                 Select a student to view their submission
@@ -511,28 +654,80 @@ const TeacherAssignmentGrading = () => {
                   </div>
                 ) : (
                   <>
+                    {/* Tabs Section - Show if submission file exists */}
                     {selectedStudent.submission.submissionFile && (
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <FileText className="text-blue-600" size={20} />
-                            <span className="font-medium">Submitted File</span>
-                          </div>
-                          <a
-                            href={selectedStudent.submission.submissionFile}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                      <div className="border-b border-gray-200 mb-4">
+                        <nav className="flex space-x-1" aria-label="Tabs">
+                          <button
+                            onClick={() => setActiveTab('answers')}
+                            className={`px-4 py-3 text-sm font-medium transition-colors ${
+                              activeTab === 'answers'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
                           >
-                            <Download size={16} />
-                            View/Download
-                          </a>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Submitted on: {new Date(selectedStudent.submission.submissionDate).toLocaleString()}
-                        </p>
+                            Answers
+                          </button>
+                          <button
+                            onClick={() => setActiveTab('file')}
+                            className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
+                              activeTab === 'file'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            Submission File
+                          </button>
+                        </nav>
                       </div>
                     )}
+
+                    {/* Submission File Tab */}
+                    {activeTab === 'file' && selectedStudent.submission.submissionFile && (
+                      <div className="bg-white rounded-lg shadow-sm border" style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}>
+                        <div className="flex flex-col h-full">
+                          {/* File Info Header */}
+                          <div className="border-b border-gray-200 p-4 bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-blue-600" size={20} />
+                                <div>
+                                  <span className="font-medium text-gray-900">
+                                    {selectedStudent.submission.submissionFile.split('/').pop()}
+                                  </span>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Submitted on: {new Date(selectedStudent.submission.submissionDate).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <a
+                                href={selectedStudent.submission.submissionFile}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 px-3 py-2 rounded-lg hover:bg-blue-50"
+                              >
+                                <Download size={16} />
+                                Download
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* File Viewer */}
+                          <div className="flex-1 relative overflow-hidden">
+                            {(() => {
+                              const fileUrl = selectedStudent.submission.submissionFile;
+                              const fileName = fileUrl.split('/').pop();
+                              return renderFileViewer(fileUrl, fileName, true);
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Answers Tab */}
+                    {activeTab === 'answers' && (
+                      <div className="space-y-6">
 
                     {subjectiveQuestions.map((q, index) => {
                       const answer = selectedStudent.submission.answers?.subjective?.[q._id] || '';
@@ -546,23 +741,33 @@ const TeacherAssignmentGrading = () => {
                           </div>
                           <p className="font-medium text-gray-900 mb-3">{q.question}</p>
                           <div className="bg-gray-50 rounded-lg p-4 mb-3">
-                            <p className="text-gray-700 whitespace-pre-wrap">{answer || 'No answer provided'}</p>
+                            {answer ? (
+                              <p className="text-gray-700 whitespace-pre-wrap">{answer}</p>
+                            ) : selectedStudent.submission?.submissionFile ? (
+                              <p className="text-blue-600 font-medium italic">Please view submitted file</p>
+                            ) : (
+                              <p className="text-gray-700">No answer provided</p>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="number"
-                              placeholder="Points"
-                              min="0"
-                              max={q.points || 20}
-                              value={grades[`${selectedStudent.id}_${q._id}`] || ''}
-                              onChange={(e) => setGrades(prev => ({
-                                ...prev,
-                                [`${selectedStudent.id}_${q._id}`]: e.target.value ? parseFloat(e.target.value) : null
-                              }))}
-                              className="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-500">/ {q.points || 20}</span>
-                          </div>
+                          {!assignment.isUngraded ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                placeholder="Points"
+                                min="0"
+                                max={q.points || 20}
+                                value={grades[`${selectedStudent.id}_${q._id}`] || ''}
+                                onChange={(e) => setGrades(prev => ({
+                                  ...prev,
+                                  [`${selectedStudent.id}_${q._id}`]: e.target.value ? parseFloat(e.target.value) : null
+                                }))}
+                                className="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-500">/ {q.points || 20}</span>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 italic">Ungraded assignment - no scoring</p>
+                          )}
                         </div>
                       );
                     })}
@@ -592,44 +797,68 @@ const TeacherAssignmentGrading = () => {
                         </div>
                       )}
                       
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Total Grade
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            placeholder="Total grade"
-                            min="0"
-                            max={assignment.totalPoints}
-                            value={grades[getGradeKey(selectedStudent)] || selectedStudent.submission?.grade || ''}
-                            onChange={(e) => handleGradeChange(getGradeKey(selectedStudent), e.target.value)}
-                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-500">
-                            / {assignment.totalPoints}
-                          </span>
+                      {!assignment.isUngraded ? (
+                        <>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Total Grade
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                placeholder="Total grade"
+                                min="0"
+                                max={assignment.totalPoints}
+                                value={grades[getGradeKey(selectedStudent)] || selectedStudent.submission?.grade || ''}
+                                onChange={(e) => handleGradeChange(getGradeKey(selectedStudent), e.target.value)}
+                                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-500">
+                                / {assignment.totalPoints}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Feedback
+                            </label>
+                            <textarea
+                              value={feedback[getGradeKey(selectedStudent)] || selectedStudent.submission?.feedback || ''}
+                              onChange={(e) => handleFeedbackChange(getGradeKey(selectedStudent), e.target.value)}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              rows="4"
+                              placeholder="Add feedback for the student..."
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleSaveGrade(selectedStudent)}
+                            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                          >
+                            Save Grade
+                          </button>
+                        </>
+                      ) : (
+                        <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-sm text-gray-600">
+                            This assignment is ungraded. You can still provide feedback to students, but no scores will be recorded.
+                          </p>
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Feedback (Optional)
+                            </label>
+                            <textarea
+                              value={feedback[getGradeKey(selectedStudent)] || selectedStudent.submission?.feedback || ''}
+                              onChange={(e) => handleFeedbackChange(getGradeKey(selectedStudent), e.target.value)}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              rows="4"
+                              placeholder="Add feedback for the student..."
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Feedback
-                        </label>
-                        <textarea
-                          value={feedback[getGradeKey(selectedStudent)] || selectedStudent.submission?.feedback || ''}
-                          onChange={(e) => handleFeedbackChange(getGradeKey(selectedStudent), e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          rows="4"
-                          placeholder="Add feedback for the student..."
-                        />
-                      </div>
-                      <button
-                        onClick={() => handleSaveGrade(selectedStudent)}
-                        className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-                      >
-                        Save Grade
-                      </button>
+                      )}
                     </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -664,7 +893,81 @@ const TeacherAssignmentGrading = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-4">
+                    {/* Tabs Section - Show if submission file exists */}
+                    {selectedStudent.submission.submissionFile && (
+                      <div className="border-b border-gray-200 mb-4">
+                        <nav className="flex space-x-1" aria-label="Tabs">
+                          <button
+                            onClick={() => setActiveTab('answers')}
+                            className={`px-4 py-3 text-sm font-medium transition-colors ${
+                              activeTab === 'answers'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            Answers
+                          </button>
+                          <button
+                            onClick={() => setActiveTab('file')}
+                            className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
+                              activeTab === 'file'
+                                ? 'border-b-2 border-blue-500 text-blue-600'
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            <Paperclip className="h-4 w-4" />
+                            Submission File
+                          </button>
+                        </nav>
+                      </div>
+                    )}
+
+                    {/* Submission File Tab */}
+                    {activeTab === 'file' && selectedStudent.submission.submissionFile && (
+                      <div className="bg-white rounded-lg shadow-sm border mb-6" style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}>
+                        <div className="flex flex-col h-full">
+                          {/* File Info Header */}
+                          <div className="border-b border-gray-200 p-4 bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-blue-600" size={20} />
+                                <div>
+                                  <span className="font-medium text-gray-900">
+                                    {selectedStudent.submission.submissionFile.split('/').pop()}
+                                  </span>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Submitted on: {new Date(selectedStudent.submission.submissionDate).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <a
+                                href={selectedStudent.submission.submissionFile}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 px-3 py-2 rounded-lg hover:bg-blue-50"
+                              >
+                                <Download size={16} />
+                                Download
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* File Viewer */}
+                          <div className="flex-1 relative overflow-hidden">
+                            {(() => {
+                              const fileUrl = selectedStudent.submission.submissionFile;
+                              const fileName = fileUrl.split('/').pop();
+                              return renderFileViewer(fileUrl, fileName, true);
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Answers Tab */}
+                    {activeTab === 'answers' && (
+                      <div className="space-y-6">
+                      <div className="space-y-4">
                       {objectiveQuestions.map((q, index) => {
                         const qId = q._id || q.id;
                         const studentAnswer = selectedStudent.submission.answers?.objective?.[qId];
@@ -740,9 +1043,9 @@ const TeacherAssignmentGrading = () => {
                           </div>
                         );
                       })}
-                    </div>
+                      </div>
 
-                    <div className="border-t pt-4">
+                      <div className="border-t pt-4">
                       <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="flex items-center justify-between">
                           <div>
@@ -802,7 +1105,9 @@ const TeacherAssignmentGrading = () => {
                       >
                         Save Grade
                       </button>
-                    </div>
+                      </div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -810,6 +1115,39 @@ const TeacherAssignmentGrading = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Modal */}
+      {isFullscreen && selectedStudent?.submission?.submissionFile && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-semibold">
+                {selectedStudent.submission.submissionFile.split('/').pop()}
+              </h3>
+              <span className="text-sm text-gray-300">
+                {selectedStudent.name} - {selectedStudent.rollNo}
+              </span>
+            </div>
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="Exit Fullscreen (Esc)"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Fullscreen Viewer */}
+          <div className="flex-1 overflow-auto">
+            {renderFileViewer(
+              selectedStudent.submission.submissionFile,
+              selectedStudent.submission.submissionFile.split('/').pop(),
+              false
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

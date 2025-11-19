@@ -51,6 +51,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
   const [totalPoints, setTotalPoints] = useState(100);
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('23:59');
+  const [isUngraded, setIsUngraded] = useState(false);
 
   // Questions State - set activeTab based on assignmentType
   const [questions, setQuestions] = useState([]);
@@ -93,8 +94,14 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
   };
 
   const handleSave = async () => {
-    if (!assignmentTitle || questions.length === 0) {
-      toast.error('Please provide an assignment title and add at least one question before publishing.');
+    if (!assignmentTitle) {
+      toast.error('Please provide an assignment title before publishing.');
+      return;
+    }
+
+    // Allow publishing with either questions or attachments
+    if (questions.length === 0 && attachments.length === 0) {
+      toast.error('Please add at least one question or attachment before publishing.');
       return;
     }
 
@@ -113,7 +120,8 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
       formData.append('title', assignmentTitle);
       formData.append('description', description || '');
       formData.append('instructions', instructions || '');
-      formData.append('totalPoints', totalPoints.toString());
+      
+      formData.append('isUngraded', isUngraded ? 'true' : 'false');
       formData.append('isActive', 'true');
       formData.append('allowLateSubmissions', 'true');
       
@@ -127,12 +135,14 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
         formData.append('dueDate', dueDateTime);
       }
       
-      // Add questions as JSON string
-      const questionsToSend = questions.map(q => {
+      // Add questions as JSON string (empty array if no questions)
+      // First pass: prepare question data and collect attachments
+      const questionsToSend = questions.length > 0 ? questions.map((q, index) => {
         const questionData = {
           question: q.question,
           type: q.type,
           points: q.points || 0,
+          score: q.score || q.points || 0, // Add score field (per-question scoring)
         };
         
         // Add optional fields
@@ -153,16 +163,65 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
         }
         
         return questionData;
-      });
+      }) : [];
       
+      // If attachments exist, add auto-generated question for attachments
+      if (attachments.length > 0) {
+        // Check if auto-generated question already exists
+        const hasAutoQuestion = questionsToSend.some(q => q.source === 'attachment-auto');
+        if (!hasAutoQuestion) {
+          // Calculate total from existing questions first
+          const existingTotal = questionsToSend.reduce((sum, q) => sum + (q.score || q.points || 0), 0);
+          const autoQuestionScore = isUngraded ? 0 : (totalPoints - existingTotal > 0 ? totalPoints - existingTotal : totalPoints);
+          
+          const autoQuestion = {
+            question: "Solve the given assignment questions in the attached sheet(s).",
+            type: "subjective",
+            points: autoQuestionScore,
+            score: autoQuestionScore, // Add score field
+            source: "attachment-auto"
+          };
+          questionsToSend.push(autoQuestion);
+        }
+      }
+      
+      // Calculate total points from question scores if not ungraded
+      let finalTotalPoints = isUngraded ? 0 : totalPoints;
+      if (!isUngraded && questionsToSend.length > 0) {
+        finalTotalPoints = questionsToSend.reduce((sum, q) => sum + (q.score || 0), 0);
+      }
+      
+      formData.append('totalPoints', finalTotalPoints.toString());
       formData.append('questions', JSON.stringify(questionsToSend));
       
-      // Add attachment files
-      attachments.forEach((file) => {
-        if (file instanceof File) {
+      // Add assignment-level attachment files
+      // Filter and append only actual File objects (not existing attachment objects with _id)
+      const filesToUpload = attachments.filter(file => file instanceof File);
+      
+      if (filesToUpload.length > 0) {
+        filesToUpload.forEach((file) => {
           formData.append('attachments', file);
+        });
+        console.log(`Adding ${filesToUpload.length} attachment file(s) to FormData`);
+      } else if (attachments.length > 0) {
+        console.warn('Attachments array has items but none are File objects:', attachments);
+      }
+      
+      // Log FormData for debugging
+      console.log('FormData being sent:');
+      console.log('Total attachments in state:', attachments.length);
+      console.log('File objects to upload:', filesToUpload.length);
+      for (let pair of formData.entries()) {
+        if (pair[1] instanceof File) {
+          console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes, type: ${pair[1].type})`);
+        } else {
+          // Truncate long strings for readability
+          const value = typeof pair[1] === 'string' && pair[1].length > 100 
+            ? pair[1].substring(0, 100) + '...' 
+            : pair[1];
+          console.log(`${pair[0]}: ${value}`);
         }
-      });
+      }
       
       // Create assignment via API
       const response = await createAssignment(finalCourseID, formData);
@@ -225,6 +284,8 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
                 dueTime={dueTime}
                 setDueTime={setDueTime}
                 courseData={courseData}
+                isUngraded={isUngraded}
+                setIsUngraded={setIsUngraded}
               />
             )}
             {currentStep === 2 && (
@@ -235,6 +296,10 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
                 setActiveTab={setActiveTab}
                 courseData={courseData}
                 assignmentType={assignmentType}
+                attachments={attachments}
+                setAttachments={setAttachments}
+                totalPoints={totalPoints}
+                isUngraded={isUngraded}
               />
             )}
             {currentStep === 3 && (
@@ -249,6 +314,9 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
                 loading={loading}
                 handleSave={handleSave}
                 courseData={courseData}
+                isUngraded={isUngraded}
+                attachments={attachments}
+                onPrevious={handlePrevious}
               />
             )}
           </div>

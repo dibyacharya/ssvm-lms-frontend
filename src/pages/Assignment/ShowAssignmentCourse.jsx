@@ -206,9 +206,17 @@ const StudentAssignmentSectionCourse = () => {
                       Due: {formatDate(selectedAssignment.dueDate)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {selectedAssignment.totalPoints} points
-                  </p>
+                  {selectedAssignment.isUngraded ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
+                        Ungraded
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {selectedAssignment.totalPoints} points
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

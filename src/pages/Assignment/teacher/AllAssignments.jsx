@@ -117,11 +117,19 @@ const AssignmentCard = ({
                   <span className="font-medium">{dueDate}</span>
                 </div>
               )}
-              {grade && (
-                <div className="flex items-center text-xs text-gray-500">
-                  <Award size={12} className="mr-1" />
-                  <span>{grade} pts</span>
+              {assignment.isUngraded ? (
+                <div className="flex items-center text-xs">
+                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
+                    Ungraded
+                  </span>
                 </div>
+              ) : (
+                grade && (
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Award size={12} className="mr-1" />
+                    <span>{grade} pts</span>
+                  </div>
+                )
               )}
             </div>
           </div>

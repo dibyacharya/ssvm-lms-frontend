@@ -13,6 +13,7 @@ const EditAssignmentForm = ({
   const [totalPoints, setTotalPoints] = useState(100);
   const [dueDate, setDueDate] = useState("");
   const [isActive, setIsActive] = useState(true); // New state for late submission
+  const [isUngraded, setIsUngraded] = useState(false); // New state for ungraded assignments
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -25,6 +26,7 @@ const EditAssignmentForm = ({
       setDescription(assignment.description || "");
       setTotalPoints(assignment.totalPoints || 100);
       setIsActive(assignment.isActive); // Initialize isActive
+      setIsUngraded(assignment.isUngraded || false); // Initialize isUngraded
 
       // Set existing attachments if available
       if (assignment.attachments && assignment.attachments.length > 0) {
@@ -99,12 +101,48 @@ const EditAssignmentForm = ({
     }
   }, [assignment]);
 
-  // Handle file upload - accept multiple PDFs
+  // Handle file upload - accept multiple files with validation
   const handleFileUpload = (event) => {
     if (event.target.files && event.target.files.length > 0) {
-      // Convert FileList to array and append to existing attachments
       const newFiles = Array.from(event.target.files);
-      setAttachments((prevAttachments) => [...prevAttachments, ...newFiles]);
+      
+      // Validate file types according to backend guide
+      const allowedTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'application/json'
+      ];
+      
+      const validFiles = newFiles.filter(file => {
+        const isValid = allowedTypes.includes(file.type);
+        if (!isValid) {
+          console.warn(`File "${file.name}" has invalid type: ${file.type}`);
+        }
+        return isValid;
+      });
+      
+      if (validFiles.length !== newFiles.length) {
+        alert('Some files have invalid types and were removed. Allowed types: PDF, JPEG, PNG, DOC, DOCX, XLS, XLSX, CSV, JSON');
+      }
+      
+      // Validate file size (20MB limit - adjust if backend has different limit)
+      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+      const sizeValidFiles = validFiles.filter(file => {
+        if (file.size > MAX_FILE_SIZE) {
+          alert(`File "${file.name}" is too large. Maximum size: 20MB`);
+          return false;
+        }
+        return true;
+      });
+      
+      // Append valid files to existing attachments
+      setAttachments((prevAttachments) => [...prevAttachments, ...sizeValidFiles]);
     }
   };
 
@@ -136,35 +174,37 @@ const EditAssignmentForm = ({
       // Append text fields
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("totalPoints", totalPoints.toString());
+      formData.append("isUngraded", isUngraded ? 'true' : 'false');
+      formData.append("totalPoints", isUngraded ? '0' : totalPoints.toString());
       formData.append("dueDate", dueDate);
       formData.append("isActive", isActive.toString());
       formData.append("allowLateSubmissions", isActive.toString()); // Map isActive to allowLateSubmissions
       
-      // If assignment has questions, preserve them
+      // If assignment has questions, preserve them (ensure they have score field)
       if (assignment.questions && assignment.questions.length > 0) {
-        formData.append("questions", JSON.stringify(assignment.questions));
+        const questionsWithScore = assignment.questions.map(q => ({
+          ...q,
+          score: q.score || q.points || 0 // Ensure score field exists
+        }));
+        formData.append("questions", JSON.stringify(questionsWithScore));
       }
 
       // Process attachments:
-      // 1. Existing attachment objects (with _id) will be kept as-is
-      // 2. New File objects will be uploaded
+      // Separate existing attachments (with _id) from new files (File objects)
+      const existingAttachments = attachments.filter((file) => file._id);
+      const newFiles = attachments.filter((file) => !file._id && file instanceof File);
 
-      // First, handle existing attachments that need to be kept
-      const existingAttachmentIds = attachments
-        .filter((file) => file._id) // Only get the ones with _id (existing ones)
-        .map((file) => file._id);
-
-      // Add the list of attachment IDs to keep
-      formData.append("attachments", JSON.stringify(existingAttachmentIds));
-
-      // Then add all new File objects to be uploaded
-      attachments.forEach((file) => {
-        // If it's a new file (without _id, meaning it's a File object)
-        if (!file._id && file instanceof File) {
-          formData.append("attachments", file);
-        }
+      // If we want to replace all attachments, send replaceAttachments flag
+      // Otherwise, we'll append new files and keep existing ones
+      // For now, we'll keep existing attachments and add new ones
+      
+      // Add new File objects to be uploaded (same field name for all files)
+      newFiles.forEach((file) => {
+        formData.append("attachments", file);
       });
+      
+      // If we want to remove specific attachments, we would send removeAttachments
+      // For now, keeping all existing attachments unless explicitly removed
 
       // Log the FormData to validate structure (for debugging)
       console.log("Form data being sent for update:");
@@ -228,7 +268,7 @@ const EditAssignmentForm = ({
           <div className="flex items-center mb-3">
             <input
               type="file"
-              accept=".pdf"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.json,image/jpeg,image/png"
               multiple
               onChange={handleFileUpload}
               className="w-full border p-2 rounded"
@@ -272,19 +312,65 @@ const EditAssignmentForm = ({
       <div className="w-1/3 p-4 bg-gray-100 shadow-md rounded-lg ml-4">
         <h3 className="text-md font-semibold mb-2">Assignment Settings</h3>
 
+        {/* Ungraded Toggle */}
         <div className="mb-4">
-          <label className="block font-medium">Total Points</label>
-          <select
-            className="w-full border p-2 rounded"
+          <label className="flex items-center cursor-pointer justify-between">
+            <div className="mr-2 font-medium">Ungraded Assignment</div>
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={isUngraded}
+                onChange={(e) => {
+                  setIsUngraded(e.target.checked);
+                  if (e.target.checked) {
+                    setTotalPoints(0);
+                  }
+                }}
+              />
+              <div
+                className={`block w-14 h-8 rounded-full transition-colors cursor-pointer ${
+                  isUngraded ? "bg-blue-500" : "bg-gray-300"
+                }`}
+                onClick={() => {
+                  const newValue = !isUngraded;
+                  setIsUngraded(newValue);
+                  if (newValue) {
+                    setTotalPoints(0);
+                  }
+                }}
+              >
+                <div
+                  className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform transform ${
+                    isUngraded ? "translate-x-6" : ""
+                  }`}
+                ></div>
+              </div>
+            </div>
+          </label>
+          <p className="text-xs text-gray-500 mt-1">
+            {isUngraded
+              ? "This assignment will not be scored or graded"
+              : "This assignment will be graded"}
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className={`block font-medium ${isUngraded ? 'text-gray-400' : ''}`}>
+            Total Points
+          </label>
+          <input
+            type="number"
+            className={`w-full border p-2 rounded ${
+              isUngraded ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''
+            }`}
             value={totalPoints}
             onChange={(e) => setTotalPoints(Number(e.target.value))}
-          >
-            <option value="100">100</option>
-            <option value="50">50</option>
-            <option value="25">25</option>
-            <option value="10">10</option>
-            <option value="0">Ungraded</option>
-          </select>
+            min="0"
+            step="1"
+            disabled={isUngraded}
+            placeholder="Enter total points"
+          />
         </div>
 
         <div className="mb-4">

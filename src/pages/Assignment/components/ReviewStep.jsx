@@ -3,7 +3,8 @@ import { Eye, BookOpen, Calendar, CheckCircle2, AlertCircle } from 'lucide-react
 
 const ReviewStep = ({
   questions, assignmentTitle, description, selectedModule,
-  totalPoints, dueDate, dueTime, loading, handleSave, courseData
+  totalPoints, dueDate, dueTime, loading, handleSave, courseData, isUngraded,
+  attachments = [], onPrevious
 }) => {
   const objectiveQuestions = questions.filter(q => q.type === 'objective');
   const subjectiveQuestions = questions.filter(q => q.type === 'subjective');
@@ -43,13 +44,25 @@ const ReviewStep = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-gray-500 uppercase tracking-wide">POINTS</div>
-                <div className="font-medium">{totalPoints}</div>
+                <div className="font-medium">
+                  {isUngraded ? (
+                    <span className="text-gray-400 italic">Ungraded</span>
+                  ) : (
+                    totalPoints
+                  )}
+                </div>
               </div>
               <div>
                 <div className="text-sm text-gray-500 uppercase tracking-wide">QUESTIONS</div>
                 <div className="font-medium">{questions.length}</div>
               </div>
             </div>
+            {isUngraded && (
+              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <AlertCircle className="text-gray-500" size={16} />
+                <span className="text-sm text-gray-600">This is an ungraded assignment</span>
+              </div>
+            )}
             {dueDate && (
               <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                 <Calendar className="text-blue-600" size={16} />
@@ -92,19 +105,55 @@ const ReviewStep = ({
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 truncate">{q.question}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded ${
-                        q.type === 'objective' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {q.type}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          q.type === 'objective' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
+                        }`}>
+                          {q.type}
+                        </span>
+                        {!isUngraded && (q.score || q.points) && (
+                          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                            {(q.score || q.points)} pts
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
+                {!isUngraded && questions.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">Total Score:</span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {questions.reduce((sum, q) => sum + (q.score || q.points || 0), 0)} points
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+      {/* Attachments Section */}
+      {attachments.length > 0 && (
+        <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold mb-4">Attachments</h3>
+          <div className="space-y-2">
+            {attachments.map((file, index) => (
+              <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                <span className="text-sm text-gray-700">{file.name || (file.url ? 'Attachment' : 'File')}</span>
+                {file.size && (
+                  <span className="text-xs text-gray-500">
+                    ({(file.size / 1024).toFixed(2)} KB)
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -113,7 +162,7 @@ const ReviewStep = ({
           </div>
           <button
             onClick={handleSave}
-            disabled={loading || !assignmentTitle || questions.length === 0}
+            disabled={loading || !assignmentTitle || (questions.length === 0 && attachments.length === 0)}
             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
           >
             {loading ? (
@@ -129,16 +178,26 @@ const ReviewStep = ({
             )}
           </button>
         </div>
-        {(!assignmentTitle || questions.length === 0) && (
+        {(!assignmentTitle || (questions.length === 0 && attachments.length === 0)) && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center gap-2">
               <AlertCircle className="text-yellow-600" size={16} />
               <p className="text-sm text-yellow-800">
-                Please provide an assignment title and add at least one question before publishing.
+                Please provide an assignment title and add at least one question or attachment before publishing.
               </p>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Previous Button */}
+      <div className="mt-6 flex justify-start">
+        <button
+          onClick={onPrevious}
+          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+        >
+          Previous
+        </button>
       </div>
     </div>
   );

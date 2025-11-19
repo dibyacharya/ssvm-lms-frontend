@@ -40,9 +40,17 @@ export const getAssignmentById = async ({ assignmentID }) => {
 export const createAssignment = async (courseID, formData) => {
   try {
     // Note: Don't set Content-Type header for FormData - browser sets it automatically with boundary
+    // Axios automatically handles FormData, but we need to ensure default Content-Type header doesn't interfere
+    const config = {
+      headers: {
+        'Content-Type': undefined, // Remove default Content-Type to let browser set multipart/form-data with boundary
+      },
+    };
+    
     const response = await api.post(
       `/assignment/courses/${courseID}/assignments`,
-      formData
+      formData,
+      config
     );
 
     toast.success("Assignment created successfully!");
@@ -108,9 +116,17 @@ export const deleteAssignment = async (assignmentID) => {
 export const submitAssignment = async (assignmentID, formData) => {
   try {
     // Note: Don't set Content-Type header for FormData - browser sets it automatically with boundary
+    // Remove default Content-Type to let browser set multipart/form-data with boundary
+    const config = {
+      headers: {
+        'Content-Type': undefined, // Remove default Content-Type to let browser set multipart/form-data with boundary
+      },
+    };
+    
     const response = await api.post(
       `/assignment/assignments/${assignmentID}/submit`,
-      formData
+      formData,
+      config
     );
 
     const data = response.data;

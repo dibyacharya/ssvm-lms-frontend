@@ -1,28 +1,147 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Sparkles, FileText, Edit, Trash, CheckCircle2 } from 'lucide-react';
+import { Upload, Sparkles, FileText, Edit, Trash, CheckCircle2, Plus, X, Paperclip, Save, HelpCircle } from 'lucide-react';
 import MCQGenerator from './MCQGenerator';
 import AIApprovalModal from './AIApprovalModal';
-import { parseFile } from '../utils/questionParser';
+import AddQuestionModal from './AddQuestionModal';
+import AIGenerationModal from './AIGenerationModal';
+import { parseFile, getSampleCSVFormat, getSampleJSONFormat } from '../utils/questionParser';
 
 const QuestionsStep = ({
   questions, setQuestions,
   activeTab, setActiveTab,
   courseData,
-  assignmentType = null // 'subjective' or 'objective' - if set, restricts to that type only
+  assignmentType = null, // 'subjective' or 'objective' - if set, restricts to that type only
+  attachments = [], // Assignment-level attachments
+  setAttachments = () => {}, // Function to update assignment-level attachments
+  totalPoints = 100, // Total points for the assignment
+  isUngraded = false // Whether the assignment is ungraded
 }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [showMCQGenerator, setShowMCQGenerator] = useState(false);
   const [showAIApproval, setShowAIApproval] = useState(false);
   const [pendingAIQuestions, setPendingAIQuestions] = useState([]);
   
+  // Modal states
+  const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
+  const [showAIGenerationModal, setShowAIGenerationModal] = useState(false);
+  const [showAIGenerationModalMCQ, setShowAIGenerationModalMCQ] = useState(false);
+  
   // AI Generator State (for subjective)
   const [numQuestions, setNumQuestions] = useState(5);
   const [selectedBloomLevel, setSelectedBloomLevel] = useState('');
   const [selectedModule2, setSelectedModule2] = useState('');
+  const [selectedCourseOutcome, setSelectedCourseOutcome] = useState('');
   const [additionalContext, setAdditionalContext] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [aiError, setAiError] = useState(null);
+
+  // Editing state
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [editQuestionText, setEditQuestionText] = useState('');
+  const [editPoints, setEditPoints] = useState(10);
+  const [editBloomLevel, setEditBloomLevel] = useState('');
+  const [editCourseOutcome, setEditCourseOutcome] = useState('');
+
+  // Tab state for Questions step
+  const [questionsTab, setQuestionsTab] = useState('create'); // 'create' or 'attachments'
+  
+  // Tooltip state for file format help
+  const [showFormatTooltip, setShowFormatTooltip] = useState(false);
 
   const bloomLevels = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
+
+  // Helper function to extract course outcomes from courseData
+  // Expected format: courseData.courseOutcomes = [{ code: 'CO1', description: 'Description' }, ...]
+  // Or courseData.courseOutcomes = ['CO1 (Description)', 'CO2 (Description)', ...]
+  const getCourseOutcomes = () => {
+    if (!courseData) {
+      console.log('No courseData available');
+      return [];
+    }
+    
+    // Check if courseOutcomes exists as an array
+    if (courseData.courseOutcomes && Array.isArray(courseData.courseOutcomes) && courseData.courseOutcomes.length > 0) {
+      console.log('Found courseOutcomes:', courseData.courseOutcomes);
+      return courseData.courseOutcomes;
+    }
+    
+    // Check alternative field names
+    if (courseData.course_outcomes && Array.isArray(courseData.course_outcomes) && courseData.course_outcomes.length > 0) {
+      console.log('Found course_outcomes:', courseData.course_outcomes);
+      return courseData.course_outcomes;
+    }
+    
+    // Check if learningOutcomes exist and can be converted
+    if (courseData.learningOutcomes && Array.isArray(courseData.learningOutcomes) && courseData.learningOutcomes.length > 0) {
+      console.log('Found learningOutcomes, converting to course outcomes format:', courseData.learningOutcomes);
+      // Try to extract CO codes from learning outcomes
+      // Format might be "LO1: Description" or "CO1: Description"
+      return courseData.learningOutcomes.map((outcome, index) => {
+        const outcomeStr = String(outcome);
+        // Try to extract CO code
+        const coMatch = outcomeStr.match(/^(CO\d+)/i);
+        const loMatch = outcomeStr.match(/^(LO\d+)/i);
+        
+        if (coMatch) {
+          // Already has CO format
+          const code = coMatch[1];
+          const description = outcomeStr.replace(/^CO\d+[:\s]*/i, '').trim();
+          return { code, description: description || outcomeStr };
+        } else if (loMatch) {
+          // Convert LO to CO
+          const loCode = loMatch[1];
+          const code = loCode.replace(/^LO/i, 'CO');
+          const description = outcomeStr.replace(/^LO\d+[:\s]*/i, '').trim();
+          return { code, description: description || outcomeStr };
+        } else {
+          // Default: create CO code from index
+          return { code: `CO${index + 1}`, description: outcomeStr };
+        }
+      });
+    }
+    
+    console.log('No course outcomes found in courseData. Available fields:', Object.keys(courseData));
+    // If not found, return empty array (can be populated from API)
+    return [];
+  };
+
+  // Helper function to extract CO code from outcome string
+  // Handles formats like: "CO1 (Description)" or "CO1" or { code: 'CO1', description: 'Description' }
+  const extractOutcomeCode = (outcome) => {
+    if (!outcome) return '';
+    
+    // If it's an object with code property
+    if (typeof outcome === 'object' && outcome.code) {
+      return outcome.code;
+    }
+    
+    // If it's a string, extract CO1, CO2, etc.
+    if (typeof outcome === 'string') {
+      const match = outcome.match(/^(CO\d+)/i);
+      return match ? match[1] : outcome;
+    }
+    
+    return outcome;
+  };
+
+  // Helper function to format outcome for display
+  const formatOutcomeForDisplay = (outcome) => {
+    if (!outcome) return '';
+    
+    // If it's an object with code and description
+    if (typeof outcome === 'object' && outcome.code) {
+      return outcome.description 
+        ? `${outcome.code} (${outcome.description})`
+        : outcome.code;
+    }
+    
+    // If it's already a string with format "CO1 (Description)" or just "CO1"
+    if (typeof outcome === 'string') {
+      return outcome;
+    }
+    
+    return String(outcome);
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -40,59 +159,174 @@ const QuestionsStep = ({
         alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
       }
       
+      // Only validate if assignment is not ungraded
+      if (!isUngraded && totalPoints > 0) {
+        const currentTotal = calculateTotalQuestionPoints();
+        const newQuestionsTotal = validQuestions.reduce((sum, q) => sum + (q.points || 0), 0);
+        const newTotal = currentTotal + newQuestionsTotal;
+        
+        if (newTotal > totalPoints) {
+          const remaining = totalPoints - currentTotal;
+          if (remaining <= 0) {
+            alert(`Cannot add questions from file. Total points already reached (${currentTotal}/${totalPoints}). Please adjust question points or total assignment points.`);
+            return;
+          }
+          const confirm = window.confirm(
+            `Warning: Adding questions from file will exceed the total points (${newTotal} > ${totalPoints}).\n\n` +
+            `Current total: ${currentTotal} points\n` +
+            `File questions total: ${newQuestionsTotal} points\n` +
+            `Remaining points available: ${remaining} points\n\n` +
+            `Would you like to proceed anyway?`
+          );
+          if (!confirm) {
+            return;
+          }
+        }
+      }
+      
       setQuestions(prev => [...prev, ...validQuestions]);
     } catch (error) {
       alert(`Error parsing file: ${error.message}`);
     }
   };
 
-  const generateAISubjectiveQuestions = () => {
+  const generateAISubjectiveQuestions = async (params) => {
+    const { numQuestions: num, selectedCourseOutcome: co, selectedBloomLevel: bloom, additionalContext: context } = params;
+    
     setGenerating(true);
-    // Dummy AI generation - only subjective questions
-    setTimeout(() => {
-      const dummySubjectiveQuestions = [
-        {
-          id: `ai_${Date.now()}_1`,
-          question: 'What is the difference between population and sample in statistics?',
-          type: 'subjective',
-          bloomLevel: selectedBloomLevel || 'understand',
-          courseOutcome: 'CO1',
-          options: null,
-          correctAnswer: null,
-          points: 20,
-          source: 'ai',
-          status: 'pending'
-        },
-        {
-          id: `ai_${Date.now()}_2`,
-          question: 'Calculate the mean of the following dataset: 5, 10, 15, 20, 25',
-          type: 'subjective',
-          bloomLevel: selectedBloomLevel || 'apply',
-          courseOutcome: 'CO1',
-          options: null,
-          correctAnswer: null,
-          points: 20,
-          source: 'ai',
-          status: 'pending'
-        },
-        {
-          id: `ai_${Date.now()}_3`,
-          question: 'Explain Bayes\' theorem and provide a real-world example of its application.',
-          type: 'subjective',
-          bloomLevel: selectedBloomLevel || 'analyze',
-          courseOutcome: 'CO2',
-          options: null,
-          correctAnswer: null,
-          points: 25,
-          source: 'ai',
-          status: 'pending'
-        }
-      ].slice(0, numQuestions);
+    setAiError(null);
+    setShowAIGenerationModal(false);
 
-      setPendingAIQuestions(dummySubjectiveQuestions);
-      setShowAIApproval(true);
+    const apiEndpoint = "https://question-generation.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/generate-questions";
+
+    try {
+      // Generate questions - API expects arrays, so we'll request multiple questions
+      const requestBody = new URLSearchParams();
+      // Request the number of questions specified
+      for (let i = 0; i < num; i++) {
+        requestBody.append("selected_cos[]", co);
+        requestBody.append("selected_bloom[]", bloom);
+        requestBody.append("selected_types[]", "Long answer"); // Subjective questions
+        requestBody.append("extra_prompt[]", context || "Generate based on course content");
+      }
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: requestBody.toString(),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+        const generatedQuestions = data.questions.map((q_item, index) => {
+          // The actual question text is in the 'output' property
+          const questionText = q_item.output || q_item.question || '';
+          return {
+            id: `ai_${Date.now()}_${index}`,
+            question: questionText,
+            type: 'subjective',
+            bloomLevel: q_item.bloom_level || bloom.toLowerCase(),
+            courseOutcome: extractOutcomeCode(q_item.co || co),
+            options: null,
+            correctAnswer: null,
+            points: 20, // Default points, can be edited later
+            score: 20, // Add score field for per-question scoring
+            source: 'ai',
+            status: 'pending'
+          };
+        });
+
+        setPendingAIQuestions(generatedQuestions);
+        setShowAIApproval(true);
+      } else {
+        throw new Error("No questions were generated in the expected format.");
+      }
+    } catch (err) {
+      console.error("Error generating questions:", err);
+      setAiError(err.message || "Failed to generate questions. Please try again.");
+      setShowAIGenerationModal(true); // Reopen modal to show error
+    } finally {
       setGenerating(false);
-    }, 2000);
+    }
+  };
+
+  const generateAIMCQQuestions = async (params) => {
+    const { numQuestions: num, selectedCourseOutcome: co, selectedBloomLevel: bloom, additionalContext: context } = params;
+    
+    setGenerating(true);
+    setAiError(null);
+    setShowAIGenerationModalMCQ(false);
+
+    const apiEndpoint = "https://question-generation.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/generate-questions";
+
+    try {
+      // Generate questions - API expects arrays, so we'll request multiple questions
+      const requestBody = new URLSearchParams();
+      // Request the number of questions specified
+      for (let i = 0; i < num; i++) {
+        requestBody.append("selected_cos[]", co);
+        requestBody.append("selected_bloom[]", bloom);
+        requestBody.append("selected_types[]", "MCQ"); // MCQ questions
+        requestBody.append("extra_prompt[]", context || "Generate based on course content");
+      }
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: requestBody.toString(),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error (${response.status}): ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+        const generatedQuestions = data.questions.map((q_item, index) => {
+          // For MCQ, we need to handle options and correctAnswer
+          const questionText = q_item.question || '';
+          const options = q_item.options || [];
+          const correctAnswer = q_item.correct_answer || q_item.correctAnswer || '';
+          
+          return {
+            id: `ai_mcq_${Date.now()}_${index}`,
+            question: questionText,
+            type: 'objective',
+            bloomLevel: q_item.bloom_level || bloom.toLowerCase(),
+            courseOutcome: extractOutcomeCode(q_item.co || co),
+            options: options.length >= 2 ? options : ['', '', '', ''],
+            correctAnswer: correctAnswer,
+            points: q_item.estimated_points || 5, // Default points for MCQ
+            score: q_item.estimated_points || 5, // Add score field for per-question scoring
+            source: 'ai',
+            status: 'pending'
+          };
+        });
+
+        setPendingAIQuestions(generatedQuestions);
+        setShowAIApproval(true);
+      } else {
+        throw new Error("No questions were generated in the expected format.");
+      }
+    } catch (err) {
+      console.error("Error generating MCQ questions:", err);
+      setAiError(err.message || "Failed to generate questions. Please try again.");
+      setShowAIGenerationModalMCQ(true); // Reopen modal to show error
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleApproveAIQuestions = (approvedQuestions) => {
@@ -110,6 +344,31 @@ const QuestionsStep = ({
       alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
     }
     
+    // Only validate if assignment is not ungraded
+    if (!isUngraded && totalPoints > 0) {
+      const currentTotal = calculateTotalQuestionPoints();
+      const newQuestionsTotal = validQuestions.reduce((sum, q) => sum + (q.points || 0), 0);
+      const newTotal = currentTotal + newQuestionsTotal;
+      
+      if (newTotal > totalPoints) {
+        const remaining = totalPoints - currentTotal;
+        if (remaining <= 0) {
+          alert(`Cannot add questions. Total points already reached (${currentTotal}/${totalPoints}). Please adjust question points or total assignment points.`);
+          return;
+        }
+        const confirm = window.confirm(
+          `Warning: Adding these questions will exceed the total points (${newTotal} > ${totalPoints}).\n\n` +
+          `Current total: ${currentTotal} points\n` +
+          `New questions total: ${newQuestionsTotal} points\n` +
+          `Remaining points available: ${remaining} points\n\n` +
+          `Would you like to proceed anyway?`
+        );
+        if (!confirm) {
+          return;
+        }
+      }
+    }
+    
     setQuestions(prev => [...prev, ...validQuestions]);
     setPendingAIQuestions([]);
   };
@@ -122,21 +381,210 @@ const QuestionsStep = ({
     setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
-  const editQuestion = (id) => {
-    // Simple edit - in production, this would open a modal
-    const question = questions.find(q => q.id === id);
-    if (question) {
-      const newQuestion = prompt('Edit question:', question.question);
-      if (newQuestion) {
-        setQuestions(prev => prev.map(q => 
-          q.id === id ? { ...q, question: newQuestion } : q
-        ));
+
+  // Calculate total points from all questions (use score if available, fallback to points)
+  const calculateTotalQuestionPoints = () => {
+    return questions.reduce((sum, q) => sum + (q.score || q.points || 0), 0);
+  };
+
+  const handleAddManualQuestion = (newQuestion) => {
+    // Only validate if assignment is not ungraded
+    if (!isUngraded && totalPoints > 0) {
+      const currentTotal = calculateTotalQuestionPoints();
+      const newTotal = currentTotal + (newQuestion.points || 0);
+      
+      if (newTotal > totalPoints) {
+        const remaining = totalPoints - currentTotal;
+        if (remaining <= 0) {
+          alert(`Cannot add question. Total points already reached (${currentTotal}/${totalPoints}). Please adjust question points or total assignment points.`);
+          return;
+        }
+        const confirm = window.confirm(
+          `Warning: Adding this question will exceed the total points (${newTotal} > ${totalPoints}).\n\n` +
+          `Current total: ${currentTotal} points\n` +
+          `This question: ${newQuestion.points} points\n` +
+          `Remaining points available: ${remaining} points\n\n` +
+          `Would you like to proceed anyway?`
+        );
+        if (!confirm) {
+          return;
+        }
+      } else if (newTotal < totalPoints) {
+        const remaining = totalPoints - newTotal;
+        // Just show a warning, but allow it
+        console.log(`Points total: ${newTotal}/${totalPoints}. Remaining: ${remaining} points.`);
       }
     }
+    
+    setQuestions(prev => [...prev, newQuestion]);
+  };
+
+  const handleStartEdit = (question) => {
+    setEditingQuestionId(question.id);
+    setEditQuestionText(question.question);
+    // For ungraded assignments, always set points to 0
+    setEditPoints(isUngraded ? 0 : (question.score || question.points || 10)); // Use score if available, fallback to points
+    setEditBloomLevel(question.bloomLevel || '');
+    setEditCourseOutcome(question.courseOutcome || '');
+  };
+
+  const handleSaveEdit = () => {
+    if (!editQuestionText.trim()) {
+      alert('Please enter a question');
+      return;
+    }
+
+    // Only validate if assignment is not ungraded
+    if (!isUngraded && totalPoints > 0) {
+      const currentQuestion = questions.find(q => q.id === editingQuestionId);
+      const currentTotal = calculateTotalQuestionPoints();
+      const oldPoints = currentQuestion?.points || 0;
+      const newPoints = editPoints || 10;
+      const newTotal = currentTotal - oldPoints + newPoints;
+      
+      if (newTotal > totalPoints) {
+        const remaining = totalPoints - (currentTotal - oldPoints);
+        if (remaining <= 0) {
+          alert(`Cannot update question. Total points would exceed the limit (${newTotal} > ${totalPoints}). Please adjust the points.`);
+          return;
+        }
+        const confirm = window.confirm(
+          `Warning: Updating this question will exceed the total points (${newTotal} > ${totalPoints}).\n\n` +
+          `Current total: ${currentTotal} points\n` +
+          `Old question points: ${oldPoints} points\n` +
+          `New question points: ${newPoints} points\n` +
+          `Remaining points available: ${remaining} points\n\n` +
+          `Would you like to proceed anyway?`
+        );
+        if (!confirm) {
+          return;
+        }
+      }
+    }
+
+    // For ungraded assignments, always use 0 points
+    const finalPoints = isUngraded ? 0 : (editPoints || 10);
+    
+    setQuestions(prev => prev.map(q => 
+      q.id === editingQuestionId 
+        ? { 
+            ...q, 
+            question: editQuestionText.trim(),
+            points: finalPoints,
+            score: finalPoints, // Update score field as well
+            bloomLevel: editBloomLevel || undefined,
+            courseOutcome: extractOutcomeCode(editCourseOutcome) || undefined
+          }
+        : q
+    ));
+    
+    setEditingQuestionId(null);
+    setEditQuestionText('');
+    setEditPoints(isUngraded ? 0 : 10);
+    setEditBloomLevel('');
+    setEditCourseOutcome('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestionId(null);
+    setEditQuestionText('');
+    setEditPoints(isUngraded ? 0 : 10);
+    setEditBloomLevel('');
+    setEditCourseOutcome('');
+  };
+
+  // Assignment-level attachment handlers with validation
+  const handleAttachmentUpload = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      
+      // Validate file types according to backend guide
+      const allowedTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'application/json'
+      ];
+      
+      const validFiles = newFiles.filter(file => {
+        const isValid = allowedTypes.includes(file.type);
+        if (!isValid) {
+          console.warn(`File "${file.name}" has invalid type: ${file.type}`);
+        }
+        return isValid;
+      });
+      
+      if (validFiles.length !== newFiles.length) {
+        alert('Some files have invalid types and were removed. Allowed types: PDF, JPEG, PNG, DOC, DOCX, XLS, XLSX, CSV, JSON');
+      }
+      
+      // Validate file size (20MB limit - adjust if backend has different limit)
+      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+      const sizeValidFiles = validFiles.filter(file => {
+        if (file.size > MAX_FILE_SIZE) {
+          alert(`File "${file.name}" is too large. Maximum size: 20MB`);
+          return false;
+        }
+        return true;
+      });
+      
+      setAttachments((prev) => [...prev, ...sizeValidFiles]);
+    }
+  };
+
+  const handleRemoveAttachment = (index) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const subjectiveQuestions = questions.filter(q => q.type === 'subjective');
   const objectiveQuestions = questions.filter(q => q.type === 'objective');
+  
+  // Auto-create subjective question when attachments are added
+  useEffect(() => {
+    // Only for subjective assignments
+    if (assignmentType !== 'subjective' && activeTab !== 'subjective') {
+      return;
+    }
+
+    setQuestions(prev => {
+      // Check if there's already an auto-generated question from attachments
+      const hasAutoAttachmentQuestion = prev.some(
+        q => q.type === 'subjective' && q.source === 'attachment-auto'
+      );
+
+      if (attachments.length > 0 && !hasAutoAttachmentQuestion) {
+        // Create auto-question for attachments
+        const autoQuestion = {
+          id: `attachment_auto_${Date.now()}`,
+          question: 'Solve the given assignment questions in the attached sheet(s).',
+          type: 'subjective',
+          points: isUngraded ? 0 : totalPoints,
+          score: isUngraded ? 0 : totalPoints, // Add score field for per-question scoring
+          source: 'attachment-auto',
+          status: 'approved'
+        };
+        
+        return [...prev, autoQuestion];
+      } else if (attachments.length === 0 && hasAutoAttachmentQuestion) {
+        // Remove auto-question when all attachments are removed
+        return prev.filter(q => !(q.type === 'subjective' && q.source === 'attachment-auto'));
+      } else if (attachments.length > 0 && hasAutoAttachmentQuestion) {
+        // Update points and score of auto-question when totalPoints changes
+        return prev.map(q => 
+          q.source === 'attachment-auto' && q.type === 'subjective'
+            ? { ...q, points: isUngraded ? 0 : totalPoints, score: isUngraded ? 0 : totalPoints }
+            : q
+        );
+      }
+      
+      return prev;
+    });
+  }, [attachments.length, assignmentType, activeTab, isUngraded, totalPoints, setQuestions]);
   
   // If assignmentType is restricted, ensure activeTab matches and filter questions
   useEffect(() => {
@@ -237,86 +685,540 @@ const QuestionsStep = ({
         {/* If assignmentType is set, only show that type's content */}
         {(activeTab === 'subjective' || assignmentType === 'subjective') && assignmentType !== 'objective' && (
           <div className="space-y-6">
-            {/* AI Generation Section */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="text-blue-500" size={20} />
-                <h3 className="text-lg font-semibold">AI Question Generator</h3>
+            {/* Tabs for Create Questions and Add Attachments */}
+            <div className="bg-white rounded-lg shadow-sm border p-1">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setQuestionsTab('create')}
+                  className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    questionsTab === 'create'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Create Your Own Assignment
+                </button>
+                <button
+                  onClick={() => setQuestionsTab('attachments')}
+                  className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    questionsTab === 'attachments'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Add Attachments
+                </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Questions</label>
-                  <input
-                    type="number"
-                    value={numQuestions}
-                    onChange={(e) => setNumQuestions(Number(e.target.value))}
-                    min="1"
-                    max="20"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Bloom Taxonomy Level</label>
-                  <select
-                    value={selectedBloomLevel}
-                    onChange={(e) => setSelectedBloomLevel(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select level</option>
-                    {bloomLevels.map(level => (
-                      <option key={level} value={level.toLowerCase()}>{level}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Additional Context (Optional)</label>
-                  <textarea
-                    value={additionalContext}
-                    onChange={(e) => setAdditionalContext(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows="3"
-                    placeholder="Provide any additional context..."
-                  />
-                </div>
-              </div>
-              <button
-                onClick={generateAISubjectiveQuestions}
-                disabled={generating || !numQuestions}
-                className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {generating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Generating Questions...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Generate Subjective Questions
-                  </>
-                )}
-              </button>
             </div>
 
-            {/* Question List */}
-            <div className="bg-white rounded-lg shadow-sm border">
+            {/* Tab Content */}
+            {questionsTab === 'create' && (
+              <React.Fragment>
+                {/* Action Buttons */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowAddQuestionModal(true)}
+                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 font-medium"
+                    >
+                      <Plus size={20} />
+                      Add Question
+                    </button>
+                    <button
+                      onClick={() => setShowAIGenerationModal(true)}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
+                    >
+                      <Sparkles size={20} />
+                      Generate with AI
+                    </button>
+                  </div>
+                  
+                  {/* Points Summary - Only show if not ungraded */}
+                  {!isUngraded && totalPoints > 0 && (
+                    <div className={`mt-4 p-3 rounded-lg border ${
+                      calculateTotalQuestionPoints() === totalPoints
+                        ? 'bg-green-50 border-green-200'
+                        : calculateTotalQuestionPoints() > totalPoints
+                        ? 'bg-red-50 border-red-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          Points Summary:
+                        </span>
+                        <span className={`text-sm font-bold ${
+                          calculateTotalQuestionPoints() === totalPoints
+                            ? 'text-green-700'
+                            : calculateTotalQuestionPoints() > totalPoints
+                            ? 'text-red-700'
+                            : 'text-yellow-700'
+                        }`}>
+                          {calculateTotalQuestionPoints()} / {totalPoints} points
+                        </span>
+                      </div>
+                      {calculateTotalQuestionPoints() !== totalPoints && (
+                        <p className="text-xs mt-1">
+                          {calculateTotalQuestionPoints() > totalPoints
+                            ? `⚠️ Exceeds total by ${calculateTotalQuestionPoints() - totalPoints} points`
+                            : `ℹ️ ${totalPoints - calculateTotalQuestionPoints()} points remaining`
+                          }
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Question List */}
+                <div className="bg-white rounded-lg shadow-sm border">
               {subjectiveQuestions.length === 0 ? (
                 <div className="p-12 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Subjective Questions</h3>
-                  <p className="text-gray-600">Generate questions using AI or upload a file.</p>
+                  <p className="text-gray-600">Click "Add Question" or "Generate with AI" to get started.</p>
                 </div>
               ) : (
                 <div className="p-6 space-y-4">
                   {subjectiveQuestions.map((q, index) => (
+                    <div key={q.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      {editingQuestionId === q.id ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Question Text <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              value={editQuestionText}
+                              onChange={(e) => setEditQuestionText(e.target.value)}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              rows="4"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label className={`block text-sm font-medium mb-2 ${isUngraded ? 'text-gray-400' : 'text-gray-700'}`}>
+                                Points
+                                {isUngraded && (
+                                  <span className="text-xs text-gray-400 ml-2">
+                                    (Ungraded - disabled)
+                                  </span>
+                                )}
+                                {!isUngraded && totalPoints > 0 && (
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    (Remaining: {totalPoints - (calculateTotalQuestionPoints() - (questions.find(q => q.id === editingQuestionId)?.points || 0))} pts)
+                                  </span>
+                                )}
+                              </label>
+                              <input
+                                type="number"
+                                value={editPoints}
+                                onChange={(e) => {
+                                  if (!isUngraded) {
+                                    setEditPoints(Number(e.target.value));
+                                  }
+                                }}
+                                min="0"
+                                max={!isUngraded && totalPoints > 0 
+                                  ? totalPoints - (calculateTotalQuestionPoints() - (questions.find(q => q.id === editingQuestionId)?.points || 0))
+                                  : undefined}
+                                disabled={isUngraded}
+                                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                  isUngraded 
+                                    ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                    : 'border-gray-300'
+                                }`}
+                              />
+                              {isUngraded ? (
+                                <p className="text-xs text-gray-400 mt-1 italic">
+                                  This assignment is ungraded - points are set to 0
+                                </p>
+                              ) : totalPoints > 0 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Total: {calculateTotalQuestionPoints() - (questions.find(q => q.id === editingQuestionId)?.points || 0)} / {totalPoints} points (without this question)
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Bloom Level</label>
+                              <select
+                                value={editBloomLevel}
+                                onChange={(e) => setEditBloomLevel(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              >
+                                <option value="">Select level</option>
+                                {bloomLevels.map(level => (
+                                  <option key={level} value={level.toLowerCase()}>{level}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Course Outcome</label>
+                              <select
+                                value={editCourseOutcome}
+                                onChange={(e) => setEditCourseOutcome(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              >
+                                <option value="">Select course outcome</option>
+                                {getCourseOutcomes().map((outcome, idx) => {
+                                  const displayText = formatOutcomeForDisplay(outcome);
+                                  const code = extractOutcomeCode(outcome);
+                                  return (
+                                    <option key={idx} value={code}>
+                                      {displayText}
+                                    </option>
+                                  );
+                                })}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleSaveEdit}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                            >
+                              <Save size={16} />
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">
+                                Q{index + 1}
+                              </span>
+                              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                Subjective
+                              </span>
+                              {q.source === 'ai' && (
+                                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded flex items-center gap-1">
+                                  <Sparkles size={10} />
+                                  AI Generated
+                                </span>
+                              )}
+                              {q.source === 'attachment-auto' && (
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded flex items-center gap-1">
+                                  <Paperclip size={10} />
+                                  Auto from Attachments
+                                </span>
+                              )}
+                              {q.points && (
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                  {q.points} pts
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleStartEdit(q)}
+                                className="p-1 text-gray-400 hover:text-blue-600"
+                                title="Edit question"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => removeQuestion(q.id)}
+                                className="p-1 text-gray-400 hover:text-red-600"
+                                title="Delete question"
+                              >
+                                <Trash size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-gray-900 mb-2 whitespace-pre-wrap">{q.question}</p>
+                          
+                          {(q.bloomLevel || q.courseOutcome) && (
+                            <div className="flex gap-2 mt-3">
+                              {q.bloomLevel && (
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                  {q.bloomLevel}
+                                </span>
+                              )}
+                              {q.courseOutcome && (
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                  {q.courseOutcome}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+                </div>
+              </React.Fragment>
+            )}
+
+            {/* Attachments Tab Content */}
+            {questionsTab === 'attachments' && (
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Paperclip className="text-blue-500" size={20} />
+                  <h3 className="text-lg font-semibold">Assignment Attachments</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Upload Files
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                      <input
+                        type="file"
+                        onChange={handleAttachmentUpload}
+                        multiple
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.json,image/jpeg,image/png"
+                        className="hidden"
+                        id="assignment-attachment-upload"
+                      />
+                      <label
+                        htmlFor="assignment-attachment-upload"
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <Upload className="text-gray-400" size={32} />
+                        <span className="text-sm font-medium text-gray-700">Click to upload files</span>
+                        <span className="text-xs text-gray-500">PDF, DOC, DOCX, Images, etc.</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {attachments.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Attached Files ({attachments.length})
+                      </label>
+                      <div className="space-y-2">
+                        {attachments.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Paperclip className="text-gray-500" size={16} />
+                              <span className="text-sm text-gray-700">{file.name}</span>
+                              <span className="text-xs text-gray-500">
+                                ({(file.size / 1024).toFixed(2)} KB)
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveAttachment(index)}
+                              className="text-red-600 hover:text-red-800"
+                              title="Remove attachment"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {attachments.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Paperclip className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm">No attachments added yet</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* If assignmentType is set, only show that type's content */}
+        {(activeTab === 'objective' || assignmentType === 'objective') && assignmentType !== 'subjective' && (
+          <div className="space-y-6">
+            {/* Action Buttons */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex gap-4">
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.csv,.json';
+                      input.onchange = handleFileUpload;
+                      input.click();
+                    }}
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
+                  >
+                    <Upload size={20} />
+                    Upload CSV/JSON
+                  </button>
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowFormatTooltip(true)}
+                    onMouseLeave={() => setShowFormatTooltip(false)}
+                    onClick={() => setShowFormatTooltip(!showFormatTooltip)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white transition-colors"
+                    title="View file format help"
+                  >
+                    <HelpCircle size={18} />
+                  </button>
+                  
+                  {/* Format Tooltip */}
+                  {showFormatTooltip && (
+                    <div 
+                      className="absolute z-50 top-full left-0 mt-2 w-[90vw] max-w-[600px] bg-white border-2 border-blue-200 rounded-lg shadow-xl p-4"
+                      onMouseEnter={() => setShowFormatTooltip(true)}
+                      onMouseLeave={() => setShowFormatTooltip(false)}
+                    >
+                      {/* Arrow pointing up */}
+                      <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-l-2 border-t-2 border-blue-200 transform rotate-45"></div>
+                      
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                          <HelpCircle size={18} className="text-blue-600" />
+                          File Format Guide
+                        </h4>
+                        <button
+                          onClick={() => setShowFormatTooltip(false)}
+                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                          title="Close"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      
+                      {/* CSV Format */}
+                      <div className="mb-4">
+                        <h5 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
+                          <FileText size={14} />
+                          CSV Format
+                        </h5>
+                        <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs font-mono overflow-x-auto">
+                          <div className="text-gray-600 mb-1 font-semibold">Header row (required):</div>
+                          <div className="text-gray-800 whitespace-pre-wrap break-all">
+                            question,type,option_a,option_b,option_c,option_d,correct_answer,points,bloom_level,course_outcome
+                          </div>
+                          <div className="text-gray-600 mt-3 mb-1 font-semibold">Example rows:</div>
+                          <div className="text-gray-800 whitespace-pre-wrap">
+                            What is statistics?,subjective,,,,,20,understand,CO1{'\n'}
+                            Which is a measure of central tendency?,objective,Mean,Range,Variance,Mode,Mean,10,remember,CO1
+                          </div>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-600 space-y-1">
+                          <p><strong>Note:</strong> For subjective questions, leave option columns empty. For objective questions, provide all 4 options.</p>
+                          <p><strong>Required fields:</strong> question, type</p>
+                          <p><strong>Optional fields:</strong> points (default: 10), bloom_level, course_outcome</p>
+                        </div>
+                      </div>
+                      
+                      {/* JSON Format */}
+                      <div>
+                        <h5 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
+                          <FileText size={14} />
+                          JSON Format
+                        </h5>
+                        <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs font-mono overflow-x-auto max-h-48 overflow-y-auto">
+                          <pre className="text-gray-800 whitespace-pre-wrap">
+{JSON.stringify([
+  {
+    "question": "What is statistics?",
+    "type": "subjective",
+    "points": 20,
+    "bloomLevel": "understand",
+    "courseOutcome": "CO1"
+  },
+  {
+    "question": "Which is a measure of central tendency?",
+    "type": "objective",
+    "points": 10,
+    "options": ["Mean", "Range", "Variance", "Mode"],
+    "correctAnswer": "Mean",
+    "bloomLevel": "remember",
+    "courseOutcome": "CO1"
+  }
+], null, 2)}
+                          </pre>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-600 space-y-1">
+                          <p><strong>Required fields:</strong> question, type</p>
+                          <p><strong>Optional fields:</strong> points (default: 10), bloomLevel, courseOutcome</p>
+                          <p><strong>For objective questions:</strong> options (array), correctAnswer</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowMCQGenerator(true)}
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 font-medium"
+                >
+                  <Sparkles size={20} />
+                  MCQ Generator
+                </button>
+                <button
+                  onClick={() => setShowAIGenerationModalMCQ(true)}
+                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 font-medium"
+                >
+                  <Sparkles size={20} />
+                  AI Generator
+                </button>
+              </div>
+              
+              {/* Points Summary - Only show if not ungraded */}
+              {!isUngraded && totalPoints > 0 && (
+                <div className={`mt-4 p-3 rounded-lg border ${
+                  calculateTotalQuestionPoints() === totalPoints
+                    ? 'bg-green-50 border-green-200'
+                    : calculateTotalQuestionPoints() > totalPoints
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      Points Summary:
+                    </span>
+                    <span className={`text-sm font-bold ${
+                      calculateTotalQuestionPoints() === totalPoints
+                        ? 'text-green-700'
+                        : calculateTotalQuestionPoints() > totalPoints
+                        ? 'text-red-700'
+                        : 'text-yellow-700'
+                    }`}>
+                      {calculateTotalQuestionPoints()} / {totalPoints} points
+                    </span>
+                  </div>
+                  {calculateTotalQuestionPoints() !== totalPoints && (
+                    <p className="text-xs mt-1">
+                      {calculateTotalQuestionPoints() > totalPoints
+                        ? `⚠️ Exceeds total by ${calculateTotalQuestionPoints() - totalPoints} points`
+                        : `ℹ️ ${totalPoints - calculateTotalQuestionPoints()} points remaining`
+                      }
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Question List */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              {objectiveQuestions.length === 0 ? (
+                <div className="p-12 text-center">
+                  <CheckCircle2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Objective Questions</h3>
+                  <p className="text-gray-600">Upload a CSV file, use the MCQ generator, or generate with AI to add questions.</p>
+                </div>
+              ) : (
+                <div className="p-6 space-y-4">
+                  {objectiveQuestions.map((q, index) => (
                     <div key={q.id} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-2">
                           <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                             Q{index + 1}
                           </span>
-                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
-                            Subjective
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                            MCQ
                           </span>
                           {q.source === 'ai' && (
                             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded flex items-center gap-1">
@@ -332,131 +1234,16 @@ const QuestionsStep = ({
                         </div>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => editQuestion(q.id)}
+                            onClick={() => handleStartEdit(q)}
                             className="p-1 text-gray-400 hover:text-blue-600"
+                            title="Edit question"
                           >
                             <Edit size={16} />
                           </button>
                           <button
                             onClick={() => removeQuestion(q.id)}
                             className="p-1 text-gray-400 hover:text-red-600"
-                          >
-                            <Trash size={16} />
-                          </button>
-                        </div>
-                      </div>
-                      <p className="text-gray-900 mb-2">{q.question}</p>
-                      {(q.bloomLevel || q.courseOutcome) && (
-                        <div className="flex gap-2 mt-3">
-                          {q.bloomLevel && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                              {q.bloomLevel}
-                            </span>
-                          )}
-                          {q.courseOutcome && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                              {q.courseOutcome}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* If assignmentType is set, only show that type's content */}
-        {(activeTab === 'objective' || assignmentType === 'objective') && assignmentType !== 'subjective' && (
-          <div className="space-y-6">
-            {/* Upload Section */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Upload className="text-blue-500" size={20} />
-                <h3 className="text-lg font-semibold">Upload MCQ Questions</h3>
-              </div>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Question File</h4>
-                <p className="text-gray-600 mb-4">
-                  Drag and drop your CSV or JSON file here, or click to browse
-                </p>
-                <input
-                  type="file"
-                  accept=".csv,.json"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload-objective"
-                />
-                <label
-                  htmlFor="file-upload-objective"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-                >
-                  Choose File
-                </label>
-                {uploadedFile && (
-                  <p className="mt-2 text-sm text-green-600">
-                    Uploaded: {uploadedFile.name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* MCQ Generator Button */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">MCQ Generator</h3>
-                  <p className="text-sm text-gray-600">Create multiple choice questions interactively</p>
-                </div>
-                <button
-                  onClick={() => setShowMCQGenerator(true)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                >
-                  <Sparkles size={16} />
-                  Open Generator
-                </button>
-              </div>
-            </div>
-
-            {/* Question List */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              {objectiveQuestions.length === 0 ? (
-                <div className="p-12 text-center">
-                  <CheckCircle2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Objective Questions</h3>
-                  <p className="text-gray-600">Upload a file or use the MCQ generator to add questions.</p>
-                </div>
-              ) : (
-                <div className="p-6 space-y-4">
-                  {objectiveQuestions.map((q, index) => (
-                    <div key={q.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                            Q{index + 1}
-                          </span>
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                            MCQ
-                          </span>
-                          {q.points && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                              {q.points} pts
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => editQuestion(q.id)}
-                            className="p-1 text-gray-400 hover:text-blue-600"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            onClick={() => removeQuestion(q.id)}
-                            className="p-1 text-gray-400 hover:text-red-600"
+                            title="Delete question"
                           >
                             <Trash size={16} />
                           </button>
@@ -507,6 +1294,31 @@ const QuestionsStep = ({
                   alert(`Only ${assignmentType} questions are allowed. Some questions were filtered out.`);
                 }
                 
+                // Only validate if assignment is not ungraded
+                if (!isUngraded && totalPoints > 0) {
+                  const currentTotal = calculateTotalQuestionPoints();
+                  const newQuestionsTotal = validQuestions.reduce((sum, q) => sum + (q.points || 0), 0);
+                  const newTotal = currentTotal + newQuestionsTotal;
+                  
+                  if (newTotal > totalPoints) {
+                    const remaining = totalPoints - currentTotal;
+                    if (remaining <= 0) {
+                      alert(`Cannot add questions. Total points already reached (${currentTotal}/${totalPoints}). Please adjust question points or total assignment points.`);
+                      return;
+                    }
+                    const confirm = window.confirm(
+                      `Warning: Adding these questions will exceed the total points (${newTotal} > ${totalPoints}).\n\n` +
+                      `Current total: ${currentTotal} points\n` +
+                      `New questions total: ${newQuestionsTotal} points\n` +
+                      `Remaining points available: ${remaining} points\n\n` +
+                      `Would you like to proceed anyway?`
+                    );
+                    if (!confirm) {
+                      return;
+                    }
+                  }
+                }
+                
                 setQuestions(prev => [...prev, ...validQuestions]);
                 setShowMCQGenerator(false);
               }}
@@ -522,6 +1334,52 @@ const QuestionsStep = ({
         questions={pendingAIQuestions}
         onApprove={handleApproveAIQuestions}
         onReject={handleRejectAIQuestions}
+      />
+
+      <AddQuestionModal
+        isOpen={showAddQuestionModal}
+        onClose={() => setShowAddQuestionModal(false)}
+        onSave={handleAddManualQuestion}
+        courseData={courseData}
+        bloomLevels={bloomLevels}
+        getCourseOutcomes={getCourseOutcomes}
+        formatOutcomeForDisplay={formatOutcomeForDisplay}
+        extractOutcomeCode={extractOutcomeCode}
+        totalPoints={totalPoints}
+        isUngraded={isUngraded}
+        currentTotalPoints={calculateTotalQuestionPoints()}
+      />
+
+      <AIGenerationModal
+        isOpen={showAIGenerationModal}
+        onClose={() => {
+          setShowAIGenerationModal(false);
+          setAiError(null);
+        }}
+        onGenerate={generateAISubjectiveQuestions}
+        courseData={courseData}
+        bloomLevels={bloomLevels}
+        getCourseOutcomes={getCourseOutcomes}
+        formatOutcomeForDisplay={formatOutcomeForDisplay}
+        extractOutcomeCode={extractOutcomeCode}
+        generating={generating}
+        aiError={aiError}
+      />
+
+      <AIGenerationModal
+        isOpen={showAIGenerationModalMCQ}
+        onClose={() => {
+          setShowAIGenerationModalMCQ(false);
+          setAiError(null);
+        }}
+        onGenerate={generateAIMCQQuestions}
+        courseData={courseData}
+        bloomLevels={bloomLevels}
+        getCourseOutcomes={getCourseOutcomes}
+        formatOutcomeForDisplay={formatOutcomeForDisplay}
+        extractOutcomeCode={extractOutcomeCode}
+        generating={generating}
+        aiError={aiError}
       />
     </div>
   );
