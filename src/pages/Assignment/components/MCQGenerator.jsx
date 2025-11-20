@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { Plus, Trash, Sparkles, Save } from 'lucide-react';
 
-const MCQGenerator = ({ onSave, onCancel }) => {
+const MCQGenerator = ({ 
+  onSave, 
+  onCancel, 
+  courseData, 
+  bloomLevels = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
+  getCourseOutcomes = () => [],
+  formatOutcomeForDisplay = (outcome) => String(outcome),
+  extractOutcomeCode = (outcome) => String(outcome)
+}) => {
   const [questions, setQuestions] = useState([
     {
       id: 1,
@@ -60,8 +68,8 @@ const MCQGenerator = ({ onSave, onCancel }) => {
         options: q.options.filter(opt => opt.trim()),
         correctAnswer: q.correctAnswer,
         points: q.points,
-        bloomLevel: q.bloomLevel,
-        courseOutcome: q.courseOutcome,
+        bloomLevel: q.bloomLevel || undefined,
+        courseOutcome: extractOutcomeCode(q.courseOutcome) || undefined,
         source: 'generated'
       }));
     
@@ -168,25 +176,45 @@ const MCQGenerator = ({ onSave, onCancel }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bloom Level
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={q.bloomLevel}
                     onChange={(e) => updateQuestion(q.id, 'bloomLevel', e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g., remember"
-                  />
+                  >
+                    <option value="">Select level</option>
+                    {bloomLevels.map(level => (
+                      <option key={level} value={level.toLowerCase()}>{level}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Course Outcome
                   </label>
-                  <input
-                    type="text"
-                    value={q.courseOutcome}
-                    onChange={(e) => updateQuestion(q.id, 'courseOutcome', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g., CO1"
-                  />
+                  {getCourseOutcomes().length > 0 ? (
+                    <select
+                      value={q.courseOutcome}
+                      onChange={(e) => updateQuestion(q.id, 'courseOutcome', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select course outcome</option>
+                      {getCourseOutcomes().map((outcome, index) => {
+                        const displayText = formatOutcomeForDisplay(outcome);
+                        const code = extractOutcomeCode(outcome);
+                        return (
+                          <option key={index} value={code}>
+                            {displayText}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <div className="w-full p-2 border border-yellow-300 rounded-lg bg-yellow-50">
+                      <p className="text-xs text-yellow-800">
+                        No course outcomes found. Please add course outcomes in course settings.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Calendar,
   CheckCircle,
@@ -10,6 +10,8 @@ import {
   Paperclip,
   Maximize,
   X,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { useCourse } from "../../../context/CourseContext";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +38,15 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { courseData } = useCourse();
   const navigate = useNavigate();
+  
+  // Timer state
+  const [timeRemaining, setTimeRemaining] = useState(null);
+  const [timerStarted, setTimerStarted] = useState(false);
+  const [assignmentStarted, setAssignmentStarted] = useState(false);
+  const [warned5min, setWarned5min] = useState(false);
+  const [warned1min, setWarned1min] = useState(false);
+  const [isTimeUp, setIsTimeUp] = useState(false);
+  const timerIntervalRef = useRef(null);
 
   // Fetch assignments from API
   const fetchAssignments = async () => {
@@ -95,6 +106,210 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       setObjectiveAnswers({});
     }
   };
+
+  // Check if assignment has been started
+  const checkAssignmentStarted = (assignment) => {
+    if (!assignment?.completeIn || submission) return false;
+    
+    const startedKey = `assignment_${assignment._id}_started`;
+    const started = localStorage.getItem(startedKey) === 'true';
+    
+    if (started) {
+      setAssignmentStarted(true);
+      return true;
+    }
+    
+    return false;
+  };
+
+  // Handle starting the assignment
+  const handleStartAssignment = (assignment) => {
+    if (!assignment?.completeIn || submission) return;
+    
+    const startedKey = `assignment_${assignment._id}_started`;
+    localStorage.setItem(startedKey, 'true');
+    setAssignmentStarted(true);
+    
+    // Now start the timer
+    startTimer(assignment);
+  };
+
+  // Timer functions
+  const startTimer = (assignment) => {
+    if (!assignment?.completeIn || submission) return; // Don't start if already submitted
+    
+    const storageKey = `assignment_${assignment._id}_deadline`;
+    const existingDeadline = localStorage.getItem(storageKey);
+    
+    if (existingDeadline) {
+      // Timer already started - resume countdown
+      const deadline = parseInt(existingDeadline);
+      const now = Date.now();
+      
+      if (now >= deadline) {
+        // Timer expired - auto submit
+        handleAutoSubmit();
+        return;
+      }
+      
+      setTimerStarted(true);
+      updateTimer(deadline);
+    } else {
+      // First time starting - start the timer
+      const startTime = Date.now();
+      const durationMs = assignment.completeIn * 60 * 1000; // Convert minutes to milliseconds
+      const deadline = startTime + durationMs;
+      
+      localStorage.setItem(storageKey, deadline.toString());
+      setTimerStarted(true);
+      updateTimer(deadline);
+    }
+  };
+
+  const updateTimer = (deadline) => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    
+    timerIntervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const remaining = deadline - now;
+      
+      if (remaining <= 0) {
+        // Time's up!
+        clearInterval(timerIntervalRef.current);
+        setIsTimeUp(true);
+        handleAutoSubmit();
+        return;
+      }
+      
+      setTimeRemaining(remaining);
+      
+      // Check for warnings
+      const minutesLeft = Math.floor(remaining / (1000 * 60));
+      const secondsLeft = Math.floor((remaining % (1000 * 60)) / 1000);
+      
+      if (minutesLeft === 5 && secondsLeft === 0 && !warned5min) {
+        toast.error('⚠️ 5 minutes remaining! Please save your work.');
+        setWarned5min(true);
+      }
+      
+      if (minutesLeft === 1 && secondsLeft === 0 && !warned1min) {
+        toast.error('⚠️ 1 minute remaining! Your assignment will be submitted automatically.');
+        setWarned1min(true);
+      }
+    }, 1000);
+    
+    // Initial update
+    const now = Date.now();
+    const remaining = deadline - now;
+    setTimeRemaining(remaining);
+  };
+
+  const handleAutoSubmit = async () => {
+    if (submission || isTimeUp) return; // Don't submit if already submitted or already processing
+    
+    setIsTimeUp(true);
+    toast.error('Time is up! Your assignment will be submitted automatically.');
+    
+    // Clear timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    
+    if (selectedAssignment) {
+      const storageKey = `assignment_${selectedAssignment._id}_deadline`;
+      localStorage.removeItem(storageKey);
+    }
+    
+    // Auto-submit with current answers
+    try {
+      setIsLoading(true);
+      
+      // Create FormData for submission
+      const formData = new FormData();
+      
+      // Check if there are any answers to send
+      const hasSubjectiveAnswers = Object.keys(subjectiveAnswers).length > 0 && 
+        Object.values(subjectiveAnswers).some(answer => answer?.trim());
+      const hasObjectiveAnswers = Object.keys(objectiveAnswers).length > 0;
+      
+      // Only add answers if there are actual answers (not empty objects)
+      if (hasSubjectiveAnswers || hasObjectiveAnswers) {
+        formData.append('answers', JSON.stringify({
+          subjective: subjectiveAnswers,
+          objective: objectiveAnswers
+        }));
+      }
+      
+      // Add file if selected
+      if (selectedFile && selectedFile instanceof File) {
+        formData.append('submissionFile', selectedFile);
+      }
+
+      // Submit to API
+      await submitAssignment(selectedAssignment._id, formData);
+      
+      // Refresh assignments to get updated submission data
+      await fetchAssignments();
+      
+      // Clear file selection
+      setSelectedFile(null);
+      
+      toast.success('Assignment submitted automatically due to time limit.');
+    } catch (error) {
+      console.error('Error auto-submitting:', error);
+      toast.error('Failed to auto-submit. Please submit manually.');
+      setIsTimeUp(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Format time remaining
+  const formatTimeRemaining = (ms) => {
+    if (!ms || ms <= 0) return '00:00:00';
+    
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+
+  // Initialize assignment state when assignment is selected
+  useEffect(() => {
+    if (selectedAssignment && !submission) {
+      // Reset warning flags when assignment changes
+      setWarned5min(false);
+      setWarned1min(false);
+      setIsTimeUp(false);
+      
+      // Check if assignment has been started
+      if (selectedAssignment.completeIn) {
+        const hasStarted = checkAssignmentStarted(selectedAssignment);
+        if (hasStarted) {
+          // Assignment already started - resume timer
+          startTimer(selectedAssignment);
+        } else {
+          // Assignment not started yet - wait for user to click "Start Assignment"
+          setAssignmentStarted(false);
+        }
+      } else {
+        // No timer - assignment is always "started"
+        setAssignmentStarted(true);
+      }
+    } else {
+      setAssignmentStarted(true); // If submitted or no assignment, allow viewing
+    }
+    
+    // Cleanup on unmount or assignment change
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [selectedAssignment?._id, submission]);
 
   useEffect(() => {
     if (courseID) {
@@ -242,6 +457,17 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
       // Submit to API
       const response = await submitAssignment(selectedAssignment._id, formData);
+      
+      // Clear timer if assignment had a time limit
+      if (selectedAssignment.completeIn) {
+        const storageKey = `assignment_${selectedAssignment._id}_deadline`;
+        localStorage.removeItem(storageKey);
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+        }
+        setTimerStarted(false);
+        setTimeRemaining(null);
+      }
       
       // Refresh assignments to get updated submission data
       await fetchAssignments();
@@ -521,6 +747,86 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 )}
               </div>
             </div>
+            
+            {/* Start Assignment Prompt */}
+            {selectedAssignment.completeIn && !assignmentStarted && !submission && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                      <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        Timed Assignment
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        This assignment has a time limit of <strong className="text-blue-600 dark:text-blue-400">{selectedAssignment.completeIn} minutes</strong>.
+                        Once you start, the timer will begin and cannot be paused.
+                      </p>
+                      <div className="mt-2 flex items-center gap-2 text-xs text-yellow-700 dark:text-yellow-400">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>Your assignment will be auto-submitted when time expires</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleStartAssignment(selectedAssignment)}
+                    className="ml-4 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors font-medium shadow-md"
+                  >
+                    Start Assignment
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Timer Display */}
+            {selectedAssignment.completeIn && !submission && assignmentStarted && (
+              <div className={`mt-4 p-4 rounded-lg border-2 ${
+                timeRemaining && timeRemaining < 5 * 60 * 1000
+                  ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                  : timeRemaining && timeRemaining < 10 * 60 * 1000
+                  ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
+                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className={`h-6 w-6 ${
+                      timeRemaining && timeRemaining < 5 * 60 * 1000
+                        ? 'text-red-600 dark:text-red-400 animate-pulse'
+                        : timeRemaining && timeRemaining < 10 * 60 * 1000
+                        ? 'text-yellow-600 dark:text-yellow-400'
+                        : 'text-blue-600 dark:text-blue-400'
+                    }`} />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Time Remaining
+                      </p>
+                      <p className={`text-2xl font-bold font-mono ${
+                        timeRemaining && timeRemaining < 5 * 60 * 1000
+                          ? 'text-red-600 dark:text-red-400'
+                          : timeRemaining && timeRemaining < 10 * 60 * 1000
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-blue-600 dark:text-blue-400'
+                      }`}>
+                        {timeRemaining ? formatTimeRemaining(timeRemaining) : '--:--:--'}
+                      </p>
+                    </div>
+                  </div>
+                  {timeRemaining && timeRemaining < 5 * 60 * 1000 && (
+                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <AlertTriangle className="h-5 w-5" />
+                      <span className="text-sm font-medium">Time running out!</span>
+                    </div>
+                  )}
+                </div>
+                {isTimeUp && (
+                  <div className="mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded text-red-800 dark:text-red-300 text-sm font-medium">
+                    Time expired! Submitting your assignment...
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Submission Status */}
@@ -612,7 +918,13 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           {/* Questions Section */}
           {activeTab === 'questions' && (
             <>
-              {questions.length === 0 ? (
+              {!assignmentStarted && selectedAssignment.completeIn && !submission ? (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Please start the assignment to view questions.
+                  </p>
+                </div>
+              ) : questions.length === 0 ? (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
                   <p className="text-gray-500 dark:text-gray-400">
                     No questions available for this assignment.
@@ -649,7 +961,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             rows="6"
                             placeholder="Type your answer here..."
-                            disabled={!!submission}
+                            disabled={!!submission || !assignmentStarted}
                           />
                           {submission && answerValue && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -661,7 +973,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                     })}
 
                     {/* PDF Upload Option for Subjective */}
-                    {!submission && (
+                    {!submission && assignmentStarted && (
                       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
                         <Upload className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500 mb-3" />
                         <h3 className="font-medium text-gray-900 dark:text-white mb-2">
@@ -676,10 +988,15 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                           onChange={handleFileChange}
                           className="hidden"
                           id="pdf-upload"
+                          disabled={!assignmentStarted}
                         />
                         <label
                           htmlFor="pdf-upload"
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white rounded-lg cursor-pointer transition-colors"
+                          className={`inline-flex items-center px-4 py-2 rounded-lg cursor-pointer transition-colors ${
+                            assignmentStarted
+                              ? 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white'
+                              : 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed'
+                          }`}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {selectedFile ? selectedFile.name : "Choose PDF File"}
@@ -752,7 +1069,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                                     value={option}
                                     checked={isSelected}
                                     onChange={() => handleObjectiveAnswerChange(qId, option)}
-                                    disabled={!!submission}
+                                    disabled={!!submission || !assignmentStarted}
                                     className="w-4 h-4 text-blue-600"
                                   />
                                   <span className="font-medium text-gray-900 dark:text-white">
@@ -773,15 +1090,25 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
               )}
 
               {/* Submit Button */}
-              {!submission && (
+              {!submission && assignmentStarted && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <button
                     onClick={handleSubmit}
-                    className="w-full px-6 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-400 flex items-center justify-center gap-2 font-medium transition-colors"
+                    disabled={isTimeUp}
+                    className={`w-full px-6 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${
+                      isTimeUp
+                        ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed'
+                        : 'bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-400'
+                    }`}
                   >
                     <Send className="h-5 w-5" />
-                    Submit Assignment
+                    {isTimeUp ? 'Submitting...' : 'Submit Assignment'}
                   </button>
+                  {selectedAssignment.completeIn && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                      This is a timed assignment. You have {selectedAssignment.completeIn} minutes to complete it.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

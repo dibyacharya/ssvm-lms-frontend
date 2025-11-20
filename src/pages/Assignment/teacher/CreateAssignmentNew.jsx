@@ -52,6 +52,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('23:59');
   const [isUngraded, setIsUngraded] = useState(false);
+  const [completeIn, setCompleteIn] = useState(null);
 
   // Questions State - set activeTab based on assignmentType
   const [questions, setQuestions] = useState([]);
@@ -135,6 +136,11 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
         formData.append('dueDate', dueDateTime);
       }
       
+      // Add completeIn (time limit in minutes) if provided
+      if (completeIn !== null && completeIn !== undefined && completeIn > 0) {
+        formData.append('completeIn', completeIn.toString());
+      }
+      
       // Add questions as JSON string (empty array if no questions)
       // First pass: prepare question data and collect attachments
       const questionsToSend = questions.length > 0 ? questions.map((q, index) => {
@@ -152,14 +158,33 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
         if (q.source) questionData.source = q.source;
         if (q.status) questionData.status = q.status;
         
-        // For objective questions, add options and correctAnswer
+        // For objective questions, options and correctAnswer are REQUIRED
         if (q.type === 'objective') {
-          if (q.options && q.options.length >= 2) {
-            questionData.options = q.options;
+          // Validate that options exist and have at least 2 items
+          if (!q.options || !Array.isArray(q.options) || q.options.length < 2) {
+            throw new Error(`Objective question "${q.question.substring(0, 50)}..." must have at least 2 options.`);
           }
-          if (q.correctAnswer) {
-            questionData.correctAnswer = q.correctAnswer;
+          
+          // Filter out empty options
+          const validOptions = q.options.filter(opt => opt && opt.trim() !== '');
+          if (validOptions.length < 2) {
+            throw new Error(`Objective question "${q.question.substring(0, 50)}..." must have at least 2 non-empty options.`);
           }
+          
+          // Validate that correctAnswer exists
+          if (!q.correctAnswer || q.correctAnswer.trim() === '') {
+            throw new Error(`Objective question "${q.question.substring(0, 50)}..." must have a correct answer.`);
+          }
+          
+          // Validate that correctAnswer matches one of the options exactly
+          const correctAnswerExists = validOptions.some(opt => opt.trim() === q.correctAnswer.trim());
+          if (!correctAnswerExists) {
+            throw new Error(`Objective question "${q.question.substring(0, 50)}..." has a correct answer that doesn't match any of the options. Please ensure the correct answer exactly matches one of the options.`);
+          }
+          
+          // Always include options and correctAnswer for objective questions (REQUIRED by backend)
+          questionData.options = validOptions;
+          questionData.correctAnswer = q.correctAnswer.trim();
         }
         
         return questionData;
@@ -240,7 +265,13 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
       }, 500);
     } catch (error) {
       console.error('Error creating assignment:', error);
-      // Error is already handled in the service with toast
+      // Show validation errors to the user
+      if (error.message) {
+        toast.error(error.message);
+      } else {
+        // Error is already handled in the service with toast
+        toast.error('Failed to create assignment. Please check the console for details.');
+      }
     } finally {
       setLoading(false);
     }
@@ -286,6 +317,8 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
                 courseData={courseData}
                 isUngraded={isUngraded}
                 setIsUngraded={setIsUngraded}
+                completeIn={completeIn}
+                setCompleteIn={setCompleteIn}
               />
             )}
             {currentStep === 2 && (
@@ -317,6 +350,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
                 isUngraded={isUngraded}
                 attachments={attachments}
                 onPrevious={handlePrevious}
+                completeIn={completeIn}
               />
             )}
           </div>

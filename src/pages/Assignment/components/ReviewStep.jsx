@@ -4,7 +4,7 @@ import { Eye, BookOpen, Calendar, CheckCircle2, AlertCircle } from 'lucide-react
 const ReviewStep = ({
   questions, assignmentTitle, description, selectedModule,
   totalPoints, dueDate, dueTime, loading, handleSave, courseData, isUngraded,
-  attachments = [], onPrevious
+  attachments = [], onPrevious, completeIn
 }) => {
   // Find the selected module
   const selectedModuleData = selectedModule 
@@ -70,6 +70,14 @@ const ReviewStep = ({
               <Calendar className="text-blue-600" size={16} />
               <span className="text-sm font-medium text-blue-900">
                 Due: {new Date(dueDate + "T" + dueTime).toLocaleDateString()} at {dueTime}
+              </span>
+            </div>
+          )}
+          {completeIn && completeIn > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+              <AlertCircle className="text-orange-600" size={16} />
+              <span className="text-sm font-medium text-orange-900">
+                Time Limit: {completeIn} minutes ({completeIn >= 60 ? `${Math.floor(completeIn / 60)} hour${Math.floor(completeIn / 60) > 1 ? 's' : ''}` : ''}{completeIn % 60 !== 0 && completeIn >= 60 ? ` ${completeIn % 60} minute${completeIn % 60 > 1 ? 's' : ''}` : completeIn < 60 ? `${completeIn} minute${completeIn > 1 ? 's' : ''}` : ''})
               </span>
             </div>
           )}

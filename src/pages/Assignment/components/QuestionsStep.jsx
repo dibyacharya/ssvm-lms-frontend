@@ -1427,6 +1427,11 @@ const QuestionsStep = ({
                 setShowMCQGenerator(false);
               }}
               onCancel={() => setShowMCQGenerator(false)}
+              courseData={courseData}
+              bloomLevels={bloomLevels}
+              getCourseOutcomes={getCourseOutcomes}
+              formatOutcomeForDisplay={formatOutcomeForDisplay}
+              extractOutcomeCode={extractOutcomeCode}
             />
           </div>
         </div>

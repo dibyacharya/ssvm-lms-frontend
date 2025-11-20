@@ -10,7 +10,8 @@ const AssignmentDetailsStep = ({
   dueDate, setDueDate,
   dueTime, setDueTime,
   courseData,
-  isUngraded, setIsUngraded
+  isUngraded, setIsUngraded,
+  completeIn, setCompleteIn
 }) => {
   // Get today's date in YYYY-MM-DD format for min date validation
   const today = new Date().toISOString().split('T')[0];
@@ -196,6 +197,31 @@ const AssignmentDetailsStep = ({
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Time Limit (Optional)
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  value={completeIn || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : parseInt(e.target.value);
+                    setCompleteIn(value);
+                  }}
+                  min="1"
+                  step="1"
+                  placeholder="Enter time in minutes"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <span className="text-sm text-gray-500 whitespace-nowrap">minutes</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Set a time limit for students to complete this assignment. Leave empty for no time limit.
+                <br />
+                <span className="font-medium">Examples:</span> 30 (30 min), 60 (1 hour), 90 (1.5 hours), 120 (2 hours)
+              </p>
             </div>
           </div>
         </div>
