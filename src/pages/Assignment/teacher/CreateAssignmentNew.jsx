@@ -59,7 +59,7 @@ const AssignmentCreator = ({ onBack, onSave, courseID, inModal = false, assignme
 
   const steps = [
     { number: 1, title: 'Assignment Details', subtitle: 'Basic information and settings' },
-    { number: 2, title: 'Questions', subtitle: 'Add subjective and objective questions' },
+    { number: 2, title: 'Questions', subtitle: 'Add assignment questions' },
     { number: 3, title: 'Review & Publish', subtitle: 'Review and publish assignment' }
   ];
 

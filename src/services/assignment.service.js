@@ -256,3 +256,19 @@ export const getStudentAssignmentStats = async () => {
     throw error;
   }
 };
+
+/**
+ * Get course gradebook (Teacher only)
+ * @param {string} courseId - Course ID
+ * @returns {Promise} Response with gradebook data including course, assignments, and students with grades
+ */
+export const getCourseGradebook = async (courseId) => {
+  try {
+    const response = await api.get(`/assignment/courses/${courseId}/gradebook`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching course gradebook:", error);
+    const errorMessage = error.response?.data?.message || "Failed to load gradebook";
+    throw error;
+  }
+};

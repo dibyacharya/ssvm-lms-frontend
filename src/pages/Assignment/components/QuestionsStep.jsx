@@ -45,8 +45,15 @@ const QuestionsStep = ({
   // Tab state for Questions step
   const [questionsTab, setQuestionsTab] = useState('create'); // 'create' or 'attachments'
   
-  // Tooltip state for file format help
+  // Tooltip states
   const [showFormatTooltip, setShowFormatTooltip] = useState(false);
+  const [showCreateTooltip, setShowCreateTooltip] = useState(false);
+  const [showAttachmentTooltip, setShowAttachmentTooltip] = useState(false);
+  const [showAddQuestionTooltip, setShowAddQuestionTooltip] = useState(false);
+  const [showAIGenerateTooltip, setShowAIGenerateTooltip] = useState(false);
+  const [showUploadTooltip, setShowUploadTooltip] = useState(false);
+  const [showMCQGeneratorTooltip, setShowMCQGeneratorTooltip] = useState(false);
+  const [showAIGeneratorTooltip, setShowAIGeneratorTooltip] = useState(false);
 
   const bloomLevels = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 
@@ -606,7 +613,7 @@ const QuestionsStep = ({
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Sparkles className="text-blue-500" size={24} />
+          <Sparkles className="text-primary" size={24} />
           <div>
             <h2 className="text-2xl font-bold">Questions</h2>
             <p className="text-gray-600">
@@ -646,7 +653,7 @@ const QuestionsStep = ({
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'bg-white text-blue-600 shadow-sm'
+                  ? 'bg-white text-primary shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -658,27 +665,7 @@ const QuestionsStep = ({
       )}
       
       {/* Show type indicator if assignmentType is restricted */}
-      {assignmentType && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center gap-2">
-            {assignmentType === 'subjective' ? (
-              <>
-                <FileText className="text-blue-600" size={20} />
-                <span className="text-sm font-medium text-blue-900">
-                  Creating Subjective Assignment - Only subjective questions are allowed
-                </span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="text-green-600" size={20} />
-                <span className="text-sm font-medium text-green-900">
-                  Creating Objective Assignment - Only objective (MCQ) questions are allowed
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+     
 
       {/* Tab Content */}
       <div className="min-h-[500px]">
@@ -686,28 +673,62 @@ const QuestionsStep = ({
         {(activeTab === 'subjective' || assignmentType === 'subjective') && assignmentType !== 'objective' && (
           <div className="space-y-6">
             {/* Tabs for Create Questions and Add Attachments */}
-            <div className="bg-white rounded-lg shadow-sm border p-1">
+            <div className="bg-white rounded-lg shadow-sm border p-1 relative">
               <div className="flex gap-2">
-                <button
-                  onClick={() => setQuestionsTab('create')}
-                  className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    questionsTab === 'create'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  Create Your Own Assignment
-                </button>
-                <button
-                  onClick={() => setQuestionsTab('attachments')}
-                  className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    questionsTab === 'attachments'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  Add Attachments
-                </button>
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setQuestionsTab('create')}
+                    onMouseEnter={() => setShowCreateTooltip(true)}
+                    onMouseLeave={() => setShowCreateTooltip(false)}
+                    className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      questionsTab === 'create'
+                        ? 'bg-primary text-white'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    Create Your Own Assignment
+                  </button>
+                  {/* Tooltip for Create Your Own Assignment */}
+                  {showCreateTooltip && (
+                    <div 
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      onMouseEnter={() => setShowCreateTooltip(true)}
+                      onMouseLeave={() => setShowCreateTooltip(false)}
+                    >
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                      Manually create and add questions one by one. You can set points, Bloom's level, and course outcomes for each question.
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setQuestionsTab('attachments')}
+                    onMouseEnter={() => setShowAttachmentTooltip(true)}
+                    onMouseLeave={() => setShowAttachmentTooltip(false)}
+                    className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      questionsTab === 'attachments'
+                        ? 'bg-primary text-white'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    Add Attachments
+                  </button>
+                  {/* Tooltip for Add Attachments */}
+                  {showAttachmentTooltip && (
+                    <div 
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      onMouseEnter={() => setShowAttachmentTooltip(true)}
+                      onMouseLeave={() => setShowAttachmentTooltip(false)}
+                    >
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                      Upload files (PDF, DOC, images, etc.) that students can download along with the assignment.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -717,27 +738,61 @@ const QuestionsStep = ({
                 {/* Action Buttons */}
                 <div className="bg-white rounded-lg shadow-sm border p-6">
                   <div className="flex gap-4">
-                    <button
-                      onClick={() => setShowAddQuestionModal(true)}
-                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 font-medium"
-                    >
-                      <Plus size={20} />
-                      Add Question
-                    </button>
-                    <button
-                      onClick={() => setShowAIGenerationModal(true)}
-                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
-                    >
-                      <Sparkles size={20} />
-                      Generate with AI
-                    </button>
+                    <div className="flex-1 relative">
+                      <button
+                        onClick={() => setShowAddQuestionModal(true)}
+                        onMouseEnter={() => setShowAddQuestionTooltip(true)}
+                        onMouseLeave={() => setShowAddQuestionTooltip(false)}
+                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
+                      >
+                        <Plus size={20} />
+                        Add Question
+                      </button>
+                      {/* Tooltip for Add Question */}
+                      {showAddQuestionTooltip && (
+                        <div 
+                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                          onMouseEnter={() => setShowAddQuestionTooltip(true)}
+                          onMouseLeave={() => setShowAddQuestionTooltip(false)}
+                        >
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                          Manually add a new question. You can specify the question text, points, Bloom's taxonomy level, and course outcome.
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 relative">
+                      <button
+                        onClick={() => setShowAIGenerationModal(true)}
+                        onMouseEnter={() => setShowAIGenerateTooltip(true)}
+                        onMouseLeave={() => setShowAIGenerateTooltip(false)}
+                        className="w-full px-6 py-3 bg-accent1 text-white rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
+                      >
+                        <Sparkles size={20} />
+                        Generate with AI
+                      </button>
+                      {/* Tooltip for Generate with AI */}
+                      {showAIGenerateTooltip && (
+                        <div 
+                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                          onMouseEnter={() => setShowAIGenerateTooltip(true)}
+                          onMouseLeave={() => setShowAIGenerateTooltip(false)}
+                        >
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                          Use AI to automatically generate subjective questions based on course content, Bloom's taxonomy level, and course outcomes.
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Points Summary - Only show if not ungraded */}
                   {!isUngraded && totalPoints > 0 && (
                     <div className={`mt-4 p-3 rounded-lg border ${
                       calculateTotalQuestionPoints() === totalPoints
-                        ? 'bg-green-50 border-green-200'
+                        ? 'bg-accent2 border-primary'
                         : calculateTotalQuestionPoints() > totalPoints
                         ? 'bg-red-50 border-red-200'
                         : 'bg-yellow-50 border-yellow-200'
@@ -748,10 +803,10 @@ const QuestionsStep = ({
                         </span>
                         <span className={`text-sm font-bold ${
                           calculateTotalQuestionPoints() === totalPoints
-                            ? 'text-green-700'
-                            : calculateTotalQuestionPoints() > totalPoints
-                            ? 'text-red-700'
-                            : 'text-yellow-700'
+                        ? 'text-primary'
+                        : calculateTotalQuestionPoints() > totalPoints
+                        ? 'text-red-700'
+                        : 'text-yellow-700'
                         }`}>
                           {calculateTotalQuestionPoints()} / {totalPoints} points
                         </span>
@@ -879,7 +934,7 @@ const QuestionsStep = ({
                             </button>
                             <button
                               onClick={handleSaveEdit}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2"
                             >
                               <Save size={16} />
                               Save
@@ -890,10 +945,10 @@ const QuestionsStep = ({
                         <>
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex items-center gap-2">
-                              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">
+                              <span className="bg-accent2 text-primary text-xs px-2 py-1 rounded font-medium">
                                 Q{index + 1}
                               </span>
-                              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                              <span className="bg-accent2 text-primary text-xs px-2 py-1 rounded">
                                 Subjective
                               </span>
                               {q.source === 'ai' && (
@@ -903,7 +958,7 @@ const QuestionsStep = ({
                                 </span>
                               )}
                               {q.source === 'attachment-auto' && (
-                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded flex items-center gap-1">
+                                <span className="bg-accent2 text-primary text-xs px-2 py-1 rounded flex items-center gap-1">
                                   <Paperclip size={10} />
                                   Auto from Attachments
                                 </span>
@@ -917,7 +972,7 @@ const QuestionsStep = ({
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleStartEdit(q)}
-                                className="p-1 text-gray-400 hover:text-blue-600"
+                                className="p-1 text-gray-400 hover:text-primary"
                                 title="Edit question"
                               >
                                 <Edit size={16} />
@@ -961,7 +1016,7 @@ const QuestionsStep = ({
             {questionsTab === 'attachments' && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Paperclip className="text-blue-500" size={20} />
+                  <Paperclip className="text-primary" size={20} />
                   <h3 className="text-lg font-semibold">Assignment Attachments</h3>
                 </div>
                 
@@ -1048,17 +1103,32 @@ const QuestionsStep = ({
                       input.onchange = handleFileUpload;
                       input.click();
                     }}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
+                    onMouseEnter={() => setShowUploadTooltip(true)}
+                    onMouseLeave={() => setShowUploadTooltip(false)}
+                    className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
                   >
                     <Upload size={20} />
                     Upload CSV/JSON
                   </button>
+                  {/* Tooltip for Upload CSV/JSON */}
+                  {showUploadTooltip && (
+                    <div 
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      onMouseEnter={() => setShowUploadTooltip(true)}
+                      onMouseLeave={() => setShowUploadTooltip(false)}
+                    >
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                      Upload a CSV or JSON file containing multiple objective questions. Click the help icon for format details.
+                    </div>
+                  )}
                   <button
                     type="button"
                     onMouseEnter={() => setShowFormatTooltip(true)}
                     onMouseLeave={() => setShowFormatTooltip(false)}
                     onClick={() => setShowFormatTooltip(!showFormatTooltip)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-primary/70 hover:text-white transition-colors"
                     title="View file format help"
                   >
                     <HelpCircle size={18} />
@@ -1067,16 +1137,16 @@ const QuestionsStep = ({
                   {/* Format Tooltip */}
                   {showFormatTooltip && (
                     <div 
-                      className="absolute z-50 top-full left-0 mt-2 w-[90vw] max-w-[600px] bg-white border-2 border-blue-200 rounded-lg shadow-xl p-4"
+                      className="absolute z-50 top-full left-0 mt-2 w-[90vw] max-w-[600px] bg-white border-2 border-primary/30 rounded-lg shadow-xl p-4"
                       onMouseEnter={() => setShowFormatTooltip(true)}
                       onMouseLeave={() => setShowFormatTooltip(false)}
                     >
                       {/* Arrow pointing up */}
-                      <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-l-2 border-t-2 border-blue-200 transform rotate-45"></div>
+                      <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-l-2 border-t-2 border-primary/30 transform rotate-45"></div>
                       
                       <div className="flex items-start justify-between mb-3">
                         <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                          <HelpCircle size={18} className="text-blue-600" />
+                          <HelpCircle size={18} className="text-primary" />
                           File Format Guide
                         </h4>
                         <button
@@ -1149,27 +1219,61 @@ const QuestionsStep = ({
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => setShowMCQGenerator(true)}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 font-medium"
-                >
-                  <Sparkles size={20} />
-                  MCQ Generator
-                </button>
-                <button
-                  onClick={() => setShowAIGenerationModalMCQ(true)}
-                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 font-medium"
-                >
-                  <Sparkles size={20} />
-                  AI Generator
-                </button>
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setShowMCQGenerator(true)}
+                    onMouseEnter={() => setShowMCQGeneratorTooltip(true)}
+                    onMouseLeave={() => setShowMCQGeneratorTooltip(false)}
+                    className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
+                  >
+                    <Sparkles size={20} />
+                    MCQ Generator
+                  </button>
+                  {/* Tooltip for MCQ Generator */}
+                  {showMCQGeneratorTooltip && (
+                    <div 
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      onMouseEnter={() => setShowMCQGeneratorTooltip(true)}
+                      onMouseLeave={() => setShowMCQGeneratorTooltip(false)}
+                    >
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                      Generate multiple choice questions interactively. Create questions with options and set the correct answer.
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 relative">
+                  <button
+                    onClick={() => setShowAIGenerationModalMCQ(true)}
+                    onMouseEnter={() => setShowAIGeneratorTooltip(true)}
+                    onMouseLeave={() => setShowAIGeneratorTooltip(false)}
+                    className="w-full px-6 py-3 bg-accent1 text-white rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
+                  >
+                    <Sparkles size={20} />
+                    AI Generator
+                  </button>
+                  {/* Tooltip for AI Generator */}
+                  {showAIGeneratorTooltip && (
+                    <div 
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      onMouseEnter={() => setShowAIGeneratorTooltip(true)}
+                      onMouseLeave={() => setShowAIGeneratorTooltip(false)}
+                    >
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                      Use AI to automatically generate objective (MCQ) questions based on course content, Bloom's taxonomy level, and course outcomes.
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Points Summary - Only show if not ungraded */}
               {!isUngraded && totalPoints > 0 && (
                 <div className={`mt-4 p-3 rounded-lg border ${
                   calculateTotalQuestionPoints() === totalPoints
-                    ? 'bg-green-50 border-green-200'
+                    ? 'bg-accent2 border-primary'
                     : calculateTotalQuestionPoints() > totalPoints
                     ? 'bg-red-50 border-red-200'
                     : 'bg-yellow-50 border-yellow-200'
@@ -1180,7 +1284,7 @@ const QuestionsStep = ({
                     </span>
                     <span className={`text-sm font-bold ${
                       calculateTotalQuestionPoints() === totalPoints
-                        ? 'text-green-700'
+                        ? 'text-primary'
                         : calculateTotalQuestionPoints() > totalPoints
                         ? 'text-red-700'
                         : 'text-yellow-700'
@@ -1214,10 +1318,10 @@ const QuestionsStep = ({
                     <div key={q.id} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                          <span className="bg-accent2 text-primary text-xs px-2 py-1 rounded">
                             Q{index + 1}
                           </span>
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                          <span className="bg-accent2 text-primary text-xs px-2 py-1 rounded">
                             MCQ
                           </span>
                           {q.source === 'ai' && (
@@ -1235,7 +1339,7 @@ const QuestionsStep = ({
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleStartEdit(q)}
-                            className="p-1 text-gray-400 hover:text-blue-600"
+                            className="p-1 text-gray-400 hover:text-primary"
                             title="Edit question"
                           >
                             <Edit size={16} />
@@ -1257,7 +1361,7 @@ const QuestionsStep = ({
                               key={optIndex}
                               className={`p-2 rounded border text-sm ${
                                 q.correctAnswer === option
-                                  ? 'bg-green-50 border-green-200 text-green-800'
+                                  ? 'bg-accent2 border-primary text-primary'
                                   : 'bg-gray-50 border-gray-200'
                               }`}
                             >

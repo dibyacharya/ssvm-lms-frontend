@@ -55,7 +55,7 @@ const StatusBadge = ({ isActive }) => {
   return (
     <div
       className={`px-3 py-1 rounded-full text-xs font-medium ${
-        isActive ? "bg-green-100 text-primary" : "bg-red-100 text-red-600"
+        isActive ? "bg-accent2 text-primary" : "bg-red-100 text-red-600"
       }`}
     >
       {isActive ? "Active" : "Closed"}
@@ -145,7 +145,7 @@ const AssignmentCard = ({
                   href={attachment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded transition-colors border border-blue-200"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-primary bg-accent2 hover:bg-accent2/80 rounded transition-colors border border-primary/30"
                 >
                   <Paperclip size={10} />
                   <span className="max-w-[100px] truncate">{attachment.name}</span>
@@ -163,16 +163,16 @@ const AssignmentCard = ({
           {/* Stats - Horizontal Layout */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-green-600" />
-              <span className="text-sm font-semibold text-green-700">
+              <CheckCircle size={14} className="text-primary" />
+              <span className="text-sm font-semibold text-primary">
                 {stats?.turnedIn || 0}
               </span>
               <span className="text-xs text-gray-500">Turned in</span>
             </div>
 
             <div className="flex items-center gap-1.5">
-              <Users size={14} className="text-blue-600" />
-              <span className="text-sm font-semibold text-blue-700">
+              <Users size={14} className="text-primary" />
+              <span className="text-sm font-semibold text-primary">
                 {stats?.assigned || 0}
               </span>
               <span className="text-xs text-gray-500">Assigned</span>
@@ -188,7 +188,7 @@ const AssignmentCard = ({
 
             {/* Status Badge */}
             {isActive ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-green-700 bg-green-50 rounded-full border border-green-200">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-primary bg-accent2 rounded-full border border-primary/30">
                 <CheckCircle size={10} />
                 Active
               </span>
@@ -384,6 +384,16 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
   };
 
   const handleGrade = (assignmentId) => {
+    // Determine which section we're in (account for hideTabs)
+    const currentTab = hideTabs ? initialTab : activeTab;
+    const currentSection = currentTab === 'subjective' ? 'Subjective' : 'Objective';
+    
+    // Store the section in localStorage before navigating
+    if (courseID) {
+      const storageKey = `course_${courseID}_selectedSection`;
+      localStorage.setItem(storageKey, currentSection);
+    }
+    
     // Navigate to grading page
     navigate(`/teacher/assignment/${assignmentId}/grade`);
   };
@@ -439,7 +449,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
                 onClick={() => setActiveTab('subjective')}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
                   activeTab === 'subjective'
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -450,7 +460,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
                 onClick={() => setActiveTab('objective')}
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
                   activeTab === 'objective'
-                    ? 'border-green-600 text-green-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >

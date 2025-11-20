@@ -510,7 +510,19 @@ const TeacherAssignmentGrading = () => {
             <p className="text-gray-600">Grade student submissions</p>
           </div>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              // Get courseID from assignment or courseData
+              const courseId = assignment?.course || courseData?._id || courseData?.id;
+              
+              if (courseId) {
+                // Navigate back to the course page
+                // The CourseManagement component will read from localStorage to restore the section
+                navigate(`/teacher/course/${courseId}`);
+              } else {
+                // Fallback to browser back
+                navigate(-1);
+              }
+            }}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft size={20} />

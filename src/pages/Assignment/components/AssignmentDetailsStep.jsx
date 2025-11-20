@@ -18,7 +18,7 @@ const AssignmentDetailsStep = ({
   return (
   <div className="max-w-6xl mx-auto">
     <div className="flex items-center gap-2 mb-6">
-      <BookOpen className="text-blue-500" size={24} />
+      <BookOpen className="text-primary" size={24} />
       <h2 className="text-2xl font-bold">Assignment Details</h2>
       <p className="text-gray-600 ml-2">Configure the basic information for your assignment</p>
     </div>
@@ -36,7 +36,7 @@ const AssignmentDetailsStep = ({
               value={assignmentTitle}
               onChange={(e) => setAssignmentTitle(e.target.value)}
               required
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                 !assignmentTitle ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Enter assignment title"
@@ -50,7 +50,7 @@ const AssignmentDetailsStep = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                 !description || description.trim() === '' ? 'border-red-300' : 'border-gray-300'
               }`}
               rows="4"
@@ -75,7 +75,7 @@ const AssignmentDetailsStep = ({
                 value={selectedModule}
                 onChange={(e) => setSelectedModule(e.target.value)}
                 required
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                   !selectedModule ? 'border-red-300' : 'border-gray-300'
                 }`}
               >
@@ -106,7 +106,7 @@ const AssignmentDetailsStep = ({
         </div>
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-blue-500" size={20} />
+            <Calendar className="text-primary" size={20} />
             <h3 className="text-lg font-semibold">Scheduling</h3>
           </div>
           <div className="space-y-4">
@@ -134,7 +134,7 @@ const AssignmentDetailsStep = ({
                 />
                 <div
                   className={`block w-14 h-8 rounded-full transition-colors cursor-pointer ${
-                    isUngraded ? "bg-blue-500" : "bg-gray-300"
+                    isUngraded ? "bg-primary" : "bg-gray-300"
                   }`}
                   onClick={() => {
                     const newValue = !isUngraded;
@@ -163,7 +163,7 @@ const AssignmentDetailsStep = ({
                 min="0"
                 step="1"
                 disabled={isUngraded}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                   isUngraded 
                     ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
                     : 'border-gray-300'
@@ -182,7 +182,7 @@ const AssignmentDetailsStep = ({
                   onChange={(e) => setDueDate(e.target.value)}
                   min={today}
                   required
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                     !dueDate ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />

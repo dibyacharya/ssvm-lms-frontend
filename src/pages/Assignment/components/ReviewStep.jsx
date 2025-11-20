@@ -6,8 +6,13 @@ const ReviewStep = ({
   totalPoints, dueDate, dueTime, loading, handleSave, courseData, isUngraded,
   attachments = [], onPrevious
 }) => {
-  const objectiveQuestions = questions.filter(q => q.type === 'objective');
-  const subjectiveQuestions = questions.filter(q => q.type === 'subjective');
+  // Find the selected module
+  const selectedModuleData = selectedModule 
+    ? courseData?.syllabus?.modules?.find(m => m._id === selectedModule || m.id === selectedModule)
+    : null;
+  const moduleName = selectedModuleData 
+    ? `Module ${selectedModuleData.moduleNumber || ''}: ${selectedModuleData.name}`.replace('Module :', 'Module')
+    : "Not selected";
   
   return (
     <div className="max-w-6xl mx-auto">
@@ -18,122 +23,103 @@ const ReviewStep = ({
           <p className="text-gray-600">Review your assignment details and publish when ready</p>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <BookOpen className="text-blue-500" size={20} />
-            <h3 className="text-lg font-semibold">Assignment Summary</h3>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-gray-900 mb-1">{assignmentTitle || "Untitled Assignment"}</h4>
-              <p className="text-sm text-gray-600">{description || "No description provided"}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-gray-500 uppercase tracking-wide">COURSE</div>
-                <div className="font-medium">{courseData?.courseCode || 'N/A'}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500 uppercase tracking-wide">MODULE</div>
-                <div className="font-medium">
-                  {selectedModule ? courseData?.syllabus?.modules?.find(m => m._id === selectedModule)?.name : "Not selected"}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-gray-500 uppercase tracking-wide">POINTS</div>
-                <div className="font-medium">
-                  {isUngraded ? (
-                    <span className="text-gray-400 italic">Ungraded</span>
-                  ) : (
-                    totalPoints
-                  )}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500 uppercase tracking-wide">QUESTIONS</div>
-                <div className="font-medium">{questions.length}</div>
-              </div>
-            </div>
-            {isUngraded && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <AlertCircle className="text-gray-500" size={16} />
-                <span className="text-sm text-gray-600">This is an ungraded assignment</span>
-              </div>
-            )}
-            {dueDate && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                <Calendar className="text-blue-600" size={16} />
-                <span className="text-sm font-medium text-blue-900">
-                  Due: {new Date(dueDate + "T" + dueTime).toLocaleDateString()} at {dueTime}
-                </span>
-              </div>
-            )}
-          </div>
+      
+      {/* Assignment Summary - In a row layout */}
+      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <BookOpen className="text-blue-500" size={20} />
+          <h3 className="text-lg font-semibold">Assignment Summary</h3>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold mb-4">Question Review Status</h3>
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{questions.length}</div>
-              <div className="text-sm text-green-600">Total</div>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{objectiveQuestions.length}</div>
-              <div className="text-sm text-blue-600">Objective</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{subjectiveQuestions.length}</div>
-              <div className="text-sm text-purple-600">Subjective</div>
-            </div>
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium text-gray-900 mb-1">{assignmentTitle || "Untitled Assignment"}</h4>
+            <p className="text-sm text-gray-600">{description || "No description provided"}</p>
           </div>
-          <div className="space-y-4">
-            <h4 className="font-medium">Questions Overview</h4>
-            {questions.length === 0 ? (
-              <div className="text-center py-8">
-                <AlertCircle className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
-                <p className="text-sm text-gray-600">No questions added yet</p>
-              </div>
-            ) : (
-              <div className="max-h-60 overflow-y-auto space-y-2">
-                {questions.map((q, index) => (
-                  <div key={q.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded">
-                    <span className="bg-white text-gray-600 text-xs px-2 py-1 rounded font-medium">
-                      {index + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 truncate">{q.question}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          q.type === 'objective' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-                        }`}>
-                          {q.type}
-                        </span>
-                        {!isUngraded && (q.score || q.points) && (
-                          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
-                            {(q.score || q.points)} pts
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {!isUngraded && questions.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700">Total Score:</span>
-                      <span className="text-sm font-bold text-blue-600">
-                        {questions.reduce((sum, q) => sum + (q.score || q.points || 0), 0)} points
-                      </span>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">COURSE</div>
+              <div className="font-medium">{courseData?.courseCode || 'N/A'}</div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">MODULE</div>
+              <div className="font-medium">{moduleName.split(":")[0]}</div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">POINTS</div>
+              <div className="font-medium">
+                {isUngraded ? (
+                  <span className="text-gray-400 italic">Ungraded</span>
+                ) : (
+                  totalPoints
                 )}
               </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">QUESTIONS</div>
+              <div className="font-medium">{questions.length}</div>
+            </div>
+          </div>
+          {isUngraded && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <AlertCircle className="text-gray-500" size={16} />
+              <span className="text-sm text-gray-600">This is an ungraded assignment</span>
+            </div>
+          )}
+          {dueDate && (
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+              <Calendar className="text-blue-600" size={16} />
+              <span className="text-sm font-medium text-blue-900">
+                Due: {new Date(dueDate + "T" + dueTime).toLocaleDateString()} at {dueTime}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Questions Overview - Below Assignment Summary */}
+      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+        <h3 className="text-lg font-semibold mb-4">Questions Overview</h3>
+        {questions.length === 0 ? (
+          <div className="text-center py-8">
+            <AlertCircle className="mx-auto h-8 w-8 text-yellow-500 mb-2" />
+            <p className="text-sm text-gray-600">No questions added yet</p>
+          </div>
+        ) : (
+          <div className="max-h-60 overflow-y-auto space-y-2">
+            {questions.map((q, index) => (
+              <div key={q.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded">
+                <span className="bg-white text-gray-600 text-xs px-2 py-1 rounded font-medium">
+                  {index + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 truncate">{q.question}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      q.type === 'objective' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {q.type}
+                    </span>
+                    {!isUngraded && (q.score || q.points) && (
+                      <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                        {(q.score || q.points)} pts
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {!isUngraded && questions.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700">Total Score:</span>
+                  <span className="text-sm font-bold text-blue-600">
+                    {questions.reduce((sum, q) => sum + (q.score || q.points || 0), 0)} points
+                  </span>
+                </div>
+              </div>
             )}
           </div>
-        </div>
+        )}
       </div>
       {/* Attachments Section */}
       {attachments.length > 0 && (
