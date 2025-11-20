@@ -37,7 +37,7 @@ import CourseSchedule from "./course/CourseSchedule";
 import AttendanceHeatMap from "./course/AttendenceHeatMap";
 import AttendanceTracker from "./course/AttendanceTracker";
 import AttendanceStats from "./course/AttendanceStats";
-import StudentGradingTable from "./course/GradeSheet";
+import Gradebook from "./course/Gradebook";
 import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import TeacherHome from "./course/TeacherHome";
 import AnnouncementManagement from "./course/AnnouncementManagement";
@@ -53,16 +53,41 @@ import ContinuousAssessment from "./course/ContinuousAssessment";
 import { useMeeting } from "../../../context/MeetingContext";
 
 const CourseManagement = () => {
-  const [selectedOption, setSelectedOption] = useState("Home");
+  // Get courseId from URL parameters
+  const { courseID } = useParams();
+  
+  // Get stored section from localStorage for this course, default to "Home"
+  const getStoredSection = (courseId) => {
+    if (!courseId) return "Home";
+    const storageKey = `course_${courseId}_selectedSection`;
+    const stored = localStorage.getItem(storageKey);
+    return stored || "Home";
+  };
+
+  const [selectedOption, setSelectedOption] = useState(() => getStoredSection(courseID));
   const [openDropdown, setOpenDropdown] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  // Get courseId from URL parameters
-  const { courseID } = useParams();
   const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Update selectedOption when courseID changes (e.g., navigating to different course)
+  useEffect(() => {
+    if (courseID) {
+      const stored = getStoredSection(courseID);
+      setSelectedOption(stored);
+    }
+  }, [courseID]);
+
+  // Save selectedOption to localStorage whenever it changes
+  useEffect(() => {
+    if (courseID && selectedOption) {
+      const storageKey = `course_${courseID}_selectedSection`;
+      localStorage.setItem(storageKey, selectedOption);
+    }
+  }, [selectedOption, courseID]);
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -146,6 +171,7 @@ const CourseManagement = () => {
     const pathParts = location.pathname.split("/");
     return pathParts[pathParts.length - 1];
   };
+
 
   // Fetch course data when component mounts
   useEffect(() => {
@@ -284,9 +310,11 @@ const CourseManagement = () => {
             {selectedOption === "Weekly Plan" && <WeeklyPlanManager />}
             {selectedOption === "Class List" && <StudentTable />}
             {selectedOption === "Subjective" && (
-              <AllAssignments courseID={courseID} />
+              <AllAssignments courseID={courseID} initialTab="subjective" hideTabs={true} />
             )}
-            {selectedOption === "Objective" && <QuizCreator />}
+            {selectedOption === "Objective" && (
+              <AllAssignments courseID={courseID} initialTab="objective" hideTabs={true} />
+            )}
             {selectedOption === "Practical Activity" && (
               <AllActivities courseID={courseID} />
             )}
@@ -307,7 +335,7 @@ const CourseManagement = () => {
             {selectedOption === "Announcements" && (
               <AnnouncementManagement courseID={courseID} />
             )}
-            {selectedOption === "Grade Sheet" && <StudentGradingTable />}
+            {selectedOption === "Gradebook" && <Gradebook />}
             {(selectedOption === "Continuous Assessment Plan" || selectedOption === "Continuous\nAssessment Plan") && <ContinuousAssessment />}
             {selectedOption === "Discussion" && <DiscussionForum />}
           </div>
@@ -541,19 +569,19 @@ const CourseManagement = () => {
                 )}
               </button>
 
-              {/* Grades Button with underline effect */}
+              {/* Gradebook Button with underline effect */}
               <button
-                onClick={() => setSelectedOption("Grade Sheet")}
+                onClick={() => setSelectedOption("Gradebook")}
                 className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  selectedOption === "Grade Sheet"
+                  selectedOption === "Gradebook"
                     ? "text-accent1 dark:text-accent1"
                     : "text-gray-700 dark:text-gray-300"
                 }`}
               >
                 <BarChart2 className="w-5 h-5" />
-                <span>Grades</span>
+                <span>Gradebook</span>
                 {/* Add line below when selected */}
-                {selectedOption === "Grade Sheet" && (
+                {selectedOption === "Gradebook" && (
                   <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
                 )}
               </button>

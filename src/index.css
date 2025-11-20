@@ -6,23 +6,26 @@
 
 
 :root{
-  --color-accent1:#1aa100;
-  --color-accent2:#a3f294;
+  --color-accent1:#16a34a; /* Green-600 - Main accent */
+  --color-accent2:#bbf7d0; /* Green-100 - Light accent */
 }
+
+[data-color-scheme="green"] {
+  --color-accent1: #16a34a; /* Green-600 */
+  --color-accent2: #bbf7d0; /* Green-100 */
+}
+
 [data-color-scheme="blue"] {
- 
   --color-accent1: #3b82f6;
   --color-accent2: #bfdbfe;
 }
 
 [data-color-scheme="purple"] {
- 
   --color-accent1: #8b5cf6;
   --color-accent2: #ddd6fe;
 }
 
 [data-color-scheme="amber"] {
- 
   --color-accent1: #D97706;
   --color-accent2: #ffedd5;
 }

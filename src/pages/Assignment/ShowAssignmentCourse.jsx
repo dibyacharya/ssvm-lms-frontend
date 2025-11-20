@@ -114,7 +114,7 @@ const StudentAssignmentSectionCourse = () => {
     if (!selectedAssignment || !courseData?.student?.id) return null;
 
     return selectedAssignment.submissions.find(
-      (submission) => submission.student === courseData.student.id
+      (submission) => submission.studentId === courseData.student.id
     );
   };
 
@@ -155,7 +155,7 @@ const StudentAssignmentSectionCourse = () => {
         <div className="space-y-2">
           {assignments.map((assignment) => {
             const hasSubmitted = assignment.submissions.some(
-              (sub) => sub.student === courseData?.student?.id
+              (sub) => sub.studentId === courseData?.student?.id
             );
 
             return (
@@ -206,9 +206,17 @@ const StudentAssignmentSectionCourse = () => {
                       Due: {formatDate(selectedAssignment.dueDate)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {selectedAssignment.totalPoints} points
-                  </p>
+                  {selectedAssignment.isUngraded ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
+                        Ungraded
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {selectedAssignment.totalPoints} points
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

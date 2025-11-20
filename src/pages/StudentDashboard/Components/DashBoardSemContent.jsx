@@ -15,6 +15,7 @@ import {
 import { useMeeting } from "../../../context/MeetingContext";
 import toast from "react-hot-toast";
 import { getAllStudentCourses } from "../../../services/course.service";
+import { getStudentAssignmentStats } from "../../../services/assignment.service";
 import calculateAttendance from "../../../utils/Functions/CalculateStudentAttendencePercentage";
 import AssignmentStatusChart from "./AssignmentStatusChart";
 
@@ -27,58 +28,48 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   
   const [coursesData, setCoursesData] = useState({ courses: [], user: {} });
   const [allCoursesData, setAllCoursesData] = useState({ courses: [], user: {} });
+  const [assignmentStats, setAssignmentStats] = useState({
+    allAssignments: 0,
+    submitted: 0,
+    pending: 0,
+    courses: []
+  });
   const [loading, setLoading] = useState(true);
+  const [assignmentStatsLoading, setAssignmentStatsLoading] = useState(true);
 
   console.log("course meetings",meetings);
 
-  const allAssignmentsCount = coursesData.courses?.reduce((total, course) => {
-    const assignmentsInCourse = course.assignments?.length || 0;
-    return total + assignmentsInCourse;
-  }, 0) || 0;
+  // Use assignment stats from API
+  const allAssignmentsCount = assignmentStats.allAssignments || 0;
+  const pendingAssignmentsCount = assignmentStats.pending || 0;
+  const submittedAssignmentsCount = assignmentStats.submitted || 0;
 
-  const pendingAssignmentsCount = coursesData.courses?.reduce((total, course) => {
-    const pendingInCourse = course.assignments?.filter(assignment =>
-      assignment.submissions.length === 0
-    ).length || 0;
-    return total + pendingInCourse;
-  }, 0) || 0;
-
-  // Function to get all assignments from all courses
+  // Function to get all latest assignments from API stats
   const getAllAssignments = () => {
-    if (!coursesData.courses) return [];
+    if (!assignmentStats.courses || assignmentStats.courses.length === 0) return [];
 
     const assignments = [];
-    coursesData.courses.forEach(course => {
-      if (course.assignments && course.assignments.length > 0) {
-        course.assignments.forEach(assignment => {
-          assignments.push({
-            ...assignment,
-            courseName: course.title,
-            courseId: course._id
-          });
+    assignmentStats.courses.forEach(course => {
+      if (course.latestAssignment) {
+        assignments.push({
+          ...course.latestAssignment,
+          courseName: course.courseTitle,
+          courseId: course.courseId,
+          courseCode: course.courseCode,
+          courseImage: course.courseImage
         });
       }
     });
 
-    // Sort by due date (most recent first)
-    return assignments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    // Sort by createdAt date (newest first, as per API spec)
+    return assignments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   };
 
-  // Function to determine assignment status based on submissions
-  const getAssignmentStatus = (assignment, userId) => {
-    if (!assignment.submissions || assignment.submissions.length === 0) {
-      return "not_started";
+  // Function to determine assignment status based on hasSubmitted from API
+  const getAssignmentStatus = (assignment) => {
+    if (assignment.hasSubmitted === true) {
+      return "submitted";
     }
-
-    const userSubmission = assignment.submissions.find(sub => sub.student === userId);
-    if (userSubmission) {
-      if (userSubmission.status === "graded") {
-        return "submitted";
-      } else {
-        return "in_progress";
-      }
-    }
-
     return "not_started";
   };
 
@@ -118,6 +109,29 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
     };
 
     fetchCourses();
+  }, []);
+
+  // Fetch assignment statistics
+  useEffect(() => {
+    const fetchAssignmentStats = async () => {
+      try {
+        setAssignmentStatsLoading(true);
+        const data = await getStudentAssignmentStats();
+        setAssignmentStats({
+          allAssignments: data.allAssignments || 0,
+          submitted: data.submitted || 0,
+          pending: data.pending || 0,
+          courses: data.courses || []
+        });
+      } catch (err) {
+        console.error("Error fetching assignment stats:", err);
+        toast.error("Failed to load assignment statistics. Please try again later.");
+      } finally {
+        setAssignmentStatsLoading(false);
+      }
+    };
+
+    fetchAssignmentStats();
   }, []);
 
   // Filter courses based on semNumber when it changes
@@ -202,8 +216,16 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
     navigate(`/student/assignment/${assignment.courseId}/${assignment._id}`);
   };
 
+  // Handle scroll to recent assignments section
+  const scrollToRecentAssignments = () => {
+    const element = document.getElementById('recent-assignments');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Combine loading states for the main loader
-  if (loading || meetingsLoading) {
+  if (loading || meetingsLoading || assignmentStatsLoading) {
     return (
       <div className="flex items-center justify-center h-screen dark:bg-gray-900">
         <div className="text-center">
@@ -269,7 +291,13 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
           <div
             key={index}
             className={`${item.bgClass} p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 cursor-pointer`}
-            onClick={() => setActiveSection(item.id)}
+            onClick={() => {
+              if (item.id === "Assignment") {
+                scrollToRecentAssignments();
+              } else {
+                setActiveSection(item.id);
+              }
+            }}
           >
             <div className="flex items-center space-x-3 mb-4">
               <div className={`p-2 bg-gray-50 dark:bg-gray-700 rounded-lg ${item.color}`}>
@@ -377,7 +405,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
           <AssignmentStatusChart
             allAssignmentsCount={allAssignmentsCount}
             pendingAssignmentsCount={pendingAssignmentsCount}
-            setActiveSection={setActiveSection}
+            submittedAssignmentsCount={submittedAssignmentsCount}
           />
         </div>
       </div>
@@ -451,18 +479,12 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       </div>
 
       {/* Assignments Section - Now Dynamic */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div id="recent-assignments" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
             <CheckSquare className="h-5 w-5 mr-2 text-primary dark:text-blue-400" />
             Recent Assignments
           </h2>
-          <button
-            className="text-accent1/80 hover:text-accent1 dark:text-blue-400 dark:hover:text-blue-300 flex items-center text-sm font-medium"
-            onClick={() => setActiveSection("Assignment")}
-          >
-            View All <ChevronRight className="h-4 w-4 ml-1" />
-          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -486,7 +508,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
               </thead>
               <tbody>
                 {recentAssignments.map((assignment) => {
-                  const status = getAssignmentStatus(assignment, coursesData.user._id);
+                  const status = getAssignmentStatus(assignment);
                   return (
                     <tr
                       key={assignment._id}
@@ -498,9 +520,16 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                           <div className="h-8 w-8 rounded-md bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center text-primary dark:text-blue-400 mr-3">
                             <CheckSquare className="h-4 w-4" />
                           </div>
-                          <span className="font-medium text-gray-800 dark:text-white">
-                            {assignment.title}
-                          </span>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-gray-800 dark:text-white">
+                              {assignment.title}
+                            </span>
+                            {assignment.description && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                                {assignment.description}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-500 dark:text-gray-400">
@@ -510,7 +539,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1.5" />
                           <span className="text-sm text-gray-600 dark:text-gray-300">
-                            {formatDate(assignment.dueDate)}
+                            {assignment.dueDate ? formatDate(assignment.dueDate) : "No due date"}
                           </span>
                         </div>
                       </td>

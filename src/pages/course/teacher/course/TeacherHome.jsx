@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import { getAllCourseAnnouncements } from "../../../../services/announcement.service";
+import { getAllCourseAssignments } from "../../../../services/assignment.service";
 import { useCourse } from "../../../../context/CourseContext";
 import { useParams } from "react-router-dom";
 import { useUtilityContext } from "../../../../context/UtilityContext";
@@ -30,16 +31,13 @@ const TeacherHome = ({ setSelectedOption }) => {
   const { currentModuleIndex, setCurrentModuleIndex } = useUtilityContext();
   console.log(user, courseData);
 
-  // Dummy data (can be replaced with actual data from backend if available)
-  const assignments = [
-  
-  ];
-
   const upcomingEvents = [
    
   ];
   const [announcements, setAnnouncements] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
 
   const fetchAnnouncements = async () => {
     try {
@@ -53,9 +51,52 @@ const TeacherHome = ({ setSelectedOption }) => {
     }
   };
 
+  const fetchAssignments = async () => {
+    try {
+      setAssignmentsLoading(true);
+      const response = await getAllCourseAssignments({ courseID });
+      setAssignments(response.assignments || []);
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+    } finally {
+      setAssignmentsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+    if (courseID) {
+      fetchAnnouncements();
+      fetchAssignments();
+    }
+  }, [courseID]);
+
+  // Calculate assignments that need grading
+  const assignmentsNeedingGrading = assignments.reduce((count, assignment) => {
+    const turnedIn = assignment.stats?.turnedIn || 0;
+    const graded = assignment.stats?.graded || 0;
+    return count + (turnedIn - graded);
+  }, 0);
+
+  // Format date helper function
+  const formatDate = (dateString) => {
+    if (!dateString) return "No due date";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Get assignment status
+  const getAssignmentStatus = (assignment) => {
+    const now = new Date();
+    const dueDate = new Date(assignment.dueDate);
+    if (dueDate < now) {
+      return "past";
+    }
+    return assignment.isActive !== false ? "active" : "upcoming";
+  };
 
   return (
     <div className="max-w-[1600px] pt-12 relative -top-6 mx-auto space-y-8 p-6 bg-gray-50">
@@ -120,7 +161,7 @@ const TeacherHome = ({ setSelectedOption }) => {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-tertiary">
-            <span className="text-amber-500 font-medium">2</span>
+            <span className="text-amber-500 font-medium">{assignmentsNeedingGrading}</span>
             <span className="mx-1">need grading</span>
           </div>
         </div>
@@ -221,53 +262,64 @@ const TeacherHome = ({ setSelectedOption }) => {
             </div>
 
             <div className="divide-y divide-tertiary/10">
-              {assignments.length > 0 ? (
-                assignments.map((assignment) => (
-                  <div
-                    key={assignment.id}
-                    className="p-6 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium text-primary">
-                          {assignment.title}
-                        </h3>
-                        <div className="flex items-center mt-2 text-sm">
-                          <Clock className="w-4 h-4 text-tertiary mr-1" />
-                          <span className="text-tertiary">
-                            Due: {assignment.dueDate}
-                          </span>
+              {assignmentsLoading ? (
+                <div className="p-6 text-center text-tertiary">Loading assignments...</div>
+              ) : assignments.length > 0 ? (
+                assignments.slice(0, 5).map((assignment) => {
+                  const status = getAssignmentStatus(assignment);
+                  const turnedIn = assignment.stats?.turnedIn || 0;
+                  const assigned = assignment.stats?.assigned || assignment.stats?.total || courseData?.students?.length || 0;
+                  const graded = assignment.stats?.graded || 0;
+                  const submissionPercentage = assigned > 0 ? (turnedIn / assigned) * 100 : 0;
+                  
+                  return (
+                    <div
+                      key={assignment._id}
+                      className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedOption("Long or Short Type");
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium text-primary">
+                            {assignment.title}
+                          </h3>
+                          <div className="flex items-center mt-2 text-sm">
+                            <Clock className="w-4 h-4 text-tertiary mr-1" />
+                            <span className="text-tertiary">
+                              Due: {formatDate(assignment.dueDate)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              status === "active"
+                                ? "bg-primary/10 text-primary"
+                                : status === "past"
+                                ? "bg-gray-100 text-gray-600"
+                                : "bg-amber-50 text-amber-600"
+                            }`}
+                          >
+                            {status === "active" ? "Active" : status === "past" ? "Past Due" : "Upcoming"}
+                          </div>
+                          <div className="text-sm text-tertiary mt-2">
+                            {turnedIn} of {assigned} submitted
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end">
+                      <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
                         <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            assignment.status === "active"
-                              ? "bg-primary/10 text-primary"
-                              : "bg-amber-50 text-amber-600"
-                          }`}
-                        >
-                          {assignment.status === "active" ? "Active" : "Upcoming"}
-                        </div>
-                        <div className="text-sm text-tertiary mt-2">
-                          {assignment.submissions} of {assignment.totalStudents}{" "}
-                          submitted
-                        </div>
+                          className="bg-primary h-2 rounded-full"
+                          style={{
+                            width: `${submissionPercentage}%`,
+                          }}
+                        ></div>
                       </div>
                     </div>
-                    <div className="mt-4 w-full bg-gray-100 rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (assignment.submissions / assignment.totalStudents) *
-                            100
-                          }%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="p-6 text-center text-tertiary">
                   No assignments available.

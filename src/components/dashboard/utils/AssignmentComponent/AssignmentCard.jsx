@@ -11,7 +11,7 @@ const AssignmentCard = ({
 }) => {
   // Check if the assignment has been submitted by this student
   const hasSubmitted = assignment.submissions?.some(
-    (sub) => sub.student === studentId
+    (sub) => sub.studentId === studentId
   );
 
   // Check if the assignment is past due

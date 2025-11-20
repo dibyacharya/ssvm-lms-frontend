@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Plus,
-  MoreVertical,
   X,
   Edit,
   Trash,
@@ -10,15 +9,18 @@ import {
   CheckCircle,
   Users,
   Award,
+  ClipboardCheck,
+  FileText,
 } from "lucide-react";
-import AssignmentForm from "./CreateAssignment";
+import AssignmentSectionRevamp from "./CreateAssignmentNew";
 import EditAssignmentForm from "./EditAssignment";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   deleteAssignment,
   getAllCourseAssignments,
 } from "../../../services/assignment.service";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
+import toast from "react-hot-toast";
 
 // Custom Modal Component
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -53,7 +55,7 @@ const StatusBadge = ({ isActive }) => {
   return (
     <div
       className={`px-3 py-1 rounded-full text-xs font-medium ${
-        isActive ? "bg-green-100 text-primary" : "bg-red-100 text-red-600"
+        isActive ? "bg-accent2 text-primary" : "bg-red-100 text-red-600"
       }`}
     >
       {isActive ? "Active" : "Closed"}
@@ -65,8 +67,7 @@ const AssignmentCard = ({
   assignment,
   onEdit,
   onDelete,
-  onMenuClick,
-  openMenuId,
+  onGrade,
 }) => {
   const {
     id,
@@ -77,201 +78,288 @@ const AssignmentCard = ({
     stats,
     attachments,
     isActive,
+    grade,
   } = assignment;
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-      <div className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2">
+    <div className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+      <div className="p-4">
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
               <Link to={`/teacher/assignment/${id}`}>
-                <h3 className="font-semibold text-lg text-primary hover:text-primary transition-colors">
+                <h3 className="font-semibold text-lg text-primary hover:text-primary/80 transition-colors cursor-pointer truncate">
                   {title}
                 </h3>
               </Link>
               <StatusBadge isActive={isActive} />
             </div>
-            <p className="text-sm text-tertiary mt-1">{date}</p>
-            {dueDate && (
-              <div className="flex items-center text-sm text-tertiary mt-1">
-                <Calendar size={14} className="mr-1" />
-                {dueDate}
-              </div>
+            
+            {/* Description */}
+            {description && (
+              <p className="text-sm text-gray-600 mt-1.5 line-clamp-1 leading-snug">
+                {description.length > 100 ? `${description.substring(0, 100)}...` : description}
+              </p>
             )}
-          </div>
 
-          <div className="relative">
-            <button
-              className="text-tertiary hover:text-primary p-1 rounded-full hover:bg-gray-100"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMenuClick(id, e);
-              }}
-            >
-              <MoreVertical size={16} />
-            </button>
-
-            {openMenuId === id && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-20">
-                <button
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-primary hover:bg-gray-50 transition-colors"
-                  onClick={() => onEdit(id)}
-                >
-                  <Edit size={16} />
-                  Edit
-                </button>
-                <button
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600 hover:bg-gray-50 transition-colors"
-                  onClick={() => onDelete(id)}
-                >
-                  <Trash size={16} />
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 border-t border-gray-100 pt-4">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <div className="flex items-center gap-1">
-                <CheckCircle size={16} className="text-primary" />
-                <span className="text-lg font-semibold text-primary">
-                  {stats.turnedIn}
-                </span>
-              </div>
-              <div className="text-xs text-tertiary mt-1">Turned in</div>
-            </div>
-
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <div className="flex items-center gap-1">
-                <Users size={16} className="text-blue-500" />
-                <span className="text-lg font-semibold text-primary">
-                  {stats.assigned}
-                </span>
-              </div>
-              <div className="text-xs text-tertiary mt-1">Assigned</div>
-            </div>
-
-            <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-              <div className="flex items-center gap-1">
-                <Award size={16} className="text-amber-500" />
-                <span className="text-lg font-semibold text-primary">
-                  {stats.graded}
-                </span>
-              </div>
-              <div className="text-xs text-tertiary mt-1">Graded</div>
+            {/* Date and Due Date */}
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              {date && (
+                <div className="flex items-center text-xs text-gray-500">
+                  <Calendar size={12} className="mr-1" />
+                  <span>{date}</span>
+                </div>
+              )}
+              {dueDate && (
+                <div className="flex items-center text-xs text-gray-500">
+                  <Calendar size={12} className="mr-1" />
+                  <span className="font-medium">{dueDate}</span>
+                </div>
+              )}
+              {assignment.isUngraded ? (
+                <div className="flex items-center text-xs">
+                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
+                    Ungraded
+                  </span>
+                </div>
+              ) : (
+                grade && (
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Award size={12} className="mr-1" />
+                    <span>{grade} pts</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
 
-        {/* Attachments Section */}
+        {/* Attachments Section - Compact */}
         {attachments && attachments.length > 0 && (
-          <div className="mt-4 border-t border-gray-100 pt-4">
-            <div className="text-sm font-medium text-primary mb-2">
-              Attachments
-            </div>
-            <div className="space-y-2">
-              {attachments.map((attachment) => (
+          <div className="mt-2 mb-3">
+            <div className="flex flex-wrap gap-1.5">
+              {attachments.slice(0, 3).map((attachment) => (
                 <a
                   key={attachment._id}
                   href={attachment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-primary bg-accent2 hover:bg-accent2/80 rounded transition-colors border border-primary/30"
                 >
-                  <Paperclip size={14} className="mr-1" />
-                  {attachment.name}
+                  <Paperclip size={10} />
+                  <span className="max-w-[100px] truncate">{attachment.name}</span>
                 </a>
               ))}
+              {attachments.length > 3 && (
+                <span className="text-xs text-gray-500 px-2 py-1">+{attachments.length - 3} more</span>
+              )}
             </div>
           </div>
         )}
 
-        <div className="mt-4 text-xs text-right">
-          {isActive ? (
-            <span className="text-primary">Late submission allowed</span>
-          ) : (
-            <span className="text-red-500">Late submission closed</span>
-          )}
+        {/* Stats and Action Buttons on Single Line */}
+        <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+          {/* Stats - Horizontal Layout */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle size={14} className="text-primary" />
+              <span className="text-sm font-semibold text-primary">
+                {stats?.turnedIn || 0}
+              </span>
+              <span className="text-xs text-gray-500">Turned in</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Users size={14} className="text-primary" />
+              <span className="text-sm font-semibold text-primary">
+                {stats?.assigned || 0}
+              </span>
+              <span className="text-xs text-gray-500">Assigned</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Award size={14} className="text-amber-600" />
+              <span className="text-sm font-semibold text-amber-700">
+                {stats?.graded || 0}
+              </span>
+              <span className="text-xs text-gray-500">Graded</span>
+            </div>
+
+            {/* Status Badge */}
+            {isActive ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-primary bg-accent2 rounded-full border border-primary/30">
+                <CheckCircle size={10} />
+                Active
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-red-700 bg-red-50 rounded-full border border-red-200">
+                <X size={10} />
+                Closed
+              </span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onGrade(id)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-md transition-colors"
+            >
+              <ClipboardCheck size={14} />
+              Grade
+            </button>
+            <button
+              onClick={() => onEdit(id)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              <Edit size={14} />
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(id)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+            >
+              <Trash size={14} />
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const AllAssignments = ({ courseID }) => {
+const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false }) => {
+  const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState(null);
-  const [openMenuId, setOpenMenuId] = useState(null);
   const [assignments, setAssignments] = useState([]);
+  const [allAssignments, setAllAssignments] = useState([]); // Store all assignments
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(initialTab); // 'subjective' or 'objective'
+  const [createAssignmentType, setCreateAssignmentType] = useState(initialTab);
+  
+  // If hideTabs is true, lock the tab to initialTab and prevent switching
+  const lockedTab = hideTabs ? initialTab : null;
 
   // Fetch assignments from API
   const fetchAssignments = async () => {
+    if (!courseID) return;
+    
     try {
       setIsLoading(true);
-      const data = await getAllCourseAssignments({ courseID });
+      setError(null);
+      
+      const response = await getAllCourseAssignments({ courseID });
+      const courseAssignments = response.assignments || [];
 
-      // Map API data to the format expected by the component
-      const formattedAssignments = data.assignments.map((assignment) => ({
-        id: assignment._id,
-        title: assignment.title,
-        description: assignment.description,
-        courseId: assignment.course,
-        dueDate: assignment.dueDate
-          ? `Due ${new Date(assignment.dueDate).toLocaleDateString()}`
-          : "",
-        originalDueDate: assignment.dueDate,
-        date: assignment.createdAt
-          ? `Posted ${new Date(assignment.createdAt).toLocaleDateString()}`
-          : "",
-        stats: {
-          turnedIn: assignment.submissions ? assignment.submissions.length : 0,
-          assigned: 40, // Placeholder - will be available later
-          graded: assignment.submissions
-            ? assignment.submissions.filter((sub) => sub.grade).length
-            : 0,
-        },
-        attachments: assignment.attachments || [],
-        grade: assignment.totalPoints || 100,
-        allowLateSubmissions: assignment.isActive,
-        topic: assignment.description
-          ? assignment.description.substring(0, 20) + "..."
-          : "N/A",
-        isActive: assignment.isActive,
-      }));
+      // Map to the format expected by the component
+      const formattedAssignments = courseAssignments.map((assignment) => {
+        // Determine assignment type based on questions
+        const questions = assignment.questions || [];
+        const hasSubjective = questions.some(q => q.type === 'subjective');
+        const hasObjective = questions.some(q => q.type === 'objective');
+        
+        // Determine primary type: if only one type exists, use that; otherwise use first question type
+        let assignmentType = 'subjective'; // default
+        if (hasObjective && !hasSubjective) {
+          assignmentType = 'objective';
+        } else if (hasSubjective && !hasObjective) {
+          assignmentType = 'subjective';
+        } else if (questions.length > 0) {
+          assignmentType = questions[0].type || 'subjective';
+        }
+        
+        return {
+          id: assignment._id,
+          title: assignment.title,
+          description: assignment.description,
+          courseId: assignment.course,
+          dueDate: assignment.dueDate
+            ? `Due ${new Date(assignment.dueDate).toLocaleDateString()}`
+            : "",
+          originalDueDate: assignment.dueDate,
+          date: assignment.createdAt
+            ? `Posted ${new Date(assignment.createdAt).toLocaleDateString()}`
+            : "",
+          stats: {
+            turnedIn: assignment.stats?.turnedIn || 0,
+            assigned: assignment.stats?.assigned || assignment.stats?.total || 0,
+            graded: assignment.stats?.graded || 0,
+          },
+          attachments: assignment.attachments || [],
+          grade: assignment.totalPoints || 100,
+          allowLateSubmissions: assignment.allowLateSubmissions !== false,
+          topic: assignment.description
+            ? assignment.description.substring(0, 20) + "..."
+            : "N/A",
+          isActive: assignment.isActive !== false,
+          assignmentType: assignmentType, // Add assignment type
+          questions: questions, // Store questions for filtering
+        };
+      });
 
-      setAssignments(formattedAssignments);
+      setAllAssignments(formattedAssignments);
+      
+      // Filter assignments based on active tab
+      const filtered = formattedAssignments.filter(assignment => {
+        if (activeTab === 'subjective') {
+          // Show assignments with at least one subjective question
+          return assignment.questions?.some(q => q.type === 'subjective');
+        } else {
+          // Show assignments with at least one objective question
+          return assignment.questions?.some(q => q.type === 'objective');
+        }
+      });
+      
+      setAssignments(filtered);
     } catch (err) {
       console.error("Error fetching assignments:", err);
-      setError("Failed to load assignments. Please try again later.");
+      const errorMessage = err.response?.data?.message || "Failed to load assignments. Please try again later.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAssignments();
+    if (courseID) {
+      fetchAssignments();
+    }
   }, [courseID]);
 
-  const handleOpenCreateModal = () => {
+  // Filter assignments when tab changes
+  useEffect(() => {
+    if (allAssignments.length > 0) {
+      // If tabs are hidden, use the locked tab, otherwise use activeTab
+      const filterTab = lockedTab || activeTab;
+      const filtered = allAssignments.filter(assignment => {
+        if (filterTab === 'subjective') {
+          // Show assignments with at least one subjective question
+          return assignment.questions?.some(q => q.type === 'subjective');
+        } else {
+          // Show assignments with at least one objective question
+          return assignment.questions?.some(q => q.type === 'objective');
+        }
+      });
+      setAssignments(filtered);
+    }
+  }, [activeTab, allAssignments, lockedTab]);
+
+  const handleOpenCreateModal = (type = null) => {
     setIsCreateModalOpen(true);
+    // If type is provided, it will be passed to CreateAssignmentNew
+    // Otherwise, use the active tab
+    setCreateAssignmentType(type || activeTab);
   };
 
   const handleOpenEditModal = (assignment) => {
     setCurrentAssignment(assignment);
     setIsEditModalOpen(true);
-    setOpenMenuId(null);
-  };
-
-  const handleMoreClick = (assignmentId, e) => {
-    e.stopPropagation();
-    setOpenMenuId(openMenuId === assignmentId ? null : assignmentId);
   };
 
   const handleEdit = (assignmentId) => {
@@ -282,17 +370,33 @@ const AllAssignments = ({ courseID }) => {
   };
 
   const handleDelete = async (assignmentId) => {
-    await deleteAssignment(assignmentId);
-    await fetchAssignments();
-    setOpenMenuId(null);
+    if (!window.confirm("Are you sure you want to delete this assignment? This action cannot be undone.")) {
+      return;
+    }
+    
+    try {
+      await deleteAssignment(assignmentId);
+      await fetchAssignments();
+    } catch (error) {
+      // Error is already handled in the service with toast
+      console.error("Error deleting assignment:", error);
+    }
   };
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  const handleGrade = (assignmentId) => {
+    // Determine which section we're in (account for hideTabs)
+    const currentTab = hideTabs ? initialTab : activeTab;
+    const currentSection = currentTab === 'subjective' ? 'Subjective' : 'Objective';
+    
+    // Store the section in localStorage before navigating
+    if (courseID) {
+      const storageKey = `course_${courseID}_selectedSection`;
+      localStorage.setItem(storageKey, currentSection);
+    }
+    
+    // Navigate to grading page
+    navigate(`/teacher/assignment/${assignmentId}/grade`);
+  };
 
   if (isLoading) {
     return (
@@ -310,32 +414,81 @@ const AllAssignments = ({ courseID }) => {
     );
   }
 
+  // Count assignments by type
+  const subjectiveCount = allAssignments.filter(a => a.questions?.some(q => q.type === 'subjective')).length;
+  const objectiveCount = allAssignments.filter(a => a.questions?.some(q => q.type === 'objective')).length;
+  
+  // Determine which tab to show based on hideTabs prop
+  const displayTab = lockedTab || activeTab;
+
   return (
     <div className="bg-gray-50 md:px-[15%] rounded-lg shadow-sm">
-      <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-primary">Assignments</h2>
-          <button
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors shadow-sm"
-            onClick={handleOpenCreateModal}
-          >
-            <Plus size={18} />
-            New Assignment
-          </button>
+      {/* Header Section - Only show when NOT creating assignment */}
+      {!isCreateModalOpen && (
+        <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>
+              <p className="text-sm text-gray-600 max-w-2xl">
+                Manage and track all course assignments. Create new assignments, view submission statistics, grade student work, and monitor assignment progress.
+              </p>
+            </div>
+            <button
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+              onClick={() => handleOpenCreateModal(displayTab)}
+            >
+              <Plus size={18} />
+              New Assignment
+            </button>
+          </div>
+          
+          {/* Tab Navigation - Only show if hideTabs is false */}
+          {!hideTabs && (
+            <div className="flex gap-2 mt-4 border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('subjective')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'subjective'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <FileText size={16} />
+                Subjective ({subjectiveCount})
+              </button>
+              <button
+                onClick={() => setActiveTab('objective')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'objective'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <CheckCircle size={16} />
+                Objective ({objectiveCount})
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* Create Assignment Modal */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Create Assignment"
-      >
-        <AssignmentForm
-          courseID={courseID}
-          fetchAssignments={fetchAssignments}
-        />
-      </Modal>
+      {/* Create Assignment Form - Displayed below nav */}
+      {isCreateModalOpen && (
+        <div className="bg-white">
+          <AssignmentSectionRevamp
+            courseID={courseID}
+            inModal={false}
+            assignmentType={createAssignmentType}
+            onSave={(data) => {
+              console.log('Assignment saved:', data);
+              // Refresh assignments from API
+              fetchAssignments();
+              setIsCreateModalOpen(false);
+            }}
+            onCancel={() => setIsCreateModalOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Edit Assignment Modal */}
       <Modal
@@ -353,7 +506,8 @@ const AllAssignments = ({ courseID }) => {
         )}
       </Modal>
 
-      <div className="p-6">
+      {!isCreateModalOpen && (
+        <div className="p-6">
         {assignments.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-100">
             <div className="text-lg text-tertiary">
@@ -361,7 +515,7 @@ const AllAssignments = ({ courseID }) => {
             </div>
             <button
               className="mt-4 inline-flex items-center gap-2 text-primary hover:text-primary/90 font-medium"
-              onClick={handleOpenCreateModal}
+              onClick={() => handleOpenCreateModal(displayTab)}
             >
               <Plus size={18} />
               Create your first assignment
@@ -375,13 +529,13 @@ const AllAssignments = ({ courseID }) => {
                 assignment={assignment}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onMenuClick={handleMoreClick}
-                openMenuId={openMenuId}
+                onGrade={handleGrade}
               />
             ))}
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
