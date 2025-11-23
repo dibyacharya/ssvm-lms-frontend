@@ -11,6 +11,7 @@ import {
   Award,
   ClipboardCheck,
   FileText,
+  ArrowLeft,
 } from "lucide-react";
 import AssignmentSectionRevamp from "./CreateAssignmentNew";
 import EditAssignmentForm from "./EditAssignment";
@@ -421,13 +422,34 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
   // Determine which tab to show based on hideTabs prop
   const displayTab = lockedTab || activeTab;
 
+  // Handle back to Continuous Assessment
+  const handleBackToContinuousAssessment = () => {
+    if (courseID) {
+      // Set the section to Continuous Assessment
+      const sectionName = "Continuous Assessment";
+      localStorage.setItem(`course_${courseID}_selectedSection`, sectionName);
+      // Dispatch custom event to notify CourseManagement to update
+      window.dispatchEvent(new CustomEvent('sectionChange', { detail: { section: sectionName } }));
+    }
+  };
+
   return (
     <div className="bg-gray-50 md:px-[15%] rounded-lg shadow-sm">
       {/* Header Section - Only show when NOT creating assignment */}
       {!isCreateModalOpen && (
         <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
           <div className="flex justify-between items-start">
-            <div>
+            <div className="flex-1">
+              {/* Back button - Only show when hideTabs is true (accessed from Continuous Assessment) */}
+              {hideTabs && (
+                <button
+                  onClick={handleBackToContinuousAssessment}
+                  className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors px-3 py-2 mb-3 -ml-3"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Back to Continuous Assessment</span>
+                </button>
+              )}
               <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>
               <p className="text-sm text-gray-600 max-w-2xl">
                 Manage and track all course assignments. Create new assignments, view submission statistics, grade student work, and monitor assignment progress.
