@@ -5,7 +5,7 @@ import { useCourse } from "../context/CourseContext";
 import toast from "react-hot-toast";
 
 const SaveButton = ({ urlId, className = "" }) => {
-  const { courseData, setCourseData } = useCourse();
+  const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
   const [isSaving, setIsSaving] = useState(false);
   const handleSaveCourse = async () => {
     const courseId = urlId || extractCourseIdFromPath();
@@ -22,8 +22,11 @@ const SaveButton = ({ urlId, className = "" }) => {
       const updatedCourse = await updateCourse(courseId, courseData);
 
       // Update the context with the response
-
       setCourseData({ ...updatedCourse, ["students"]: courseData.students });
+
+      // Mark all sessions from backend response as saved
+      const savedSessionKeys = Object.keys(updatedCourse.attendance?.sessions || {});
+      markSessionsAsSaved(savedSessionKeys);
 
       toast.success("Course saved successfully!");
     } catch (error) {

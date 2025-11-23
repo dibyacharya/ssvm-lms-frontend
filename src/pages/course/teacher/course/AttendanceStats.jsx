@@ -15,14 +15,17 @@ import {
 
 const AttendanceStats = () => {
   // Get data from the course context
-  const { courseData } = useCourse();
+  const { courseData, savedSessions } = useCourse();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const sessionsPerPage = 5;
 
-  // Extract all sessions dates in order
-  const sessionDates = Object.keys(courseData.attendance.sessions || {}).sort();
+  // Extract only saved sessions (from backend) in order
+  const allSessions = Object.keys(courseData.attendance.sessions || {});
+  const sessionDates = allSessions
+    .filter(sessionKey => savedSessions.has(sessionKey))
+    .sort();
 
   // Calculate pagination
   const totalPages = Math.ceil(sessionDates.length / sessionsPerPage);

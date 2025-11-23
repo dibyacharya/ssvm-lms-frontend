@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Tooltip from "@uiw/react-tooltip";
 import HeatMap from "@uiw/react-heat-map";
 import { useCourse } from "../../../../context/CourseContext";
@@ -15,108 +15,127 @@ import SaveButton from "../../../../utils/CourseSaveButton";
 import { useParams } from "react-router-dom";
 
 const AttendanceHeatMap = () => {
-  const { courseData } = useCourse();
+  const { courseData, savedSessions } = useCourse();
   const [attendanceData, setAttendanceData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { courseID } = useParams();
 
-  // Get semester start and end dates - handling ISO format dates like "2025-03-01T00:00:00.000Z"
-  const semesterStartDate = courseData?.courseSchedule?.classStartDate
-    ? new Date(courseData?.courseSchedule?.classStartDate)
-    : null;
-  const semesterEndDate = courseData?.courseSchedule?.classEndDate
-    ? new Date(courseData?.courseSchedule?.classEndDate)
-    : null;
+  // Convert savedSessions Set to a stable array for dependency comparison
+  const savedSessionsArray = useMemo(() => {
+    return Array.from(savedSessions || []);
+  }, [savedSessions]);
+
+  // Memoize semester dates to prevent unnecessary re-renders
+  const semesterStartDate = useMemo(() => {
+    return courseData?.courseSchedule?.classStartDate
+      ? new Date(courseData.courseSchedule.classStartDate)
+      : null;
+  }, [courseData?.courseSchedule?.classStartDate]);
+
+  const semesterEndDate = useMemo(() => {
+    return courseData?.courseSchedule?.classEndDate
+      ? new Date(courseData.courseSchedule.classEndDate)
+      : null;
+  }, [courseData?.courseSchedule?.classEndDate]);
 
   // Custom function to determine color based on percentage
   const getColorForPercentage = (percentage) => {
-    if (percentage === 0) return "#f3f4f6"; // Gray for no data
+    if (percentage === 0) return "#ef4444"; // Red for zero attendance
     if (percentage < 26) return "#ef4444"; // Red for 1-25%
     if (percentage < 51) return "#facc15"; // Yellow for 26-50%
     if (percentage < 76) return "#84cc16"; // Light green for 51-75%
     return "#1aa100"; // Primary green for 76-100%
   };
 
-  useEffect(() => {
-    // Process attendance data from context
-    const processAttendanceData = () => {
-      setIsLoading(true);
+  // Use useMemo instead of useEffect to compute attendance data
+  const processedAttendanceData = useMemo(() => {
+    if (
+      !courseData ||
+      !courseData.attendance ||
+      !courseData.attendance.sessions ||
+      !courseData.students ||
+      !semesterStartDate ||
+      !semesterEndDate
+    ) {
+      return [];
+    }
 
-      if (
-        !courseData ||
-        !courseData.attendance ||
-        !courseData.attendance.sessions ||
-        !courseData.students ||
-        !semesterStartDate ||
-        !semesterEndDate
-      ) {
-        setIsLoading(false);
-        return [];
+    const heatMapData = [];
+    const allSessions = courseData.attendance.sessions;
+    const totalStudents = courseData.students.length;
+
+    // Filter to only include saved sessions (from backend)
+    // If savedSessions is empty, use all sessions (for backward compatibility)
+    const sessions = {};
+    Object.entries(allSessions).forEach(([sessionKey, studentIds]) => {
+      // If savedSessions is empty or not initialized, show all sessions
+      // Otherwise, only show saved sessions
+      if (savedSessionsArray.length === 0 || savedSessionsArray.includes(sessionKey)) {
+        sessions[sessionKey] = studentIds;
+      }
+    });
+
+    // Group sessions by date
+    const sessionsByDate = {};
+
+    Object.entries(sessions).forEach(([sessionKey, studentIds]) => {
+      // Session key format: "YYYY-MM-DD_HH:MM"
+      const [dateStr] = sessionKey.split("_");
+
+      if (!sessionsByDate[dateStr]) {
+        sessionsByDate[dateStr] = {
+          totalSessions: 0,
+          totalAttendance: 0,
+        };
       }
 
-      const heatMapData = [];
-      const sessions = courseData.attendance.sessions;
-      const totalStudents = courseData.students.length;
+      // Increment session count for this date (even if no students attended)
+      sessionsByDate[dateStr].totalSessions += 1;
 
-      // Group sessions by date
-      const sessionsByDate = {};
+      // Add students present in this session (handles empty arrays for zero attendance)
+      const presentCount = Array.isArray(studentIds) ? studentIds.length : 0;
+      sessionsByDate[dateStr].totalAttendance += presentCount;
+    });
 
-      Object.entries(sessions).forEach(([sessionKey, studentIds]) => {
-        // Session key format: "YYYY-MM-DD_HH:MM"
-        const [dateStr] = sessionKey.split("_");
+    // Calculate percentage for each date
+    Object.entries(sessionsByDate).forEach(([dateStr, data]) => {
+      // Format date as YYYY/MM/DD for heat map
+      const [year, month, day] = dateStr.split("-");
+      const formattedDate = `${year}/${month}/${day}`;
 
-        if (!sessionsByDate[dateStr]) {
-          sessionsByDate[dateStr] = {
-            totalSessions: 0,
-            totalAttendance: 0,
-          };
-        }
+      // Calculate maximum possible attendance for the day
+      const maxPossibleAttendance = totalStudents * data.totalSessions;
 
-        // Increment session count for this date
-        sessionsByDate[dateStr].totalSessions += 1;
+      // Calculate percentage (avoid division by zero)
+      const percentage =
+        maxPossibleAttendance > 0
+          ? Math.round((data.totalAttendance / maxPossibleAttendance) * 100)
+          : 0;
 
-        // Add students present in this session
-        sessionsByDate[dateStr].totalAttendance += studentIds.length;
+      // Get color based on percentage
+      const color = getColorForPercentage(percentage);
+
+      // Add to heat map data
+      heatMapData.push({
+        date: formattedDate,
+        count: percentage,
+        color: color,
+        raw: {
+          attended: data.totalAttendance,
+          possible: maxPossibleAttendance,
+          sessions: data.totalSessions,
+        },
       });
+    });
 
-      // Calculate percentage for each date
-      Object.entries(sessionsByDate).forEach(([dateStr, data]) => {
-        // Format date as YYYY/MM/DD for heat map
-        const [year, month, day] = dateStr.split("-");
-        const formattedDate = `${year}/${month}/${day}`;
+    return heatMapData;
+  }, [courseData?.attendance?.sessions, courseData?.students, semesterStartDate, semesterEndDate, savedSessionsArray]);
 
-        // Calculate maximum possible attendance for the day
-        const maxPossibleAttendance = totalStudents * data.totalSessions;
-
-        // Calculate percentage (avoid division by zero)
-        const percentage =
-          maxPossibleAttendance > 0
-            ? Math.round((data.totalAttendance / maxPossibleAttendance) * 100)
-            : 0;
-
-        // Get color based on percentage
-        const color = getColorForPercentage(percentage);
-
-        // Add to heat map data
-        heatMapData.push({
-          date: formattedDate,
-          count: percentage,
-          color: color,
-          raw: {
-            attended: data.totalAttendance,
-            possible: maxPossibleAttendance,
-            sessions: data.totalSessions,
-          },
-        });
-      });
-
-      // Update state
-      setAttendanceData(heatMapData);
-      setIsLoading(false);
-    };
-
-    processAttendanceData();
-  }, [courseData, semesterStartDate, semesterEndDate]);
+  // Update state only when processed data changes
+  useEffect(() => {
+    setIsLoading(false);
+    setAttendanceData(processedAttendanceData);
+  }, [processedAttendanceData]);
 
   // Calculate overall attendance percentage
   const calculateOverallAttendance = () => {

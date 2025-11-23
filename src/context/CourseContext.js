@@ -126,6 +126,7 @@ const CourseContext = createContext();
 // Create the provider component
 export const CourseProvider = ({ children }) => {
   const [courseData, setCourseData] = useState(initialCourseData);
+  const [savedSessions, setSavedSessions] = useState(new Set());
 
   // Calculate total credit points
   const totalCredits = Object.values(courseData.creditPoints || {}).reduce(
@@ -570,10 +571,16 @@ export const CourseProvider = ({ children }) => {
     return (attendedSessions / totalSessions) * 100;
   };
 
+  // Mark sessions as saved (called after successful backend save)
+  const markSessionsAsSaved = (savedSessionsList) => {
+    setSavedSessions(new Set(savedSessionsList || []));
+  };
+
   const value = {
     courseData,
     totalCredits,
     setCourseData,
+    savedSessions,
     updateAboutCourse,
     updateCreditPoints,
     addLearningOutcome,
@@ -604,6 +611,7 @@ export const CourseProvider = ({ children }) => {
     getSessionAttendance,
     removeAttendanceSession,
     getStudentAttendanceRate,
+    markSessionsAsSaved,
   };
 
   return (

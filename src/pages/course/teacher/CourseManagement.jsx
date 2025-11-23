@@ -81,6 +81,20 @@ const CourseManagement = () => {
     }
   }, [courseID]);
 
+  // Listen for section change events from child components
+  useEffect(() => {
+    const handleSectionChange = (event) => {
+      if (event.detail && event.detail.section) {
+        setSelectedOption(event.detail.section);
+      }
+    };
+
+    window.addEventListener('sectionChange', handleSectionChange);
+    return () => {
+      window.removeEventListener('sectionChange', handleSectionChange);
+    };
+  }, []);
+
   // Save selectedOption to localStorage whenever it changes
   useEffect(() => {
     if (courseID && selectedOption) {
@@ -127,7 +141,7 @@ const CourseManagement = () => {
     });
   }, [meetings, courseID]);
 
-  const { courseData, setCourseData } = useCourse();
+  const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
 
   // Check for temporary meeting for XCT 3002 between 2:30 PM and 3:30 PM
   const tempLiveMeeting = useMemo(() => {
@@ -211,6 +225,13 @@ const CourseManagement = () => {
 
         // Update the entire course data with what we got from API
         setCourseData({ ...response, syllabus: normalizedSyllabus });
+        
+        // Mark all sessions from backend as saved
+        const savedSessionKeys = Object.keys(response.attendance?.sessions || {});
+        if (savedSessionKeys.length > 0 && markSessionsAsSaved) {
+          markSessionsAsSaved(savedSessionKeys);
+        }
+        
         console.log({ ...response });
         setLoading(false);
       } catch (err) {
@@ -271,10 +292,10 @@ const CourseManagement = () => {
       title: "Assessment",
       icon: <Activity className="w-5 h-5" />,
       items: [
-        { label: "Subjective", icon: <FileText className="w-5 h-5" /> },
-        { label: "Objective", icon: <Layout className="w-5 h-5" /> },
-        { label: "Practical Activity", icon: <Activity className="w-5 h-5" /> },
-        { label: "Continuous\nAssessment Plan", icon: <BarChart2 className="w-5 h-5" /> },
+        // { label: "Subjective", icon: <FileText className="w-5 h-5" /> },
+        // { label: "Objective", icon: <Layout className="w-5 h-5" /> },
+        { label: "Activity", icon: <Activity className="w-5 h-5" /> },
+        { label: "Continuous Assessment", icon: <BarChart2 className="w-5 h-5" /> },
       ],
     },
   };
@@ -315,7 +336,7 @@ const CourseManagement = () => {
             {selectedOption === "Objective" && (
               <AllAssignments courseID={courseID} initialTab="objective" hideTabs={true} />
             )}
-            {selectedOption === "Practical Activity" && (
+            {selectedOption === "Activity" && (
               <AllActivities courseID={courseID} />
             )}
             {selectedOption === "Home" && (
@@ -336,7 +357,7 @@ const CourseManagement = () => {
               <AnnouncementManagement courseID={courseID} />
             )}
             {selectedOption === "Gradebook" && <Gradebook />}
-            {(selectedOption === "Continuous Assessment Plan" || selectedOption === "Continuous\nAssessment Plan") && <ContinuousAssessment />}
+            {selectedOption === "Continuous Assessment" && <ContinuousAssessment />}
             {selectedOption === "Discussion" && <DiscussionForum />}
           </div>
         </div>
@@ -396,8 +417,8 @@ const CourseManagement = () => {
         </button>
 
         {openDropdown === menuKey && (
-          <div className="absolute left-0 mt-2 w-[520px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-4 z-50">
-            <div className="grid grid-cols-2 gap-4 px-4">
+          <div className="absolute left-0 mt-2 w-[600px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-5 z-50">
+            <div className="grid grid-cols-2 gap-5 px-5">
               {items.map((item) => (
                 <button
                   key={item.label}
@@ -405,7 +426,7 @@ const CourseManagement = () => {
                     setSelectedOption(item.label);
                     setOpenDropdown(null);
                   }}
-                  className={`flex items-center space-x-3 p-4 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 p-5 rounded-lg transition-colors ${
                     selectedOption === item.label
                       ? "bg-accent1/10 dark:bg-accent1/20 text-accent1 dark:text-accent1"
                       : "hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
@@ -420,7 +441,7 @@ const CourseManagement = () => {
                   >
                     {item.icon}
                   </div>
-                  <span className="font-medium text-left whitespace-pre-line">{item.label}</span>
+                  <span className="font-medium text-left whitespace-nowrap">{item.label}</span>
                 </button>
               ))}
             </div>
