@@ -250,7 +250,7 @@ const CourseBrief = () => {
               ) : (
                 <div className="prose max-w-none">
                   <p
-                    className={`text-primary leading-relaxed ${
+                    className={`text-black leading-relaxed ${
                       !courseData.aboutCourse && "text-tertiary/60 italic"
                     }`}
                   >
@@ -320,7 +320,7 @@ const CourseBrief = () => {
                           {index + 1}
                         </span>
                       </div>
-                      <p className="text-primary">{outcome}</p>
+                      <p className="text-black">{outcome}</p>
                     </div>
                   ))}
                   {courseData.learningOutcomes.length === 0 && (

@@ -203,7 +203,7 @@ const TeacherProfilePage = () => {
                 <div className="flex flex-col md:flex-row items-center gap-4 mt-2 text-gray-600">
                   
                   <span className="text-green-600 font-semibold">
-                    Faculity
+                   Faculty
                   </span>
                   
                 </div>
