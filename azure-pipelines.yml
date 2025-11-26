@@ -108,7 +108,6 @@ stages:
                     resource_group: rg-kiit-lms-'$(env)'
                     containerapp_environment: '$(containerapp_environment)'
                     containerapp_name: 'lmsfrontend'
-                    target_port: '$(lmsfrontend_target_port)'
                     env: '$(env)'
 
 ########################
@@ -156,5 +155,4 @@ stages:
                     resource_group: rg-kiit-lms-'$(env)'
                     containerapp_environment: '$(containerapp_environment)'
                     containerapp_name: 'lmsfrontend'
-                    target_port: '$(lmsfrontend_target_port)'
                     env: '$(env)'
