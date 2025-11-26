@@ -24,7 +24,7 @@ parameters:
   - name: env
     type: string
   - name: target_port
-    type: int
+    type: integer
 
 steps:
 
