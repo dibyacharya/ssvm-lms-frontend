@@ -58,7 +58,6 @@ stages:
                     resource_group: '$(resource_group)'
                     containerapp_environment: '$(containerapp_environment)'
                     containerapp_name: 'lmsfrontend'
-                    target_port: '$(lmsfrontend_target_port)'
                     env: '$(env)'
 
 ########################
