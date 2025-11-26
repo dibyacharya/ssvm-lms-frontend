@@ -23,6 +23,8 @@ parameters:
     type: string
   - name: env
     type: string
+  - name: target_port
+    type: int
 
 steps:
 
@@ -83,7 +85,7 @@ steps:
             --environment "$ENVIRONMENT" \
             --image "${{ parameters.registry_name }}.azurecr.io/${{ parameters.imageRepository }}:${{ parameters.tag }}" \
             --ingress external \
-            --target-port 8000 \
+            --target-port ${{ parameters.target_port }} \
             --registry-server "${{ parameters.registry_name }}.azurecr.io" \
             --registry-username "${{ parameters.acrusername }}" \
             --registry-password "${{ parameters.acrpassword }}"
