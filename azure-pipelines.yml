@@ -57,7 +57,7 @@ stages:
                     acrpassword: '$(acrpassword)'
                     resource_group: '$(resource_group)'
                     containerapp_environment: '$(containerapp_environment)'
-                    containerapp_name: '$(containerapp_name)'
+                    containerapp_name: 'lmsfrontend'
                     env: '$(env)'
 
 ########################
@@ -106,7 +106,7 @@ stages:
                     acrpassword: '$(acrpassword)'
                     resource_group: rg-kiit-lms-'$(env)'
                     containerapp_environment: '$(containerapp_environment)'
-                    containerapp_name: '$(containerapp_name)'
+                    containerapp_name: 'lmsfrontend'
                     env: '$(env)'
 
 ########################
@@ -153,5 +153,5 @@ stages:
                     acrpassword: '$(acrpassword)'
                     resource_group: rg-kiit-lms-'$(env)'
                     containerapp_environment: '$(containerapp_environment)'
-                    containerapp_name: '$(containerapp_name)'
+                    containerapp_name: 'lmsfrontend'
                     env: '$(env)'
