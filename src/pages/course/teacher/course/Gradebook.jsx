@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Download, Search, FileText, Calendar, User, Award, TrendingUp, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Edit3, Save, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getCourseGradebook } from "../../../../services/assignment.service";
+import {
+  getCourseGrading,
+  bulkUpdateStudentGrading,
+  getContinuousAssessmentPlan,
+  publishGrades,
+  unpublishGrades
+} from "../../../../services/course.service";
 import { useCourse } from "../../../../context/CourseContext";
 import LoadingSpinner from "../../../../utils/LoadingAnimation";
 import toast from "react-hot-toast";
@@ -19,6 +26,7 @@ const Gradebook = () => {
   const [isEditingSemester, setIsEditingSemester] = useState(false);
   const [semesterMarks, setSemesterMarks] = useState({});
   const [continuousAssessmentData, setContinuousAssessmentData] = useState([]);
+  const [isPublished, setIsPublished] = useState(false);
 
   // Get current semester from courseData
   const currentSemester = courseData?.semNumber || courseData?.semester?.semNumber || courseData?.semester?.semNumber || "N/A";
@@ -37,37 +45,81 @@ const Gradebook = () => {
         const data = await getCourseGradebook(courseID);
         setGradebookData(data);
         
-        // Load continuous assessment data from localStorage
-        const savedData = localStorage.getItem(`continuousAssessment_${courseID}`);
-        if (savedData) {
-          setContinuousAssessmentData(JSON.parse(savedData));
+        // Load continuous assessment data from backend
+        try {
+          const categories = await getContinuousAssessmentPlan(courseID);
+          if (categories && categories.length > 0) {
+            // Convert backend format to frontend format
+            const formattedCategories = categories.map(cat => ({
+              id: cat._id,
+              _id: cat._id,
+              category: cat.category,
+              number: cat.number,
+              eachMarks: cat.eachMarks,
+              calculationMethod: cat.calculationMethod,
+              n: cat.n,
+              totalMarks: cat.totalMarks,
+              selectedAssignments: cat.selectedAssignments || []
+            }));
+            setContinuousAssessmentData(formattedCategories);
+          }
+        } catch (error) {
+          console.error("Error fetching continuous assessment plan:", error);
         }
         
-        // Load semester marks from localStorage or initialize
-        const savedMarks = localStorage.getItem(`semesterMarks_${courseID}`);
-        if (savedMarks && data?.students) {
-          const parsedMarks = JSON.parse(savedMarks);
-          // Merge with current students
-          const mergedMarks = {};
-          data.students.forEach(student => {
-            mergedMarks[student.studentId] = parsedMarks[student.studentId] || {
-              endTerm: 0,
-              midTerm: 0,
-              continuousEvaluation: {}
-            };
-          });
-          setSemesterMarks(mergedMarks);
-        } else if (data?.students) {
-          // Initialize semester marks structure
-          const initialMarks = {};
-          data.students.forEach(student => {
-            initialMarks[student.studentId] = {
-              endTerm: 0,
-              midTerm: 0,
-              continuousEvaluation: {}
-            };
-          });
-          setSemesterMarks(initialMarks);
+        // Load semester marks from backend
+        try {
+          const gradings = await getCourseGrading(courseID);
+          if (gradings && gradings.length > 0 && data?.students) {
+            // Convert backend format to frontend format
+            const marksMap = {};
+            gradings.forEach(grading => {
+              marksMap[grading.studentId] = {
+                endTerm: grading.endTerm || 0,
+                midTerm: grading.midTerm || 0,
+                continuousEvaluation: grading.continuousEvaluation || {}
+              };
+            });
+            
+            // Merge with current students (in case new students were added)
+            const mergedMarks = {};
+            data.students.forEach(student => {
+              mergedMarks[student.studentId] = marksMap[student.studentId] || {
+                endTerm: 0,
+                midTerm: 0,
+                continuousEvaluation: {}
+              };
+            });
+            setSemesterMarks(mergedMarks);
+            
+            // Check if grades are published
+            setIsPublished(gradings[0]?.isPublished || false);
+          } else if (data?.students) {
+            // Initialize semester marks structure if no grades exist
+            const initialMarks = {};
+            data.students.forEach(student => {
+              initialMarks[student.studentId] = {
+                endTerm: 0,
+                midTerm: 0,
+                continuousEvaluation: {}
+              };
+            });
+            setSemesterMarks(initialMarks);
+          }
+        } catch (error) {
+          console.error("Error fetching course grading:", error);
+          // Initialize empty marks if error
+          if (data?.students) {
+            const initialMarks = {};
+            data.students.forEach(student => {
+              initialMarks[student.studentId] = {
+                endTerm: 0,
+                midTerm: 0,
+                continuousEvaluation: {}
+              };
+            });
+            setSemesterMarks(initialMarks);
+          }
         }
       } catch (err) {
         console.error("Error fetching gradebook:", err);
@@ -458,9 +510,33 @@ const Gradebook = () => {
                 ) : (
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        // Reload from backend to cancel changes
+                        try {
+                          const gradings = await getCourseGrading(courseID);
+                          if (gradings && gradings.length > 0 && gradebookData?.students) {
+                            const marksMap = {};
+                            gradings.forEach(grading => {
+                              marksMap[grading.studentId] = {
+                                endTerm: grading.endTerm || 0,
+                                midTerm: grading.midTerm || 0,
+                                continuousEvaluation: grading.continuousEvaluation || {}
+                              };
+                            });
+                            const mergedMarks = {};
+                            gradebookData.students.forEach(student => {
+                              mergedMarks[student.studentId] = marksMap[student.studentId] || {
+                                endTerm: 0,
+                                midTerm: 0,
+                                continuousEvaluation: {}
+                              };
+                            });
+                            setSemesterMarks(mergedMarks);
+                          }
+                        } catch (error) {
+                          console.error("Error reloading grades:", error);
+                        }
                         setIsEditingSemester(false);
-                        // Reload from localStorage or reset
                       }}
                       className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                     >
@@ -468,17 +544,71 @@ const Gradebook = () => {
                       Cancel
                     </button>
                     <button
-                      onClick={() => {
-                        // Save to localStorage
-                        localStorage.setItem(`semesterMarks_${courseID}`, JSON.stringify(semesterMarks));
-                        setIsEditingSemester(false);
-                        toast.success("Semester marks saved successfully!");
+                      onClick={async () => {
+                        try {
+                          // Convert frontend format to backend format
+                          const gradingsToSave = Object.entries(semesterMarks).map(([studentId, marks]) => ({
+                            studentId,
+                            endTerm: marks.endTerm || 0,
+                            midTerm: marks.midTerm || 0,
+                            continuousEvaluation: marks.continuousEvaluation || {}
+                          }));
+
+                          await bulkUpdateStudentGrading(courseID, gradingsToSave);
+                          setIsEditingSemester(false);
+                          toast.success("Semester marks saved successfully!");
+                        } catch (error) {
+                          console.error("Error saving semester marks:", error);
+                          toast.error(error.response?.data?.error || "Failed to save semester marks");
+                        }
                       }}
                       className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       <Save className="w-4 h-4" />
                       Save
                     </button>
+                    {!isPublished && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Publish all grades? Students will be able to see their grades.')) {
+                            return;
+                          }
+                          try {
+                            await publishGrades(courseID);
+                            setIsPublished(true);
+                            toast.success("Grades published successfully!");
+                          } catch (error) {
+                            console.error("Error publishing grades:", error);
+                            toast.error(error.response?.data?.error || "Failed to publish grades");
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        <Award className="w-4 h-4" />
+                        Publish Grades
+                      </button>
+                    )}
+                    {isPublished && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm('Unpublish all grades? Students will no longer be able to see their grades.')) {
+                            return;
+                          }
+                          try {
+                            await unpublishGrades(courseID);
+                            setIsPublished(false);
+                            toast.success("Grades unpublished successfully!");
+                          } catch (error) {
+                            console.error("Error unpublishing grades:", error);
+                            toast.error(error.response?.data?.error || "Failed to unpublish grades");
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                        Unpublish
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -511,7 +641,7 @@ const Gradebook = () => {
                      {expandedContinuous && continuousAssessmentData.length > 0 ? (
                        <>
                          {continuousAssessmentData.map((category) => (
-                           <th key={category.id} className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
+                           <th key={category.id || category._id} className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
                              <div className="flex flex-col items-center">
                                <span className="text-xs">{category.category}</span>
                                <span className="text-xs text-gray-500 dark:text-gray-400">({category.totalMarks})</span>
@@ -602,6 +732,7 @@ const Gradebook = () => {
                                    }}
                                    className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
                                    min="0"
+                                   disabled={!isEditingSemester}
                                  />
                                </td>
                                <td className="px-4 py-3 text-center text-sm bg-yellow-50 dark:bg-yellow-900/20">
@@ -619,6 +750,7 @@ const Gradebook = () => {
                                    }}
                                    className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
                                    min="0"
+                                   disabled={!isEditingSemester}
                                  />
                                </td>
                              </>
@@ -626,29 +758,33 @@ const Gradebook = () => {
                            {/* Show continuous evaluation categories as columns when expanded */}
                            {expandedContinuous && continuousAssessmentData.length > 0 ? (
                              <>
-                               {continuousAssessmentData.map((category) => (
-                                 <td key={category.id} className="px-4 py-3 text-center text-sm bg-blue-50 dark:bg-blue-900/20">
-                                   <input
-                                     type="number"
-                                     value={studentMarks.continuousEvaluation?.[category.id] || 0}
-                                     onChange={(e) => {
-                                       setSemesterMarks(prev => ({
-                                         ...prev,
-                                         [student.studentId]: {
-                                           ...prev[student.studentId],
-                                           continuousEvaluation: {
-                                             ...(prev[student.studentId]?.continuousEvaluation || {}),
-                                             [category.id]: parseFloat(e.target.value) || 0
+                               {continuousAssessmentData.map((category) => {
+                                 const categoryId = category.id || category._id;
+                                 return (
+                                   <td key={categoryId} className="px-4 py-3 text-center text-sm bg-blue-50 dark:bg-blue-900/20">
+                                     <input
+                                       type="number"
+                                       value={studentMarks.continuousEvaluation?.[categoryId] || 0}
+                                       onChange={(e) => {
+                                         setSemesterMarks(prev => ({
+                                           ...prev,
+                                           [student.studentId]: {
+                                             ...prev[student.studentId],
+                                             continuousEvaluation: {
+                                               ...(prev[student.studentId]?.continuousEvaluation || {}),
+                                               [categoryId]: parseFloat(e.target.value) || 0
+                                             }
                                            }
-                                         }
-                                       }));
-                                     }}
-                                     className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
-                                     min="0"
-                                     max={category.totalMarks}
-                                   />
-                                 </td>
-                               ))}
+                                         }));
+                                       }}
+                                       className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
+                                       min="0"
+                                       max={category.totalMarks}
+                                       disabled={!isEditingSemester}
+                                     />
+                                   </td>
+                                 );
+                               })}
                                {/* Continuous Evaluation Total column when expanded - read-only */}
                                <td className="px-4 py-3 text-center text-sm bg-blue-50 dark:bg-blue-900/20">
                                  <span className="font-semibold text-gray-900 dark:text-white">

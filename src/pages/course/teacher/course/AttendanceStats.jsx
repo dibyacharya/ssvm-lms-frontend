@@ -163,6 +163,9 @@ const AttendanceStats = () => {
                     Sl. No.
                   </th>
                   <th className="p-3 font-medium text-tertiary text-left">
+                    Roll No.
+                  </th>
+                  <th className="p-3 font-medium text-tertiary text-left">
                     Student Name
                   </th>
                   <th className="p-3 font-medium text-tertiary text-center">
@@ -195,6 +198,9 @@ const AttendanceStats = () => {
                         className="border-b border-tertiary/10 hover:bg-gray-50 transition-colors duration-150"
                       >
                         <td className="p-3 text-primary">{index + 1}</td>
+                        <td className="p-3 text-primary font-medium">
+                          {student?.rollNo || "—"}
+                        </td>
                         <td className="p-3 text-primary font-medium">
                           {student?.name}
                         </td>
