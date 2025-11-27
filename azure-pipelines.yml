@@ -11,11 +11,11 @@ variables:
   - name: tag
     value: '$(Build.BuildId)'
   - name: devRepo
-    value: 'kiit/dev/lms/kiit_lms_admin_frontend'
+    value: 'kiit/dev/lms/lmsfrontend'
   - name: uatRepo
-    value: 'kiit/uat/lms/kiit_lms_admin_frontend'
+    value: 'kiit/uat/lms/lmsfrontend'
   - name: prodRepo
-    value: 'kiit/prod/lms/kiit_lms_admin_frontend'
+    value: 'kiit/prod/lms/lmsfrontend'
 
 ########################
 # BUILD (DEV REPO)
