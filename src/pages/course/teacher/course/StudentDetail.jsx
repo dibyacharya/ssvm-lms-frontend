@@ -113,20 +113,18 @@ const StudentTable = () => {
           <thead className="bg-accent2  dark:text-white">
             <tr>
               <th className="px-4 py-3">Sl. No.</th>
-              {/* <SortableHeader label="Roll No." sortKey="rollNo" /> */}
+              <SortableHeader label="Roll No." sortKey="rollNo" />
               <SortableHeader label="Name" sortKey="name" />
               <SortableHeader label="Email" sortKey="email" />
-              {/* <SortableHeader label="Program" sortKey="program" /> */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentItems.map((item, index) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-center">{indexOfFirstItem + index + 1}</td>
-                {/* <td className="px-4 py-3">{item.rollNo}</td> */}
+                <td className="px-4 py-3">{item.rollNo || "—"}</td>
                 <td className="px-4 py-3">{item.name}</td>
                 <td className="px-4 py-3">{item.email}</td>
-                {/* <td className="px-4 py-3">{item.program}</td> */}
               </tr>
             ))}
           </tbody>

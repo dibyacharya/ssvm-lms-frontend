@@ -1,41 +1,94 @@
 import React, { useState, useEffect } from "react";
 import { Edit3, Save, X, BarChart3 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { getAssessmentPlan, saveAssessmentPlan } from "../../../../services/course.service";
+import toast from "react-hot-toast";
+import LoadingSpinner from "../../../../utils/LoadingAnimation";
 
 const AssessmentPlan = () => {
   const { courseID } = useParams();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [assessmentPlan, setAssessmentPlan] = useState({
     endTermExam: 50,
     midTermExam: 30,
     continuousAssessment: 20
   });
   const [tempPlan, setTempPlan] = useState(assessmentPlan);
+  const [isLocked, setIsLocked] = useState(false);
 
-  // Load data from localStorage on component mount
+  // Load data from backend on component mount
   useEffect(() => {
-    const savedData = localStorage.getItem(`assessmentPlan_${courseID}`);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      setAssessmentPlan(parsedData);
-      setTempPlan(parsedData);
-    }
+    const fetchAssessmentPlan = async () => {
+      if (!courseID) return;
+      
+      try {
+        setLoading(true);
+        const data = await getAssessmentPlan(courseID);
+        
+        if (data) {
+          setAssessmentPlan({
+            endTermExam: data.endTermExam,
+            midTermExam: data.midTermExam,
+            continuousAssessment: data.continuousAssessment
+          });
+          setTempPlan({
+            endTermExam: data.endTermExam,
+            midTermExam: data.midTermExam,
+            continuousAssessment: data.continuousAssessment
+          });
+          setIsLocked(data.isLocked || false);
+        } else {
+          // Use defaults if no plan exists
+          const defaultPlan = {
+            endTermExam: 50,
+            midTermExam: 30,
+            continuousAssessment: 20
+          };
+          setAssessmentPlan(defaultPlan);
+          setTempPlan(defaultPlan);
+        }
+      } catch (error) {
+        console.error("Error fetching assessment plan:", error);
+        toast.error("Failed to load assessment plan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssessmentPlan();
   }, [courseID]);
 
-  // Save data to localStorage
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem(`assessmentPlan_${courseID}`, JSON.stringify(data));
-  };
-
   const handleEdit = () => {
+    if (isLocked) {
+      toast.error("Assessment plan is locked. Grades have been entered.");
+      return;
+    }
     setTempPlan({ ...assessmentPlan });
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setAssessmentPlan(tempPlan);
-    saveToLocalStorage(tempPlan);
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (isLocked) {
+      toast.error("Assessment plan is locked. Grades have been entered.");
+      return;
+    }
+
+    const total = tempPlan.endTermExam + tempPlan.midTermExam + tempPlan.continuousAssessment;
+    if (total !== 100) {
+      toast.error(`Total must equal 100. Currently ${total}.`);
+      return;
+    }
+
+    try {
+      await saveAssessmentPlan(courseID, tempPlan);
+      setAssessmentPlan(tempPlan);
+      setIsEditing(false);
+      toast.success("Assessment plan saved successfully");
+    } catch (error) {
+      console.error("Error saving assessment plan:", error);
+      toast.error(error.response?.data?.error || "Failed to save assessment plan");
+    }
   };
 
   const handleCancel = () => {
@@ -53,6 +106,16 @@ const AssessmentPlan = () => {
 
   const totalMarks = tempPlan.endTermExam + tempPlan.midTermExam + tempPlan.continuousAssessment;
 
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-6 flex items-center justify-center min-h-[200px]">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-gray-200">
@@ -63,7 +126,12 @@ const AssessmentPlan = () => {
             </div>
             <h3 className="text-xl font-semibold text-gray-800">Assessment Plan</h3>
           </div>
-          {!isEditing ? (
+          {isLocked && (
+            <div className="text-sm text-yellow-600 font-medium">
+              ⚠️ Locked - Grades have been entered
+            </div>
+          )}
+          {!isEditing && !isLocked ? (
             <button
               onClick={handleEdit}
               className="inline-flex items-center px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -71,7 +139,7 @@ const AssessmentPlan = () => {
               <Edit3 className="w-4 h-4 mr-1" />
               Edit
             </button>
-          ) : (
+          ) : isEditing ? (
             <div className="flex space-x-2">
               <button
                 onClick={handleCancel}
@@ -88,7 +156,7 @@ const AssessmentPlan = () => {
                 Save
               </button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -106,7 +174,7 @@ const AssessmentPlan = () => {
           {/* End-Term Exam */}
           <div className="bg-gray-100 rounded-xl p-4 text-center">
             <div className="text-sm text-gray-600 mb-2">End-Term Exam</div>
-            {isEditing ? (
+            {isEditing && !isLocked ? (
               <input
                 type="number"
                 value={tempPlan.endTermExam}
@@ -123,7 +191,7 @@ const AssessmentPlan = () => {
           {/* Mid-Term Exam */}
           <div className="bg-gray-100 rounded-xl p-4 text-center">
             <div className="text-sm text-gray-600 mb-2">Mid-Term Exam</div>
-            {isEditing ? (
+            {isEditing && !isLocked ? (
               <input
                 type="number"
                 value={tempPlan.midTermExam}
@@ -140,7 +208,7 @@ const AssessmentPlan = () => {
           {/* Continuous Assessment */}
           <div className="bg-gray-100 rounded-xl p-4 text-center">
             <div className="text-sm text-gray-600 mb-2">Continuous Assessment</div>
-            {isEditing ? (
+            {isEditing && !isLocked ? (
               <input
                 type="number"
                 value={tempPlan.continuousAssessment}
@@ -156,7 +224,7 @@ const AssessmentPlan = () => {
         </div>
 
         {/* Validation Messages */}
-        {isEditing && (
+        {isEditing && !isLocked && (
           <div className="mt-4">
             {totalMarks !== 100 && (
               <div className={`p-3 rounded-lg text-sm ${

@@ -17,14 +17,24 @@ import {
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAllCourseAssignments } from "../../../../services/assignment.service";
+import {
+  getContinuousAssessmentPlan,
+  createContinuousAssessmentCategory,
+  updateContinuousAssessmentCategory,
+  deleteContinuousAssessmentCategory,
+  bulkUpdateContinuousAssessmentPlan,
+  getAssessmentPlan,
+} from "../../../../services/course.service";
 import CreateAssignmentNew from "../../../Assignment/teacher/CreateAssignmentNew";
 import toast from "react-hot-toast";
+import LoadingSpinner from "../../../../utils/LoadingAnimation";
 
 const ContinuousAssessment = () => {
   const { courseID } = useParams();
   const navigate = useNavigate();
   const [assessmentCategories, setAssessmentCategories] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [totalMarks, setTotalMarks] = useState(0);
   const [assessmentPlan, setAssessmentPlan] = useState({
     endTermExam: 50,
@@ -64,33 +74,54 @@ const ContinuousAssessment = () => {
     "Sum of the Best 'n'"
   ];
 
-  // Load data from localStorage on component mount
+  // Load data from backend on component mount
   useEffect(() => {
-    // Load assessment plan
-    const savedPlan = localStorage.getItem(`assessmentPlan_${courseID}`);
-    if (savedPlan) {
-      setAssessmentPlan(JSON.parse(savedPlan));
-    }
+    const fetchData = async () => {
+      if (!courseID) return;
 
-    // Load continuous assessment data
-    const savedData = localStorage.getItem(`continuousAssessment_${courseID}`);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      setAssessmentCategories(parsedData);
-    } else {
-      // Initialize with default data
-      setAssessmentCategories([
-        {
-          id: 1,
-          category: "General Assignment",
-          number: 4,
-          eachMarks: 10,
-          calculationMethod: "Average of Best of n",
-          n: 3,
-          totalMarks: 10
+      try {
+        setLoading(true);
+        
+        // Fetch assessment plan
+        const planData = await getAssessmentPlan(courseID);
+        if (planData) {
+          setAssessmentPlan({
+            endTermExam: planData.endTermExam,
+            midTermExam: planData.midTermExam,
+            continuousAssessment: planData.continuousAssessment
+          });
         }
-      ]);
-    }
+
+        // Fetch continuous assessment categories
+        const categories = await getContinuousAssessmentPlan(courseID);
+        if (categories && categories.length > 0) {
+          // Convert backend format to frontend format (use _id as id, handle selectedAssignments)
+          const formattedCategories = categories.map(cat => ({
+            id: cat._id,
+            _id: cat._id,
+            category: cat.category,
+            number: cat.number,
+            eachMarks: cat.eachMarks,
+            calculationMethod: cat.calculationMethod,
+            n: cat.n,
+            totalMarks: cat.totalMarks,
+            selectedAssignments: cat.selectedAssignments || [],
+            assignmentDetails: cat.selectedAssignments || [] // Backend populates this
+          }));
+          setAssessmentCategories(formattedCategories);
+        } else {
+          // No categories exist yet - start with empty array
+          setAssessmentCategories([]);
+        }
+      } catch (error) {
+        console.error("Error fetching continuous assessment data:", error);
+        toast.error("Failed to load continuous assessment plan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [courseID]);
 
   // Calculate total marks whenever categories change
@@ -101,84 +132,163 @@ const ContinuousAssessment = () => {
     setTotalMarks(total);
   }, [assessmentCategories]);
 
-  // Save data to localStorage
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem(`continuousAssessment_${courseID}`, JSON.stringify(data));
+  const addNewCategory = async () => {
+    try {
+      const newCategoryData = {
+        category: "General Assignment",
+        number: 1,
+        eachMarks: 10,
+        calculationMethod: "Average of Best of n",
+        n: 1,
+        totalMarks: 10,
+        selectedAssignments: []
+      };
+
+      const created = await createContinuousAssessmentCategory(courseID, newCategoryData);
+      
+      // Add to local state
+      const newCategory = {
+        id: created._id || created.data?._id,
+        _id: created._id || created.data?._id,
+        category: created.category || created.data?.category,
+        number: created.number || created.data?.number,
+        eachMarks: created.eachMarks || created.data?.eachMarks,
+        calculationMethod: created.calculationMethod || created.data?.calculationMethod,
+        n: created.n || created.data?.n,
+        totalMarks: created.totalMarks || created.data?.totalMarks,
+        selectedAssignments: created.selectedAssignments || created.data?.selectedAssignments || []
+      };
+
+      setAssessmentCategories(prev => [...prev, newCategory]);
+      toast.success("Category added successfully");
+    } catch (error) {
+      console.error("Error creating category:", error);
+      toast.error(error.response?.data?.error || "Failed to create category");
+    }
   };
 
-  const addNewCategory = () => {
-    const newCategory = {
-      id: Date.now(),
-      category: "General Assignment",
-      number: 1,
-      eachMarks: 10,
-      calculationMethod: "Average of Best of n",
-      n: 1,
-      totalMarks: 10
-    };
-    const updatedCategories = [...assessmentCategories, newCategory];
-    setAssessmentCategories(updatedCategories);
-    saveToLocalStorage(updatedCategories);
-  };
+  const updateCategory = async (id, field, value) => {
+    // Optimistically update UI
+    const category = assessmentCategories.find(cat => cat.id === id || cat._id === id);
+    if (!category) return;
 
-  const updateCategory = (id, field, value) => {
-    const updatedCategories = assessmentCategories.map(category => {
-      if (category.id === id) {
-        const updated = { ...category, [field]: value };
-        
-        // Recalculate total marks based on calculation method
-        let totalMarks = 0;
-        const num = parseInt(updated.number) || 0;
-        const eachMarks = parseInt(updated.eachMarks) || 0;
-        const n = parseInt(updated.n) || 0;
-
-        switch (updated.calculationMethod) {
-          case "Average of all":
-            totalMarks = eachMarks;
-            break;
-          case "Sum of all":
-            totalMarks = num * eachMarks;
-            break;
-          case "Average of Best of n":
-          case "Average of the Best 'n'":
-            totalMarks = Math.min(n, num) * eachMarks;
-            break;
-          case "Sum of the Best 'n'":
-            totalMarks = Math.min(n, num) * eachMarks;
-            break;
-          default:
-            totalMarks = eachMarks;
-        }
-
-        updated.totalMarks = totalMarks;
-        return updated;
-      }
-      return category;
-    });
+    const updated = { ...category, [field]: value };
     
-    setAssessmentCategories(updatedCategories);
-    saveToLocalStorage(updatedCategories);
+    // Recalculate total marks based on calculation method
+    let totalMarks = 0;
+    const num = parseInt(updated.number) || 0;
+    const eachMarks = parseInt(updated.eachMarks) || 0;
+    const n = parseInt(updated.n) || 0;
+
+    switch (updated.calculationMethod) {
+      case "Average of all":
+        totalMarks = eachMarks;
+        break;
+      case "Sum of all":
+        totalMarks = num * eachMarks;
+        break;
+      case "Average of Best of n":
+      case "Average of the Best 'n'":
+        totalMarks = Math.min(n, num) * eachMarks;
+        break;
+      case "Sum of the Best 'n'":
+        totalMarks = Math.min(n, num) * eachMarks;
+        break;
+      default:
+        totalMarks = eachMarks;
+    }
+
+    updated.totalMarks = totalMarks;
+
+    // Update local state immediately
+    setAssessmentCategories(prev => prev.map(cat => 
+      (cat.id === id || cat._id === id) ? updated : cat
+    ));
+
+    // Save to backend
+    try {
+      const categoryId = category._id || category.id;
+      await updateContinuousAssessmentCategory(courseID, categoryId, {
+        [field]: value,
+        totalMarks: updated.totalMarks
+      });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      toast.error(error.response?.data?.error || "Failed to update category");
+      // Revert on error
+      setAssessmentCategories(prev => prev.map(cat => 
+        (cat.id === id || cat._id === id) ? category : cat
+      ));
+    }
   };
 
-  const deleteCategory = (id) => {
-    const updatedCategories = assessmentCategories.filter(category => category.id !== id);
-    setAssessmentCategories(updatedCategories);
-    saveToLocalStorage(updatedCategories);
+  const deleteCategory = async (id) => {
+    const category = assessmentCategories.find(cat => cat.id === id || cat._id === id);
+    if (!category) return;
+
+    try {
+      const categoryId = category._id || category.id;
+      await deleteContinuousAssessmentCategory(courseID, categoryId);
+      
+      // Remove from local state
+      setAssessmentCategories(prev => prev.filter(cat => cat.id !== id && cat._id !== id));
+      toast.success("Category deleted successfully");
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      toast.error(error.response?.data?.error || "Failed to delete category");
+    }
   };
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      // Convert frontend format to backend format
+      const categoriesToSave = assessmentCategories.map(cat => ({
+        category: cat.category,
+        number: cat.number,
+        eachMarks: cat.eachMarks,
+        calculationMethod: cat.calculationMethod,
+        n: cat.n,
+        totalMarks: cat.totalMarks,
+        selectedAssignments: Array.isArray(cat.selectedAssignments) 
+          ? cat.selectedAssignments.map(a => typeof a === 'string' ? a : a._id || a.id)
+          : []
+      }));
+
+      await bulkUpdateContinuousAssessmentPlan(courseID, categoriesToSave);
+      setIsEditing(false);
+      toast.success("Continuous assessment plan saved successfully");
+    } catch (error) {
+      console.error("Error saving continuous assessment plan:", error);
+      toast.error(error.response?.data?.error || "Failed to save plan");
+    }
   };
 
-  const handleCancel = () => {
-    // Reload from localStorage to cancel changes
-    const savedData = localStorage.getItem(`continuousAssessment_${courseID}`);
-    if (savedData) {
-      setAssessmentCategories(JSON.parse(savedData));
+  const handleCancel = async () => {
+    // Reload from backend to cancel changes
+    try {
+      const categories = await getContinuousAssessmentPlan(courseID);
+      if (categories && categories.length > 0) {
+        const formattedCategories = categories.map(cat => ({
+          id: cat._id,
+          _id: cat._id,
+          category: cat.category,
+          number: cat.number,
+          eachMarks: cat.eachMarks,
+          calculationMethod: cat.calculationMethod,
+          n: cat.n,
+          totalMarks: cat.totalMarks,
+          selectedAssignments: cat.selectedAssignments || []
+        }));
+        setAssessmentCategories(formattedCategories);
+      } else {
+        setAssessmentCategories([]);
+      }
+    } catch (error) {
+      console.error("Error reloading data:", error);
     }
     setIsEditing(false);
   };
@@ -256,11 +366,13 @@ const ContinuousAssessment = () => {
     setShowAssignmentModal(true);
     
     // Load previously selected assignments for this category
-    const category = assessmentCategories.find(cat => cat.id === id);
+    const category = assessmentCategories.find(cat => cat.id === id || cat._id === id);
     if (category?.selectedAssignments) {
       const selected = {};
       category.selectedAssignments.forEach(assignmentId => {
-        selected[assignmentId] = true;
+        // Handle both string IDs and object IDs
+        const id = typeof assignmentId === 'string' ? assignmentId : assignmentId._id || assignmentId.id;
+        selected[id] = true;
       });
       setSelectedAssignments(selected);
     } else {
@@ -277,27 +389,46 @@ const ContinuousAssessment = () => {
   };
 
   // Save selected assignments to category
-  const handleSaveSelectedAssignments = () => {
+  const handleSaveSelectedAssignments = async () => {
     const selectedIds = Object.keys(selectedAssignments).filter(id => selectedAssignments[id]);
     
-    const updatedCategories = assessmentCategories.map(category => {
-      if (category.id === selectedCategoryId) {
-        return {
-          ...category,
-          selectedAssignments: selectedIds
-        };
-      }
-      return category;
-    });
-    
-    setAssessmentCategories(updatedCategories);
-    saveToLocalStorage(updatedCategories);
-    setShowAssignmentModal(false);
-    setSelectedAssignments({});
-    setSelectedCategoryId(null);
+    const category = assessmentCategories.find(cat => cat.id === selectedCategoryId || cat._id === selectedCategoryId);
+    if (!category) return;
+
+    try {
+      const categoryId = category._id || category.id;
+      await updateContinuousAssessmentCategory(courseID, categoryId, {
+        selectedAssignments: selectedIds
+      });
+
+      // Update local state
+      setAssessmentCategories(prev => prev.map(cat => 
+        (cat.id === selectedCategoryId || cat._id === selectedCategoryId)
+          ? { ...cat, selectedAssignments: selectedIds }
+          : cat
+      ));
+
+      setShowAssignmentModal(false);
+      setSelectedAssignments({});
+      setSelectedCategoryId(null);
+      toast.success("Assignments linked successfully");
+    } catch (error) {
+      console.error("Error saving selected assignments:", error);
+      toast.error(error.response?.data?.error || "Failed to save assignments");
+    }
   };
 
   const remainingMarks = assessmentPlan.continuousAssessment - totalMarks;
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6 p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
 
   // If creating assignment, show the create form
   if (isCreatingAssignment) {
@@ -401,15 +532,20 @@ const ContinuousAssessment = () => {
         </div>
 
         {/* Assessment Rows */}
-        {assessmentCategories.map((category, index) => (
-          <div key={category.id} className="grid grid-cols-6 gap-4 mb-4 items-start py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 transition-colors border border-gray-200 dark:border-gray-600">
+        {assessmentCategories.length === 0 && !isEditing ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            No assessment categories configured yet. Click "Edit Plan" to add categories.
+          </div>
+        ) : (
+          assessmentCategories.map((category, index) => (
+            <div key={category.id || category._id} className="grid grid-cols-6 gap-4 mb-4 items-start py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 transition-colors border border-gray-200 dark:border-gray-600">
             {/* Category Dropdown */}
             <div className="flex items-start">
               {isEditing ? (
                 <div className="w-full flex flex-col gap-2">
                   <select
                     value={category.category}
-                    onChange={(e) => handleCategoryChange(category.id, e.target.value)}
+                    onChange={(e) => handleCategoryChange(category.id || category._id, e.target.value)}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {categoryOptions.map(option => (
@@ -438,7 +574,7 @@ const ContinuousAssessment = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleSelect(category.id, category.category);
+                          handleSelect(category.id || category._id, category.category);
                         }}
                         className="relative px-2 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm cursor-pointer flex items-center justify-center group"
                         title="Select"
@@ -478,6 +614,11 @@ const ContinuousAssessment = () => {
                       {category.selectedAssignments.length} assignment(s) selected
                     </span>
                   )}
+                  {category.assignmentDetails && category.assignmentDetails.length > 0 && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {category.assignmentDetails.length} assignment(s) linked
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -488,7 +629,7 @@ const ContinuousAssessment = () => {
                 <input
                   type="number"
                   value={category.number}
-                  onChange={(e) => updateCategory(category.id, 'number', e.target.value)}
+                  onChange={(e) => updateCategory(category.id || category._id, 'number', e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   min="1"
                 />
@@ -503,7 +644,7 @@ const ContinuousAssessment = () => {
                 <input
                   type="number"
                   value={category.eachMarks}
-                  onChange={(e) => updateCategory(category.id, 'eachMarks', e.target.value)}
+                  onChange={(e) => updateCategory(category.id || category._id, 'eachMarks', e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   min="1"
                 />
@@ -517,7 +658,7 @@ const ContinuousAssessment = () => {
               {isEditing ? (
                 <select
                   value={category.calculationMethod}
-                  onChange={(e) => updateCategory(category.id, 'calculationMethod', e.target.value)}
+                  onChange={(e) => updateCategory(category.id || category._id, 'calculationMethod', e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {calculationOptions.map(option => (
@@ -535,7 +676,7 @@ const ContinuousAssessment = () => {
                 <input
                   type="number"
                   value={category.n}
-                  onChange={(e) => updateCategory(category.id, 'n', e.target.value)}
+                  onChange={(e) => updateCategory(category.id || category._id, 'n', e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   min="1"
                 />
@@ -549,7 +690,7 @@ const ContinuousAssessment = () => {
               <span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">{category.totalMarks}</span>
               {isEditing && (
                 <button
-                  onClick={() => deleteCategory(category.id)}
+                  onClick={() => deleteCategory(category.id || category._id)}
                   className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors ml-2"
                   title="Delete category"
                 >
@@ -558,7 +699,8 @@ const ContinuousAssessment = () => {
               )}
             </div>
           </div>
-        ))}
+        ))
+        )}
 
         {/* Add More Category Button */}
         {isEditing && (
