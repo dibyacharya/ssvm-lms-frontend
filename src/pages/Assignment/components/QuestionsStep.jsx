@@ -204,25 +204,50 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModal(false);
 
-    const apiEndpoint = "https://question-generation.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/generate-questions";
+    const apiEndpoint = "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api/generate-questions";
 
     try {
-      // Generate questions - API expects arrays, so we'll request multiple questions
-      const requestBody = new URLSearchParams();
-      // Request the number of questions specified
-      for (let i = 0; i < num; i++) {
-        requestBody.append("selected_cos[]", co);
-        requestBody.append("selected_bloom[]", bloom);
-        requestBody.append("selected_types[]", "Long answer"); // Subjective questions
-        requestBody.append("extra_prompt[]", context || "Generate based on course content");
+      // Extract modules, topics, and units from courseData
+      const modules = [];
+      const topics = [];
+      const units = [];
+
+      if (courseData?.syllabus?.modules && Array.isArray(courseData.syllabus.modules)) {
+        courseData.syllabus.modules.forEach((module, moduleIndex) => {
+          // Add module identifier (e.g., "M1", "M2")
+          modules.push(`M${module.moduleNumber || moduleIndex + 1}`);
+          
+          // Add topics for this module
+          if (module.topics && Array.isArray(module.topics)) {
+            module.topics.forEach((topic, topicIndex) => {
+              topics.push(`M${module.moduleNumber || moduleIndex + 1}T${topicIndex + 1}`);
+            });
+          }
+        });
       }
+
+      // Get course code and remove spaces
+      const courseCode = (courseData?.courseCode || courseData?.course_code || "").replace(/\s+/g, "");
+
+      // Generate questions - API expects JSON format
+      const requestBody = {
+        course_code: courseCode,
+        selected_cos: [co],
+        selected_bloom: bloom.toLowerCase(),
+        selected_type: "subjective", // Subjective/Long answer questions
+        num_questions: num,
+        extra_prompt: context || "",
+        modules: modules,
+        topics: topics,
+        units: units
+      };
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: requestBody.toString(),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -272,25 +297,50 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModalMCQ(false);
 
-    const apiEndpoint = "https://question-generation.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/generate-questions";
+    const apiEndpoint = "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api/generate-questions";
 
     try {
-      // Generate questions - API expects arrays, so we'll request multiple questions
-      const requestBody = new URLSearchParams();
-      // Request the number of questions specified
-      for (let i = 0; i < num; i++) {
-        requestBody.append("selected_cos[]", co);
-        requestBody.append("selected_bloom[]", bloom);
-        requestBody.append("selected_types[]", "MCQ"); // MCQ questions
-        requestBody.append("extra_prompt[]", context || "Generate based on course content");
+      // Extract modules, topics, and units from courseData
+      const modules = [];
+      const topics = [];
+      const units = [];
+
+      if (courseData?.syllabus?.modules && Array.isArray(courseData.syllabus.modules)) {
+        courseData.syllabus.modules.forEach((module, moduleIndex) => {
+          // Add module identifier (e.g., "M1", "M2")
+          modules.push(`M${module.moduleNumber || moduleIndex + 1}`);
+          
+          // Add topics for this module
+          if (module.topics && Array.isArray(module.topics)) {
+            module.topics.forEach((topic, topicIndex) => {
+              topics.push(`M${module.moduleNumber || moduleIndex + 1}T${topicIndex + 1}`);
+            });
+          }
+        });
       }
+
+      // Get course code and remove spaces
+      const courseCode = (courseData?.courseCode || courseData?.course_code || "").replace(/\s+/g, "");
+
+      // Generate questions - API expects JSON format
+      const requestBody = {
+        course_code: courseCode,
+        selected_cos: [co],
+        selected_bloom: bloom.toLowerCase(),
+        selected_type: "objective", // MCQ questions
+        num_questions: num,
+        extra_prompt: context || "",
+        modules: modules,
+        topics: topics,
+        units: units
+      };
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: requestBody.toString(),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

@@ -14,6 +14,7 @@ import Courseware from "./Components/Courseware";
 import SwayamKanbanBoard from "./Components/ToDoList";
 import { useUtilityContext } from "../../context/UtilityContext";
 import StudentStatsSection from "./Components/StudentStatsSection";
+import StudentGradebook from "./Components/StudentGradebook";
 
 const Dashboard = () => {
   const { activeSection, setActiveSection } = useUtilityContext();
@@ -36,6 +37,7 @@ const Dashboard = () => {
         {activeSection === "MyStats" && <StudentStatsSection />}
         {activeSection === "Assignment" && <AssignmentList />}
         {activeSection === "Courseware" && <Courseware />}
+        {activeSection === "Gradebook" && <StudentGradebook />}
         {activeSection === "LiveClass" && <CreateMeeting />}
         {activeSection === "ToDo" && <SwayamKanbanBoard />}
       </div>
