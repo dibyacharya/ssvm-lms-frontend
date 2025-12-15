@@ -70,22 +70,31 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
     setGeneratingQuestion(true);
     setAiError(null);
 
-    const apiEndpoint = "https://question-generation.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/generate-questions";
+    const apiEndpoint = "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api/generate-questions";
 
-    // Use URLSearchParams to construct the x-www-form-urlencoded body
-    const requestBody = new URLSearchParams();
-    requestBody.append("selected_cos[]", selectedOutcome);
-    requestBody.append("selected_bloom[]", selectedBloomLevel);
-    requestBody.append("selected_types[]", questionType);
-    requestBody.append("extra_prompt[]", extraPrompt || "Generate based on concrete concepts");
+    // Determine question type for API
+    const apiQuestionType = questionType === "Objective" ? "objective" : "subjective";
+
+    // Generate questions - API expects JSON format
+    const requestBody = {
+      course_code: "", // Not available in this component
+      selected_cos: [selectedOutcome],
+      selected_bloom: selectedBloomLevel.toLowerCase(),
+      selected_type: apiQuestionType,
+      num_questions: 1,
+      extra_prompt: extraPrompt || "",
+      modules: [], // Not available in this component
+      topics: [], // Not available in this component
+      units: [] // Not available in this component
+    };
 
     try {
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: requestBody.toString(),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

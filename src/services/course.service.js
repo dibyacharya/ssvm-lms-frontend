@@ -177,3 +177,43 @@ export const unpublishGrades = async (courseID) => {
     throw error;
   }
 };
+
+// Student Grading APIs (following API documentation)
+export const getStudentAssessmentPlan = async (courseId) => {
+  try {
+    const response = await api.get(`/grading/courses/${courseId}/assessment-plan`);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null;
+    }
+    console.error("Error fetching assessment plan:", error);
+    throw error;
+  }
+};
+
+export const getStudentContinuousAssessmentPlan = async (courseId) => {
+  try {
+    const response = await api.get(`/grading/courses/${courseId}/continuous-assessment-plan`);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null;
+    }
+    console.error("Error fetching continuous assessment plan:", error);
+    throw error;
+  }
+};
+
+export const getStudentOwnGrades = async (courseId) => {
+  try {
+    const response = await api.get(`/grading/courses/${courseId}/grading`);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null; // Grades not published yet
+    }
+    console.error("Error fetching student grades:", error);
+    throw error;
+  }
+};
