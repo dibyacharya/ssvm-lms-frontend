@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Book,
@@ -11,8 +11,7 @@ import {
   BookOpen,
   Layers,
 } from "lucide-react";
-// 1. Import the context hook
-import { useMeeting } from "../../../context/MeetingContext";
+import { useMeetingsV2 } from "../../../context/MeetingV2Context";
 import toast from "react-hot-toast";
 import { getAllStudentCourses } from "../../../services/course.service";
 import { getStudentAssignmentStats } from "../../../services/assignment.service";
@@ -23,8 +22,7 @@ const DEFAULT_IMAGE = "https://img.freepik.com/free-vector/online-school-platfor
 
 const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   const navigate = useNavigate();
-  // 2. Get meetings and their state from the context
-  const { meetings, loading: meetingsLoading, error: meetingsError } = useMeeting();
+  const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
   
   const [coursesData, setCoursesData] = useState({ courses: [], user: {} });
   const [allCoursesData, setAllCoursesData] = useState({ courses: [], user: {} });
@@ -36,8 +34,6 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   });
   const [loading, setLoading] = useState(true);
   const [assignmentStatsLoading, setAssignmentStatsLoading] = useState(true);
-
-  console.log("course meetings",meetings);
 
   // Use assignment stats from API
   const allAssignmentsCount = assignmentStats.allAssignments || 0;
@@ -153,44 +149,55 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       setCoursesData(allCoursesData);
     }
   }, [semNumber, allCoursesData]);
-  
-  // Effect to handle meeting loading errors
+
+  // Pre-fetch meetings for all courses when coursesData changes
   useEffect(() => {
-    
-    if (meetingsError) {
-      toast.error("Failed to load meetings. Please try again later.");
+    if (coursesData.courses && coursesData.courses.length > 0) {
+      const uniqueCourseIds = [...new Set(coursesData.courses.map(c => c._id).filter(Boolean))];
+      // Fire-and-forget: fetch meetings for all courses in parallel
+      uniqueCourseIds.forEach(courseId => {
+        fetchMeetingsForCourse(courseId).catch(() => {});
+      });
     }
-    
-  }, [meetingsError]);
+  }, [coursesData.courses, fetchMeetingsForCourse]); 
+  
+  // 4. Functions based on backend meetings per course (using V2 context)
+  // NOTE: This only reads from already-loaded meetings; fetching happens in useEffect above
+  const getThisWeekMeetings = useMemo(() => {
+    if (!coursesData.courses || coursesData.courses.length === 0) return [];
 
-
-  // 4. Updated function to use meetings from context
-  const getThisWeekMeetings = () => {
-    if (!meetings || meetings.length === 0) return [];
-    
-    const now = new Date();
-    // Set to the beginning of the current day
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Set to the end of the day 6 days from now
     const endOfWeek = new Date(today);
     endOfWeek.setDate(today.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
 
-    return meetings.filter(meeting => {
-      const meetingStartDate = new Date(meeting.start);
-      return meetingStartDate >= today && meetingStartDate <= endOfWeek;
+    const allMeetings = [];
+
+    coursesData.courses.forEach((course) => {
+      if (!course?._id) return;
+      // Only read from already-loaded meetings (no fetching here to avoid recursion)
+      const courseMeetings = getMeetingsForCourse(course._id) || [];
+      courseMeetings.forEach((meeting) => {
+        const start = meeting.instanceStart || meeting.start;
+        if (!start) return;
+        const startDate = new Date(start);
+        if (startDate >= today && startDate <= endOfWeek) {
+          allMeetings.push(meeting);
+        }
+      });
     });
-  };
+
+    return allMeetings;
+  }, [coursesData.courses, getMeetingsForCourse]);
   
-  // Get upcoming events from meetings
-  const upcomingEvents = meetings
-    ? meetings
-        .filter(m => new Date(m.start) > new Date())
-        .sort((a, b) => new Date(a.start) - new Date(b.start))
-        .slice(0, 3)
-    : [];
+  const upcomingEvents = useMemo(() => {
+    return getThisWeekMeetings
+      .filter((m) => m.status === "upcoming" || m.status === "live")
+      .sort((a, b) => new Date(a.instanceStart || a.start) - new Date(b.instanceStart || b.start))
+      .slice(0, 3);
+  }, [getThisWeekMeetings]);
 
 
   const getStatusStyle = (status) => {
@@ -225,7 +232,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   };
 
   // Combine loading states for the main loader
-  if (loading || meetingsLoading || assignmentStatsLoading) {
+  if (loading || assignmentStatsLoading) {
     return (
       <div className="flex items-center justify-center h-screen dark:bg-gray-900">
         <div className="text-center">
@@ -269,7 +276,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
             title: "Live Classes",
             icon: <Calendar className="h-6 w-6 text-primary dark:text-blue-400" />,
             // 5. Count is now dynamic based on context data
-            count: getThisWeekMeetings().length,
+            count: getThisWeekMeetings.length,
             description: "This Week",
             bgClass: "bg-white dark:bg-gray-800",
             color: "text-primary dark:text-blue-400",

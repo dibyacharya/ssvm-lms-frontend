@@ -11,16 +11,11 @@ import {
 
 import { getAllCourses } from "../../../../services/course.service";
 import ScheduleCalendar from "./ScheduleCalendar";
-// 1. Import the context hook
-import { useMeeting } from "../../../../context/MeetingContext";
 
 const TeacherDashboard2 = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // 2. Get meetings and their loading state from the context
-  const { meetings, loading: meetingsLoading, error: meetingsError } = useMeeting();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -39,7 +34,7 @@ const TeacherDashboard2 = () => {
   }, []);
 
   // --- STATS CALCULATIONS (course & grade data still comes from dashboardData) ---
- 
+
   const activeCoursesCount = dashboardData?.courses?.length || 0;
 
   const totalStudentsCount = useMemo(() => {
@@ -69,18 +64,37 @@ const TeacherDashboard2 = () => {
     return pendingCount;
   }, [dashboardData]);
 
-
-  // 3. RECALCULATE upcoming lectures using the meetings from the context
+  // 3. Upcoming lectures in next 7 days from meeting summaries
   const upcomingLecturesCount = useMemo(() => {
-    if (!meetings) return 0;
-    const now = new Date();
-    // A lecture is "upcoming" if its start time is in the future
-    return meetings.filter(meeting => new Date(meeting.start) > now).length;
-  }, [meetings]);
+    if (!dashboardData?.courses) return 0;
+    return dashboardData.courses.reduce(
+      (sum, course) => sum + (course.meetingsNext7DaysCount || 0),
+      0
+    );
+  }, [dashboardData?.courses]);
+
+  // Today's meetings for schedule/calendar, flattened across courses
+  const todayEvents = useMemo(() => {
+    if (!dashboardData?.courses) return [];
+
+    return dashboardData.courses.flatMap((course) =>
+      (course.todayMeetings || []).map((m) => ({
+        _id: m.meetingId,
+        start: m.start,
+        end: m.end,
+        subject: m.title,
+        roomNumber: m.roomNumber,
+        link: m.link,
+        color: m.color,
+        courseTitle: course.title,
+        courseCode: course.courseCode,
+      }))
+    );
+  }, [dashboardData?.courses]);
 
 
-  // 4. UPDATE loading and error states to consider both data sources
-  if (loading || meetingsLoading) {
+  // 4. UPDATE loading and error states
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen w-full bg-white dark:bg-gray-800">
         <div className="animate-spin h-8 w-8 border-4 border-primary dark:border-primary/80 border-t-transparent rounded-full mr-3"></div>
@@ -89,10 +103,10 @@ const TeacherDashboard2 = () => {
     );
   }
 
-  if (error || meetingsError) {
+  if (error) {
     return (
       <div className="flex justify-center items-center h-screen w-full bg-white dark:bg-gray-800">
-        <p className="text-xl text-red-600 dark:text-red-400">{error || meetingsError}</p>
+        <p className="text-xl text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
@@ -194,8 +208,8 @@ const TeacherDashboard2 = () => {
         </div>
       </div>
 
-      {/* 5. PASS the meetings from the context to the calendar component */}
-      <ScheduleCalendar events={meetings} />
+      {/* 5. Scheduled meetings & mini calendar using today's meeting instances */}
+      <ScheduleCalendar events={todayEvents} />
     </div>
   );
 };
