@@ -11,7 +11,7 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
-import { useMeeting } from "../../context/MeetingContext";
+import { useMeetingsV2 } from "../../context/MeetingV2Context";
 import { getAllStudentCourses } from "../../services/course.service";
 import { generateTimetableEvents, getAvailableSemesters } from "../data/timetableData";
 
@@ -106,10 +106,7 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
 
 // --- Main Component ---
 const CreateMeeting = () => {
-  // Get meetings, loading status, and error state from the context
-  const { meetings, loading, error } = useMeeting();
-  console.log("meetings",meetings);
-  
+  const { meetingsByCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
   // Local UI state for view, selected date, and modal
   const [view, setView] = useState("cards"); // 'calendar' or 'cards'
@@ -127,6 +124,20 @@ const CreateMeeting = () => {
         const data = await getAllStudentCourses();
         
         if (data && data.courses) {
+          // Fetch meetings for each enrolled course
+          const uniqueCourseIds = [
+            ...new Set(
+              data.courses
+                .map((course) => course._id)
+                .filter(Boolean)
+            ),
+          ];
+          await Promise.all(
+            uniqueCourseIds.map((id) =>
+              fetchMeetingsForCourse(id).catch(() => {})
+            )
+          );
+
           // Get available semesters that have timetable data
           const availableSemesters = getAvailableSemesters();
           
@@ -175,12 +186,18 @@ const CreateMeeting = () => {
   // Process meetings from context into a format for the calendar
   // useMemo prevents reprocessing on every render, improving performance
   const processedMeetings = useMemo(() => {
-    const meetingsProcessed = meetings.map((meeting) => ({
-      ...meeting,
-      date: new Date(meeting.date),
-      start: new Date(meeting.start),
-      end: new Date(meeting.end),
-    }));
+    const allBackendMeetings = Object.values(meetingsByCourse || {}).flat();
+
+    const meetingsProcessed = allBackendMeetings.map((meeting) => {
+      const start = meeting.instanceStart || meeting.start;
+      const end = meeting.instanceEnd || meeting.end;
+      return {
+        ...meeting,
+        date: new Date(start),
+        start: new Date(start),
+        end: new Date(end),
+      };
+    });
     
     // Merge timetable events with regular meetings
     const allMeetings = [...meetingsProcessed, ...timetableEvents];

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MonitorPlay, Search, ChevronDown, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllCourses } from "../../../services/course.service";
-import { useMeeting } from "../../../context/MeetingContext"; // 1. Import the meeting context
+import { useMeetingsV2 } from "../../../context/MeetingV2Context"; // New meeting context
 
 const TeacherCourses = () => {
   const [coursesData, setCoursesData] = useState({
@@ -14,19 +14,9 @@ const TeacherCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSemester, setFilterSemester] = useState("All");
   const [filterYear, setFilterYear] = useState("All");
-  const [currentTime, setCurrentTime] = useState(new Date());
-  
-  // 2. Get meetings data from the context
-  const { meetings } = useMeeting();
 
-  // Update current time every minute to check if meeting should be active
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
+  // 2. Get meetings data from the new context
+  const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
   const image = [
     "https://thumbs.dreamstime.com/b/businessman-looking-dice-sketch-thoughtful-chalkboard-connected-game-probability-theory-73451825.jpg",
@@ -46,6 +36,17 @@ const TeacherCourses = () => {
     };
     fetchCourses();
   }, []);
+
+  // Pre-fetch meetings for all courses once when courses are loaded
+  useEffect(() => {
+    if (coursesData.courses && coursesData.courses.length > 0) {
+      const uniqueCourseIds = [...new Set(coursesData.courses.map(c => c._id).filter(Boolean))];
+      // Fire-and-forget: fetch meetings for all courses in parallel
+      uniqueCourseIds.forEach(courseId => {
+        fetchMeetingsForCourse(courseId).catch(() => {});
+      });
+    }
+  }, [coursesData.courses, fetchMeetingsForCourse]);
 
   const getSemesterInfo = (startDate) => {
     const date = new Date(startDate);
@@ -89,52 +90,22 @@ const TeacherCourses = () => {
   };
 
   // 3. Helper function to find a live meeting for any course within a semester
-  const findLiveMeetingForSemester = (semesterCourses, allMeetings) => {
-    if (!allMeetings || !semesterCourses) return null;
-    const now = new Date();
-    for (const course of semesterCourses) {
-        const liveMeeting = allMeetings.find(meeting => {
-            const isForThisCourse = meeting.courseId === course._id;
-            if (!isForThisCourse) return false;
-            // This logic treats the API time as local time by removing the 'Z'
-            const startTime = new Date(meeting.start.slice(0, -1));
-            const endTime = new Date(meeting.end.slice(0, -1));
-            return now >= startTime && now <= endTime;
-        });
-        if (liveMeeting) return liveMeeting; // Return the first one found
-    }
-    return null; // No live meetings found in this semester
-  };
-
-  // Helper function to check for temporary meeting for XCT 3002
-  const findTempLiveMeetingForSemester = (semesterCourses) => {
+  // NOTE: This only reads from already-loaded meetings; fetching happens in useEffect above
+  const findLiveMeetingForSemester = (semesterCourses) => {
     if (!semesterCourses) return null;
-    
-    // Check if any course in this semester has code "XCT 3002"
-    const xct3002Course = semesterCourses.find(course => {
-      const courseCode = course.courseCode || course.code || course.course_code;
-      return courseCode === 'XCT 3002';
-    });
-    
-    if (!xct3002Course) return null;
-    
-    const now = currentTime;
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
-    
-    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
-    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
-    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
-    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
-    
-    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
-      return {
-        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
-        isTemporary: true
-      };
+
+    for (const course of semesterCourses) {
+      if (!course?._id) continue;
+      // Only read from already-loaded meetings (no fetching here to avoid recursion)
+      const courseMeetings = getMeetingsForCourse(course._id) || [];
+      const liveMeeting = courseMeetings.find(
+        (meeting) =>
+          meeting.course === course._id &&
+          meeting.status === "live"
+      );
+      if (liveMeeting) return liveMeeting;
     }
-    
+
     return null;
   };
 
@@ -227,10 +198,8 @@ const TeacherCourses = () => {
         </div>
       ) : (
         filteredCourses.map((semester, index) => {
-          // 4. For each semester, check if there's a live meeting
-          const liveMeeting = findLiveMeetingForSemester(semester.courses, meetings);
-          const tempLiveMeeting = findTempLiveMeetingForSemester(semester.courses);
-          const activeMeeting = liveMeeting || tempLiveMeeting;
+          // 4. For each semester, check if there's a live meeting via backend status
+          const activeMeeting = findLiveMeetingForSemester(semester.courses);
 
           return (
             <div key={semester.semesterId || index} className="mb-12">

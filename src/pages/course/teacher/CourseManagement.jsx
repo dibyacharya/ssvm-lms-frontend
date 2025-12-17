@@ -50,7 +50,7 @@ import ProfileDropdown from "../../../utils/ProfileDropDown";
 import AllActivities from "../../Activity/teacher/AllActivities";
 import BlogCreator from "./course/Blog/BlogCreator";
 import ContinuousAssessment from "./course/ContinuousAssessment";
-import { useMeeting } from "../../../context/MeetingContext";
+import { useMeetingsV2 } from "../../../context/MeetingV2Context";
 
 const CourseManagement = () => {
   // Get courseId from URL parameters
@@ -106,73 +106,43 @@ const CourseManagement = () => {
     logout();
     navigate("/login");
   };
-  // Get context to update it
+  // New meetings context (backend-driven)
+  const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
-  // Get meetings data from the context
-  const { meetings } = useMeeting();
+  // Load meetings for this course from backend
+  useEffect(() => {
+    if (courseID) {
+      fetchMeetingsForCourse(courseID).catch(() => {
+        // errors are stored in context; UI can handle via other components if needed
+      });
+    }
+  }, [courseID, fetchMeetingsForCourse]);
 
-  // Update current time every minute to check if meeting should be active
+  const courseMeetings = getMeetingsForCourse(courseID) || [];
+
+  // Keep current time updated for optional client-side checks, if needed elsewhere
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Check for a currently live meeting for THIS specific course
-// This logic makes the button active based on the exact time in the API string
+  // Find live meeting instance for this course based on backend-computed status
   const liveMeeting = useMemo(() => {
-    if (!meetings || !courseID) return null;
-    
-    const now = new Date();
-
-    return meetings.find(meeting => {
-      const isForThisCourse = meeting.courseId === courseID;
-      if (!isForThisCourse) return false;
-
-      // This logic strips the 'Z' (UTC marker) from the API's time string.
-      // It forces JavaScript to read "13:01" as "1:01 PM" in your local time.
-      const startTime = new Date(meeting.start.slice(0, -1));
-      const endTime = new Date(meeting.end.slice(0, -1));
-      
-      // The button will now be active if the current time is between the local start and end times.
-      return now >= startTime && now <= endTime;
-    });
-  }, [meetings, courseID]);
+    if (!courseID || !courseMeetings.length) return null;
+    return courseMeetings.find(
+      (meeting) =>
+        meeting.course === courseID &&
+        meeting.status === "live"
+    );
+  }, [courseID, courseMeetings]);
 
   const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
 
-  // Check for temporary meeting for XCT 3002 between 2:30 PM and 3:30 PM
-  const tempLiveMeeting = useMemo(() => {
-    if (!courseData) return null;
-    
-    const courseCode = courseData.courseCode || courseData.code || courseData.course_code;
-    if (courseCode !== 'XCT 3002') return null;
-    
-    const now = currentTime;
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
-    
-    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
-    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
-    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
-    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
-    
-    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
-      return {
-        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
-        isTemporary: true
-      };
-    }
-    
-    return null;
-  }, [courseData, currentTime]);
-
   // Create the handler function for the button
   const handleJoinLiveClass = () => {
-    const activeMeeting = liveMeeting || tempLiveMeeting;
+    const activeMeeting = liveMeeting;
     if (activeMeeting) {
       window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
     } else {

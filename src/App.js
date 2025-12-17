@@ -30,7 +30,7 @@ import TeacherProfileSection from "./pages/TeacherDashboard/Components/TeacherPr
 import StudentProfileSection from "./pages/StudentDashboard/Components/StudentProfileSection.jsx";
 import ITS from "./pages/Its/Its.jsx";
 import StudentAssignmentSectionCourse from "./pages/Assignment/ShowAssignmentCourse.jsx";
-import { MeetingProvider } from "./context/MeetingContext.js";
+import { MeetingV2Provider } from "./context/MeetingV2Context.js";
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -44,12 +44,12 @@ const App = () => {
     <AuthProvider>
       <UtilityProvider>
         <CourseProvider>
-          <MeetingProvider>
+          <MeetingV2Provider>
           <Router>
             <Layout />
           </Router>
           <Toaster position="top-right" reverseOrder={false} />
-          </MeetingProvider>
+          </MeetingV2Provider>
         </CourseProvider>
       </UtilityProvider>
     </AuthProvider>

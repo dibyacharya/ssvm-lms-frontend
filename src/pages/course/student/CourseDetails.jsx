@@ -15,7 +15,7 @@ import {
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getCoursesById } from "../../../services/course.service";
 import { useCourse } from "../../../context/CourseContext";
-import { useMeeting } from "../../../context/MeetingContext"; 
+import { useMeetingsV2 } from "../../../context/MeetingV2Context"; 
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 import MentorInfo from "../../../components/dashboard/utils/MentorInfo";
 import CourseInfo from "../../../components/dashboard/utils/CourseInfo";
@@ -85,15 +85,25 @@ const CourseDetails = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const dropdownRefs = useRef({});
 
-  // 2. Get meetings data from the context
-  const { meetings } = useMeeting();
+  // 2. Get meetings data from the new backend-driven context
+  const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
-  // Update current time every minute to check if meeting should be active
+  // Load meetings for this course
+  useEffect(() => {
+    if (courseID) {
+      fetchMeetingsForCourse(courseID).catch(() => {
+        // error is stored in context; component can choose to show a toast if needed
+      });
+    }
+  }, [courseID, fetchMeetingsForCourse]);
+
+  const courseMeetings = getMeetingsForCourse(courseID) || [];
+
+  // Update current time every minute (used for other time-based UI if needed)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every minute
-
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -151,54 +161,19 @@ const CourseDetails = () => {
     };
   }, [openDropdown]);
 
-  // 3. Check for a currently live meeting for THIS specific course
+  // 3. Check for a currently live meeting for THIS specific course using backend status
   const liveMeeting = useMemo(() => {
-    if (!meetings || !courseID) return null;
-
-    const now = new Date(); // Get current time
-
-    // Find a meeting that belongs to the current course and is within its time frame
-    return meetings.find(meeting => {
-      const isForThisCourse = meeting.courseId === courseID;
-      if (!isForThisCourse) return false;
-
-      const startTime = new Date(meeting.start);
-      const endTime = new Date(meeting.end);
-      
-      return now >= startTime && now <= endTime;
-    });
-  }, [meetings, courseID]); // This will re-check whenever meetings data changes
-
-  // Check for temporary meeting for XCT 3002 between 2:30 PM and 3:30 PM
-  const tempLiveMeeting = useMemo(() => {
-    if (!course) return null;
-    
-    const courseCode = course.courseCode || course.code || course.course_code;
-    if (courseCode !== 'XCT 3002') return null;
-    
-    const now = currentTime;
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const timeInMinutes = currentHour * 60 + currentMinute; // Convert to minutes
-    
-    // 5:20 PM = 17:20 = 17 * 60 + 20 = 1040 minutes
-    // 6:30 PM = 18:30 = 18 * 60 + 30 = 1110 minutes
-    const startTimeMinutes = 17 * 60 + 20; // 5:20 PM
-    const endTimeMinutes = 18 * 60 + 30; // 6:30 PM
-    
-    if (timeInMinutes >= startTimeMinutes && timeInMinutes <= endTimeMinutes) {
-      return {
-        link: 'https://meet.google.com/uze-qbgn-ffi?authuser=0',
-        isTemporary: true
-      };
-    }
-    
-    return null;
-  }, [course, currentTime]);
+    if (!courseID || !courseMeetings.length) return null;
+    return courseMeetings.find(
+      (meeting) =>
+        meeting.course === courseID &&
+        meeting.status === "live"
+    );
+  }, [courseID, courseMeetings]);
 
   // Handler for joining live class
   const handleJoinLiveClass = () => {
-    const activeMeeting = liveMeeting || tempLiveMeeting;
+    const activeMeeting = liveMeeting;
     if (activeMeeting) {
       window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
     } else {
