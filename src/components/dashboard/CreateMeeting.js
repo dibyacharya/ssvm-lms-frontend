@@ -208,7 +208,7 @@ const CreateMeeting = () => {
     ).sort((a, b) => new Date(a.start) - new Date(b.start));
     
     return uniqueMeetings;
-  }, [meetings, timetableEvents]);
+  }, [meetingsByCourse, timetableEvents]);
 
   // Filter meetings for the selected date when in "List View"
   const filteredMeetings =
@@ -244,21 +244,13 @@ const CreateMeeting = () => {
     event: EventComponent,
   };
 
-  if (loading || coursesLoading) {
+  if (coursesLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary dark:border-blue-400 border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-300">Loading meetings...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500 dark:text-red-400 bg-gray-50 dark:bg-gray-900">
-        <p>Error: {error}</p>
       </div>
     );
   }
