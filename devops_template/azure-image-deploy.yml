@@ -56,7 +56,7 @@ steps:
         target_port = data.get("target_port")
 
         env_vars = data.get("env_vars", {})
-        ENV_VARS = " ".join(f'{key}="{value}"' for key, value in env_vars.items())
+        ENV_VARS = " ".join(f'{key}={value}' for key, value in env_vars.items())
         print(f'containerapp_name="{containerapp_name}"')
         print(f'containerapp_environment="{containerapp_environment}"')
         print(f'ingress="{ingress}"')
@@ -103,7 +103,7 @@ steps:
             --registry-server "${{ parameters.registry_name }}.azurecr.io" \
             --registry-username "${{ parameters.acrusername }}" \
             --registry-password "${{ parameters.acrpassword }}" \
-            --env-vars "$ENV_VARS"
+            --env-vars $ENV_VARS
 
         fi
 
