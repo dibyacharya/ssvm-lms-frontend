@@ -31,7 +31,7 @@ deployconfig:
     containerapp_name: "lmsfrontend"
     containerapp_environment: "caenv-kiit-lms-prd"
     ingress: "external"
-    target_port: 8000
+    target_port: 80
     AZURE_STORAGE_ACCOUNT_NAME: "stgkiitlmsprd"
     # env_vars:
     #   MONGODB_URI: "keyvaultref:https://akv-kiit-lms-prd.vault.azure.net/secrets/MONGODB-URI/b7ab250070ef42a69e8acf0460af34a8"
