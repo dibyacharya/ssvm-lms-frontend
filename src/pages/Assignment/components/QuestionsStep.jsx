@@ -204,7 +204,7 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModal(false);
 
-    const apiEndpoint = "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api/generate-questions";
+    const apiEndpoint = process.env.REACT_APP_AI_QUESTIONS_API_URL;
 
     try {
       // Extract modules, topics, and units from courseData
@@ -297,7 +297,7 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModalMCQ(false);
 
-    const apiEndpoint = "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io/api/generate-questions";
+    const apiEndpoint = process.env.REACT_APP_AI_QUESTIONS_API_URL;
 
     try {
       // Extract modules, topics, and units from courseData

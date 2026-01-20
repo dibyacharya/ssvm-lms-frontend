@@ -94,7 +94,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
 
     try {
       const res = await fetch(
-        "https://ca-dev-chatbot.whitegrass-ce3c3d28.centralindia.azurecontainerapps.io/api/chat",
+        process.env.REACT_APP_CHATBOT_API_URL,
         {
           method: "POST",
           headers: {
