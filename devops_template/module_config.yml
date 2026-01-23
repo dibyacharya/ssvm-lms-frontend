@@ -4,7 +4,8 @@ deployconfig:
     containerapp_environment: "caenv-kiit-lms-dev"
     ingress: "external"
     target_port: 80
-    AZURE_STORAGE_ACCOUNT_NAME: "stgkiitlmsdev"
+    min_replicas: 0
+    keyvault_name: "akv-kiit-lms-dev"
     env_vars:
       REACT_APP_BACKEND_URL: "https://lmsbackend.bluehill-eb07d9c6.centralindia.azurecontainerapps.io"
       REACT_APP_AI_QUESTIONS_API_URL: "https://qgen.bluehill-eb07d9c6.centralindia.azurecontainerapps.io"
@@ -21,7 +22,8 @@ deployconfig:
     containerapp_environment: "caenv-kiit-lms-uat"
     ingress: "external"
     target_port: 80
-    AZURE_STORAGE_ACCOUNT_NAME: "stgkiitlmsuat"
+    min_replicas: 0
+    keyvault_name: "akv-kiit-lms-uat"
     env_vars:
       REACT_APP_BACKEND_URL: "https://lmsbackend.mangoplant-048dc06b.centralindia.azurecontainerapps.io"
       REACT_APP_AI_QUESTIONS_API_URL: "https://qgen.mangoplant-048dc06b.centralindia.azurecontainerapps.io"
@@ -37,8 +39,9 @@ deployconfig:
     containerapp_name: "lmsfrontend"
     containerapp_environment: "caenv-kiit-lms-prd"
     ingress: "external"
-    target_port: 80
-    AZURE_STORAGE_ACCOUNT_NAME: "stgkiitlmsprd"
+    target_port: 80    
+    min_replicas: 1
+    keyvault_name: "akv-kiit-lms-prd"
     env_vars:
       REACT_APP_BACKEND_URL: "https://lmsbackend.happybay-a98257cb.centralindia.azurecontainerapps.io"
       REACT_APP_AI_QUESTIONS_API_URL: "https://qgen.happybay-a98257cb.centralindia.azurecontainerapps.io"
