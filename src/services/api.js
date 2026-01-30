@@ -1,6 +1,15 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+// Prefer runtime-injected config (window.RUNTIME_CONFIG) for containerized deployments.
+// Fallback to env var or localhost for local dev.
+const API_URL =
+  (typeof window !== "undefined" && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.BACKEND_URL) ||
+  process.env.REACT_APP_BACKEND_URL;
+
+const DEBUG_AUTH =
+  (typeof window !== "undefined" && window.RUNTIME_CONFIG && (window.RUNTIME_CONFIG.DEBUG_AUTH === true || window.RUNTIME_CONFIG.DEBUG_AUTH === "true")) ||
+  process.env.REACT_APP_DEBUG_AUTH === "true" ||
+  false;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -38,9 +47,12 @@ api.interceptors.response.use(
 export const authService = {
   login: async (email, password) => {
     try {
+      if (DEBUG_AUTH) console.log("[AUTH] Login attempt with email:", email);
       const response = await api.post("/auth/login", { email, password });
+      if (DEBUG_AUTH) console.log("[AUTH] Login success:", response.data);
       return response;
     } catch (error) {
+      if (DEBUG_AUTH) console.error("[AUTH] Login error:", error.response?.data || error.message);
       throw error;
     }
   },
