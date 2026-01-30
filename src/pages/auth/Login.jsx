@@ -21,7 +21,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  console.log(process.env.REACT_APP_BACKEND_URL)
   const navigate = useNavigate();
   const { login } = useAuth();
 
