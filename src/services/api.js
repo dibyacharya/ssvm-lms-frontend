@@ -11,6 +11,16 @@ const DEBUG_AUTH =
   process.env.REACT_APP_DEBUG_AUTH === "true" ||
   false;
 
+// Log runtime config and resolved API URL so you can verify in the browser console
+try {
+  if (typeof window !== "undefined" && window.RUNTIME_CONFIG) {
+    console.info("[RUNTIME_CONFIG]", window.RUNTIME_CONFIG);
+  }
+  console.info("[API] Using API_URL:", API_URL, "DEBUG_AUTH:", DEBUG_AUTH);
+} catch (e) {
+  // noop in non-browser environments
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
