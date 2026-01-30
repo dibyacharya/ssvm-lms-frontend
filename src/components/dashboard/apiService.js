@@ -1,6 +1,12 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000"; // Your backend API URL
+// API URL - Use runtime config with fallback
+const API_URL =
+  (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.BACKEND_URL)
+    ? window.RUNTIME_CONFIG.BACKEND_URL
+    : "http://localhost:3000";
+
+const DEBUG = (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.DEBUG_AUTH) || false;
 
 // API Call to login via Google OAuth
 export const loginWithGoogle = async () => {
