@@ -458,7 +458,7 @@ const CourseManagement = () => {
       </header>
 
       {/* Live Class Buttons */}
-      {(liveMeeting || tempLiveMeeting) && (
+      {liveMeeting && (
         <button
           onClick={handleJoinLiveClass}
           className=" absolute top-20 flex justify-center items-center gap-2  right-8 text-lg px-6 py-2 bg-primary/80 text-white rounded-lg hover:bg-primary transition-colors z-[900]"
@@ -481,7 +481,7 @@ const CourseManagement = () => {
           </div>
           
           {/* Live Class Button */}
-         {!(liveMeeting || tempLiveMeeting) && <div className="ml-8">
+         {!liveMeeting && <div className="ml-8">
             <button
               disabled
               className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"
