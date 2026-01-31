@@ -204,7 +204,7 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModal(false);
 
-    const apiEndpoint = process.env.REACT_APP_AI_QUESTIONS_API_URL;
+    const apiEndpoint = window.RUNTIME_CONFIG?.QGEN_URL;
 
     try {
       // Extract modules, topics, and units from courseData
@@ -297,7 +297,7 @@ const QuestionsStep = ({
     setAiError(null);
     setShowAIGenerationModalMCQ(false);
 
-    const apiEndpoint = process.env.REACT_APP_AI_QUESTIONS_API_URL;
+    const apiEndpoint = window.RUNTIME_CONFIG?.QGEN_URL;
 
     try {
       // Extract modules, topics, and units from courseData
