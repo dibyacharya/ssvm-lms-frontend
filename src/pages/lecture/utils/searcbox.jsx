@@ -94,7 +94,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
 
     try {
       const res = await fetch(
-        process.env.REACT_APP_CHATBOT_API_URL,
+        window.RUNTIME_CONFIG?.CHATBOT_URL,
         {
           method: "POST",
           headers: {

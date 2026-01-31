@@ -1,12 +1,13 @@
 import axios from "axios";
 
-// API URL - Use runtime config with fallback
-const API_URL =
-  (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.BACKEND_URL)
-    ? window.RUNTIME_CONFIG.BACKEND_URL
-    : "http://localhost:3000";
+// Use only runtime config (window.RUNTIME_CONFIG)
+const runtimeConfig = typeof window !== 'undefined' ? window.RUNTIME_CONFIG : undefined;
+const API_URL = runtimeConfig?.BACKEND_URL || null;
+const DEBUG = runtimeConfig?.DEBUG_AUTH === true || runtimeConfig?.DEBUG_AUTH === 'true';
 
-const DEBUG = (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.DEBUG_AUTH) || false;
+if (typeof window !== 'undefined' && !API_URL) {
+  console.error("❌ apiService: API_URL is undefined. Check window.RUNTIME_CONFIG.BACKEND_URL");
+}
 
 // API Call to login via Google OAuth
 export const loginWithGoogle = async () => {

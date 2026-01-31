@@ -2,13 +2,14 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { useAuth } from './AuthContext'; // To get the logged-in user
 import { getAllCourses, getAllStudentCourses } from '../services/course.service'; // Import course services
 
-// API URL - Use runtime config with fallback
-const API_URL =
-  (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.BACKEND_URL)
-    ? `${window.RUNTIME_CONFIG.BACKEND_URL}/meetings`
-    : 'https://meeting-backend-theta.vercel.app/api/meetings';
+// Use only runtime config (window.RUNTIME_CONFIG)
+const runtimeConfig = typeof window !== 'undefined' ? window.RUNTIME_CONFIG : undefined;
+const API_URL = runtimeConfig?.BACKEND_URL ? `${runtimeConfig.BACKEND_URL}/meetings` : null;
+const DEBUG = runtimeConfig?.DEBUG_AUTH === true || runtimeConfig?.DEBUG_AUTH === 'true';
 
-const DEBUG = (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.DEBUG_AUTH) || false;
+if (typeof window !== 'undefined' && !API_URL) {
+  console.error("❌ MeetingContext: API_URL is undefined. Check window.RUNTIME_CONFIG.BACKEND_URL");
+}
 
 // 1. Create the Context
 const MeetingContext = createContext();
