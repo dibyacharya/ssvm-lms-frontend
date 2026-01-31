@@ -3,7 +3,7 @@ import axios from "axios";
 // Use only runtime-injected config (window.RUNTIME_CONFIG) — no env vars
 const runtimeConfig = typeof window !== "undefined" ? window.RUNTIME_CONFIG : undefined;
 
-const API_URL = runtimeConfig?.BACKEND_URL;
+const API_URL = runtimeConfig?.BACKEND_URL ? `${runtimeConfig.BACKEND_URL}/api` : undefined;
 const DEBUG_AUTH = runtimeConfig?.DEBUG_AUTH === true || runtimeConfig?.DEBUG_AUTH === "true";
 
 // Log runtime config for visibility

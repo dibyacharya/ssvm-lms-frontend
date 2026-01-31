@@ -1,7 +1,7 @@
 // Default runtime config for local development.
 // In production the container startup script should overwrite this file.
 window.RUNTIME_CONFIG = {
-  BACKEND_URL: "http://localhost:8080/api",
+  BACKEND_URL: "http://localhost:8080",
   CHATBOT_URL: "http://localhost:8080/api/chat",
   QGEN_URL: "http://localhost:8080/api/generate-questions",
   DEBUG_AUTH: true
