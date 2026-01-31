@@ -361,7 +361,7 @@ const CourseDetails = () => {
     </div>
     
     {/* Live Class Button */}
-    {(liveMeeting || tempLiveMeeting) ? (
+    {liveMeeting ? (
       <div className="ml-8">
         <button
           onClick={handleJoinLiveClass}
