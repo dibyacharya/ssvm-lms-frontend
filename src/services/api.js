@@ -55,10 +55,15 @@ api.interceptors.response.use(
 
 // Auth service
 export const authService = {
-  login: async (email, password) => {
+  login: async (identifier, password) => {
     try {
-      if (DEBUG_AUTH) console.log("[AUTH] Login attempt with email:", email);
-      const response = await api.post("/auth/login", { email, password });
+      if (DEBUG_AUTH) console.log("[AUTH] Login attempt with identifier:", identifier);
+      const response = await api.post("/auth/login", {
+        identifier,
+        email: identifier,
+        userId: identifier,
+        password,
+      });
       if (DEBUG_AUTH) console.log("[AUTH] Login success:", response.data);
       return response;
     } catch (error) {

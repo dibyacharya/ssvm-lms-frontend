@@ -16,7 +16,7 @@ const carouselImages = [
 ];
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -46,15 +46,20 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) {
+    const identifier = (formData.identifier || "").trim();
+    if (!identifier || !formData.password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    if (identifier.length < 3 || !/^[A-Za-z0-9._@-]+$/.test(identifier)) {
+      toast.error("Enter your User ID or Email");
       return;
     }
     setLoading(true);
     setError("");
     try {
       const response = await authService.login(
-        formData.email,
+        identifier,
         formData.password
       );
       
@@ -140,10 +145,10 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="email"
+                htmlFor="identifier"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email Address
+                User ID / Email
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
@@ -153,18 +158,21 @@ const Login = () => {
                   />
                 </span>
                 <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
+                  id="identifier"
+                  type="text"
+                  autoComplete="username"
                   required
                   className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
-                  placeholder="you@example.com"
-                  value={formData.email}
+                  placeholder="Enter User ID or Email"
+                  value={formData.identifier}
                   onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                    setFormData({ ...formData, identifier: e.target.value })
                   }
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Use Roll No / Enrollment No / Employee ID (or email if applicable)
+              </p>
             </div>
 
             <div>
