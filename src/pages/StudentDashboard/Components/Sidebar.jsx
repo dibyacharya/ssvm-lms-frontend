@@ -115,7 +115,7 @@ const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
       {/* Profile and Logout */}
       <div className="mb-6 px-2">
         <Link
-          to="/student/profile/myprofile"
+          to="/profile"
           className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-secondary dark:hover:bg-gray-400 hover:bg-gray-100"
         >
           <span className="text-accent1 flex justify-center w-7">

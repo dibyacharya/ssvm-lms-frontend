@@ -344,9 +344,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                 to={`/student/course/${course._id}`}
                 className="group relative flex flex-col justify-between rounded-lg border border-gray-100 dark:border-gray-600 hover:border-2 hover:border-accent1/30 dark:hover:border-blue-400/50 shadow-accent1 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden bg-white dark:bg-gray-700"
                 onClick={() => {
-                  course.available
-                    ? navigate(`/student/course/${course._id}`)
-                    : null;
+                  if (course.available) {
+                    navigate(`/student/course/${course._id}`);
+                  }
                 }}
               >
                 {/* Course Image */}

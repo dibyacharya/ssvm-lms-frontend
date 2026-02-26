@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GraduationCap, Mail, Lock, User, UserCircle } from "lucide-react";
+import { Mail, Lock, User, UserCircle } from "lucide-react";
 import logo from "./logo.jpg";
 import toast from "react-hot-toast";
+import { authService } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +33,6 @@ const Register = () => {
     }
 
     try {
-      // Placeholder for authService.register
       const data = await authService.register(formData);
       login(data);
       navigate(
@@ -39,6 +41,7 @@ const Register = () => {
       console.log("Registration data:", formData);
     } catch (err) {
       toast.error("Failed to register");
+      setError(err?.response?.data?.message || "Failed to register");
       return;
     } finally {
       setLoading(false);

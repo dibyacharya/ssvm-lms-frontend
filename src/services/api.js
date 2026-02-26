@@ -45,9 +45,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      const requestUrl = String(error.config?.url || "");
+      const isAuthRequest = /\/auth\/(login|register)\b/.test(requestUrl);
+      const isOnLoginPage =
+        typeof window !== "undefined" && window.location.pathname === "/login";
+
+      if (!isAuthRequest && !isOnLoginPage) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
@@ -58,10 +65,8 @@ export const authService = {
   login: async (identifier, password) => {
     try {
       if (DEBUG_AUTH) console.log("[AUTH] Login attempt with identifier:", identifier);
-      const response = await api.post("/auth/login", {
+      const response = await api.post("/auth/lms/login", {
         identifier,
-        email: identifier,
-        userId: identifier,
         password,
       });
       if (DEBUG_AUTH) console.log("[AUTH] Login success:", response.data);
@@ -75,6 +80,28 @@ export const authService = {
   register: async (userData) => {
     try {
       const response = await api.post("/auth/register", userData);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      const response = await api.post("/auth/forgot-password", { email });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  resetPassword: async ({ email, otp, newPassword }) => {
+    try {
+      const response = await api.post("/auth/reset-password", {
+        email,
+        otp,
+        newPassword,
+      });
       return response;
     } catch (error) {
       throw error;

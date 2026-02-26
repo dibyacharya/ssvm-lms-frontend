@@ -23,6 +23,9 @@ const Login = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const identifierHasEmail = (formData.identifier || "").includes("@");
+  const emailLoginBlockedMessage =
+    "Email login is not allowed. Use Roll No / Enrolment No / Employee ID.";
 
   // Preload images
   useEffect(() => {
@@ -51,8 +54,13 @@ const Login = () => {
       toast.error("Please fill in all fields");
       return;
     }
-    if (identifier.length < 3 || !/^[A-Za-z0-9._@-]+$/.test(identifier)) {
-      toast.error("Enter your User ID or Email");
+    if (identifierHasEmail) {
+      setError(emailLoginBlockedMessage);
+      toast.error(emailLoginBlockedMessage);
+      return;
+    }
+    if (identifier.length < 3) {
+      toast.error("Enter your User ID");
       return;
     }
     setLoading(true);
@@ -78,8 +86,15 @@ const Login = () => {
         navigate(redirectPath);
       }
     } catch (err) {
-      console.log("error", err);
-      toast.error("Login failed. Please check your credentials and try again.");
+      const code = err?.response?.data?.code;
+      let message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Login failed. Please try again.";
+      if (code === "USER_NOT_FOUND") message = "Wrong User ID";
+      if (code === "INVALID_PASSWORD") message = "Wrong Password";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -142,13 +157,19 @@ const Login = () => {
             <p className="text-gray-500 mt-2">Welcome back! Please sign in to your account.</p>
           </div>
 
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="identifier"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                User ID / Email
+                User ID (Roll No / Enrolment No / Employee ID)
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
@@ -163,16 +184,16 @@ const Login = () => {
                   autoComplete="username"
                   required
                   className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
-                  placeholder="Enter User ID or Email"
+                  placeholder="Enter User ID"
                   value={formData.identifier}
                   onChange={(e) =>
                     setFormData({ ...formData, identifier: e.target.value })
                   }
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Use Roll No / Enrollment No / Employee ID (or email if applicable)
-              </p>
+              {identifierHasEmail && (
+                <p className="text-xs text-red-600 mt-1">{emailLoginBlockedMessage}</p>
+              )}
             </div>
 
             <div>
@@ -183,9 +204,9 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <a href="#" className="text-sm text-emerald-600 hover:text-emerald-500">
+                <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-500">
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
@@ -218,9 +239,9 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || identifierHasEmail}
               className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white transition-all duration-300 ease-in-out transform hover:scale-105 ${
-                loading
+                loading || identifierHasEmail
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
               }`}

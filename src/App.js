@@ -10,6 +10,8 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPasswordOtp from "./pages/auth/ResetPasswordOtp";
 import TeacherDashboard from "./pages/TeacherDashboard/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard/StudentDashboard";
 import { Toaster } from "react-hot-toast";
@@ -31,6 +33,8 @@ import StudentProfileSection from "./pages/StudentDashboard/Components/StudentPr
 import ITS from "./pages/Its/Its.jsx";
 import StudentAssignmentSectionCourse from "./pages/Assignment/ShowAssignmentCourse.jsx";
 import { MeetingV2Provider } from "./context/MeetingV2Context.js";
+import PublicHelpdeskIntake from "./pages/HelpDesk/PublicHelpdeskIntake.jsx";
+import Profile from "./pages/Profile/Profile.jsx";
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -57,7 +61,12 @@ const App = () => {
 };
 const Layout = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/login", "/register"];
+  const hideNavbarRoutes = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ];
 
   return (
     <div className="min-h-screen dark:bg-gray-900 bg-white">
@@ -68,6 +77,17 @@ const Layout = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPasswordOtp />} />
+          <Route path="/helpdesk" element={<PublicHelpdeskIntake />} />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute roles={["student", "teacher"]}>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/admin"
             element={
