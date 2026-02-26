@@ -115,7 +115,7 @@ const TeacherDashboard = () => {
 
         <div className="mb-6 px-2">
           <Link
-            to={"/teacher/profile/myprofile"}
+            to={"/profile"}
             className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span className="text-accent1 dark:text-accent1/90 flex justify-center w-7">

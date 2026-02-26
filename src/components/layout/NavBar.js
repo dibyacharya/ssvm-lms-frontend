@@ -40,11 +40,11 @@ const Navbar = () => {
                   Logout
                 </button>
                 {user && user?.role === "teacher" ? (
-                  <Link to="/teacher/profile">
+                  <Link to="/profile">
                     <User className=" p-1 h-[35px] w-[35px] text-green-500 border rounded-full border-green-500" />
                   </Link>
                 ) : (
-                  <Link to="/student/profile">
+                  <Link to="/profile">
                     <User className=" p-1 h-[35px] w-[35px] text-green-500 border rounded-full border-green-500" />
                   </Link>
                 )}

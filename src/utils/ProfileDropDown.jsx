@@ -42,7 +42,7 @@ const ProfileDropdown = ({role}) => {
         <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[2000]">
           <ul className="py-2">
             <li
-              onClick={() => handleNavigate(`/${role}/profile/myprofile`)}
+              onClick={() => handleNavigate("/profile")}
               className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"
               role="menuitem"
             >

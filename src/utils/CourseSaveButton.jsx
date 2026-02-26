@@ -4,6 +4,12 @@ import { updateCourse } from "../services/course.service";
 import { useCourse } from "../context/CourseContext";
 import toast from "react-hot-toast";
 
+const extractCourseIdFromPath = () => {
+  if (typeof window === "undefined") return "";
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
+  return pathParts[pathParts.length - 1] || "";
+};
+
 const SaveButton = ({ urlId, className = "" }) => {
   const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
   const [isSaving, setIsSaving] = useState(false);
@@ -22,10 +28,12 @@ const SaveButton = ({ urlId, className = "" }) => {
       const updatedCourse = await updateCourse(courseId, courseData);
 
       // Update the context with the response
-      setCourseData({ ...updatedCourse, ["students"]: courseData.students });
+      setCourseData({ ...updatedCourse, students: courseData.students });
 
       // Mark all sessions from backend response as saved
-      const savedSessionKeys = Object.keys(updatedCourse.attendance?.sessions || {});
+      const savedSessionKeys = Object.keys(
+        updatedCourse.attendance?.sessions || {}
+      );
       markSessionsAsSaved(savedSessionKeys);
 
       toast.success("Course saved successfully!");

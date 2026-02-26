@@ -1,8 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import DocViewer, { DocViewerRenderers } from "react-doc-viewer";
+import React, { useEffect, useState } from "react";
 import {
-  FileIcon,
-  FolderIcon,
   LinkIcon,
   XIcon,
   BookIcon,
@@ -10,14 +7,14 @@ import {
   PresentationIcon,
   ExternalLinkIcon,
   ArrowLeft,
+  PencilIcon,
+  TrashIcon,
 } from "lucide-react";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowDown } from "react-icons/io";
-import { eContent } from "../../components/data/mockData";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAllEContent } from "../../services/econtent.service";
 import AddModuleModal from "./AddModuleModal";
-import { PencilIcon, TrashIcon } from "lucide-react";
 import EditModuleModal from "./EditModuleModal"; // Adjust path as needed
 import DeleteConfirmationModal from "./DeleteModuleModal";
 
@@ -31,11 +28,12 @@ const EContentViewer = () => {
   const [showAddModuleModal, setShowAddModuleModal] = useState(false);
   const [showEditModuleModal, setShowEditModuleModal] = useState(false);
   const [showDeleteModuleModal, setShowDeleteModuleModal] = useState(false);
-  const [selectedModule, setSelectedModule] = useState(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [contentData, setContentData] = useState(null);
+  const [isViewerLoading, setIsViewerLoading] = useState(true);
+  const [viewerFailed, setViewerFailed] = useState(false);
 
   useEffect(() => {
     const fetchEContent = async () => {
@@ -62,6 +60,13 @@ const EContentViewer = () => {
       fetchEContent();
     }
   }, [courseId]);
+
+  useEffect(() => {
+    if (showModal) {
+      setIsViewerLoading(true);
+      setViewerFailed(false);
+    }
+  }, [showModal, selectedFile]);
 
   const handleModuleAdded = async () => {
     try {
@@ -105,12 +110,10 @@ const EContentViewer = () => {
 
   const openEditModal = (e) => {
     e.stopPropagation();
-    setSelectedModule(activeTopic);
     setShowEditModuleModal(true);
   };
   const openDeleteModal = (e) => {
     e.stopPropagation();
-    setSelectedModule(activeTopic);
     setShowDeleteModuleModal(true);
   };
 
@@ -182,15 +185,12 @@ const EContentViewer = () => {
       return null;
     };
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [viewerFailed, setViewerFailed] = useState(false);
-
     const handleIframeLoad = () => {
-      setIsLoading(false);
+      setIsViewerLoading(false);
     };
 
     const handleIframeError = () => {
-      setIsLoading(false);
+      setIsViewerLoading(false);
       setViewerFailed(true);
     };
 
@@ -214,7 +214,7 @@ const EContentViewer = () => {
           <div className="flex-1 relative overflow-hidden">
             {canPreview ? (
               <>
-                {isLoading && (
+                {isViewerLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
                     <div className="text-center">
                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent"></div>
@@ -273,7 +273,7 @@ const EContentViewer = () => {
                       <button
                         onClick={() => {
                           setViewerFailed(false);
-                          setIsLoading(true);
+                          setIsViewerLoading(true);
                         }}
                         className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                       >
