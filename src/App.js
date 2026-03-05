@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -24,7 +24,6 @@ import ActivityViewer from "./pages/Activity/teacher/ActivityViewer.jsx";
 import { CourseProvider } from "./context/CourseContext.js";
 import EContentViewer from "./pages/Econtent/EcontentViewer.jsx";
 import TeacherProfilePage from "./pages/TeacherDashboard/Components/TeacherProfile/TeacherProfilePage.jsx";
-
 import StudentAssignmentSection from "./pages/Assignment/student/ShowAssignment.jsx";
 import CourseDetails from "./pages/course/student/CourseDetails.jsx";
 import UtilityProvider from "./context/UtilityContext.js";
@@ -35,6 +34,15 @@ import StudentAssignmentSectionCourse from "./pages/Assignment/ShowAssignmentCou
 import { MeetingV2Provider } from "./context/MeetingV2Context.js";
 import PublicHelpdeskIntake from "./pages/HelpDesk/PublicHelpdeskIntake.jsx";
 import Profile from "./pages/Profile/Profile.jsx";
+
+// ─── VConf pages (lazy-loaded — LiveKit only loads when needed) ───
+const VconfMeetingRoom = React.lazy(() => import("./pages/vconf/MeetingRoom"));
+const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
+const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
+const VconfTranscripts = React.lazy(() => import("./pages/vconf/VconfTranscripts"));
+const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
+const VconfMomViewer = React.lazy(() => import("./pages/vconf/VconfMomViewer"));
+const VconfAnalytics = React.lazy(() => import("./pages/vconf/VconfAnalytics"));
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -203,6 +211,78 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
+          {/* ─── VConf Routes (lazy-loaded) ─── */}
+          <Route
+            path="/vconf/meeting/:id"
+            element={
+              <PrivateRoute roles={["teacher", "student"]}>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500" /></div>}>
+                  <VconfMeetingRoom />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/schedule"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfSchedule />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/recordings"
+            element={
+              <PrivateRoute roles={["teacher", "student"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfRecordings />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/transcripts"
+            element={
+              <PrivateRoute roles={["teacher", "student"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfTranscripts />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/recording/:id"
+            element={
+              <PrivateRoute roles={["teacher", "student"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfTranscriptViewer />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/mom/:id"
+            element={
+              <PrivateRoute roles={["teacher", "student"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfMomViewer />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/vconf/analytics"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+                  <VconfAnalytics />
+                </Suspense>
+              </PrivateRoute>
+            }
+          />
+
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>

@@ -268,7 +268,6 @@ export const getCourseGradebook = async (courseId) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching course gradebook:", error);
-    const errorMessage = error.response?.data?.message || "Failed to load gradebook";
     throw error;
   }
 };

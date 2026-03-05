@@ -770,14 +770,6 @@ const LectureCard = ({
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); onHandouts(); }}
-            className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-emerald-300 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-400 transition-all duration-200"
-          >
-            <BookOpen className="mr-1 h-3 w-3 flex-shrink-0" />
-            Handouts
-          </button>
-
-          <button
             onClick={(e) => { e.stopPropagation(); onMOM(); }}
             className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-purple-300 text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all duration-200"
           >
