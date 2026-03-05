@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+    <defs>
+      <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#374151"/>
+        <stop offset="100%" stop-color="#d1d5db"/>
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#g)"/>
+    <rect width="100%" height="100%" fill="url(#g)"/>
+    <circle cx="492" cy="426" r="156" fill="#ffffff" opacity="0.150"/><circle cx="431" cy="384" r="121" fill="#000000" opacity="0.116"/><circle cx="538" cy="232" r="86" fill="#ffffff" opacity="0.119"/><circle cx="241" cy="373" r="196" fill="#000000" opacity="0.127"/><circle cx="359" cy="99" r="138" fill="#ffffff" opacity="0.153"/><circle cx="689" cy="352" r="122" fill="#000000" opacity="0.155"/><circle cx="532" cy="176" r="184" fill="#ffffff" opacity="0.141"/>
+    <path d="M160,10 C240,-30 233,-13 313,-53" stroke="white" stroke-width="4" opacity="0.114" fill="none"/><path d="M307,331 C387,291 391,439 471,399" stroke="white" stroke-width="2" opacity="0.137" fill="none"/><path d="M-36,125 C44,85 134,228 214,188" stroke="white" stroke-width="2" opacity="0.098" fill="none"/><path d="M741,132 C821,92 1003,225 1083,185" stroke="white" stroke-width="4" opacity="0.132" fill="none"/><path d="M463,223 C543,183 575,317 655,277" stroke="white" stroke-width="2" opacity="0.113" fill="none"/><path d="M121,319 C201,279 296,339 376,299" stroke="white" stroke-width="3" opacity="0.106" fill="none"/><path d="M344,200 C424,160 503,314 583,274" stroke="white" stroke-width="2" opacity="0.116" fill="none"/><path d="M222,382 C302,342 309,490 389,450" stroke="white" stroke-width="4" opacity="0.068" fill="none"/><path d="M5,399 C85,359 291,384 371,344" stroke="white" stroke-width="3" opacity="0.099" fill="none"/><path d="M169,34 C249,-6 211,126 291,86" stroke="white" stroke-width="2" opacity="0.116" fill="none"/>
+    <path d="M0,351.0 C144.0,279.0 288.0,414.0 416.0,360.0 C560.0,297.0 688.0,405.0 800,333.0 L800,450 L0,450 Z" fill="white" opacity="0.08"/>
+    <path d="M0,54.0 C128.0,126.00000000000001 272.0,-20 448.00000000000006,45.0 C608.0,99.0 720.0,0 800,40 L800,0 L0,0 Z" fill="white" opacity="0.08"/>
+    </svg>

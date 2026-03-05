@@ -63,8 +63,8 @@ const AssignmentsList = ({setSelectedOption}) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Assignments</h2>
         <button
-          onClick={() => {setSelectedOption("Recorded")}}
-          className="text-accent1 dark:text-accent1/40 hover:text-accent1/70 dark:hover:text-ccent1/70 font-medium transition-colors duration-200"
+          onClick={() => {setSelectedOption("Assignments")}}
+          className="text-accent1 dark:text-accent1/40 hover:text-accent1/70 dark:hover:text-accent1/70 font-medium transition-colors duration-200"
         >
           View All
         </button>

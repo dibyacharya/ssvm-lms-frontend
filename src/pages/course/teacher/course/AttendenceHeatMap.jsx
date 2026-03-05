@@ -13,12 +13,32 @@ import {
 } from "lucide-react";
 import SaveButton from "../../../../utils/CourseSaveButton";
 import { useParams } from "react-router-dom";
+import { getPeriodLabel } from "../../../../utils/periodLabel";
+
+const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      </div>
+      {count != null && (
+        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+      )}
+    </div>
+  </div>
+);
 
 const AttendanceHeatMap = () => {
   const { courseData, savedSessions } = useCourse();
   const [attendanceData, setAttendanceData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { courseID } = useParams();
+  const periodLbl = getPeriodLabel(courseData?.periodType || courseData?.semester?.periodType || "semester");
 
   // Convert savedSessions Set to a stable array for dependency comparison
   const savedSessionsArray = useMemo(() => {
@@ -171,12 +191,14 @@ const AttendanceHeatMap = () => {
     if (!semesterStartDate || !semesterEndDate) {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <Calendar className="w-16 h-16 text-tertiary/30 mb-4" />
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mb-4">
+            <Calendar className="w-10 h-10 text-orange-400" />
+          </div>
           <h3 className="text-xl font-semibold text-primary mb-2">
-            Semester Dates Not Set
+            {periodLbl} Dates Not Set
           </h3>
           <p className="text-tertiary max-w-md">
-            Please set semester start and end dates in the Course Schedule
+            Please set {periodLbl.toLowerCase()} start and end dates in the Course Schedule
             section to view the attendance heat map.
           </p>
         </div>
@@ -186,7 +208,9 @@ const AttendanceHeatMap = () => {
     if (attendanceData.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <CalendarDays className="w-16 h-16 text-tertiary/30 mb-4" />
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-yellow-100 flex items-center justify-center mb-4">
+            <CalendarDays className="w-10 h-10 text-amber-400" />
+          </div>
           <h3 className="text-xl font-semibold text-primary mb-2">
             No Attendance Data
           </h3>
@@ -200,14 +224,15 @@ const AttendanceHeatMap = () => {
 
     return (
       <>
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-emerald-500">
             <div className="flex items-center justify-between">
               <h3 className="text-tertiary font-medium">Overall Attendance</h3>
               <div
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   calculateOverallAttendance() >= 75
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-emerald-50 text-emerald-600"
                     : "bg-red-50 text-red-500"
                 }`}
               >
@@ -222,7 +247,7 @@ const AttendanceHeatMap = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-blue-500">
             <h3 className="text-tertiary font-medium mb-2">Total Sessions</h3>
             <div className="text-3xl font-bold text-primary">
               {attendanceData.reduce(
@@ -232,14 +257,14 @@ const AttendanceHeatMap = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-purple-500">
             <h3 className="text-tertiary font-medium mb-2">Days Recorded</h3>
             <div className="text-3xl font-bold text-primary">
               {attendanceData.length}
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-amber-500">
             <h3 className="text-tertiary font-medium mb-2">Students</h3>
             <div className="text-3xl font-bold text-primary">
               {courseData.students.length}
@@ -247,101 +272,108 @@ const AttendanceHeatMap = () => {
           </div>
         </div>
 
-        <div className="mb-6 flex flex-wrap justify-between gap-4 p-5 bg-gray-50 rounded-xl">
-          <div className="flex items-center">
-            <span className="block w-4 h-4 rounded-sm bg-[#ef4444] mr-2"></span>
-            <span className="text-sm text-tertiary">Low (1-25%)</span>
-          </div>
-          <div className="flex items-center">
-            <span className="block w-4 h-4 rounded-sm bg-[#facc15] mr-2"></span>
-            <span className="text-sm text-tertiary">Medium (26-50%)</span>
-          </div>
-          <div className="flex items-center">
-            <span className="block w-4 h-4 rounded-sm bg-[#84cc16] mr-2"></span>
-            <span className="text-sm text-tertiary">High (51-75%)</span>
-          </div>
-          <div className="flex items-center">
-            <span className="block w-4 h-4 rounded-sm bg-[#1aa100] mr-2"></span>
-            <span className="text-sm text-tertiary">Full (76-100%)</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl  relative shadow-sm p-6 border border-tertiary/10 overflow-x-auto">
-          <div className="min-w-[750px]">
-            <HeatMap
-              value={attendanceData}
-              width={"100%"}
-              height={210}
-              rectSize={24}
-              space={8}
-              rectProps={{
-                rx: 2, // Rounded corners
-              }}
-              startDate={new Date(semesterStartDate.getTime() - 86400000 * 7)} // Start one week earlier for better visual
-              endDate={new Date(semesterEndDate.getTime() + 86400000 * 7)} // End one week later for better visual
-              legendCellSize={0}
-              // Set a very high max value to ensure our exact percentages are used
-              max={100}
-              // Define a simplified color scheme that will be overridden by our custom rendering
-              panelColors={{
-                0: "#f3f4f6",
-                100: "#1aa100",
-              }}
-              rectRender={(props, data) => {
-                if (data.count === undefined) {
-                  return <rect {...props} />;
-                }
-
-                // Use our pre-calculated color from data
-                const fillColor =
-                  data.color || getColorForPercentage(data.count);
-                const newProps = { ...props, fill: fillColor };
-
-                return (
-                  <Tooltip
-                    placement="top"
-                    trigger="hover"
-                    content={
-                      <div className="bg-secondary text-white p-2 rounded shadow-lg text-xs">
-                        <div className="font-bold mb-1">
-                          {new Date(data.date).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </div>
-                        <div>Attendance: {data.count}%</div>
-                        <div>
-                          Present: {data.raw?.attended || 0}/
-                          {data.raw?.possible || 0}
-                        </div>
-                        <div>Sessions: {data.raw?.sessions || 0}</div>
-                      </div>
-                    }
-                    className="heat-map-tooltip"
-                    visibleArrow={true}
-                    isOpen={false}
-                    style={{
-                      zIndex: 1000,
-                      position: "absolute",
-                    }}
-                    portalProps={{
-                      style: {
-                        position: "relative",
-                      },
-                    }}
-                  >
-                    <rect {...newProps} />
-                  </Tooltip>
-                );
-              }}
-            />
+        {/* Legend Bar */}
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-5 py-4 flex flex-wrap justify-between gap-4">
+            <div className="flex items-center">
+              <span className="block w-4 h-4 rounded-sm bg-[#ef4444] mr-2 shadow-sm"></span>
+              <span className="text-sm text-tertiary font-medium">Low (1-25%)</span>
+            </div>
+            <div className="flex items-center">
+              <span className="block w-4 h-4 rounded-sm bg-[#facc15] mr-2 shadow-sm"></span>
+              <span className="text-sm text-tertiary font-medium">Medium (26-50%)</span>
+            </div>
+            <div className="flex items-center">
+              <span className="block w-4 h-4 rounded-sm bg-[#84cc16] mr-2 shadow-sm"></span>
+              <span className="text-sm text-tertiary font-medium">High (51-75%)</span>
+            </div>
+            <div className="flex items-center">
+              <span className="block w-4 h-4 rounded-sm bg-[#1aa100] mr-2 shadow-sm"></span>
+              <span className="text-sm text-tertiary font-medium">Full (76-100%)</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-start p-5 rounded-xl bg-primary/5 border border-primary/20 mt-6">
-          <HelpCircle className="w-5 h-5 text-primary mt-0.5 mr-3 flex-shrink-0" />
+        {/* Heat Map Container */}
+        <div className="bg-white rounded-xl relative shadow-sm border-2 border-orange-100 overflow-hidden">
+          <div className="p-6 overflow-x-auto">
+            <div className="min-w-[750px]">
+              <HeatMap
+                value={attendanceData}
+                width={"100%"}
+                height={210}
+                rectSize={24}
+                space={8}
+                rectProps={{
+                  rx: 2, // Rounded corners
+                }}
+                startDate={new Date(semesterStartDate.getTime() - 86400000 * 7)} // Start one week earlier for better visual
+                endDate={new Date(semesterEndDate.getTime() + 86400000 * 7)} // End one week later for better visual
+                legendCellSize={0}
+                // Set a very high max value to ensure our exact percentages are used
+                max={100}
+                // Define a simplified color scheme that will be overridden by our custom rendering
+                panelColors={{
+                  0: "#f3f4f6",
+                  100: "#1aa100",
+                }}
+                rectRender={(props, data) => {
+                  if (data.count === undefined) {
+                    return <rect {...props} />;
+                  }
+
+                  // Use our pre-calculated color from data
+                  const fillColor =
+                    data.color || getColorForPercentage(data.count);
+                  const newProps = { ...props, fill: fillColor };
+
+                  return (
+                    <Tooltip
+                      placement="top"
+                      trigger="hover"
+                      content={
+                        <div className="bg-secondary text-white p-2 rounded shadow-lg text-xs">
+                          <div className="font-bold mb-1">
+                            {new Date(data.date).toLocaleDateString("en-US", {
+                              weekday: "short",
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </div>
+                          <div>Attendance: {data.count}%</div>
+                          <div>
+                            Present: {data.raw?.attended || 0}/
+                            {data.raw?.possible || 0}
+                          </div>
+                          <div>Sessions: {data.raw?.sessions || 0}</div>
+                        </div>
+                      }
+                      className="heat-map-tooltip"
+                      visibleArrow={true}
+                      isOpen={false}
+                      style={{
+                        zIndex: 1000,
+                        position: "absolute",
+                      }}
+                      portalProps={{
+                        style: {
+                          position: "relative",
+                        },
+                      }}
+                    >
+                      <rect {...newProps} />
+                    </Tooltip>
+                  );
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* How to Read Info Card */}
+        <div className="flex items-start p-5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 mt-6 border-l-4 border-l-orange-400">
+          <HelpCircle className="w-5 h-5 text-orange-500 mt-0.5 mr-3 flex-shrink-0" />
           <div>
             <p className="text-primary font-medium mb-1">
               How to read this chart
@@ -362,13 +394,16 @@ const AttendanceHeatMap = () => {
       <div className="flex justify-between items-center absolute -top-10 right-36">
         <SaveButton urlId={courseID} />
       </div>
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">
-            Attendance Heat Map
-          </h1>
-          <p className="text-tertiary mt-1">
+
+      {/* Gradient Header Banner */}
+      <div className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+        <SectionHeader
+          icon={BarChart2}
+          title="Attendance Heat Map"
+          gradient="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500"
+        />
+        <div className="px-6 py-3 bg-gradient-to-r from-orange-50 to-yellow-50 border-b border-orange-100">
+          <p className="text-sm text-tertiary">
             Visual representation of attendance patterns over time
           </p>
         </div>

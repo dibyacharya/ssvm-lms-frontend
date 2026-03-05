@@ -3,6 +3,7 @@
  * This file contains the weekly class schedule for different semesters.
  * Structure: Array of semester timetable objects
  */
+import { getPeriodLabel } from '../../utils/periodLabel';
 
 // Subject color mapping for calendar visualization (common across all semesters)
 export const subjectColors = {
@@ -502,7 +503,7 @@ export const getFullTimetableForSemester = (semester) => {
  * @param {Date} endDate - End date for generating events
  * @returns {Array} Array of calendar events
  */
-export const generateTimetableEvents = (semester, startDate = new Date(), endDate = null) => {
+export const generateTimetableEvents = (semester, startDate = new Date(), endDate = null, periodLabel = 'Semester') => {
   const timetable = getTimetableForSemester(semester);
   
   if (!timetable) {
@@ -554,7 +555,8 @@ export const generateTimetableEvents = (semester, startDate = new Date(), endDat
           color: slot.color,
           semester: semester,
           isTimetable: true, // Flag to identify timetable events
-          description: `Semester ${semester} - Regular class schedule for ${slot.subject}`,
+          periodLabel: periodLabel || getPeriodLabel(),
+          description: `${periodLabel || getPeriodLabel()} ${semester} - Regular class schedule for ${slot.subject}`,
           instructor: 'Scheduled Class',
           roomNumber: 'TBD',
           participants: 0,

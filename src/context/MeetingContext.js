@@ -59,8 +59,8 @@ export const MeetingProvider = ({ children }) => {
       }
 
       // Get course IDs
-     
-      const courseIds = courses.courses.map(course => course._id);
+      const courseList = Array.isArray(courses) ? courses : courses?.courses || [];
+      const courseIds = courseList.map(course => course._id);
 
       // Fetch all meetings
       const response = await fetch(API_URL);

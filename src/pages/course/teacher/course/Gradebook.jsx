@@ -1,18 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { Download, Search, FileText, Calendar, User, Award, TrendingUp, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Edit3, Save, X } from "lucide-react";
+import { Download, Search, FileText, Calendar, User, Award, TrendingUp, ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Edit3, Save, X, BookOpen, ClipboardList } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getCourseGradebook } from "../../../../services/assignment.service";
 import {
   getCourseGrading,
   bulkUpdateStudentGrading,
   getContinuousAssessmentPlan,
+  getCategoryScaledMarks,
   publishGrades,
   unpublishGrades
 } from "../../../../services/course.service";
 import { useCourse } from "../../../../context/CourseContext";
 import LoadingSpinner from "../../../../utils/LoadingAnimation";
+import { getPeriodLabel, getMidExamShort, getEndExamShort } from "../../../../utils/periodLabel";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
+
+const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      </div>
+      {count != null && (
+        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+      )}
+    </div>
+  </div>
+);
 
 const Gradebook = () => {
   const { courseID } = useParams();
@@ -21,15 +41,60 @@ const Gradebook = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeSection, setActiveSection] = useState("assignments"); // "assignments" or "semester"
+  const [activeSection, setActiveSection] = useState(() => {
+    const saved = localStorage.getItem(`gradebook_${courseID}_section`);
+    return saved === "assignments" || saved === "semester" ? saved : "assignments";
+  }); // "assignments" or "semester"
+
+  // Persist activeSection in localStorage
+  useEffect(() => {
+    localStorage.setItem(`gradebook_${courseID}_section`, activeSection);
+  }, [activeSection, courseID]);
   const [expandedContinuous, setExpandedContinuous] = useState(false); // Single global expand state
   const [isEditingSemester, setIsEditingSemester] = useState(false);
   const [semesterMarks, setSemesterMarks] = useState({});
   const [continuousAssessmentData, setContinuousAssessmentData] = useState([]);
   const [isPublished, setIsPublished] = useState(false);
+  const [computingCategory, setComputingCategory] = useState(null); // categoryId being computed
 
-  // Get current semester from courseData
+  // Get current semester and period type from courseData
   const currentSemester = courseData?.semNumber || courseData?.semester?.semNumber || courseData?.semester?.semNumber || "N/A";
+  const periodType = courseData?.semester?.periodType || courseData?.periodType || "semester";
+  const periodLbl = getPeriodLabel(periodType);
+  const midLabel = getMidExamShort(periodType);
+  const endLabel = getEndExamShort(periodType);
+
+  // Compute marks from linked assignments for a specific category
+  const handleComputeFromAssignments = async (categoryId) => {
+    try {
+      setComputingCategory(categoryId);
+      const result = await getCategoryScaledMarks(courseID, categoryId);
+
+      if (result.success && result.studentMarks) {
+        setSemesterMarks(prev => {
+          const updated = { ...prev };
+          result.studentMarks.forEach(({ studentId, categoryTotal }) => {
+            if (updated[studentId]) {
+              updated[studentId] = {
+                ...updated[studentId],
+                continuousEvaluation: {
+                  ...(updated[studentId].continuousEvaluation || {}),
+                  [categoryId]: Math.round(categoryTotal * 100) / 100
+                }
+              };
+            }
+          });
+          return updated;
+        });
+        toast.success(`Marks computed for ${result.category} using "${result.calculationMethod}"`);
+      }
+    } catch (error) {
+      console.error("Error computing marks from assignments:", error);
+      toast.error(error.response?.data?.error || "Failed to compute marks from assignments");
+    } finally {
+      setComputingCategory(null);
+    }
+  };
 
   useEffect(() => {
     const fetchGradebook = async () => {
@@ -44,7 +109,7 @@ const Gradebook = () => {
         setError(null);
         const data = await getCourseGradebook(courseID);
         setGradebookData(data);
-        
+
         // Load continuous assessment data from backend
         try {
           const categories = await getContinuousAssessmentPlan(courseID);
@@ -66,7 +131,7 @@ const Gradebook = () => {
         } catch (error) {
           console.error("Error fetching continuous assessment plan:", error);
         }
-        
+
         // Load semester marks from backend
         try {
           const gradings = await getCourseGrading(courseID);
@@ -80,7 +145,7 @@ const Gradebook = () => {
                 continuousEvaluation: grading.continuousEvaluation || {}
               };
             });
-            
+
             // Merge with current students (in case new students were added)
             const mergedMarks = {};
             data.students.forEach(student => {
@@ -91,7 +156,7 @@ const Gradebook = () => {
               };
             });
             setSemesterMarks(mergedMarks);
-            
+
             // Check if grades are published
             setIsPublished(gradings[0]?.isPublished || false);
           } else if (data?.students) {
@@ -216,7 +281,7 @@ const Gradebook = () => {
           Percentage: student.percentage?.toFixed(2) || "0.00",
           "Graded Assignments": student.gradedCount || 0,
           "Total Assignments": student.totalAssignments || 0,
-          Semester: `Semester ${currentSemester}`,
+          [periodLbl]: `${periodLbl} ${currentSemester}`,
         };
       });
 
@@ -252,7 +317,7 @@ const Gradebook = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center shadow-sm">
         <p className="text-red-600 font-medium">{error}</p>
       </div>
     );
@@ -260,8 +325,14 @@ const Gradebook = () => {
 
   if (!gradebookData) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-        <p className="text-gray-600">No gradebook data available</p>
+      <div className="bg-white border border-gray-200 rounded-xl p-12 text-center shadow-sm">
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg">
+            <BookOpen className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <p className="text-gray-500 text-lg font-medium">No gradebook data available</p>
+        <p className="text-gray-400 text-sm mt-1">Grades will appear here once assignments are created and graded.</p>
       </div>
     );
   }
@@ -269,21 +340,29 @@ const Gradebook = () => {
   return (
     <div className="relative -top-6 z-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="p-6">
-        {/* Header */}
+        {/* Header - Gradient Banner */}
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                {gradebookData.course?.title || "Course Gradebook"}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                {gradebookData.course?.courseCode || ""} • Semester {currentSemester}
-              </p>
-            </div>
-            <div className="flex gap-3">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 px-8 py-6 mb-6 shadow-lg">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+            <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+            <div className="absolute top-4 left-1/2 w-32 h-32 bg-white/5 rounded-full" />
+            <div className="relative z-10 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+                  <Award className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white tracking-tight">
+                    {gradebookData.course?.title || "Course Gradebook"}
+                  </h1>
+                  <p className="text-blue-100 text-sm mt-0.5">
+                    {gradebookData.course?.courseCode || ""} &bull; {periodLbl} {currentSemester}
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => exportToExcel(activeSection)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-medium shadow-sm border border-white/20"
               >
                 <Download className="w-5 h-5" />
                 Export to Excel
@@ -292,28 +371,38 @@ const Gradebook = () => {
           </div>
 
           {/* Section Tabs */}
-          <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveSection("assignments")}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`relative px-6 py-3.5 font-medium transition-all duration-200 ${
                 activeSection === "assignments"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              }`}
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              } rounded-t-lg`}
             >
-              <FileText className="w-5 h-5 inline-block mr-2" />
-              Assignment Marks
+              <span className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Assignment Marks
+              </span>
+              {activeSection === "assignments" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
+              )}
             </button>
             <button
               onClick={() => setActiveSection("semester")}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`relative px-6 py-3.5 font-medium transition-all duration-200 ${
                 activeSection === "semester"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              }`}
+                  ? "text-violet-600 dark:text-violet-400"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              } rounded-t-lg`}
             >
-              <Award className="w-5 h-5 inline-block mr-2" />
-              Course Grading
+              <span className="flex items-center gap-2">
+                <Award className="w-5 h-5" />
+                Course Grading
+              </span>
+              {activeSection === "semester" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full" />
+              )}
             </button>
           </div>
         </div>
@@ -321,42 +410,50 @@ const Gradebook = () => {
         {/* Statistics Cards */}
         {classStats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 border-t-4 border-t-blue-500 p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Students</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{classStats.totalStudents}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Students</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{classStats.totalStudents}</p>
                 </div>
-                <User className="w-8 h-8 text-blue-500" />
+                <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                  <User className="w-6 h-6 text-blue-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 border-t-4 border-t-emerald-500 p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Average Percentage</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Average Percentage</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">
                     {classStats.averagePercentage.toFixed(2)}%
                   </p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-green-500" />
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-emerald-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 border-t-4 border-t-purple-500 p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Assignments</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{classStats.totalAssignments}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Assignments</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{classStats.totalAssignments}</p>
                 </div>
-                <FileText className="w-8 h-8 text-purple-500" />
+                <div className="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-purple-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 border-t-4 border-t-amber-500 p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Points</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{classStats.totalMaxScore}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Points</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{classStats.totalMaxScore}</p>
                 </div>
-                <Award className="w-8 h-8 text-orange-500" />
+                <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                  <Award className="w-6 h-6 text-amber-500" />
+                </div>
               </div>
             </div>
           </div>
@@ -365,62 +462,62 @@ const Gradebook = () => {
         {/* Search Bar */}
         <div className="mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search by name, email, or roll number..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              className="w-full pl-11 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-gray-800 dark:text-white bg-white shadow-sm transition-all duration-200 placeholder:text-gray-400"
             />
           </div>
         </div>
 
         {/* Assignment Marks Section */}
         {activeSection === "assignments" && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700">
                   <tr>
-                    <th className="sticky left-0 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-0 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Sl.No
                     </th>
-                    <th className="sticky left-12 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-12 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Roll No
                     </th>
-                    <th className="sticky left-32 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-32 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
                     {gradebookData.assignments?.map((assignment) => (
                       <th
                         key={assignment.id}
-                        className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                        className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
                         title={assignment.title}
                       >
                         <div className="max-w-[120px]">
                           <div className="truncate">{assignment.title}</div>
-                          <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+                          <div className="text-gray-400 dark:text-gray-400 text-xs mt-1">
                             ({assignment.totalPoints} pts)
                           </div>
                         </div>
                       </th>
                     ))}
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
                       Total Score
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
                       Max Score
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
                       Percentage
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Graded
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                   {filteredStudents.length === 0 ? (
                     <tr>
                       <td colSpan={5 + (gradebookData.assignments?.length || 0) + 4} className="px-4 py-8 text-center text-gray-500">
@@ -429,7 +526,7 @@ const Gradebook = () => {
                     </tr>
                   ) : (
                     filteredStudents.map((student, index) => (
-                      <tr key={student.studentId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <tr key={student.studentId} className="hover:bg-blue-50/30 dark:hover:bg-gray-700/50 transition-colors duration-150">
                         <td className="sticky left-0 z-10 px-4 py-3 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white">
                           {index + 1}
                         </td>
@@ -488,21 +585,22 @@ const Gradebook = () => {
 
         {/* Semester Marks Section */}
         {activeSection === "semester" && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            {/* Course Grading Section Header */}
+            <SectionHeader
+              icon={ClipboardList}
+              title="Course Grading (WILP Program)"
+              gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+            />
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                    Course Grading (WILP Program)
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    End Term, Mid Term, and Continuous Evaluation marks
-                  </p>
-                </div>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {endLabel}, {midLabel}, and Continuous Evaluation marks
+                </p>
                 {!isEditingSemester ? (
                   <button
                     onClick={() => setIsEditingSemester(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
                   >
                     <Edit3 className="w-4 h-4" />
                     Edit Marks
@@ -538,7 +636,7 @@ const Gradebook = () => {
                         }
                         setIsEditingSemester(false);
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -556,13 +654,13 @@ const Gradebook = () => {
 
                           await bulkUpdateStudentGrading(courseID, gradingsToSave);
                           setIsEditingSemester(false);
-                          toast.success("Semester marks saved successfully!");
+                          toast.success(`${periodLbl} marks saved successfully!`);
                         } catch (error) {
-                          console.error("Error saving semester marks:", error);
-                          toast.error(error.response?.data?.error || "Failed to save semester marks");
+                          console.error("Error saving marks:", error);
+                          toast.error(error.response?.data?.error || `Failed to save ${periodLbl.toLowerCase()} marks`);
                         }
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
                     >
                       <Save className="w-4 h-4" />
                       Save
@@ -582,7 +680,7 @@ const Gradebook = () => {
                             toast.error(error.response?.data?.error || "Failed to publish grades");
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
                       >
                         <Award className="w-4 h-4" />
                         Publish Grades
@@ -603,7 +701,7 @@ const Gradebook = () => {
                             toast.error(error.response?.data?.error || "Failed to unpublish grades");
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
                       >
                         <X className="w-4 h-4" />
                         Unpublish
@@ -615,41 +713,55 @@ const Gradebook = () => {
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700">
                   <tr>
-                    <th className="sticky left-0 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-0 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Sl.No
                     </th>
-                    <th className="sticky left-12 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-12 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Roll No
                     </th>
-                    <th className="sticky left-32 z-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="sticky left-32 z-10 px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
                     {/* Conditionally show End Term and Mid Term - hide when expanded */}
                     {!expandedContinuous && (
                       <>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-red-50 dark:bg-red-900/20">
-                          End Term
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-red-50 dark:bg-red-900/20">
+                          {endLabel}
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-yellow-50 dark:bg-yellow-900/20">
-                          Mid Term
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-yellow-50 dark:bg-yellow-900/20">
+                          {midLabel}
                         </th>
                       </>
                     )}
                      {/* Show continuous evaluation categories as columns when expanded */}
                      {expandedContinuous && continuousAssessmentData.length > 0 ? (
                        <>
-                         {continuousAssessmentData.map((category) => (
-                           <th key={category.id || category._id} className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
-                             <div className="flex flex-col items-center">
+                         {continuousAssessmentData.map((category) => {
+                           const catId = category.id || category._id;
+                           const hasLinkedAssignments = category.selectedAssignments && category.selectedAssignments.length > 0;
+                           return (
+                           <th key={catId} className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
+                             <div className="flex flex-col items-center gap-1">
                                <span className="text-xs">{category.category}</span>
-                               <span className="text-xs text-gray-500 dark:text-gray-400">({category.totalMarks})</span>
+                               <span className="text-xs text-gray-400 dark:text-gray-400">({category.totalMarks})</span>
+                               {isEditingSemester && hasLinkedAssignments && (
+                                 <button
+                                   onClick={() => handleComputeFromAssignments(catId)}
+                                   disabled={computingCategory === catId}
+                                   className="mt-1 px-2 py-0.5 text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors disabled:opacity-50"
+                                   title="Auto-compute marks from linked assignments"
+                                 >
+                                   {computingCategory === catId ? "Computing..." : "Compute"}
+                                 </button>
+                               )}
                              </div>
                            </th>
-                         ))}
+                           );
+                         })}
                          {/* Continuous Evaluation Total column when expanded */}
-                         <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
+                         <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
                            <div className="flex items-center justify-center gap-2">
                              <span>Continuous Evaluation</span>
                              <button
@@ -663,7 +775,7 @@ const Gradebook = () => {
                          </th>
                        </>
                      ) : (
-                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
+                       <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20">
                          <div className="flex items-center justify-center gap-2">
                            <span>Continuous Evaluation</span>
                            {continuousAssessmentData.length > 0 && (
@@ -680,13 +792,13 @@ const Gradebook = () => {
                      )}
                      {/* Total column - only show when not expanded */}
                      {!expandedContinuous && (
-                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
+                       <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider bg-green-50 dark:bg-green-900/20">
                          Total
                        </th>
                      )}
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                   {filteredStudents.length === 0 ? (
                     <tr>
                       <td colSpan={expandedContinuous ? 3 + continuousAssessmentData.length + 1 : 7} className="px-4 py-8 text-center text-gray-500">
@@ -702,9 +814,9 @@ const Gradebook = () => {
                       };
                       const continuousTotal = Object.values(studentMarks.continuousEvaluation || {}).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
                       const totalMarks = (parseFloat(studentMarks.endTerm) || 0) + (parseFloat(studentMarks.midTerm) || 0) + continuousTotal;
-                      
+
                       return (
-                        <tr key={student.studentId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr key={student.studentId} className="hover:bg-blue-50/30 dark:hover:bg-gray-700/50 transition-colors duration-150">
                           <td className="sticky left-0 z-10 px-4 py-3 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white">
                             {index + 1}
                           </td>
@@ -730,7 +842,7 @@ const Gradebook = () => {
                                        }
                                      }));
                                    }}
-                                   className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
+                                   className="w-20 px-2 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-center dark:bg-gray-700 dark:text-white bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                                    min="0"
                                    disabled={!isEditingSemester}
                                  />
@@ -748,7 +860,7 @@ const Gradebook = () => {
                                        }
                                      }));
                                    }}
-                                   className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
+                                   className="w-20 px-2 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-center dark:bg-gray-700 dark:text-white bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                                    min="0"
                                    disabled={!isEditingSemester}
                                  />
@@ -777,7 +889,7 @@ const Gradebook = () => {
                                            }
                                          }));
                                        }}
-                                       className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center dark:bg-gray-700 dark:text-white bg-white"
+                                       className="w-20 px-2 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-center dark:bg-gray-700 dark:text-white bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
                                        min="0"
                                        max={category.totalMarks}
                                        disabled={!isEditingSemester}
@@ -820,4 +932,3 @@ const Gradebook = () => {
 };
 
 export default Gradebook;
-

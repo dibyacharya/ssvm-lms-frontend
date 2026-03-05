@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp, BookOpen, Calendar, Star } from "lucide-react";
 import { TfiAgenda } from "react-icons/tfi";
+import { getPeriodLabel } from "../../../utils/periodLabel";
 
 const CourseInfo = ({ course }) => {
+  const periodLbl = getPeriodLabel(course?.periodType || course?.semester?.periodType || "semester");
   return (
     <div className="w-[50%] bg-gradient-to-br bg-white dark:bg-gray-800 shadow-lg dark:shadow-xl rounded-xl overflow-hidden transition-all border border-gray-100 dark:border-gray-600">
       <button className="w-full flex justify-between items-center p-4 font-semibold text-lg transition-all">
@@ -28,7 +30,7 @@ const CourseInfo = ({ course }) => {
         <div className="flex items-center space-x-4 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
           <Calendar className="w-7 h-7 text-green-600 dark:text-green-400" />
           <p className="text-gray-800 dark:text-gray-200">
-            Semester {course.semester.name} (
+            {periodLbl} {course.semester.name} (
             {new Date(course.semester.startDate).toLocaleDateString()} -{" "}
             {new Date(course.semester.endDate).toLocaleDateString()})
           </p>

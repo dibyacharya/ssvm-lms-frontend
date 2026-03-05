@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import {
   FaTachometerAlt,
   FaBook,
-  FaCalendarCheck,
   FaUserCircle,
   FaSignOutAlt,
 } from "react-icons/fa";
 
 import TeacherCourses from "./Components/TeacherCourses";
-import TeacherCreateMeeting from "./Components/TeacherCreateMeeting";
 import TeacherDashboard2 from "./Components/TeacherDashboard2/TeacherDashboard2.jsx";
 import { useAuth } from "../../context/AuthContext.js";
 import { Link, useNavigate } from "react-router-dom";
@@ -43,11 +41,6 @@ const TeacherDashboard = () => {
       id: "Analytics",
       label: "Analytics",
       icon: <IoMdAnalytics />,
-    },
-    {
-      id: "NewMeetings",
-      label: "Create Meetings",
-      icon: <FaCalendarCheck />,
     },
   ];
 
@@ -186,7 +179,6 @@ const TeacherDashboard = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-xl h-full border border-gray-100 dark:border-gray-600">
           {activeSection === "Dashboard" && <TeacherDashboard2 />}
           {activeSection === "myCourses" && <TeacherCourses />}
-          {activeSection === "NewMeetings" && <TeacherCreateMeeting />}
           {activeSection === "Analytics" && <TeacherAnalyticsDashboard />}
         </div>
       </div>

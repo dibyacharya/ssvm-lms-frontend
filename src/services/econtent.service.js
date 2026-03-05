@@ -15,12 +15,7 @@ export const createEContent = async (courseId, econtentData) => {
   try {
     const response = await api.post(
       `/econtent/course/${courseId}/econtent`,
-      econtentData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      econtentData
     );
     return response.data;
   } catch (error) {
@@ -33,12 +28,7 @@ export const updateEContent = async (courseId, econtentId, econtentData) => {
   try {
     const response = await api.put(
       `/econtent/course/${courseId}/econtent/module/${econtentId}`,
-      econtentData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      econtentData
     );
     return response.data;
   } catch (error) {

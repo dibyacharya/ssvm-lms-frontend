@@ -14,6 +14,9 @@ import { Tooltip } from "react-tooltip";
 import { useMeetingsV2 } from "../../context/MeetingV2Context";
 import { getAllStudentCourses } from "../../services/course.service";
 import { generateTimetableEvents, getAvailableSemesters } from "../data/timetableData";
+import { getPeriodLabel } from "../../utils/periodLabel";
+import { Video } from "lucide-react";
+import DashboardBanner from "../../pages/StudentDashboard/Components/DashboardBanner";
 
 // Set up the localizer for react-big-calendar
 const localizer = momentLocalizer(moment);
@@ -43,7 +46,7 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
         </h2>
         {meeting.isTimetable && (
           <span className="mt-1 inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
-            Sem {meeting.semester} Timetable
+            {meeting.periodLabel || getPeriodLabel()} {meeting.semester} Timetable
           </span>
         )}
         <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
@@ -152,17 +155,25 @@ const CreateMeeting = () => {
           )].sort((a, b) => a - b);
           
           setStudentSemesters(courseSemesters);
-          
+
+          // Detect period type from courses
+          const detectedPeriodType = data.courses?.find(
+            c => c.periodType || c.semester?.periodType
+          )?.periodType || data.courses?.find(
+            c => c.semester?.periodType
+          )?.semester?.periodType || "semester";
+          const pLabel = getPeriodLabel(detectedPeriodType);
+
           // Generate timetable events for all semesters the student has
           if (courseSemesters.length > 0) {
             const today = new Date();
             const endDate = new Date(today);
             endDate.setMonth(endDate.getMonth() + 3); // Generate 3 months ahead
-            
+
             // Generate events for each semester
             const allEvents = [];
             courseSemesters.forEach(semester => {
-              const generatedEvents = generateTimetableEvents(semester, today, endDate);
+              const generatedEvents = generateTimetableEvents(semester, today, endDate, pLabel);
               allEvents.push(...generatedEvents);
             });
             
@@ -258,21 +269,16 @@ const CreateMeeting = () => {
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header and View Toggle */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-              Class Meetings Calendar
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Schedule and join your virtual classroom sessions
-              {studentSemesters.length > 0 && (
-                <span className="ml-2 text-blue-600 dark:text-blue-400">
-                  ({studentSemesters.map(sem => `Semester ${sem}`).join(', ')} Timetable Included)
-                </span>
-              )}
-            </p>
-          </div>
+        {/* Header Banner */}
+        <DashboardBanner
+          icon={Video}
+          title="Class Meetings Calendar"
+          subtitle={`Schedule and join your virtual classroom sessions${studentSemesters.length > 0 ? ` • ${studentSemesters.map(sem => `Period ${sem}`).join(', ')} Timetable Included` : ''}`}
+          gradient="bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600"
+        />
+
+        {/* View Toggle */}
+        <div className="flex justify-end mt-6 mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-1 flex">
             <button
               className={`px-4 py-2 rounded transition-colors duration-200 ${
@@ -403,7 +409,7 @@ const CreateMeeting = () => {
               </div>
               {meeting.isTimetable && (
                 <div className="text-xs mt-1 text-blue-600 dark:text-blue-400">
-                  Semester {meeting.semester} Timetable
+                  {meeting.periodLabel || getPeriodLabel()} {meeting.semester} Timetable
                 </div>
               )}
               {meeting.description && (
@@ -423,7 +429,7 @@ const CreateMeeting = () => {
             </h2>
             {selectedMeeting.isTimetable && (
               <div className="mb-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-md text-sm inline-block">
-                Semester {selectedMeeting.semester} Timetable
+                {selectedMeeting.periodLabel || getPeriodLabel()} {selectedMeeting.semester} Timetable
               </div>
             )}
             <p className="text-gray-600 dark:text-gray-300 mb-4">

@@ -2,8 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import noUiSlider from "nouislider";
 import "nouislider/dist/nouislider.css";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { fetchFile } from "@ffmpeg/util";
-import { X, Scissors, RotateCcw, Upload, Download, Clock } from "lucide-react";
+// fetchFile no longer needed — using direct fetch() for better Content-Type detection
+import { X, Scissors, RotateCcw, Upload, Download, Clock, AlertTriangle } from "lucide-react";
 import { updateLecture } from "../../services/lecture.service";
 
 const ffmpeg = new FFmpeg();
@@ -59,10 +59,13 @@ const VideoEditor = ({
   const [videoDuration, setVideoDuration] = useState(0);
   const [progress, setProgress] = useState(0);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [videoError, setVideoError] = useState(false);
+  const [outputFormat, setOutputFormat] = useState("mp4"); // Track actual video format
 
   useEffect(() => {
     if (!videoUrl) return;
     setVideoLoaded(true);
+    setVideoError(false);
     // Apply custom slider styles
     customizeSlider();
   }, [videoUrl]);
@@ -73,8 +76,9 @@ const VideoEditor = ({
     const video = videoRef.current;
     const slider = sliderRef.current;
 
-    video.onloadedmetadata = () => {
-      const duration = video.duration;
+    const initSlider = (duration) => {
+      if (!duration || !isFinite(duration) || duration <= 0) return;
+
       setVideoDuration(duration);
 
       if (slider.noUiSlider) {
@@ -105,6 +109,28 @@ const VideoEditor = ({
       slider.noUiSlider.on("update", (values) => {
         setCurrentRange([parseFloat(values[0]), parseFloat(values[1])]);
       });
+    };
+
+    video.onloadedmetadata = () => {
+      const duration = video.duration;
+      if (isFinite(duration) && duration > 0) {
+        initSlider(duration);
+      } else {
+        // WebM files from MediaRecorder often have Infinity duration.
+        // Seek to a large time to force the browser to compute the real duration.
+        video.currentTime = Number.MAX_SAFE_INTEGER;
+        video.ontimeupdate = function onceSeek() {
+          video.ontimeupdate = null;
+          const realDuration = video.duration;
+          video.currentTime = 0;
+          if (isFinite(realDuration) && realDuration > 0) {
+            initSlider(realDuration);
+          } else {
+            // Last resort: use 60s default so the editor doesn't crash
+            initSlider(60);
+          }
+        };
+      }
     };
   }, [videoLoaded, videoUrl]);
 
@@ -139,132 +165,184 @@ const VideoEditor = ({
   };
 
   const trimVideo = async () => {
-  if (!ffmpeg.loaded) {
-    await ffmpeg.load();
-  }
-  setProcessing(true);
-  setProgress(0);
-
-  try {
-    const inputFile = "input.mp4";
-    
-    // Better way to handle video data - convert to blob first
-    let videoData;
-    
-    if (videoUrl.startsWith('blob:')) {
-      // If it's a blob URL, fetch it directly
-      const response = await fetch(videoUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch blob: ${response.statusText}`);
-      }
-      videoData = await response.arrayBuffer();
-    } else {
-      // For regular URLs, try fetchFile with error handling
+    if (!ffmpeg.loaded) {
       try {
-        videoData = await fetchFile(videoUrl);
-      } catch (fetchError) {
-        console.error('fetchFile failed, trying alternative method:', fetchError);
-        
-        // Fallback: try direct fetch
-        const response = await fetch(videoUrl, {
-          mode: 'cors',
-          credentials: 'same-origin'
-        });
-        
+        await ffmpeg.load();
+      } catch (loadError) {
+        console.error("FFmpeg load failed:", loadError);
+        alert(
+          "Failed to load the video processor. Please refresh the page and try again."
+        );
+        return;
+      }
+    }
+    setProcessing(true);
+    setProgress(0);
+
+    try {
+      // Fetch video data first, then detect format from Content-Type or bytes
+      let videoData;
+      let detectedContentType = "";
+
+      if (videoUrl.startsWith("blob:")) {
+        const response = await fetch(videoUrl);
         if (!response.ok) {
-          throw new Error(`Failed to fetch video: ${response.statusText}`);
+          throw new Error(`Failed to fetch blob: ${response.statusText}`);
         }
-        
+        detectedContentType = response.headers.get("content-type") || "";
+        videoData = await response.arrayBuffer();
+      } else {
+        // Use fetch directly (works with proxy URL and CORS)
+        const response = await fetch(videoUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
+        }
+        detectedContentType = response.headers.get("content-type") || "";
         videoData = await response.arrayBuffer();
       }
-    }
 
-    // Write the video data to FFmpeg
-    await ffmpeg.writeFile(inputFile, new Uint8Array(videoData));
-
-    const video = videoRef.current;
-    const duration = video.duration;
-    let segments = [];
-    let lastEnd = 0;
-
-    // Sort the remove ranges and process segments
-    const sortedRanges = [...removeRanges].sort((a, b) => a[0] - b[0]);
-    for (const [start, end] of sortedRanges) {
-      if (lastEnd < start) {
-        segments.push([lastEnd, start]);
+      if (!videoData || videoData.byteLength === 0) {
+        throw new Error("Downloaded video is empty. The recording may be unavailable.");
       }
-      lastEnd = end;
-    }
-    if (lastEnd < duration) {
-      segments.push([lastEnd, duration]);
-    }
 
-    if (segments.length === 0) {
-      alert("Nothing left to save! Select a valid trim range.");
+      // Detect format from Content-Type header, URL patterns, or file magic bytes
+      const bytes = new Uint8Array(videoData);
+      const isWebMByMagic = bytes.length >= 4 && bytes[0] === 0x1A && bytes[1] === 0x45 && bytes[2] === 0xDF && bytes[3] === 0xA3;
+      const isWebM =
+        detectedContentType.includes("webm") ||
+        isWebMByMagic ||
+        videoUrl.includes("/recording/video") ||
+        videoUrl.includes(".webm") ||
+        videoUrl.includes("/stream/");
+
+      const ext = isWebM ? "webm" : "mp4";
+      const mimeType = isWebM ? "video/webm" : "video/mp4";
+      const inputFile = `input.${ext}`;
+      setOutputFormat(ext);
+
+      console.log(`[VideoEditor] Format: ${ext}, Content-Type: ${detectedContentType}, Size: ${videoData.byteLength} bytes, Magic: ${isWebMByMagic ? 'WebM' : 'other'}`);
+
+      await ffmpeg.writeFile(inputFile, bytes);
+      setProgress(10);
+
+      // Use the already-computed videoDuration state (handles WebM Infinity)
+      const duration = videoDuration;
+      if (!duration || !isFinite(duration) || duration <= 0) {
+        throw new Error(
+          "Could not determine video duration. Please reload the page and try again."
+        );
+      }
+
+      // Calculate keep-segments (inverse of remove-ranges)
+      let segments = [];
+      let lastEnd = 0;
+      const sortedRanges = [...removeRanges].sort((a, b) => a[0] - b[0]);
+      for (const [start, end] of sortedRanges) {
+        if (lastEnd < start) {
+          segments.push([lastEnd, start]);
+        }
+        lastEnd = end;
+      }
+      if (lastEnd < duration) {
+        segments.push([lastEnd, duration]);
+      }
+
+      if (segments.length === 0) {
+        alert("Nothing left to save! Select a valid trim range.");
+        setProcessing(false);
+        return;
+      }
+
+      // Extract each keep-segment using stream copy (same container, fast)
+      let segmentFiles = [];
+      for (let i = 0; i < segments.length; i++) {
+        const [segStart, segEnd] = segments[i];
+        const outputSegment = `segment_${i}.${ext}`;
+
+        await ffmpeg.exec([
+          "-i",
+          inputFile,
+          "-ss",
+          `${segStart}`,
+          "-to",
+          `${segEnd}`,
+          "-c",
+          "copy",
+          "-avoid_negative_ts",
+          "make_zero",
+          outputSegment,
+        ]);
+
+        segmentFiles.push(outputSegment);
+        setProgress(10 + Math.round(((i + 1) / segments.length) * 60));
+      }
+
+      // Merge segments if more than one
+      let finalOutput = `output.${ext}`;
+      if (segmentFiles.length > 1) {
+        const fileList = "fileList.txt";
+        const listContent = segmentFiles
+          .map((f) => `file '${f}'`)
+          .join("\n");
+        await ffmpeg.writeFile(
+          fileList,
+          new TextEncoder().encode(listContent)
+        );
+
+        await ffmpeg.exec([
+          "-f",
+          "concat",
+          "-safe",
+          "0",
+          "-i",
+          fileList,
+          "-c",
+          "copy",
+          finalOutput,
+        ]);
+      } else {
+        finalOutput = segmentFiles[0];
+      }
+
+      setProgress(90);
+
+      const data = await ffmpeg.readFile(finalOutput);
+      const url = URL.createObjectURL(
+        new Blob([data.buffer], { type: mimeType })
+      );
+      setOutputURL(url);
+      setProgress(100);
       setProcessing(false);
-      return;
+
+      // Clean up FFmpeg virtual filesystem
+      try {
+        await ffmpeg.deleteFile(inputFile);
+        for (const sf of segmentFiles) {
+          try {
+            await ffmpeg.deleteFile(sf);
+          } catch (_) {}
+        }
+        if (segmentFiles.length > 1) {
+          try {
+            await ffmpeg.deleteFile("fileList.txt");
+          } catch (_) {}
+          try {
+            await ffmpeg.deleteFile(`output.${ext}`);
+          } catch (_) {}
+        }
+      } catch (cleanupErr) {
+        console.warn("FFmpeg cleanup warning:", cleanupErr);
+      }
+    } catch (error) {
+      console.error("Error processing video:", error);
+      const errorMsg =
+        error?.message ||
+        (typeof error === "string" ? error : String(error));
+      alert(`Failed to process video: ${errorMsg}`);
+      setProcessing(false);
+      setProgress(0);
     }
-
-    let segmentFiles = [];
-    for (let i = 0; i < segments.length; i++) {
-      const [segStart, segEnd] = segments[i];
-      const outputSegment = `segment_${i}.mp4`;
-      
-      await ffmpeg.exec([
-        "-i",
-        inputFile,
-        "-ss",
-        `${segStart}`,
-        "-to",
-        `${segEnd}`,
-        "-c",
-        "copy",
-        outputSegment,
-      ]);
-      
-      segmentFiles.push(outputSegment);
-      setProgress(Math.round(((i + 1) / segments.length) * 70)); // 70% for segments
-    }
-
-    // Merge segments
-    let finalOutput = "output.mp4";
-    if (segmentFiles.length > 1) {
-      const fileList = "fileList.txt";
-      const listContent = segmentFiles.map((f) => `file '${f}'`).join("\n");
-      await ffmpeg.writeFile(fileList, new TextEncoder().encode(listContent));
-
-      await ffmpeg.exec([
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        fileList,
-        "-c",
-        "copy",
-        finalOutput,
-      ]);
-    } else {
-      finalOutput = segmentFiles[0]; // Only one segment, no need to merge
-    }
-
-    setProgress(90); // 90% after merging
-
-    const data = await ffmpeg.readFile(finalOutput);
-    const url = URL.createObjectURL(
-      new Blob([data.buffer], { type: "video/mp4" })
-    );
-    setOutputURL(url);
-    setProgress(100);
-    setProcessing(false);
-    
-  } catch (error) {
-    console.error("Error processing video:", error);
-    alert(`Failed to process video: ${error.message}`);
-    setProcessing(false);
-    setProgress(0);
-  }
-};
+  };
 
   const resetEditor = () => {
     setRemoveRanges([]);
@@ -286,8 +364,9 @@ const VideoEditor = ({
       // Convert the Blob URL to a File object
       const response = await fetch(outputURL);
       const blob = await response.blob();
-      const videoFile = new File([blob], "edited_video.mp4", {
-        type: "video/mp4",
+      const mimeType = outputFormat === "webm" ? "video/webm" : "video/mp4";
+      const videoFile = new File([blob], `edited_video.${outputFormat}`, {
+        type: mimeType,
       });
 
       // Create FormData and append the video file
@@ -321,13 +400,33 @@ const VideoEditor = ({
         </button>
       </div>
 
-      {videoUrl && (
+      {!videoUrl && (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+          <AlertTriangle size={48} className="mb-4 text-amber-400" />
+          <p className="text-lg font-medium text-gray-700">No video available</p>
+          <p className="text-sm mt-1">This lecture does not have a video attached yet.</p>
+        </div>
+      )}
+
+      {videoUrl && videoError && (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+          <AlertTriangle size={48} className="mb-4 text-red-400" />
+          <p className="text-lg font-medium text-gray-700">Video failed to load</p>
+          <p className="text-sm mt-1 text-center max-w-md">
+            The video recording could not be loaded. The recording server may be unavailable or the video may have been removed.
+          </p>
+          <p className="text-xs mt-3 text-gray-400 break-all max-w-lg text-center">{videoUrl}</p>
+        </div>
+      )}
+
+      {videoUrl && !videoError && (
         <div>
           <div className="flex flex-col items-center w-full mb-6">
             <video
               ref={videoRef}
               src={videoUrl}
               controls
+              onError={() => setVideoError(true)}
               className="w-full rounded-lg shadow-md bg-black aspect-video"
             />
             <div ref={sliderRef} className="w-full mt-6 mb-8"></div>
@@ -468,7 +567,7 @@ const VideoEditor = ({
               </button>
               <a
                 href={outputURL}
-                download="edited_video.mp4"
+                download={`edited_video.${outputFormat}`}
                 onMouseEnter={() => setHoveredButton("download")}
                 onMouseLeave={() => setHoveredButton(null)}
                 className={`flex items-center gap-2 bg-white text-secondary border border-secondary py-3 px-5 rounded-md no-underline transition-all duration-200 ${

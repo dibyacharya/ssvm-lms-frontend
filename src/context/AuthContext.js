@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from "react";
+import { getMyProfile } from "../services/profile.service";
 
 const AuthContext = createContext({});
 
@@ -8,11 +9,63 @@ export const AuthProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [loading, setLoading] = useState(true);
+  const hasRefreshed = useRef(false);
 
+  // Refresh user data from backend on app mount
+  // This ensures admin-made changes (name, program, batch, etc.) propagate immediately
   useEffect(() => {
-    // Set loading to false after checking localStorage
-    setLoading(false);
-  }, []);
+    const refreshUserFromBackend = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || !user || hasRefreshed.current) {
+        setLoading(false);
+        return;
+      }
+      hasRefreshed.current = true;
+      try {
+        const profileData = await getMyProfile();
+        if (profileData) {
+          setUser((prevUser) => {
+            const academicSummary = profileData.academicSummary || {};
+            const userCore = profileData.user || {};
+            const teacherProfile = profileData.teacherProfile || {};
+
+            const refreshed = {
+              ...prevUser,
+              // Core user fields
+              name: userCore.name || prevUser.name,
+              email: userCore.email || prevUser.email,
+              mobileNo: userCore.mobileNo || prevUser.mobileNo,
+              gender: userCore.gender || prevUser.gender,
+              designation: userCore.designation || prevUser.designation,
+              profilePhotoUrl: userCore.profilePhotoUrl || prevUser.profilePhotoUrl,
+              role: userCore.role || prevUser.role,
+              roleKey: userCore.roleKey || prevUser.roleKey,
+              isActive: userCore.isActive !== undefined ? userCore.isActive : prevUser.isActive,
+              // Academic info (for students)
+              academicProfile: userCore.academicProfile || prevUser.academicProfile,
+              // Teacher-specific fields
+              ...(prevUser.role === "teacher" ? {
+                profTitle: teacherProfile.profTitle || prevUser.profTitle || "",
+                profDesc: teacherProfile.profDesc || prevUser.profDesc || "",
+                googleScholarLink: teacherProfile.googleScholarLink || prevUser.googleScholarLink || "",
+                scopusLink: teacherProfile.scopusLink || prevUser.scopusLink || "",
+                linkedInLink: teacherProfile.linkedInLink || prevUser.linkedInLink || "",
+              } : {}),
+            };
+            localStorage.setItem("user", JSON.stringify(refreshed));
+            return refreshed;
+          });
+        }
+      } catch (error) {
+        // If token is expired or invalid, don't crash — user will be redirected to login
+        console.warn("AuthContext: Failed to refresh user from backend", error?.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    refreshUserFromBackend();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Keep localStorage in sync with user state
@@ -27,12 +80,14 @@ export const AuthProvider = ({ children }) => {
     setUser(userData.user);
     localStorage.setItem("user", JSON.stringify(userData.user));
     localStorage.setItem("token", userData.token);
+    hasRefreshed.current = false; // Allow refresh on next mount
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    hasRefreshed.current = false;
   };
 
   const updateUser = (updatedUserData) => {
@@ -43,8 +98,47 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  // Manual refresh — can be called from any component via useAuth().refreshUser()
+  const refreshUser = useCallback(async () => {
+    try {
+      const profileData = await getMyProfile();
+      if (profileData) {
+        const academicSummary = profileData.academicSummary || {};
+        const userCore = profileData.user || {};
+        const teacherProfile = profileData.teacherProfile || {};
+
+        setUser((prevUser) => {
+          const refreshed = {
+            ...prevUser,
+            name: userCore.name || prevUser.name,
+            email: userCore.email || prevUser.email,
+            mobileNo: userCore.mobileNo || prevUser.mobileNo,
+            gender: userCore.gender || prevUser.gender,
+            designation: userCore.designation || prevUser.designation,
+            profilePhotoUrl: userCore.profilePhotoUrl || prevUser.profilePhotoUrl,
+            role: userCore.role || prevUser.role,
+            roleKey: userCore.roleKey || prevUser.roleKey,
+            isActive: userCore.isActive !== undefined ? userCore.isActive : prevUser.isActive,
+            academicProfile: userCore.academicProfile || prevUser.academicProfile,
+            ...(prevUser.role === "teacher" ? {
+              profTitle: teacherProfile.profTitle || prevUser.profTitle || "",
+              profDesc: teacherProfile.profDesc || prevUser.profDesc || "",
+              googleScholarLink: teacherProfile.googleScholarLink || prevUser.googleScholarLink || "",
+              scopusLink: teacherProfile.scopusLink || prevUser.scopusLink || "",
+              linkedInLink: teacherProfile.linkedInLink || prevUser.linkedInLink || "",
+            } : {}),
+          };
+          localStorage.setItem("user", JSON.stringify(refreshed));
+          return refreshed;
+        });
+      }
+    } catch (error) {
+      console.warn("AuthContext: Manual refresh failed", error?.message);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, refreshUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

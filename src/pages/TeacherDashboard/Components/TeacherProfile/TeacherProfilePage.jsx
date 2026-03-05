@@ -22,10 +22,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import api from "../../../../services/api";
+import { getMyProfile } from "../../../../services/profile.service";
 
 const TeacherProfilePage = () => {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // State for teacher details
   const [teacherDetails, setTeacherDetails] = useState({
@@ -39,17 +41,53 @@ const TeacherProfilePage = () => {
     specialization: "",
   });
 
+  // Fetch fresh profile data from API on mount (instead of relying only on cached AuthContext)
   useEffect(() => {
-    if (user) {
-      setTeacherDetails((prev) => ({
-        ...prev,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-        phone: user.mobileNo || prev.phone,
-        position: user.role || prev.position,
-      }));
-    }
-  }, [user]);
+    const fetchFreshProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const profileData = await getMyProfile();
+        if (profileData) {
+          const userCore = profileData.user || {};
+          const teacherProfile = profileData.teacherProfile || {};
+          setTeacherDetails((prev) => ({
+            ...prev,
+            name: userCore.name || prev.name,
+            email: userCore.email || prev.email,
+            phone: userCore.mobileNo || prev.phone,
+            position: teacherProfile.designation || userCore.role || prev.position,
+            department: teacherProfile.department || prev.department,
+            facultyId: teacherProfile.employeeId || teacherProfile.teacherId || prev.facultyId,
+            specialization: teacherProfile.specialization || prev.specialization,
+          }));
+          setMentorDetails((prev) => ({
+            ...prev,
+            profTitle: teacherProfile.profTitle || "",
+            profDesc: teacherProfile.profDesc || "",
+            googleScholarLink: teacherProfile.googleScholarLink || "",
+            scopusLink: teacherProfile.scopusLink || "",
+            linkedInLink: teacherProfile.linkedInLink || "",
+          }));
+        }
+      } catch (error) {
+        console.warn("TeacherProfilePage: Failed to fetch fresh profile", error?.message);
+        // Fallback to cached AuthContext data
+        if (user) {
+          setTeacherDetails((prev) => ({
+            ...prev,
+            name: user.name || prev.name,
+            email: user.email || prev.email,
+            phone: user.mobileNo || prev.phone,
+            position: user.role || prev.position,
+          }));
+        }
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchFreshProfile();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const userInitials = useMemo(() => {
     const n = user?.name || "";
@@ -86,19 +124,19 @@ const TeacherProfilePage = () => {
     linkedInLink: "",
   });
 
-  // Load mentor details from user object if available
+  // Mentor details are now loaded from the fresh API call above
+  // Fallback: if API call hasn't completed yet, use cached AuthContext
   useEffect(() => {
-    if (user) {
+    if (user && !profileLoading) {
       setMentorDetails((prev) => ({
-        ...prev,
-        profTitle: user.profTitle || "",
-        profDesc: user.profDesc || "",
-        googleScholarLink: user.googleScholarLink || "",
-        scopusLink: user.scopusLink || "",
-        linkedInLink: user.linkedInLink || "",
+        profTitle: prev.profTitle || user.profTitle || "",
+        profDesc: prev.profDesc || user.profDesc || "",
+        googleScholarLink: prev.googleScholarLink || user.googleScholarLink || "",
+        scopusLink: prev.scopusLink || user.scopusLink || "",
+        linkedInLink: prev.linkedInLink || user.linkedInLink || "",
       }));
     }
-  }, [user]);
+  }, [user, profileLoading]);
 
   // Edit mode states
   const [editingSection, setEditingSection] = useState(null);

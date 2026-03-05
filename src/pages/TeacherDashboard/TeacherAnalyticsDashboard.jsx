@@ -28,6 +28,14 @@ import {
   BookOpen,
   Award,
   BrainCircuit,
+  BarChart2,
+  MessageSquare,
+  TrendingUp,
+  FileText,
+  Download,
+  Activity,
+  Target,
+  Lightbulb,
 } from "lucide-react";
 
 // Sample data - this would come from your backend in a real app
@@ -259,6 +267,20 @@ const studentSpecificData = {
   },
 };
 
+// Section Header component matching TeacherHome style
+const SectionHeader = ({ icon: Icon, title, gradient }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+    </div>
+  </div>
+);
+
 // Dashboard Component
 const TeacherAnalyticsDashboard = () => {
   const [activeSection, setActiveSection] = useState("engagement");
@@ -314,236 +336,284 @@ const TeacherAnalyticsDashboard = () => {
     }));
   };
 
-  return (
-    <div className="bg-gray-50 min-h-screen max-w-7xl mx-auto p-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Course Analytics Dashboard
-        </h1>
-        <p className="text-gray-600">
-          Data-driven insights to improve teaching and learning outcomes
-        </p>
-      </header>
+  const tabs = [
+    { key: "engagement", label: "Learner Engagement", icon: Users },
+    { key: "performance", label: "Performance & Grades", icon: Award },
+    { key: "predictive", label: "Predictive Insights", icon: BrainCircuit },
+  ];
 
-      {/* Navigation Tabs */}
-      <div className="flex mb-6 bg-white rounded-lg shadow overflow-hidden">
-        <button
-          className={`flex items-center py-3 px-6 ${
-            activeSection === "engagement"
-              ? "bg-primary/80 text-white"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setActiveSection("engagement")}
-        >
-          <Users className="w-5 h-5 mr-2" />
-          <span>Learner Engagement</span>
-        </button>
-        <button
-          className={`flex items-center py-3 px-6 ${
-            activeSection === "performance"
-              ? "bg-primary/80 text-white"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setActiveSection("performance")}
-        >
-          <Award className="w-5 h-5 mr-2" />
-          <span>Performance & Grades</span>
-        </button>
-        <button
-          className={`flex items-center py-3 px-6 ${
-            activeSection === "predictive"
-              ? "bg-primary/80 text-white"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setActiveSection("predictive")}
-        >
-          <BrainCircuit className="w-5 h-5 mr-2" />
-          <span>Predictive Insights</span>
-        </button>
+  return (
+    <div className="max-w-[1600px] pt-12 relative -top-6 mx-auto space-y-8 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      {/* Header Section - Gradient Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+        <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+        <div className="absolute top-4 left-[40%] w-16 h-16 bg-white/5 rounded-full" />
+        <div className="absolute -bottom-6 left-[20%] w-20 h-20 bg-white/5 rounded-full" />
+
+        <div className="relative z-10 flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <BarChart2 className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              Course Analytics Dashboard
+            </h1>
+            <p className="text-white/80 text-sm font-medium mt-1.5">
+              Data-driven insights to improve teaching and learning outcomes
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs - Pill style */}
+      <div className="flex gap-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 p-2">
+        {tabs.map((tab) => {
+          const TabIcon = tab.icon;
+          return (
+            <button
+              key={tab.key}
+              className={`flex items-center gap-2 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                activeSection === tab.key
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
+                  : "text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+              onClick={() => setActiveSection(tab.key)}
+            >
+              <TabIcon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Student selection banner - visible when a student is selected */}
       {selectedStudent !== "class_average" && (
-        <div className="mb-6 bg-green-50 p-4 rounded-lg border border-green-200 flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold text-primary">
-              Viewing data for: {selectedStudent}
-            </h2>
-            <p className="text-primary/80">
-              Showing individual performance metrics and comparison with class
-              average
-            </p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-5 flex justify-between items-center border-l-4 border-l-emerald-500">
+            <div>
+              <h2 className="text-xl font-bold text-primary dark:text-white">
+                Viewing data for: {selectedStudent}
+              </h2>
+              <p className="text-tertiary dark:text-gray-400 text-sm mt-0.5">
+                Showing individual performance metrics and comparison with class
+                average
+              </p>
+            </div>
+            <button
+              onClick={() => setSelectedStudent("class_average")}
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all"
+            >
+              Back to Class View
+            </button>
           </div>
-          <button
-            onClick={() => setSelectedStudent("class_average")}
-            className="bg-primary/70 hover:bg-primary/80 text-white px-4 py-2 rounded"
-          >
-            Back to Class View
-          </button>
         </div>
       )}
 
       {/* Dashboard Content */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Engagement Section */}
         {activeSection === "engagement" && (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    Daily Active Users
-                  </h3>
-                  <Users className="w-8 h-8 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Daily Active Users */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Daily Active Users</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">134</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">134</p>
-                <p className="text-sm text-green-600">+12% from last week</p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+12%</span>
+                  <span className="mx-1">from last week</span>
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    Avg. Session Time
-                  </h3>
-                  <Clock className="w-8 h-8 text-primary" />
+              {/* Avg Session Time */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Avg. Session Time</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">45 min</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">45 min</p>
-                <p className="text-sm text-green-600">+5 min from last week</p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+5 min</span>
+                  <span className="mx-1">from last week</span>
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    Content Completion
-                  </h3>
-                  <BookOpen className="w-8 h-8 text-primary" />
+              {/* Content Completion */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-purple-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Content Completion</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">72%</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">72%</p>
-                <p className="text-sm text-yellow-600">-3% from last week</p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-amber-500 dark:text-amber-400 font-medium">-3%</span>
+                  <span className="mx-1">from last week</span>
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    Forum Engagement
-                  </h3>
-                  <Users className="w-8 h-8 text-primary" />
+              {/* Forum Engagement */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Forum Engagement</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">183</h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">183</p>
-                <p className="text-sm text-green-600">+23% from last week</p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+23%</span>
+                  <span className="mx-1">from last week</span>
+                </div>
               </div>
             </div>
 
             {/* Weekly Active Users Chart */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {selectedStudent === "class_average"
-                  ? "Weekly User Activity"
-                  : `Weekly Activity - ${selectedStudent}`}
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={getEngagementData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="activeUsers"
-                    name={
-                      selectedStudent === "class_average"
-                        ? "Active Users"
-                        : "Login Status (1=Active)"
-                    }
-                    stroke="#8884d8"
-                    activeDot={{ r: 8 }}
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="avgDuration"
-                    name="Avg. Duration (min)"
-                    stroke="#82ca9d"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <SectionHeader
+                icon={Activity}
+                title={
+                  selectedStudent === "class_average"
+                    ? "Weekly User Activity"
+                    : `Weekly Activity - ${selectedStudent}`
+                }
+                gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+              />
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={getEngagementData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="activeUsers"
+                      name={
+                        selectedStudent === "class_average"
+                          ? "Active Users"
+                          : "Login Status (1=Active)"
+                      }
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="avgDuration"
+                      name="Avg. Duration (min)"
+                      stroke="#82ca9d"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             {/* Content Engagement Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Video Completion Rates */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Video Completion Rates
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={videoCompletionData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="completion"
-                      name="Completion Rate (%)"
-                      fill="#8884d8"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={BookOpen}
+                  title="Video Completion Rates"
+                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                />
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={videoCompletionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar
+                        dataKey="completion"
+                        name="Completion Rate (%)"
+                        fill="#8884d8"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Resource Downloads */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Resource Downloads
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={resourceDownloadsData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="downloads" name="Downloads" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={Download}
+                  title="Resource Downloads"
+                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                />
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={resourceDownloadsData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="downloads" name="Downloads" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* Forum Activity */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Forum Activity Trends
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={forumActivityData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="posts"
-                    name="Posts"
-                    stackId="1"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="replies"
-                    name="Replies"
-                    stackId="1"
-                    stroke="#82ca9d"
-                    fill="#82ca9d"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <SectionHeader
+                icon={MessageSquare}
+                title="Forum Activity Trends"
+                gradient="bg-gradient-to-r from-rose-500 to-pink-600"
+              />
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={forumActivityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area
+                      type="monotone"
+                      dataKey="posts"
+                      name="Posts"
+                      stackId="1"
+                      stroke="#8884d8"
+                      fill="#8884d8"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="replies"
+                      name="Replies"
+                      stackId="1"
+                      stroke="#82ca9d"
+                      fill="#82ca9d"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </>
         )}
@@ -552,216 +622,247 @@ const TeacherAnalyticsDashboard = () => {
         {activeSection === "performance" && (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    {selectedStudent === "class_average"
-                      ? "Class Average"
-                      : "Student Average"}
-                  </h3>
-                  <Award className="w-8 h-8 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">
+                      {selectedStudent === "class_average"
+                        ? "Class Average"
+                        : "Student Average"}
+                    </p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                      {selectedStudent === "class_average"
+                        ? "78%"
+                        : selectedStudent === "Emma Wilson"
+                        ? "91%"
+                        : selectedStudent === "Michael Chen"
+                        ? "79%"
+                        : "63%"}
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">
-                  {selectedStudent === "class_average"
-                    ? "78%"
-                    : selectedStudent === "Emma Wilson"
-                    ? "91%"
-                    : selectedStudent === "Michael Chen"
-                    ? "79%"
-                    : "63%"}
-                </p>
-                <p className="text-sm text-green-600">
-                  +2% from last assessment
-                </p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+2%</span>
+                  <span className="mx-1">from last assessment</span>
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">Pass Rate</h3>
-                  <Award className="w-8 h-8 text-primary" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Pass Rate</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                      {selectedStudent === "class_average"
+                        ? "91%"
+                        : selectedStudent === "Emma Wilson"
+                        ? "100%"
+                        : selectedStudent === "Michael Chen"
+                        ? "100%"
+                        : "75%"}
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <Target className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">
-                  {selectedStudent === "class_average"
-                    ? "91%"
-                    : selectedStudent === "Emma Wilson"
-                    ? "100%"
-                    : selectedStudent === "Michael Chen"
-                    ? "100%"
-                    : "75%"}
-                </p>
-                <p className="text-sm text-yellow-600">
-                  -1% from last assessment
-                </p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-amber-500 dark:text-amber-400 font-medium">-1%</span>
+                  <span className="mx-1">from last assessment</span>
+                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700">
-                    Assignment Completion
-                  </h3>
-                  <BookOpen className="w-8 h-8 text-primary" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-tertiary dark:text-gray-400 text-sm">Assignment Completion</p>
+                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                      {selectedStudent === "class_average"
+                        ? "85%"
+                        : selectedStudent === "Emma Wilson"
+                        ? "100%"
+                        : selectedStudent === "Michael Chen"
+                        ? "100%"
+                        : "60%"}
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-800">
-                  {selectedStudent === "class_average"
-                    ? "85%"
-                    : selectedStudent === "Emma Wilson"
-                    ? "100%"
-                    : selectedStudent === "Michael Chen"
-                    ? "100%"
-                    : "60%"}
-                </p>
-                <p className="text-sm text-green-600">+5% from last week</p>
+                <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+5%</span>
+                  <span className="mx-1">from last week</span>
+                </div>
               </div>
             </div>
 
             {/* Grade Distribution */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  {selectedStudent === "class_average"
-                    ? "Grade Distribution"
-                    : `${selectedStudent}'s Grades`}
-                </h2>
-                {selectedStudent === "class_average" ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={gradeDistributionData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="students"
-                        nameKey="name"
-                        label={({ name, percent }) =>
-                          `${name}: ${(percent * 100).toFixed(0)}%`
-                        }
-                      >
-                        {gradeDistributionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value) => [`${value} students`, "Count"]}
-                      />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={getStudentGrades()}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="assignment" />
-                      <YAxis domain={[0, 100]} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar
-                        dataKey="grade"
-                        name="Student Grade"
-                        fill="#8884d8"
-                      />
-                      <Bar
-                        dataKey="classAverage"
-                        name="Class Average"
-                        fill="#82ca9d"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={BarChart2}
+                  title={
+                    selectedStudent === "class_average"
+                      ? "Grade Distribution"
+                      : `${selectedStudent}'s Grades`
+                  }
+                  gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+                />
+                <div className="p-6">
+                  {selectedStudent === "class_average" ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={gradeDistributionData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="students"
+                          nameKey="name"
+                          label={({ name, percent }) =>
+                            `${name}: ${(percent * 100).toFixed(0)}%`
+                          }
+                        >
+                          {gradeDistributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => [`${value} students`, "Count"]}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={getStudentGrades()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="assignment" />
+                        <YAxis domain={[0, 100]} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar
+                          dataKey="grade"
+                          name="Student Grade"
+                          fill="#8884d8"
+                        />
+                        <Bar
+                          dataKey="classAverage"
+                          name="Class Average"
+                          fill="#82ca9d"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
               </div>
 
               {/* Assignment Submission Trends */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Assignment Submissions
-                </h2>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={FileText}
+                  title="Assignment Submissions"
+                  gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+                />
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={assignmentSubmissionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="assignment" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar
+                        dataKey="onTime"
+                        name="On Time"
+                        stackId="a"
+                        fill="#9bf296"
+                      />
+                      <Bar
+                        dataKey="late"
+                        name="Late"
+                        stackId="a"
+                        fill="#fab784"
+                      />
+                      <Bar
+                        dataKey="missing"
+                        name="Missing"
+                        stackId="a"
+                        fill="#f5837a"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Quiz Performance */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <SectionHeader
+                icon={Award}
+                title={
+                  selectedStudent === "class_average"
+                    ? "Quiz Question Performance"
+                    : `${selectedStudent}'s Quiz Performance`
+                }
+                gradient="bg-gradient-to-r from-rose-500 to-pink-600"
+              />
+              <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={assignmentSubmissionData}>
+                  <BarChart data={getQuizPerformanceData()}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="assignment" />
+                    <XAxis dataKey="question" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
                     <Bar
-                      dataKey="onTime"
-                      name="On Time"
+                      dataKey="correct"
+                      name="Correct"
                       stackId="a"
                       fill="#9bf296"
                     />
                     <Bar
-                      dataKey="late"
-                      name="Late"
-                      stackId="a"
-                      fill="#fab784"
-                    />
-                    <Bar
-                      dataKey="missing"
-                      name="Missing"
+                      dataKey="incorrect"
+                      name="Incorrect"
                       stackId="a"
                       fill="#f5837a"
                     />
                   </BarChart>
                 </ResponsiveContainer>
+                {selectedStudent === "class_average" && (
+                  <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-700">
+                    <h3 className="font-semibold flex items-center text-yellow-800 dark:text-yellow-300">
+                      <AlertTriangle className="w-5 h-5 mr-2" />
+                      Question Analysis
+                    </h3>
+                    <p className="text-yellow-800 dark:text-yellow-200 mt-1 text-sm">
+                      Question 8 appears to be particularly challenging with a 45%
+                      success rate. Consider revisiting this content or providing
+                      additional support materials.
+                    </p>
+                  </div>
+                )}
+                {selectedStudent !== "class_average" && (
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <h3 className="font-semibold flex items-center text-blue-800 dark:text-blue-300">
+                      <AlertTriangle className="w-5 h-5 mr-2" />
+                      Individual Performance
+                    </h3>
+                    <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
+                      {selectedStudent === "Emma Wilson"
+                        ? "Excellent performance overall. Only missed question 4."
+                        : selectedStudent === "Michael Chen"
+                        ? "Good performance with areas for improvement on questions 2, 4, 6, and 8."
+                        : "Struggling with multiple questions. Consider scheduling a tutoring session."}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* Quiz Performance */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {selectedStudent === "class_average"
-                  ? "Quiz Question Performance"
-                  : `${selectedStudent}'s Quiz Performance`}
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={getQuizPerformanceData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="question" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="correct"
-                    name="Correct"
-                    stackId="a"
-                    fill="#9bf296"
-                  />
-                  <Bar
-                    dataKey="incorrect"
-                    name="Incorrect"
-                    stackId="a"
-                    fill="#f5837a"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-              {selectedStudent === "class_average" && (
-                <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <h3 className="font-semibold flex items-center text-yellow-800">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
-                    Question Analysis
-                  </h3>
-                  <p className="text-yellow-800 mt-1">
-                    Question 8 appears to be particularly challenging with a 45%
-                    success rate. Consider revisiting this content or providing
-                    additional support materials.
-                  </p>
-                </div>
-              )}
-              {selectedStudent !== "class_average" && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold flex items-center text-blue-800">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
-                    Individual Performance
-                  </h3>
-                  <p className="text-blue-800 mt-1">
-                    {selectedStudent === "Emma Wilson"
-                      ? "Excellent performance overall. Only missed question 4."
-                      : selectedStudent === "Michael Chen"
-                      ? "Good performance with areas for improvement on questions 2, 4, 6, and 8."
-                      : "Struggling with multiple questions. Consider scheduling a tutoring session."}
-                  </p>
-                </div>
-              )}
             </div>
           </>
         )}
@@ -770,203 +871,221 @@ const TeacherAnalyticsDashboard = () => {
         {activeSection === "predictive" && (
           <>
             {/* At-Risk Students */}
-            {/* <div className="bg-white p-6 rounded-lg shadow mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Students at Risk
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Student
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Risk Level
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Last Login
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Completed Assignments
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Avg Grade
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {atRiskStudentsData.map((student) => (
-                      <tr key={student.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {student.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              student.risk === "High"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {student.risk}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {student.lastLogin}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {student.completedAssignments}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {student.avgGrade}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button className="text-primary/80 hover:text-primary mr-3">
-                            Message
-                          </button>
-                          <button
-                            className="text-primary/80 hover:text-primary"
-                            onClick={() => setSelectedStudent(student.name)}
-                          >
-                            View Details
-                          </button>
-                        </td>
+            {/* <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <SectionHeader
+                icon={AlertTriangle}
+                title="Students at Risk"
+                gradient="bg-gradient-to-r from-red-500 to-rose-600"
+              />
+              <div className="p-6">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Student
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Risk Level
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Last Login
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Completed Assignments
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Avg Grade
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Action
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-                <h3 className="font-semibold flex items-center text-red-800">
-                  <AlertTriangle className="w-5 h-5 mr-2" />
-                  High Risk Alert
-                </h3>
-                <p className="text-red-800 mt-1">
-                  3 students haven't logged in for over a week and are at high
-                  risk of falling behind. Consider sending a group reminder or
-                  scheduling individual check-ins.
-                </p>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                      {atRiskStudentsData.map((student) => (
+                        <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-white">
+                            {student.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                student.risk === "High"
+                                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                                  : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                              }`}
+                            >
+                              {student.risk}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                            {student.lastLogin}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                            {student.completedAssignments}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                            {student.avgGrade}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button className="text-primary/80 hover:text-primary mr-3">
+                              Message
+                            </button>
+                            <button
+                              className="text-primary/80 hover:text-primary"
+                              onClick={() => setSelectedStudent(student.name)}
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700">
+                  <h3 className="font-semibold flex items-center text-red-800 dark:text-red-300">
+                    <AlertTriangle className="w-5 h-5 mr-2" />
+                    High Risk Alert
+                  </h3>
+                  <p className="text-red-800 dark:text-red-200 mt-1 text-sm">
+                    3 students haven't logged in for over a week and are at high
+                    risk of falling behind. Consider sending a group reminder or
+                    scheduling individual check-ins.
+                  </p>
+                </div>
               </div>
             </div> */}
 
             {/* Comparative Performance */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  {selectedStudent === "class_average"
-                    ? "Student Performance Analysis"
-                    : `${selectedStudent}'s Performance Analysis`}
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart outerRadius={90} data={getRadarData()}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar
-                      name={
-                        selectedStudent === "class_average"
-                          ? "Class Average"
-                          : selectedStudent
-                      }
-                      dataKey="average"
-                      stroke="#8884d8"
-                      fill="#8884d8"
-                      fillOpacity={0.6}
-                    />
-                    <Radar
-                      name="Top Performing Student"
-                      dataKey="topStudent"
-                      stroke="#82ca9d"
-                      fill="#82ca9d"
-                      fillOpacity={0.6}
-                    />
-                    <Legend />
-                    <Tooltip />
-                  </RadarChart>
-                </ResponsiveContainer>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={Target}
+                  title={
+                    selectedStudent === "class_average"
+                      ? "Student Performance Analysis"
+                      : `${selectedStudent}'s Performance Analysis`
+                  }
+                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                />
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RadarChart outerRadius={90} data={getRadarData()}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                      <Radar
+                        name={
+                          selectedStudent === "class_average"
+                            ? "Class Average"
+                            : selectedStudent
+                        }
+                        dataKey="average"
+                        stroke="#8884d8"
+                        fill="#8884d8"
+                        fillOpacity={0.6}
+                      />
+                      <Radar
+                        name="Top Performing Student"
+                        dataKey="topStudent"
+                        stroke="#82ca9d"
+                        fill="#82ca9d"
+                        fillOpacity={0.6}
+                      />
+                      <Legend />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Completion Forecast */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Course Completion Forecast
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={predictionData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="week" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="actual"
-                      name="Actual Completion %"
-                      stroke="#8884d8"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="predicted"
-                      name="Predicted Completion %"
-                      stroke="#82ca9d"
-                      strokeDasharray="5 5"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-800">
-                    Forecast Insight
-                  </h3>
-                  <p className="text-blue-800 mt-1">
-                    Based on current trends, we predict a 73% overall completion
-                    rate by the end of the course. This is 5% lower than the
-                    previous cohort.
-                  </p>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+                <SectionHeader
+                  icon={TrendingUp}
+                  title="Course Completion Forecast"
+                  gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+                />
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={predictionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="week" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="actual"
+                        name="Actual Completion %"
+                        stroke="#8884d8"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="predicted"
+                        name="Predicted Completion %"
+                        stroke="#82ca9d"
+                        strokeDasharray="5 5"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-300">
+                      Forecast Insight
+                    </h3>
+                    <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
+                      Based on current trends, we predict a 73% overall completion
+                      rate by the end of the course. This is 5% lower than the
+                      previous cohort.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Actionable Recommendations */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {selectedStudent === "class_average"
-                  ? "AI-Generated Recommendations"
-                  : `Personalized Recommendations for ${selectedStudent}`}
-              </h2>
-              <div className="space-y-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <SectionHeader
+                icon={Lightbulb}
+                title={
+                  selectedStudent === "class_average"
+                    ? "AI-Generated Recommendations"
+                    : `Personalized Recommendations for ${selectedStudent}`
+                }
+                gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+              />
+              <div className="p-6 space-y-4">
                 {selectedStudent === "class_average" ? (
                   <>
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h3 className="font-semibold text-blue-800">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Engagement Opportunity
                       </h3>
-                      <p className="text-blue-800 mt-1">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         Video completion rates drop significantly after Module
                         3. Consider adding interactive elements or breaking
                         content into smaller segments.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <h3 className="font-semibold text-purple-800">
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                      <h3 className="font-semibold text-purple-800 dark:text-purple-300">
                         Assignment Insight
                       </h3>
-                      <p className="text-purple-800 mt-1">
+                      <p className="text-purple-800 dark:text-purple-200 mt-1 text-sm">
                         Assignment 4 has the highest late submission rate.
                         Consider extending the deadline or providing clearer
                         instructions.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h3 className="font-semibold text-green-800">
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                      <h3 className="font-semibold text-green-800 dark:text-green-300">
                         Content Improvement
                       </h3>
-                      <p className="text-green-800 mt-1">
+                      <p className="text-green-800 dark:text-green-200 mt-1 text-sm">
                         The "Study Guide" resource has fewer downloads than
                         other materials. Consider promoting this resource or
                         updating its content to better serve student needs.
@@ -976,11 +1095,11 @@ const TeacherAnalyticsDashboard = () => {
                 ) : (
                   // Student-specific recommendations
                   <>
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h3 className="font-semibold text-blue-800">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Personalized Feedback
                       </h3>
-                      <p className="text-blue-800 mt-1">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         {selectedStudent === "Emma Wilson"
                           ? "Emma is performing exceptionally well. Consider providing more challenging content to maintain engagement."
                           : selectedStudent === "Michael Chen"
@@ -989,11 +1108,11 @@ const TeacherAnalyticsDashboard = () => {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <h3 className="font-semibold text-purple-800">
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                      <h3 className="font-semibold text-purple-800 dark:text-purple-300">
                         Learning Style Insight
                       </h3>
-                      <p className="text-purple-800 mt-1">
+                      <p className="text-purple-800 dark:text-purple-200 mt-1 text-sm">
                         {selectedStudent === "Emma Wilson"
                           ? "Emma engages consistently with all content types. Her learning style indicates a preference for video content."
                           : selectedStudent === "Michael Chen"
@@ -1002,11 +1121,11 @@ const TeacherAnalyticsDashboard = () => {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h3 className="font-semibold text-green-800">
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                      <h3 className="font-semibold text-green-800 dark:text-green-300">
                         Next Steps
                       </h3>
-                      <p className="text-green-800 mt-1">
+                      <p className="text-green-800 dark:text-green-200 mt-1 text-sm">
                         {selectedStudent === "Emma Wilson"
                           ? "Provide Emma with advanced learning materials and consider having her mentor other students."
                           : selectedStudent === "Michael Chen"
@@ -1023,26 +1142,26 @@ const TeacherAnalyticsDashboard = () => {
       </div>
 
       {/* Export/Filter Controls */}
-      <div className="mt-8 flex justify-between items-center bg-white p-4 rounded-lg shadow">
-        <div className="flex space-x-4">
-          <select className="border border-gray-300 rounded px-3 py-2 text-gray-700">
+      <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700">
+        <div className="flex flex-wrap gap-3">
+          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
             <option>Current Cohort</option>
             <option>2024 Cohort</option>
             <option>2023 Cohort</option>
           </select>
-          <select className="border border-gray-300 rounded px-3 py-2 text-gray-700">
+          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
             <option>All Students</option>
             <option>At-Risk Students</option>
             <option>High Performers</option>
           </select>
-          <select className="border border-gray-300 rounded px-3 py-2 text-gray-700">
+          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
             <option>Last 7 Days</option>
             <option>Last 30 Days</option>
             <option>Entire Course</option>
           </select>
           {/* Added: Student select dropdown */}
           <select
-            className="border border-gray-300 rounded px-3 py-2 text-gray-700"
+            className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
             value={selectedStudent}
             onChange={(e) => setSelectedStudent(e.target.value)}
           >
@@ -1052,11 +1171,11 @@ const TeacherAnalyticsDashboard = () => {
             <option value="Sophia Rodriguez">Sophia Rodriguez</option>
           </select>
         </div>
-        <div className="flex space-x-2">
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded">
+        <div className="flex gap-2">
+          <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-primary dark:text-gray-200 font-semibold py-2.5 px-5 rounded-xl text-sm transition-colors">
             Export CSV
           </button>
-          <button className="bg-primary/80 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+          <button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-2.5 px-5 rounded-xl text-sm shadow-md transition-all">
             Generate Report
           </button>
         </div>

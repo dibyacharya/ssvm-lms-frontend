@@ -14,11 +14,14 @@ import {
   BookOpen,
   Target,
   Maximize,
-  Minimize
+  Minimize,
+  FileText,
+  Video
 } from "lucide-react";
 import AutoResizeTextbox from "./utils/searcbox";
 import { useCourse } from "../../context/CourseContext";
 import CompactNotesApp from "./utils/NotesApp";
+import CoursePageBanner from "../../components/shared/CoursePageBanner";
 
 // Key takeaways data
 const keyTakeaways = [
@@ -44,14 +47,88 @@ const getVideoComponent = (videoUrl) => {
   );
 };
 
+// Transcript Viewer component for lectures with vconf transcripts
+const TranscriptViewer = ({ lecture, onClose }) => {
+  if (!lecture) return null;
+
+  const segments = lecture.transcriptSegments || [];
+  const hasSegments = segments.length > 0;
+  const plainText = lecture.transcriptText || "";
+
+  const formatTime = (seconds) => {
+    if (!seconds && seconds !== 0) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col border border-gray-200 dark:border-gray-600">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+          <div className="flex items-center gap-2">
+            <FileText size={20} className="text-accent1" />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              Transcript: {lecture.title}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <X size={18} className="text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+
+        {/* Transcript Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {lecture.transcriptStatus === "processing" ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent1 mb-3" />
+              <p>Transcript is being generated...</p>
+            </div>
+          ) : hasSegments ? (
+            <div className="space-y-3">
+              {segments.map((seg, idx) => (
+                <div key={idx} className="flex gap-3 group">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 font-mono min-w-[50px] pt-1 text-right">
+                    {formatTime(seg.start)}
+                  </span>
+                  <div className="flex-1">
+                    <span className="text-xs font-semibold text-accent1 dark:text-accent1 block mb-0.5">
+                      {seg.speaker}
+                    </span>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {seg.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : plainText ? (
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              {plainText}
+            </p>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+              <FileText size={32} className="mb-3 opacity-50" />
+              <p>No transcript available for this lecture.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function LecturePanel() {
   const [selectedLecture, setSelectedLecture] = useState(null);
   const { courseID } = useParams();
   const { courseData: course } = useCourse();
   const [expandedModules, setExpandedModules] = useState({});
   const [focusMode, setFocusMode] = useState(false);
-  
-  console.log(course);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   useEffect(() => {
     // Set first lecture of first module as selected
@@ -130,12 +207,22 @@ export default function LecturePanel() {
 
   if (modulesWithLectures.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">No Lectures Available</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            There are currently no lectures for this course.
-          </p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-7xl mx-auto">
+          <CoursePageBanner
+            icon={Video}
+            title="Class Recordings"
+            subtitle="Watch recorded lectures and review class content"
+            gradient="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-500"
+          />
+          <div className="flex items-center justify-center mt-12">
+            <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">No Lectures Available</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                There are currently no lectures for this course.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -144,28 +231,28 @@ export default function LecturePanel() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header with Focus Mode Toggle */}
-        <div className="flex items-center justify-between mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-4 border border-gray-200 dark:border-gray-600">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-             Lecture Panel
-            </h1>
-          
-          </div>
-          <button
-            onClick={toggleFocusMode}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-              focusMode
-                ? 'bg-accent2 dark:bg-accent1 border-accent1 dark:border-accent1 text-accent1 dark:text-accent1'
-                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-            }`}
-          >
-            {focusMode ? <Minimize size={16} /> : <Maximize size={16} />}
-            <span className="text-sm font-medium">
-              {focusMode ? 'Exit Focus' : 'Focus Mode'}
-            </span>
-          </button>
-        </div>
+        {/* Header Banner */}
+        <CoursePageBanner
+          icon={Video}
+          title="Class Recordings"
+          subtitle="Watch recorded lectures and review class content"
+          gradient="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-500"
+          rightContent={
+            <button
+              onClick={toggleFocusMode}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
+                focusMode
+                  ? 'bg-white/30 border-white/40 text-white'
+                  : 'bg-white/20 border-white/30 text-white hover:bg-white/30'
+              }`}
+            >
+              {focusMode ? <Minimize size={16} /> : <Maximize size={16} />}
+              <span className="text-sm font-medium">
+                {focusMode ? 'Exit Focus' : 'Focus Mode'}
+              </span>
+            </button>
+          }
+        />
 
         {focusMode ? (
           /* Focus Mode Layout */
@@ -298,15 +385,27 @@ export default function LecturePanel() {
                                 <h3 className="font-medium text-sm">
                                   {lecture.lectureOrder}. {lecture.title}
                                 </h3>
-                                <p
-                                  className={`text-xs mt-1 ${
-                                    selectedLecture?._id === lecture._id
-                                      ? "text-accent1 dark:text-accent1"
-                                      : "text-gray-500 dark:text-gray-400"
-                                  }`}
-                                >
-                                  Lecture {lecture.lectureOrder} • {formatDate(lecture.createdAt)}
-                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <p
+                                    className={`text-xs ${
+                                      selectedLecture?._id === lecture._id
+                                        ? "text-accent1 dark:text-accent1"
+                                        : "text-gray-500 dark:text-gray-400"
+                                    }`}
+                                  >
+                                    Lecture {lecture.lectureOrder} • {formatDate(lecture.createdAt)}
+                                  </p>
+                                  {lecture.vconfRoomId && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent1/10 text-accent1 font-medium">
+                                      REC
+                                    </span>
+                                  )}
+                                  {lecture.transcriptStatus === "ready" && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">
+                                      TXT
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </button>
                           ))}
@@ -340,6 +439,33 @@ export default function LecturePanel() {
                   {selectedLecture.videoUrl && (
                     <div className="aspect-video w-full mb-6 rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
                       {getVideoComponent(selectedLecture.videoUrl)}
+                    </div>
+                  )}
+
+                  {/* Recording/Transcript status badges */}
+                  {(selectedLecture.vconfRoomId || selectedLecture.recordingStatus === "ready" || selectedLecture.transcriptStatus === "ready") && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {selectedLecture.recordingStatus === "processing" && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800">
+                          <Video size={12} />
+                          Recording Processing...
+                        </span>
+                      )}
+                      {selectedLecture.transcriptStatus === "ready" && (
+                        <button
+                          onClick={() => setShowTranscript(true)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-accent1/10 text-accent1 border border-accent1/20 hover:bg-accent1/20 transition-colors cursor-pointer"
+                        >
+                          <FileText size={12} />
+                          View Transcript
+                        </button>
+                      )}
+                      {selectedLecture.transcriptStatus === "processing" && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                          <FileText size={12} />
+                          Transcript Processing...
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -486,6 +612,14 @@ export default function LecturePanel() {
           </div>
         )}
       </div>
+
+      {/* Transcript Viewer Modal */}
+      {showTranscript && selectedLecture && (
+        <TranscriptViewer
+          lecture={selectedLecture}
+          onClose={() => setShowTranscript(false)}
+        />
+      )}
     </div>
   );
 }

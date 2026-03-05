@@ -10,6 +10,8 @@ import {
   Search,
   Send,
   X,
+  Headphones,
+  TicketCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -61,36 +63,36 @@ const DEFAULT_TAXONOMY = {
 const statusBadgeClass = (status) => {
   switch (String(status || "").toLowerCase()) {
     case "pending":
-      return "bg-amber-100 text-amber-700";
+      return "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400";
     case "in-progress":
-      return "bg-blue-100 text-blue-700";
+      return "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400";
     case "resolved":
-      return "bg-emerald-100 text-emerald-700";
+      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400";
     case "closed":
-      return "bg-gray-200 text-gray-700";
+      return "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300";
     default:
-      return "bg-gray-100 text-gray-600";
+      return "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400";
   }
 };
 
 const priorityClass = (priority) => {
   switch (String(priority || "").toLowerCase()) {
     case "high":
-      return "text-red-600";
+      return "text-red-600 dark:text-red-400";
     case "medium":
-      return "text-amber-600";
+      return "text-amber-600 dark:text-amber-400";
     case "low":
-      return "text-emerald-600";
+      return "text-emerald-600 dark:text-emerald-400";
     default:
-      return "text-gray-600";
+      return "text-gray-600 dark:text-gray-400";
   }
 };
 
 const helpTypeBadgeClass = (helpType) => {
   if (String(helpType || "").toLowerCase() === "technical") {
-    return "bg-purple-100 text-purple-700";
+    return "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400";
   }
-  return "bg-indigo-100 text-indigo-700";
+  return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400";
 };
 
 const formatDate = (value) => {
@@ -119,6 +121,19 @@ const isFollowUpAllowed = (ticket) => {
   if (!base) return false;
   return Date.now() >= base.getTime() + 48 * 60 * 60 * 1000;
 };
+
+const SectionHeader = ({ icon: Icon, title, gradient }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+    </div>
+  </div>
+);
 
 const HelpdeskSection = () => {
   const navigate = useNavigate();
@@ -455,214 +470,233 @@ const HelpdeskSection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
       <div className="max-w-7xl mx-auto px-4 space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm dark:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent dark:border-gray-700"
+        >
+          <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+        </button>
+
+        {/* Page Header Gradient Banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+          <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+          <div className="relative z-10 flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Headphones className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Helpdesk</h1>
+                <p className="text-white/80 text-sm mt-1.5">Raise and track your support tickets</p>
+              </div>
+            </div>
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              className="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50"
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm text-white font-semibold hover:bg-white/30 transition-colors border border-white/25 shadow-sm"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-700" />
+              <Plus className="h-4 w-4" /> Raise Ticket
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Helpdesk</h1>
-              <p className="text-sm text-gray-600">Raise and track your support tickets.</p>
-            </div>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" /> Raise Ticket
-          </button>
         </div>
 
+        {/* Status Stat Cards with Colored Top Borders */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500">Total</p>
-            <p className="text-xl font-semibold text-gray-900">{summary.total}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{summary.total}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500">Pending</p>
-            <p className="text-xl font-semibold text-amber-700">{summary.pending}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Pending</p>
+            <p className="text-2xl font-bold text-amber-700 dark:text-amber-400 mt-1">{summary.pending}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500">In Progress</p>
-            <p className="text-xl font-semibold text-blue-700">{summary.inProgress}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">In Progress</p>
+            <p className="text-2xl font-bold text-blue-700 dark:text-blue-400 mt-1">{summary.inProgress}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500">Resolved</p>
-            <p className="text-xl font-semibold text-emerald-700">{summary.resolved}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-green-500 hover:shadow-md transition-shadow">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Resolved</p>
+            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">{summary.resolved}</p>
           </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500">Closed</p>
-            <p className="text-xl font-semibold text-gray-700">{summary.closed}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-gray-400 hover:shadow-md transition-shadow">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Closed</p>
+            <p className="text-2xl font-bold text-gray-700 dark:text-gray-300 mt-1">{summary.closed}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex flex-wrap gap-2">
-              {STATUS_TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab.key);
-                    setPage(1);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                    activeTab === tab.key
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+        {/* Ticket List Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <SectionHeader
+            icon={TicketCheck}
+            title="Support Tickets"
+            gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+          />
+
+          <div className="p-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div className="flex flex-wrap gap-2">
+                {STATUS_TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab.key);
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                      activeTab === tab.key
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full md:w-72">
+                <Search className="h-4 w-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder="Search by Ticket ID/title/category"
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary/40 focus:outline-none"
+                />
+              </div>
             </div>
 
-            <div className="relative w-full md:w-72">
-              <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Search by Ticket ID/title/category"
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/40 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="py-16 text-center text-gray-600">Loading tickets...</div>
-          ) : tickets.length === 0 ? (
-            <div className="py-16 text-center text-gray-600">
-              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              No tickets found.
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                      <th className="px-3 py-2">Ticket</th>
-                      <th className="px-3 py-2">Category / Sub-category</th>
-                      <th className="px-3 py-2">Help Type</th>
-                      <th className="px-3 py-2">Priority</th>
-                      <th className="px-3 py-2">Status</th>
-                      <th className="px-3 py-2">Escalation</th>
-                      <th className="px-3 py-2">Last Update</th>
-                      <th className="px-3 py-2">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {tickets.map((ticket) => (
-                      <tr key={ticket._id || ticket.ticketId} className="hover:bg-gray-50">
-                        <td className="px-3 py-3">
-                          <p className="text-sm font-semibold text-gray-900">{ticket.ticketId}</p>
-                          <p className="text-sm text-gray-700">{ticket.title}</p>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-700">
-                          <div>{ticket.queryCategory || ticket.category || "-"}</div>
-                          <div className="text-xs text-gray-500">
-                            {ticket.querySubCategory || "-"}
-                          </div>
-                        </td>
-                        <td className="px-3 py-3 text-sm">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${helpTypeBadgeClass(ticket.helpType)}`}
-                          >
-                            {ticket.helpType || "Academic"}
-                          </span>
-                        </td>
-                        <td className={`px-3 py-3 text-sm font-medium ${priorityClass(ticket.priority)}`}>
-                          {ticket.priority}
-                        </td>
-                        <td className="px-3 py-3 text-sm">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(ticket.status)}`}>
-                            {ticket.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-xs text-gray-700">
-                          <div className="font-semibold">
-                            {ticket.escalationLevel || "-"}
-                          </div>
-                          {Array.isArray(ticket.frontlineLevels) &&
-                          ticket.frontlineLevels.length > 1 ? (
-                            <div className="text-[11px] text-gray-500">
-                              Eligible: {ticket.frontlineLevels.join(" / ")}
-                            </div>
-                          ) : null}
-                          <div>{ticket.routedToRole || "-"}</div>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-700">{formatDate(ticket.lastUpdateAt || ticket.updatedAt)}</td>
-                        <td className="px-3 py-3 text-sm">
-                          <button
-                            type="button"
-                            onClick={() => loadTicketDetail(ticket._id || ticket.ticketId)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-gray-300 hover:bg-gray-100"
-                          >
-                            <Eye className="h-4 w-4" /> View
-                          </button>
-                        </td>
+            {loading ? (
+              <div className="py-16 text-center text-gray-600 dark:text-gray-400">Loading tickets...</div>
+            ) : tickets.length === 0 ? (
+              <div className="py-16 text-center text-gray-600 dark:text-gray-400">
+                <AlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                No tickets found.
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                      <tr className="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <th className="px-3 py-2">Ticket</th>
+                        <th className="px-3 py-2">Category / Sub-category</th>
+                        <th className="px-3 py-2">Help Type</th>
+                        <th className="px-3 py-2">Priority</th>
+                        <th className="px-3 py-2">Status</th>
+                        <th className="px-3 py-2">Escalation</th>
+                        <th className="px-3 py-2">Last Update</th>
+                        <th className="px-3 py-2">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-gray-600">
-                  Page {pagination.page} of {pagination.totalPages}
-                  {refreshing ? " (refreshing...)" : ""}
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={!pagination.hasPrev}
-                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                    className="px-3 py-1.5 rounded border border-gray-300 disabled:opacity-40"
-                  >
-                    Prev
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!pagination.hasNext}
-                    onClick={() => setPage((prev) => prev + 1)}
-                    className="px-3 py-1.5 rounded border border-gray-300 disabled:opacity-40"
-                  >
-                    Next
-                  </button>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {tickets.map((ticket) => (
+                        <tr key={ticket._id || ticket.ticketId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                          <td className="px-3 py-3">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{ticket.ticketId}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{ticket.title}</p>
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
+                            <div>{ticket.queryCategory || ticket.category || "-"}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {ticket.querySubCategory || "-"}
+                            </div>
+                          </td>
+                          <td className="px-3 py-3 text-sm">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-semibold ${helpTypeBadgeClass(ticket.helpType)}`}
+                            >
+                              {ticket.helpType || "Academic"}
+                            </span>
+                          </td>
+                          <td className={`px-3 py-3 text-sm font-medium ${priorityClass(ticket.priority)}`}>
+                            {ticket.priority}
+                          </td>
+                          <td className="px-3 py-3 text-sm">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(ticket.status)}`}>
+                              {ticket.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-xs text-gray-700 dark:text-gray-300">
+                            <div className="font-semibold">
+                              {ticket.escalationLevel || "-"}
+                            </div>
+                            {Array.isArray(ticket.frontlineLevels) &&
+                            ticket.frontlineLevels.length > 1 ? (
+                              <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                                Eligible: {ticket.frontlineLevels.join(" / ")}
+                              </div>
+                            ) : null}
+                            <div>{ticket.routedToRole || "-"}</div>
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">{formatDate(ticket.lastUpdateAt || ticket.updatedAt)}</td>
+                          <td className="px-3 py-3 text-sm">
+                            <button
+                              type="button"
+                              onClick={() => loadTicketDetail(ticket._id || ticket.ticketId)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Eye className="h-4 w-4" /> View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
-            </>
-          )}
+
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Page {pagination.page} of {pagination.totalPages}
+                    {refreshing ? " (refreshing...)" : ""}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={!pagination.hasPrev}
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      className="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
+                    >
+                      Prev
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!pagination.hasNext}
+                      onClick={() => setPage((prev) => prev + 1)}
+                      className="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-white rounded-xl shadow-xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Raise New Ticket</h3>
-              <button type="button" onClick={() => setShowCreateModal(false)} className="p-1 rounded hover:bg-gray-100">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-2xl border border-transparent dark:border-gray-700">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Raise New Ticket</h3>
+              <button type="button" onClick={() => setShowCreateModal(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreateTicket} className="p-5 space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">Title</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                 <input
                   value={createForm.title}
                   onChange={(event) => setCreateForm((prev) => ({ ...prev, title: event.target.value }))}
                   maxLength={180}
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Short summary of the issue"
                   required
                 />
@@ -670,13 +704,13 @@ const HelpdeskSection = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Help Type</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Help Type</label>
                   <select
                     value={createForm.helpType}
                     onChange={(event) =>
                       setCreateForm((prev) => ({ ...prev, helpType: event.target.value }))
                     }
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                   >
                     <option value="">Select help type</option>
@@ -689,7 +723,7 @@ const HelpdeskSection = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Query Category</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Query Category</label>
                   <select
                     value={createForm.queryCategory}
                     onChange={(event) =>
@@ -699,7 +733,7 @@ const HelpdeskSection = () => {
                         querySubCategory: "",
                       }))
                     }
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                     disabled={loadingTaxonomy}
                   >
@@ -715,7 +749,7 @@ const HelpdeskSection = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Query Sub-category</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Query Sub-category</label>
                   <select
                     value={createForm.querySubCategory}
                     onChange={(event) =>
@@ -724,7 +758,7 @@ const HelpdeskSection = () => {
                         querySubCategory: event.target.value,
                       }))
                     }
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     required
                     disabled={!createForm.queryCategory}
                   >
@@ -738,11 +772,11 @@ const HelpdeskSection = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Priority</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
                   <select
                     value={createForm.priority}
                     onChange={(event) => setCreateForm((prev) => ({ ...prev, priority: event.target.value }))}
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     {PRIORITY_OPTIONS.map((priority) => (
                       <option key={priority} value={priority}>
@@ -754,20 +788,20 @@ const HelpdeskSection = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Description</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                 <textarea
                   value={createForm.description}
                   onChange={(event) => setCreateForm((prev) => ({ ...prev, description: event.target.value }))}
                   rows={5}
                   maxLength={5000}
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Explain the issue with relevant details"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Attachments (optional)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Attachments (optional)</label>
                 <input
                   type="file"
                   multiple
@@ -777,12 +811,12 @@ const HelpdeskSection = () => {
                       files: Array.from(event.target.files || []),
                     }))
                   }
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 dark:file:bg-gray-600 file:text-gray-700 dark:file:text-gray-300"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-1">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg border border-gray-300">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Cancel
                 </button>
                 <button
@@ -799,12 +833,12 @@ const HelpdeskSection = () => {
       )}
 
       {selectedTicketId && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
-          <div className="w-full max-w-2xl bg-white h-full overflow-y-auto">
-            <div className="px-5 py-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-50 flex justify-end">
+          <div className="w-full max-w-2xl bg-white dark:bg-gray-800 h-full overflow-y-auto">
+            <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Ticket Details</h3>
-                <p className="text-sm text-gray-600">{selectedTicket?.ticketId || selectedTicketId}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ticket Details</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTicket?.ticketId || selectedTicketId}</p>
               </div>
               <button
                 type="button"
@@ -813,17 +847,17 @@ const HelpdeskSection = () => {
                   setSelectedTicket(null);
                   setCommentForm(DEFAULT_COMMENT_FORM);
                 }}
-                className="p-1 rounded hover:bg-gray-100"
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {loadingTicket || !selectedTicket ? (
-              <div className="p-8 text-center text-gray-600">Loading ticket...</div>
+              <div className="p-8 text-center text-gray-600 dark:text-gray-400">Loading ticket...</div>
             ) : (
               <div className="p-5 space-y-6">
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`px-2.5 py-1 rounded-full text-xs font-semibold ${helpTypeBadgeClass(selectedTicket.helpType)}`}
@@ -836,32 +870,32 @@ const HelpdeskSection = () => {
                     <span className={`text-sm font-semibold ${priorityClass(selectedTicket.priority)}`}>
                       {selectedTicket.priority}
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       {selectedTicket.queryCategory || selectedTicket.category}
                     </span>
                   </div>
-                  <h4 className="text-base font-semibold text-gray-900">{selectedTicket.title}</h4>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedTicket.description}</p>
-                  <p className="text-xs text-gray-600">
+                  <h4 className="text-base font-semibold text-gray-900 dark:text-white">{selectedTicket.title}</h4>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedTicket.description}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Sub-category: {selectedTicket.querySubCategory || "-"}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Escalation: {selectedTicket.escalationLevel || "-"} /{" "}
                     {selectedTicket.routedToRole || "-"}
                   </p>
                   {Array.isArray(selectedTicket.frontlineLevels) &&
                   selectedTicket.frontlineLevels.length > 1 ? (
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       Eligible frontlines: {selectedTicket.frontlineLevels.join(" / ")}
                     </p>
                   ) : null}
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Follow-up eligible at: {formatDate(selectedTicket.followUpEligibleAt)}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Resolution Status: {selectedTicket.resolutionStatus || "Unresolved"}
                   </p>
-                  <p className="text-xs text-gray-500">Last update: {formatDate(selectedTicket.lastUpdateAt || selectedTicket.updatedAt)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">Last update: {formatDate(selectedTicket.lastUpdateAt || selectedTicket.updatedAt)}</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -873,7 +907,7 @@ const HelpdeskSection = () => {
                       !isFollowUpAllowed(selectedTicket) ||
                       String(selectedTicket.status || "").toLowerCase() === "closed"
                     }
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-300 text-amber-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 disabled:opacity-50"
                   >
                     <Clock3 className="h-4 w-4" />
                     {submittingFollowUp ? "Requesting..." : "Follow up after 48hrs"}
@@ -882,7 +916,7 @@ const HelpdeskSection = () => {
                     type="button"
                     disabled={String(selectedTicket.status || "") !== "Closed"}
                     onClick={() => setShowClosedWithoutResolutionModal(true)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-red-300 text-red-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 disabled:opacity-50"
                   >
                     <AlertCircle className="h-4 w-4" />
                     Closed without resolution
@@ -890,7 +924,7 @@ const HelpdeskSection = () => {
                 </div>
 
                 <div>
-                  <h5 className="text-sm font-semibold text-gray-800 mb-2">Ticket Attachments</h5>
+                  <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Ticket Attachments</h5>
                   {selectedTicket.attachments?.length ? (
                     <div className="space-y-2">
                       {selectedTicket.attachments.map((attachment, index) => (
@@ -899,7 +933,7 @@ const HelpdeskSection = () => {
                           href={resolveAttachmentUrl(attachment.url)}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          className="flex items-center gap-2 text-sm text-primary dark:text-primary hover:underline"
                         >
                           <FileText className="h-4 w-4" />
                           {attachment.originalName || `Attachment ${index + 1}`}
@@ -907,31 +941,31 @@ const HelpdeskSection = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">No attachments</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No attachments</p>
                   )}
                 </div>
 
                 <div>
-                  <h5 className="text-sm font-semibold text-gray-800 mb-2">Conversation</h5>
+                  <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Conversation</h5>
                   <div className="space-y-3">
                     {(selectedTicket.comments || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">No comments yet.</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No comments yet.</p>
                     ) : (
                       selectedTicket.comments.map((comment) => {
                         const isMine = String(comment?.by?._id || comment?.by || "") === String(user?._id || "");
                         return (
                           <div
                             key={comment._id}
-                            className={`rounded-lg border px-3 py-2 ${isMine ? "bg-blue-50 border-blue-100" : "bg-gray-50 border-gray-200"}`}
+                            className={`rounded-lg border px-3 py-2 ${isMine ? "bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800" : "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700"}`}
                           >
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <p className="text-xs font-semibold text-gray-700">
+                              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 {comment?.by?.name || "User"} ({comment.byRole || "user"})
                               </p>
-                              <p className="text-[11px] text-gray-500">{formatDate(comment.createdAt)}</p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-500">{formatDate(comment.createdAt)}</p>
                             </div>
                             {comment.message ? (
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap">{comment.message}</p>
+                              <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{comment.message}</p>
                             ) : null}
                             {comment.attachments?.length ? (
                               <div className="mt-2 space-y-1">
@@ -956,8 +990,8 @@ const HelpdeskSection = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleAddComment} className="bg-white border border-gray-200 rounded-lg p-3 space-y-3">
-                  <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <form onSubmit={handleAddComment} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
+                  <label className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" /> Add Comment
                   </label>
                   <textarea
@@ -968,7 +1002,7 @@ const HelpdeskSection = () => {
                     rows={3}
                     maxLength={2000}
                     placeholder="Write your message..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   <input
                     type="file"
@@ -979,7 +1013,7 @@ const HelpdeskSection = () => {
                         files: Array.from(event.target.files || []),
                       }))
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 dark:file:bg-gray-600 file:text-gray-700 dark:file:text-gray-300"
                   />
                   <div className="flex justify-end">
                     <button
@@ -999,15 +1033,15 @@ const HelpdeskSection = () => {
       )}
 
       {showClosedWithoutResolutionModal && (
-        <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-xl shadow-xl">
-            <div className="px-5 py-4 border-b flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-900">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-2xl border border-transparent dark:border-gray-700">
+            <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Closed Without Resolution
               </h4>
               <button
                 type="button"
-                className="p-1 rounded hover:bg-gray-100"
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                 onClick={() => setShowClosedWithoutResolutionModal(false)}
               >
                 <X className="h-5 w-5" />
@@ -1018,7 +1052,7 @@ const HelpdeskSection = () => {
               className="px-5 py-4 space-y-4"
             >
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Reason Category
                 </label>
                 <select
@@ -1030,7 +1064,7 @@ const HelpdeskSection = () => {
                       reasonSubCategory: "",
                     }))
                   }
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 >
                   <option value="">Select category</option>
@@ -1042,7 +1076,7 @@ const HelpdeskSection = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Reason Sub-category
                 </label>
                 <select
@@ -1053,7 +1087,7 @@ const HelpdeskSection = () => {
                       reasonSubCategory: event.target.value,
                     }))
                   }
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                   disabled={!closedWithoutResolutionForm.reasonCategory}
                 >
@@ -1069,7 +1103,7 @@ const HelpdeskSection = () => {
                 <button
                   type="button"
                   onClick={() => setShowClosedWithoutResolutionModal(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300"
+                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>

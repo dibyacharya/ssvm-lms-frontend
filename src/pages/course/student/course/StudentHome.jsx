@@ -17,6 +17,7 @@ import {
   PlusCircle,
   ExternalLink,
   ArrowRight,
+  Layers,
 } from "lucide-react";
 import { useAuth } from "../../../../context/AuthContext";
 import { getAllCourseAnnouncements } from "../../../../services/announcement.service";
@@ -24,13 +25,15 @@ import { useCourse } from "../../../../context/CourseContext";
 import { useParams } from "react-router-dom";
 import AssignmentsList from "../../../../components/dashboard/utils/AssignmentComponent/AssignmentList";
 import { useUtilityContext } from "../../../../context/UtilityContext";
+import { resolveModuleTheme } from "../../../../utils/lmsAssetResolver";
+import LmsAssetImage from "../../../../components/common/LmsAssetImage";
+import CoursePageBanner from "../../../../components/shared/CoursePageBanner";
 
 const StudentHome = ({ setSelectedOption }) => {
   const { user } = useAuth();
   const { courseData } = useCourse();
   const { courseID } = useParams();
   const { setCurrentModuleIndex } = useUtilityContext();
-  console.log("heddd", courseData)
   // Dummy data for elements not present in the courseData object
   const upcomingEvents = [
    
@@ -109,15 +112,13 @@ const StudentHome = ({ setSelectedOption }) => {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 p-6 bg-gray-50 dark:bg-gray-900">
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-primary dark:text-blue-400">Home</h1>
-          <p className="text-tertiary dark:text-gray-300 mt-1">
-            Welcome back, {user?.name || "Student"}
-          </p>
-        </div>
-      </div>
+      {/* Header Banner */}
+      <CoursePageBanner
+        icon={Home}
+        title="Home"
+        subtitle={`Welcome back, ${user?.name || "Student"}`}
+        gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500"
+      />
 
       {/* Quick Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -144,7 +145,7 @@ const StudentHome = ({ setSelectedOption }) => {
             <div>
               <p className="text-tertiary dark:text-gray-400 text-sm">Course Progress</p>
               <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">
-                0%
+                {courseProgress}%
               </h3>
             </div>
             <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
@@ -152,7 +153,7 @@ const StudentHome = ({ setSelectedOption }) => {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-            <span>course just started</span>
+            <span>{courseProgress === 0 ? "Course just started" : courseProgress === 100 ? "Course completed" : `${completedTopics} of ${totalTopics} topics covered`}</span>
           </div>
         </div>
 
@@ -208,7 +209,7 @@ const StudentHome = ({ setSelectedOption }) => {
               </div>
               <button
                 className="text-primary dark:text-blue-400 hover:text-primary/80 dark:hover:text-blue-300 text-sm font-medium flex items-center transition-colors"
-                onClick={() => setSelectedOption("E-Content")}
+                onClick={() => setSelectedOption("E-Learning")}
               >
                 View All Modules
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -216,40 +217,74 @@ const StudentHome = ({ setSelectedOption }) => {
             </div>
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courseData?.syllabus?.modules?.map((module, index) => (
-                <div
-                  key={module._id}
-                  className="border cursor-pointer border-tertiary/10 dark:border-gray-600 rounded-xl overflow-hidden hover:shadow-md dark:hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-700"
-                >
-                  <div className="relative h-40 bg-gray-100 dark:bg-gray-600 overflow-hidden">
-                    <img
-                      src={"/module.png"}
-                      alt={module.moduleTitle}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                      <div className="text-white font-medium">
-                        {module.moduleTitle}
+              {courseData?.syllabus?.modules?.length > 0 ? (
+                courseData.syllabus.modules.map((module, index) => {
+                  const modTheme = resolveModuleTheme(module);
+                  return (
+                    <div
+                      key={module._id}
+                      className="group cursor-pointer rounded-xl overflow-hidden hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600"
+                      style={{ borderLeft: `4px solid ${modTheme.accentColor}` }}
+                      onClick={() => {
+                        setSelectedOption("E-Learning");
+                        setCurrentModuleIndex(index);
+                      }}
+                    >
+                      <div className="relative h-40 overflow-hidden" style={{ background: modTheme.gradientCSS }}>
+                        <LmsAssetImage
+                          src={modTheme.moduleThumbnailUrl}
+                          alt={module.moduleTitle}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          gradientCSS={modTheme.gradientCSS}
+                          accentColor={modTheme.accentColor}
+                          containerClassName="h-full w-full"
+                        />
+                        {/* Module number badge */}
+                        <div
+                          className="absolute top-3 left-3 w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                          style={{ backgroundColor: modTheme.accentColor }}
+                        >
+                          {index + 1}
+                        </div>
+                        {/* Lecture count badge */}
+                        {module.lectureCount > 0 && (
+                          <div className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            <Layers className="w-3 h-3 text-gray-600 dark:text-gray-300" />
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">{module.lectureCount} lectures</span>
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+                          <h3 className="text-white font-semibold text-base leading-tight drop-shadow-sm">
+                            {module.moduleTitle}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: modTheme.accentColor }}
+                          />
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Module {index + 1}</span>
+                        </div>
+                        <span
+                          className="text-sm font-semibold flex items-center gap-1 transition-all duration-200 group-hover:gap-2"
+                          style={{ color: modTheme.accentColor }}
+                        >
+                          View Content
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="p-4">
-                    <div className="mt-4 flex justify-between">
-                      <button
-                        className="text-primary dark:text-blue-400 hover:text-primary/80 dark:hover:text-blue-300 text-sm font-medium flex items-center transition-colors"
-                        onClick={() => {
-                          setSelectedOption("E-Content");
-                          setCurrentModuleIndex(index);
-                        }}
-                      >
-                        View Content
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </button>
-                    </div>
-                  </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center text-tertiary dark:text-gray-400 p-8">
+                  <Layers className="w-12 h-12 text-tertiary/30 dark:text-gray-600 mx-auto mb-3" />
+                  <p>No course modules available.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -333,7 +368,7 @@ const StudentHome = ({ setSelectedOption }) => {
                 </h2>
               </div>
               <div className="text-sm text-tertiary dark:text-gray-400 font-medium">
-                April 2025
+                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </div>
             </div>
 

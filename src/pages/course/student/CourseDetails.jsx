@@ -7,7 +7,6 @@ import {
   Video,
   FileText,
   BarChart2,
-  MonitorPlay,
   Activity,
   Home,
   Book,
@@ -15,7 +14,8 @@ import {
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getCoursesById } from "../../../services/course.service";
 import { useCourse } from "../../../context/CourseContext";
-import { useMeetingsV2 } from "../../../context/MeetingV2Context"; 
+import { useMeetingsV2 } from "../../../context/MeetingV2Context";
+import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 import MentorInfo from "../../../components/dashboard/utils/MentorInfo";
 import CourseInfo from "../../../components/dashboard/utils/CourseInfo";
@@ -37,9 +37,12 @@ import LecturePanel from "../../lecture/LecturePanel";
 import StudentAssignmentSection from "../../Assignment/student/ShowAssignment";
 import { VscCommentDiscussion } from "react-icons/vsc";
 import ProfileDropdown from "../../../utils/ProfileDropDown";
-import AllAnnouncements from "./course/AllAnnouncements.jsx/AllAnnouncements";
+import AllAnnouncements from "./course/AllAnnouncements";
 import StudentActivitySection from "../../Activity/student/StudentActivitySection";
 import { Si1Panel } from "react-icons/si";
+import MOM from "../teacher/course/MOM";
+import StudentHandouts from "./course/StudentHandouts";
+import CoursePageBanner from "../../../components/shared/CoursePageBanner";
 
 
 const navigationOptions = {
@@ -50,14 +53,6 @@ const navigationOptions = {
   courses: {
     title: "Course",
     icon: <BookOpen className="w-5 h-5" />,
-  },
-  content: {
-    title: "Content",
-    icon: <MonitorPlay className="w-5 h-5" />,
-    items: [
-      { label: "Class Rec.", icon: <Video className="w-5 h-5" /> },
-      { label: "E-Learning", icon: <FileText className="w-5 h-5" /> },
-    ],
   },
   assessment: {
     title: "Assessment",
@@ -171,11 +166,16 @@ const CourseDetails = () => {
     );
   }, [courseID, courseMeetings]);
 
-  // Handler for joining live class
+  // Handler for joining live class - uses only VConf join URL
   const handleJoinLiveClass = () => {
     const activeMeeting = liveMeeting;
     if (activeMeeting) {
-      window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
+      const joinUrl = activeMeeting.vconfJoinUrl;
+      if (joinUrl) {
+        window.open(joinUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        alert("Video conference room is not ready yet. Please try again in a moment.");
+      }
     } else {
       alert("There is no live class to join at the moment.");
     }
@@ -240,8 +240,8 @@ const CourseDetails = () => {
       </button>
 
       {openDropdown === menuKey && (
-        <div className="absolute left-0 mt-2 w-[440px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-4 z-50">
-          <div className="grid grid-cols-2 gap-4 px-4">
+        <div className="absolute left-0 mt-1.5 w-fit min-w-[200px] max-w-[220px] bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600 p-1 z-50">
+          <div className="flex flex-col gap-0.5">
             {items.map((item) => (
               <button
                 key={item.label}
@@ -249,14 +249,14 @@ const CourseDetails = () => {
                   setSelectedOption(item.label);
                   setOpenDropdown(null);
                 }}
-                className={`flex items-center space-x-3 p-4 rounded-lg transition-colors ${
+                className={`flex h-9 w-full items-center gap-1.5 px-2 py-1 rounded transition-colors ${
                   selectedOption === item.label
                     ? "bg-accent1/10 dark:bg-accent1/20 text-accent1 dark:text-accent1"
                     : "hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-1 rounded flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4 ${
                     selectedOption === item.label
                       ? "bg-accent1/20 dark:bg-accent1/30"
                       : "bg-gray-100 dark:bg-gray-700"
@@ -264,7 +264,7 @@ const CourseDetails = () => {
                 >
                   {item.icon}
                 </div>
-                <span className="font-medium text-left">{item.label}</span>
+                <span className="font-medium text-xs leading-4 text-left whitespace-nowrap">{item.label}</span>
               </button>
             ))}
           </div>
@@ -279,7 +279,12 @@ const CourseDetails = () => {
       case "Home": return <StudentHome setSelectedOption={setSelectedOption} />;
       case "Course": return (
           <div className="max-w-[1600px] mx-auto mt-4">
-            <div className="text-3xl pl-10 font-bold text-gray-900 dark:text-white">Explore Course</div>
+            <CoursePageBanner
+              icon={BookOpen}
+              title="Explore Course"
+              subtitle="Syllabus, mentor details, and course information"
+              gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-500"
+            />
             <div className="p-10 flex flex-col gap-2">
               <div className="flex gap-4 ">
                 <div className="flex flex-col w-[50%]">
@@ -297,10 +302,18 @@ const CourseDetails = () => {
       case "E-Learning": return <StudentContentSection />;
       case "Graded": return <StudentAssignmentSection courseID={courseID} selectedID="0" />;
       case "Self Assessment": return (
-          <div className="min-h-[300px] flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-3xl font-semibold text-primary dark:text-blue-400 mb-2">Coming Soon</div>
-              <div className="text-tertiary dark:text-gray-300">Self-assessment quizzes will be available here shortly.</div>
+          <div>
+            <CoursePageBanner
+              icon={FileText}
+              title="Self Assessment"
+              subtitle="Test your knowledge with self-assessment quizzes"
+              gradient="bg-gradient-to-r from-lime-600 via-green-600 to-emerald-500"
+            />
+            <div className="min-h-[300px] flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-3xl font-semibold text-primary dark:text-blue-400 mb-2">Coming Soon</div>
+                <div className="text-tertiary dark:text-gray-300">Self-assessment quizzes will be available here shortly.</div>
+              </div>
             </div>
           </div>
         );
@@ -348,59 +361,109 @@ const CourseDetails = () => {
       {/* <Link to={"/its"} className="fixed h-16 w-16 bg-white dark:bg-gray-800 border-black dark:border-gray-600 border-2 rounded top-[60%] z-100 flex flex-col items-center justify-center"><Si1Panel className=" h-8 w-8 text-gray-900 dark:text-white" /> <span className="text-gray-900 dark:text-white">ITS</span></Link> */}
       
       {/* Course Banner */}
-   <div className="w-[90%] m-auto pt-4">
-  {/* Header Section */}
-  <div className="flex items-center justify-between mb-6">
-    <div className="flex-1">
-      <h1 className="text-4xl font-bold text-primary dark:text-blue-400">
-       {course.title}
-      </h1>
-      <p className="text-xl text-primary/60 dark:text-blue-400/70 mt-2">
-          {course.teacher?.name }
-      </p>
-    </div>
-    
-    {/* Live Class Button */}
-    {liveMeeting ? (
-      <div className="ml-8">
-        <button
-          onClick={handleJoinLiveClass}
-          className="relative z-[900] flex justify-center items-center gap-2 text-lg px-6 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors animate-pulse"
-        >
-          <MdLiveTv />
-          Join Live Class
-        </button>
-      </div>
-    ) : (
-      <div className="ml-8">
-        <button
-          disabled
-          className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"
-        >
-          <MdLiveTv />
-          No Live Class Now
-        </button>
-      </div>
-    )}
-  </div>
-
-  {/* Tab Navigation */}
- 
-</div>
+      {(() => {
+        const theme = resolveCourseTheme(course);
+        return (
+          <div className="w-[90%] m-auto pt-4">
+            <div className="relative rounded-2xl overflow-hidden mb-6" style={{ background: theme.gradientCSS }}>
+              <img
+                src={theme.bannerUrl}
+                alt=""
+                className="w-full h-48 object-cover"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                    {course.title}
+                  </h1>
+                  <p className="text-lg text-white/80 mt-1 drop-shadow">
+                    {course.teacher?.name}
+                  </p>
+                </div>
+                {liveMeeting ? (
+                  <div className="ml-8">
+                    <a
+                      href={liveMeeting.vconfJoinUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!liveMeeting.vconfJoinUrl) {
+                          e.preventDefault();
+                          alert("Video conference room is not ready yet. Please try again in a moment.");
+                        }
+                      }}
+                      className="relative z-[900] flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline"
+                    >
+                      <MdLiveTv />
+                      Join Live Class
+                    </a>
+                  </div>
+                ) : (
+                  <div className="ml-8">
+                    <button
+                      disabled
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg cursor-not-allowed border border-white/30"
+                    >
+                      <MdLiveTv />
+                      No Live Class Now
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Navigation */}
-      <nav className="absolute shadow-sm top-0 bg-red-400 dark:bg-red-500 w-full z-40">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-6 top-3 z-10 border border-black dark:border-gray-600 flex items-center space-x-2 px-4 py-2 bg-white/20 dark:bg-gray-800/20 rounded-lg text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:shadow-md transition-all"
-        >
-          <ArrowLeft className="h-5 w-5 text-black dark:text-white" />
-          <span className="text-black dark:text-white">Back</span>
-        </button>
-        <div className="absolute top-40 left-6 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex mx-auto items-center space-x-6">
-              {Object.keys(navigationOptions).map((key) => renderDropdown(key))}
+      <nav className="bg-white dark:bg-gray-800 shadow-sm w-full border-b border-gray-200 dark:border-gray-700">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-14">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center space-x-2 px-4 py-2 mr-6 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md transition-all"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Back</span>
+            </button>
+            <div className="flex items-center space-x-6">
+              {["home", "courses"].map((key) => renderDropdown(key))}
+
+              {/* Class Rec. Button with underline effect */}
+              <button
+                onClick={() => setSelectedOption("Class Rec.")}
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  selectedOption === "Class Rec."
+                    ? "text-accent1 dark:text-accent1"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                <Video className="w-5 h-5" />
+                <span>Class Rec.</span>
+                {selectedOption === "Class Rec." && (
+                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+                )}
+              </button>
+
+              {/* E-Learning Button with underline effect */}
+              <button
+                onClick={() => setSelectedOption("E-Learning")}
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  selectedOption === "E-Learning"
+                    ? "text-accent1 dark:text-accent1"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                <FileText className="w-5 h-5" />
+                <span>E-Learning</span>
+                {selectedOption === "E-Learning" && (
+                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+                )}
+              </button>
+
+              {["assessment", "assignment"].map((key) => renderDropdown(key))}
             </div>
           </div>
         </div>

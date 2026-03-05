@@ -425,8 +425,8 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
   // Handle back to Continuous Assessment
   const handleBackToContinuousAssessment = () => {
     if (courseID) {
-      // Set the section to Continuous Assessment
-      const sectionName = "Continuous Assessment";
+      // Set the section to Continuous Assessment (not Plan)
+      const sectionName = "Continuos Assesment";
       localStorage.setItem(`course_${courseID}_selectedSection`, sectionName);
       // Dispatch custom event to notify CourseManagement to update
       window.dispatchEvent(new CustomEvent('sectionChange', { detail: { section: sectionName } }));
@@ -447,7 +447,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
                   className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors px-3 py-2 mb-3 -ml-3"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  <span>Back to Continuous Assessment</span>
+                  <span>Back to Continuos Assessment</span>
                 </button>
               )}
               <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>

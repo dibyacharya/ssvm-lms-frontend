@@ -12,6 +12,7 @@ import {
   Users,
   BookOpen,
 } from "lucide-react";
+import DashboardBanner from "./DashboardBanner";
 
 const AssignmentList = () => {
   const [coursesData, setCoursesData] = useState(null);
@@ -128,21 +129,26 @@ const AssignmentList = () => {
 
   if (!coursesData || !coursesData.courses) {
     return (
-      <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">All Assignments</h1>
-        <p className="text-gray-500">No courses available.</p>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <DashboardBanner
+          icon={FileText}
+          title="All Assignments"
+          subtitle="Track and manage your course assignments"
+          gradient="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"
+        />
+        <p className="text-gray-500 dark:text-gray-400">No courses available.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">All Assignments</h1>
-        <p className="text-gray-600">
-          Welcome back, {coursesData.user.name} • {coursesData.courses.length} courses
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <DashboardBanner
+        icon={FileText}
+        title="All Assignments"
+        subtitle={`Welcome back, ${coursesData.user.name} • ${coursesData.courses.length} courses`}
+        gradient="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"
+      />
 
       <div className="space-y-4">
         {coursesData.courses.map((course) => {

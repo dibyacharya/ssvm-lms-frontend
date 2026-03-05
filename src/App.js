@@ -69,7 +69,10 @@ const Layout = () => {
   ];
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 bg-white">
+    <div
+      className="min-h-screen kiitx-banner-bg"
+      style={{ backgroundImage: "url(/loginbg.jpg)" }}
+    >
       {/* Conditionally render Navbar */}
       {/* {!hideNavbarRoutes.includes(location.pathname) && <Navbar />} */}
 

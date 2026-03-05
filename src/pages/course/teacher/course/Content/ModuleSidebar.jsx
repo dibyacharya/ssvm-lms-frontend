@@ -9,6 +9,8 @@ import {
   Link2,
   MessageSquare,
 } from "lucide-react";
+import { resolveModuleTheme } from "../../../../../utils/lmsAssetResolver";
+import LmsAssetImage from "../../../../../components/common/LmsAssetImage";
 
 const ModuleSidebar = ({
   modules,
@@ -127,31 +129,41 @@ const ModuleSidebar = ({
 
           return (
             <div key={module._id} className="mb-4">
-              <div
-                className={`flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded ${
-                  currentModuleIndex === index ? "bg-gray-100" : ""
-                }`}
-                onClick={() => selectModule(index)}
-              >
-                <div className="flex items-center">
-                  <button
-                    className="mr-2 focus:outline-none"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleModule(module._id);
-                    }}
+              {(() => {
+                const modTheme = resolveModuleTheme(module);
+                return (
+                  <div
+                    className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded ${
+                      currentModuleIndex === index ? "bg-gray-100" : ""
+                    }`}
+                    onClick={() => selectModule(index)}
                   >
-                    {expandedModules[module._id] ? (
-                      <ChevronDown size={16} />
-                    ) : (
-                      <ChevronRight size={16} />
-                    )}
-                  </button>
-                  <span className="font-medium truncate">
-                    {module.moduleNumber}. {module.moduleTitle}
-                  </span>
-                </div>
-              </div>
+                    <LmsAssetImage
+                      src={modTheme.moduleThumbnailUrl}
+                      alt={module.moduleTitle}
+                      gradientCSS={modTheme.gradientCSS}
+                      containerClassName="w-8 h-8 rounded overflow-hidden flex-shrink-0"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      className="mr-1 focus:outline-none flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleModule(module._id);
+                      }}
+                    >
+                      {expandedModules[module._id] ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
+                    </button>
+                    <span className="font-medium truncate">
+                      {module.moduleNumber}. {module.moduleTitle}
+                    </span>
+                  </div>
+                );
+              })()}
 
               {expandedModules[module._id] && (
                 <div className="ml-6 mt-2 space-y-1">

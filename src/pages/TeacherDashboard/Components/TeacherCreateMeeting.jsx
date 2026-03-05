@@ -30,8 +30,6 @@ export default function TeacherCreateMeeting() {
     roomNumber: '',
     color: '#4285F3',
     courseId: '',
-    link: '',
-    provider: 'gmeet',
     isRecurring: false,
     recurrenceFrequency: 'WEEKLY',
     recurrenceDays: [],
@@ -82,8 +80,6 @@ export default function TeacherCreateMeeting() {
       roomNumber: '',
       color: '#4285F3',
       courseId: listCourseId || '',
-      link: '',
-      provider: 'gmeet',
       isRecurring: false,
       recurrenceFrequency: 'WEEKLY',
       recurrenceDays: [],
@@ -116,8 +112,6 @@ export default function TeacherCreateMeeting() {
         roomNumber: meeting.roomNumber || '',
         color: meeting.color || '#4285F3',
         courseId: meeting.course || meeting.courseId || listCourseId || '',
-        link: meeting.link || '',
-        provider: meeting.provider || 'gmeet',
         isRecurring: !!meeting.isRecurring,
         recurrenceFrequency: recurrence.frequency,
         recurrenceDays: recurrence.days,
@@ -159,8 +153,6 @@ export default function TeacherCreateMeeting() {
         description: formData.description,
         roomNumber: formData.roomNumber,
         color: formData.color,
-        link: formData.link,
-        provider: formData.provider,
         courseId: formData.courseId,
         isRecurring: formData.isRecurring,
       };
@@ -199,8 +191,6 @@ export default function TeacherCreateMeeting() {
         start: startIso,
         end: endIso,
         timezone: "Asia/Kolkata",
-        link: formData.link,
-        provider: formData.provider,
         roomNumber: formData.roomNumber,
         color: formData.color,
         isRecurring: formData.isRecurring,
@@ -442,37 +432,12 @@ export default function TeacherCreateMeeting() {
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
-                <input
-                  type="text"
-                  id="link"
-                  name="link"
-                  value={formData.link}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  placeholder="https://meet..."
-                />
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700 font-medium">Video conference room will be automatically created when you schedule this class.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="provider" className="block text-sm font-medium text-gray-700 mb-1">Provider</label>
-                  <select
-                    id="provider"
-                    name="provider"
-                    value={formData.provider}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md bg-white"
-                  >
-                    <option value="gmeet">Google Meet</option>
-                    <option value="zoom">Zoom</option>
-                    <option value="teams">MS Teams</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+              <div>
+                <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">Color</label>
                   <select id="color" name="color" value={formData.color} onChange={handleInputChange} className="w-full p-2 border border-gray-300 rounded-md bg-white">
                     <option value="#4285F3">Blue</option>
                     <option value="#4CAF50">Green</option>

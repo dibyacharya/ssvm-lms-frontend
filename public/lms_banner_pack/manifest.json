@@ -1,0 +1,208 @@
+{
+  "version": "1.0.0",
+  "packName": "LMS Visual Asset Pack",
+  "basePublicPath": "/lms_banner_pack",
+  "themes": [
+    {
+      "key": "mathematics",
+      "banner": "/lms_banner_pack/banners/mathematics.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/mathematics_thumb.svg",
+      "accentColor": "#1d4ed8"
+    },
+    {
+      "key": "biology",
+      "banner": "/lms_banner_pack/banners/biology.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/biology_thumb.svg",
+      "accentColor": "#15803d"
+    },
+    {
+      "key": "law",
+      "banner": "/lms_banner_pack/banners/law.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/law_thumb.svg",
+      "accentColor": "#7c2d12"
+    },
+    {
+      "key": "history",
+      "banner": "/lms_banner_pack/banners/history.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/history_thumb.svg",
+      "accentColor": "#92400e"
+    },
+    {
+      "key": "physics",
+      "banner": "/lms_banner_pack/banners/physics.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/physics_thumb.svg",
+      "accentColor": "#4338ca"
+    },
+    {
+      "key": "chemistry",
+      "banner": "/lms_banner_pack/banners/chemistry.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/chemistry_thumb.svg",
+      "accentColor": "#0f766e"
+    },
+    {
+      "key": "computer_science",
+      "banner": "/lms_banner_pack/banners/computer_science.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/computer_science_thumb.svg",
+      "accentColor": "#111827"
+    },
+    {
+      "key": "economics",
+      "banner": "/lms_banner_pack/banners/economics.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/economics_thumb.svg",
+      "accentColor": "#7c3aed"
+    },
+    {
+      "key": "literature",
+      "banner": "/lms_banner_pack/banners/literature.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/literature_thumb.svg",
+      "accentColor": "#be185d"
+    },
+    {
+      "key": "geography",
+      "banner": "/lms_banner_pack/banners/geography.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/geography_thumb.svg",
+      "accentColor": "#0f766e"
+    },
+    {
+      "key": "medicine",
+      "banner": "/lms_banner_pack/banners/medicine.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/medicine_thumb.svg",
+      "accentColor": "#b91c1c"
+    },
+    {
+      "key": "engineering",
+      "banner": "/lms_banner_pack/banners/engineering.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/engineering_thumb.svg",
+      "accentColor": "#374151"
+    },
+    {
+      "key": "upsc",
+      "banner": "/lms_banner_pack/banners/upsc.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/upsc_thumb.svg",
+      "accentColor": "#78350f"
+    },
+    {
+      "key": "business",
+      "banner": "/lms_banner_pack/banners/business.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/business_thumb.svg",
+      "accentColor": "#1e3a8a"
+    },
+    {
+      "key": "education",
+      "banner": "/lms_banner_pack/banners/education.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/education_thumb.svg",
+      "accentColor": "#166534"
+    },
+    {
+      "key": "general",
+      "banner": "/lms_banner_pack/banners/general.svg",
+      "thumbnail": "/lms_banner_pack/thumbnails/general_thumb.svg",
+      "accentColor": "#334155"
+    }
+  ],
+  "moduleThemes": [
+    {
+      "key": "general_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/general_module.svg",
+      "accentColor": "#334155"
+    },
+    {
+      "key": "reading_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/reading_module.svg",
+      "accentColor": "#1d4ed8"
+    },
+    {
+      "key": "lab_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/lab_module.svg",
+      "accentColor": "#15803d"
+    },
+    {
+      "key": "discussion_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/discussion_module.svg",
+      "accentColor": "#7c3aed"
+    },
+    {
+      "key": "assignment_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/assignment_module.svg",
+      "accentColor": "#92400e"
+    },
+    {
+      "key": "recording_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/recording_module.svg",
+      "accentColor": "#b91c1c"
+    },
+    {
+      "key": "presentation_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/presentation_module.svg",
+      "accentColor": "#0f766e"
+    },
+    {
+      "key": "practice_module",
+      "thumbnail": "/lms_banner_pack/module_thumbnails/practice_module.svg",
+      "accentColor": "#7c2d12"
+    }
+  ],
+  "contentThemes": [
+    {
+      "key": "pdf_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/pdf_generic.svg",
+      "accentColor": "#dc2626",
+      "contentType": "document"
+    },
+    {
+      "key": "video_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/video_generic.svg",
+      "accentColor": "#2563eb",
+      "contentType": "play"
+    },
+    {
+      "key": "presentation_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/presentation_generic.svg",
+      "accentColor": "#7c3aed",
+      "contentType": "slides"
+    },
+    {
+      "key": "doc_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/doc_generic.svg",
+      "accentColor": "#0f766e",
+      "contentType": "document"
+    },
+    {
+      "key": "recording_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/recording_generic.svg",
+      "accentColor": "#b91c1c",
+      "contentType": "recording"
+    },
+    {
+      "key": "transcript_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/transcript_generic.svg",
+      "accentColor": "#374151",
+      "contentType": "text"
+    },
+    {
+      "key": "audio_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/audio_generic.svg",
+      "accentColor": "#0f766e",
+      "contentType": "audio"
+    },
+    {
+      "key": "mixed_generic",
+      "thumbnail": "/lms_banner_pack/content_thumbnails/mixed_generic.svg",
+      "accentColor": "#334155",
+      "contentType": "grid"
+    }
+  ],
+  "fallbacks": {
+    "courseBanner": "/lms_banner_pack/banners/general.svg",
+    "courseThumbnail": "/lms_banner_pack/thumbnails/general_thumb.svg",
+    "moduleThumbnail": "/lms_banner_pack/module_thumbnails/general_module.svg",
+    "pdfThumbnail": "/lms_banner_pack/content_thumbnails/pdf_generic.svg",
+    "videoThumbnail": "/lms_banner_pack/content_thumbnails/video_generic.svg",
+    "presentationThumbnail": "/lms_banner_pack/content_thumbnails/presentation_generic.svg",
+    "documentThumbnail": "/lms_banner_pack/content_thumbnails/doc_generic.svg",
+    "recordingThumbnail": "/lms_banner_pack/content_thumbnails/recording_generic.svg",
+    "transcriptThumbnail": "/lms_banner_pack/content_thumbnails/transcript_generic.svg",
+    "audioThumbnail": "/lms_banner_pack/content_thumbnails/audio_generic.svg",
+    "mixedThumbnail": "/lms_banner_pack/content_thumbnails/mixed_generic.svg"
+  }
+}

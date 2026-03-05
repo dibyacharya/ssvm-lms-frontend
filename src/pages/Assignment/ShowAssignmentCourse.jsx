@@ -111,7 +111,7 @@ const StudentAssignmentSectionCourse = () => {
   };
 
    const getCurrentSubmission = () => {
-    if (!selectedAssignment || !courseData?.student?.id) return null;
+    if (!selectedAssignment?.submissions || !courseData?.student?.id) return null;
 
     return selectedAssignment.submissions.find(
       (submission) => submission.studentId === courseData.student.id

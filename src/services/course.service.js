@@ -10,8 +10,26 @@ export const getAllStudentCourses = async () => {
   return response.data;
 };
 
-export const getCoursesById = async (id) => {
-  const response = await api.get(`/courses/${id}`);
+export const getCourseDescription = async (courseId) => {
+  try {
+    const response = await api.get(`/courses/${courseId}/description`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching course description:", error);
+    throw error;
+  }
+};
+
+export const getCoursesById = async (id, params = {}) => {
+  const queryParams = {};
+  ["assignmentId", "batchId", "semesterId"].forEach((key) => {
+    if (params[key]) {
+      queryParams[key] = params[key];
+    }
+  });
+  const response = await api.get(`/courses/${id}`, {
+    params: queryParams,
+  });
   return response.data;
 };
 
@@ -21,6 +39,17 @@ export const updateCourse = async (courseId, courseData) => {
     return response.data;
   } catch (error) {
     console.error("Error updating course:", error);
+    throw error;
+  }
+};
+
+// CA Configuration API — returns category types, calculation methods, and category config from backend
+export const getCAConfig = async () => {
+  try {
+    const response = await api.get("/ca-config");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching CA config:", error);
     throw error;
   }
 };
@@ -92,6 +121,16 @@ export const deleteContinuousAssessmentCategory = async (courseID, categoryID) =
     return response.data;
   } catch (error) {
     console.error("Error deleting continuous assessment category:", error);
+    throw error;
+  }
+};
+
+export const getCategoryScaledMarks = async (courseID, categoryID) => {
+  try {
+    const response = await api.get(`/courses/${courseID}/continuous-assessment-plan/${categoryID}/scaled-marks`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching category scaled marks:", error);
     throw error;
   }
 };
@@ -201,6 +240,16 @@ export const getStudentContinuousAssessmentPlan = async (courseId) => {
       return null;
     }
     console.error("Error fetching continuous assessment plan:", error);
+    throw error;
+  }
+};
+
+export const getCourseMaterials = async (courseId) => {
+  try {
+    const response = await api.get(`/courses/${courseId}/materials`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching course materials:", error);
     throw error;
   }
 };

@@ -1,0 +1,127 @@
+You are working inside the existing LMS monorepo.
+
+The full asset pack is already placed here:
+`KIIT_LMS_FRONTEND/KIIT_LMS_FRONTEND/public/lms_banner_pack`
+
+Implement a complete automatic visual system in the LMS frontend using this pack.
+
+## Scope
+Use the pack for:
+1. course banners
+2. course thumbnails
+3. module thumbnails
+4. content item thumbnails for PDF, video, presentation, transcript, recording, doc, audio, and unknown items
+
+Do not touch unrelated meeting/course-assignment logic.
+Stay focused on LMS frontend visual integration only.
+
+## Source of truth
+Inspect and use:
+- `public/lms_banner_pack/manifest.json`
+- `public/lms_banner_pack/README.md`
+
+Do not hardcode file names blindly if the manifest already provides them.
+
+## Required behavior
+
+### A. Course cards
+Where courses are listed in cards/grids/lists:
+- show course thumbnail from the pack
+- use a resolver utility
+- prefer explicit course-provided banner/theme if existing course object already has one
+- otherwise resolve from metadata
+- fallback to generic course thumbnail
+- final fallback = CSS gradient if image missing
+
+### B. Course header / detail page
+Where a course page opens:
+- show wide course banner from the pack
+- keep banner confined inside the course header/hero area only
+- do not let it overlap global nav
+- use generic course banner if no exact match found
+
+### C. Module cards
+For module/unit/chapter cards:
+- show module thumbnail
+- use module title/type keyword matching if possible
+- fallback to `moduleThumbnail` from manifest
+
+### D. Content items inside modules
+For content rows/cards/items like:
+- PDF
+- Video
+- Presentation / PPT
+- Recording
+- Transcript
+- Notes / Doc
+- Audio
+show the appropriate content thumbnail from the pack.
+
+Priority:
+1. real preview/thumbnail if the item already has one
+2. content-type thumbnail from manifest
+3. mixed/unknown fallback
+4. CSS fallback
+
+## Utility to create
+Create a reusable resolver utility, for example:
+- `src/utils/lmsVisualResolver.js`
+
+It should expose helpers like:
+- `resolveCourseVisual(course)`
+- `resolveModuleVisual(module)`
+- `resolveContentVisual(item)`
+
+Each helper should return at least:
+- `themeKey`
+- `bannerUrl` (where applicable)
+- `thumbnailUrl`
+- `accentColor`
+- `isFallback`
+
+## Matching logic
+Implement centralized keyword mapping using:
+- course title
+- course code
+- program/department if present
+- module title
+- content type / mime type / file extension
+
+Suggested course keyword mapping is documented in the pack README.
+
+## Components to inspect and update
+Inspect the real repo and update the actual components that render:
+- course cards/grids
+- course header page
+- module cards
+- content item rows/cards in modules
+
+Do not invent parallel pages.
+
+Likely areas include:
+- teacher dashboard course list
+- student course list
+- course detail pages
+- module/content listing components
+
+## Asset loading rule
+Because assets are under `public/`, use paths like:
+- `/lms_banner_pack/...`
+Do not import these SVGs through bundler unless needed.
+
+## UX requirements
+- images should be clean and properly contained
+- no broken image icon
+- correct rounded corners/object fit
+- no layout break
+- no text baked inside images
+- safe fallback for unknown course/module/content
+
+## Output
+Return:
+1. concise summary of files changed
+2. exact diff/patch
+3. what resolver rules were implemented
+4. which components now use banners/thumbnails
+5. exact frontend run command
+6. quick verification checklist

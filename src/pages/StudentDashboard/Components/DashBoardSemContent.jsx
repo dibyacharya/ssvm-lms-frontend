@@ -10,6 +10,12 @@ import {
   ArrowRight,
   BookOpen,
   Layers,
+  Home,
+  FileText,
+  Sun,
+  Moon,
+  Sunrise,
+  Sunset,
 } from "lucide-react";
 import { useMeetingsV2 } from "../../../context/MeetingV2Context";
 import toast from "react-hot-toast";
@@ -17,13 +23,33 @@ import { getAllStudentCourses } from "../../../services/course.service";
 import { getStudentAssignmentStats } from "../../../services/assignment.service";
 import calculateAttendance from "../../../utils/Functions/CalculateStudentAttendencePercentage";
 import AssignmentStatusChart from "./AssignmentStatusChart";
+import { resolveCourseTheme, fallbacks } from "../../../utils/courseThemeResolver";
 
-const DEFAULT_IMAGE = "https://img.freepik.com/free-vector/online-school-platform-abstract-concept-illustration-homeschooling-online-education-platform-digital-classes-virtual-courses-lms-school_335657-3486.jpg";
+const SectionHeader = ({ icon: Icon, title, gradient, count, rightContent }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      </div>
+      <div className="flex items-center gap-3">
+        {count != null && (
+          <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+        )}
+        {rightContent}
+      </div>
+    </div>
+  </div>
+);
 
 const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   const navigate = useNavigate();
   const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
-  
+
   const [coursesData, setCoursesData] = useState({ courses: [], user: {} });
   const [allCoursesData, setAllCoursesData] = useState({ courses: [], user: {} });
   const [assignmentStats, setAssignmentStats] = useState({
@@ -39,6 +65,15 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   const allAssignmentsCount = assignmentStats.allAssignments || 0;
   const pendingAssignmentsCount = assignmentStats.pending || 0;
   const submittedAssignmentsCount = assignmentStats.submitted || 0;
+
+  // Time-of-day greeting
+  const timeGreeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return { text: "Good Morning", icon: Sunrise };
+    if (hour >= 12 && hour < 17) return { text: "Good Afternoon", icon: Sun };
+    if (hour >= 17 && hour < 21) return { text: "Good Evening", icon: Sunset };
+    return { text: "Good Night", icon: Moon };
+  }, []);
 
   // Function to get all latest assignments from API stats
   const getAllAssignments = () => {
@@ -93,9 +128,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
     const fetchCourses = async () => {
       try {
         const data = await getAllStudentCourses();
-      
+
         setAllCoursesData(data);
-        
+
       } catch (err) {
         console.log(err);
         toast.error("Failed to load courses. Please try again later.");
@@ -153,14 +188,14 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   // Pre-fetch meetings for all courses when coursesData changes
   useEffect(() => {
     if (coursesData.courses && coursesData.courses.length > 0) {
-      const uniqueCourseIds = [...new Set(coursesData.courses.map(c => c._id).filter(Boolean))];
+      const uniqueCourseIds = [...new Set((coursesData?.courses || []).map(c => c._id).filter(Boolean))];
       // Fire-and-forget: fetch meetings for all courses in parallel
       uniqueCourseIds.forEach(courseId => {
         fetchMeetingsForCourse(courseId).catch(() => {});
       });
     }
-  }, [coursesData.courses, fetchMeetingsForCourse]); 
-  
+  }, [coursesData.courses, fetchMeetingsForCourse]);
+
   // 4. Functions based on backend meetings per course (using V2 context)
   // NOTE: This only reads from already-loaded meetings; fetching happens in useEffect above
   const getThisWeekMeetings = useMemo(() => {
@@ -191,7 +226,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
 
     return allMeetings;
   }, [coursesData.courses, getMeetingsForCourse]);
-  
+
   const upcomingEvents = useMemo(() => {
     return getThisWeekMeetings
       .filter((m) => m.status === "upcoming" || m.status === "live")
@@ -234,7 +269,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   // Combine loading states for the main loader
   if (loading || assignmentStatsLoading) {
     return (
-      <div className="flex items-center justify-center h-screen dark:bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-accent1 border-opacity-50 mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300 text-lg">Loading...</p>
@@ -246,329 +281,381 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   // Get recent assignments (limit to first 4)
   const recentAssignments = getAllAssignments().slice(0, 4);
 
+  const GreetingIcon = timeGreeting.icon;
+
+  // Stat card definitions with themed colors
+  const statCards = [
+    {
+      id: "Courseware",
+      title: "My Courses",
+      icon: BookOpen,
+      count: coursesData?.user?.totalCourses || 0,
+      description: "Active Courses",
+      borderColor: "border-t-emerald-500",
+      iconBg: "bg-emerald-50 dark:bg-emerald-900/30",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+    },
+    {
+      id: "Assignment",
+      title: "Assignments",
+      icon: CheckSquare,
+      count: pendingAssignmentsCount,
+      description: "Pending Tasks",
+      borderColor: "border-t-blue-500",
+      iconBg: "bg-blue-50 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400",
+    },
+    {
+      id: "LiveClass",
+      title: "Live Classes",
+      icon: Calendar,
+      count: getThisWeekMeetings.length,
+      description: "This Week",
+      borderColor: "border-t-purple-500",
+      iconBg: "bg-purple-50 dark:bg-purple-900/30",
+      iconColor: "text-purple-600 dark:text-purple-400",
+    },
+    {
+      id: "MyStats",
+      title: "Attendance",
+      icon: UserCheck,
+      count: `${Math.round(
+        calculateAttendance(coursesData.user._id, coursesData.courses)
+          .overall.attendancePercentage
+      ) || "-"
+        }%`,
+      description: "Overall Rate",
+      borderColor: "border-t-amber-500",
+      iconBg: "bg-amber-50 dark:bg-amber-900/30",
+      iconColor: "text-amber-600 dark:text-amber-400",
+    },
+  ];
+
   return (
     <div className="p-6 space-y-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Welcome Section */}
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+        <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+        <div className="absolute top-4 left-[40%] w-16 h-16 bg-white/5 rounded-full" />
+        <div className="absolute -bottom-6 left-[20%] w-20 h-20 bg-white/5 rounded-full" />
 
-      {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          {
-            id: "Courseware",
-            title: "My Courses",
-            icon: <BookOpen className="h-6 w-6 text-primary dark:text-blue-400" />,
-            count: coursesData?.user?.totalCourses || 0,
-            description: "Active Courses",
-            bgClass: "bg-white dark:bg-gray-800",
-            color: "text-primary dark:text-blue-400",
-          },
-          {
-            id: "Assignment",
-            title: "Assignments",
-            icon: <CheckSquare className="h-6 w-6 text-primary dark:text-blue-400" />,
-            count: pendingAssignmentsCount,
-            description: "Pending Tasks",
-            bgClass: "bg-white dark:bg-gray-800",
-            color: "text-primary dark:text-blue-400",
-          },
-          {
-            id: "LiveClass",
-            title: "Live Classes",
-            icon: <Calendar className="h-6 w-6 text-primary dark:text-blue-400" />,
-            // 5. Count is now dynamic based on context data
-            count: getThisWeekMeetings.length,
-            description: "This Week",
-            bgClass: "bg-white dark:bg-gray-800",
-            color: "text-primary dark:text-blue-400",
-          },
-          {
-            id: "MyStats",
-            title: "Attendance",
-            icon: <UserCheck className="h-6 w-6 text-primary dark:text-blue-400" />,
-            count: `${Math.round(
-              calculateAttendance(coursesData.user._id, coursesData.courses)
-                .overall.attendancePercentage
-            ) || "-"
-              }%`,
-            description: "Overall Rate",
-            bgClass: "bg-white dark:bg-gray-800",
-            color: "text-primary dark:text-blue-400",
-          },
-        ].map((item, index) => (
-          <div
-            key={index}
-            className={`${item.bgClass} p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 cursor-pointer`}
-            onClick={() => {
-              if (item.id === "Assignment") {
-                scrollToRecentAssignments();
-              } else {
-                setActiveSection(item.id);
-              }
-            }}
-          >
-            <div className="flex items-center space-x-3 mb-4">
-              <div className={`p-2 bg-gray-50 dark:bg-gray-700 rounded-lg ${item.color}`}>
-                {item.icon}
-              </div>
-              <h2 className="text-lg font-medium text-gray-800 dark:text-white">
-                {item.title}
-              </h2>
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <Home className="w-7 h-7 text-white" />
             </div>
-            <p className={`text-3xl font-bold mb-1 ${item.color}`}>
-              {item.count}
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">{item.description}</p>
+            <div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                {timeGreeting.text}
+              </h1>
+              <p className="text-white/80 text-sm font-medium mt-1.5">
+                Welcome to your dashboard. Here's your academic overview.
+              </p>
+            </div>
           </div>
-        ))}
+          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl">
+            <GreetingIcon className="w-5 h-5 text-white/90" />
+            <span className="text-white/90 text-sm font-medium">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Access Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {statCards.map((item, index) => {
+          const CardIcon = item.icon;
+          return (
+            <div
+              key={index}
+              className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 ${item.borderColor} hover:shadow-md transition-shadow cursor-pointer`}
+              onClick={() => {
+                if (item.id === "Assignment") {
+                  scrollToRecentAssignments();
+                } else {
+                  setActiveSection(item.id);
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-tertiary dark:text-gray-400 text-sm">{item.title}</p>
+                  <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">{item.count}</h3>
+                </div>
+                <div className={`w-12 h-12 rounded-full ${item.iconBg} flex items-center justify-center`}>
+                  <CardIcon className={`w-6 h-6 ${item.iconColor}`} />
+                </div>
+              </div>
+              <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+                {item.description}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Courses Section */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-              <Book className="h-5 w-5 mr-2 text-primary dark:text-blue-400" />
-              Recent Courses
-            </h2>
-            <button
-              className="text-accent1/80 hover:text-accent1 dark:text-blue-400 dark:hover:text-blue-300 flex items-center text-sm font-medium"
-              onClick={() => setActiveSection("Courseware")}
-            >
-              View All <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {coursesData.courses?.slice(0, 4).map((course) => (
-              <Link
-                key={course.id}
-                to={`/student/course/${course._id}`}
-                className="group relative flex flex-col justify-between rounded-lg border border-gray-100 dark:border-gray-600 hover:border-2 hover:border-accent1/30 dark:hover:border-blue-400/50 shadow-accent1 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden bg-white dark:bg-gray-700"
-                onClick={() => {
-                  if (course.available) {
-                    navigate(`/student/course/${course._id}`);
-                  }
-                }}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <SectionHeader
+            icon={BookOpen}
+            title="Recent Courses"
+            gradient="rounded-t-2xl bg-gradient-to-r from-sky-500 to-blue-600"
+            count={coursesData.courses?.length || 0}
+            rightContent={
+              <button
+                className="flex items-center gap-1 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
+                onClick={() => setActiveSection("Courseware")}
               >
-                {/* Course Image */}
-                <div className="relative h-40 w-full">
-                  <img
-                    src={course.coverImage || DEFAULT_IMAGE}
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                </div>
+                View All <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            }
+          />
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {coursesData.courses?.slice(0, 4).map((course) => {
+                const theme = resolveCourseTheme(course);
+                return (
+                <Link
+                  key={course.id}
+                  to={`/student/course/${course._id}`}
+                  className="group relative flex flex-col justify-between rounded-lg border border-gray-100 dark:border-gray-700 hover:border-2 hover:border-accent1/30 dark:hover:border-blue-400/50 shadow-accent1 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden bg-white dark:bg-gray-800"
+                  onClick={() => {
+                    if (course.available) {
+                      navigate(`/student/course/${course._id}`);
+                    }
+                  }}
+                >
+                  {/* Course Image */}
+                  <div className="relative h-40 w-full" style={{ background: theme.gradientCSS }}>
+                    <img
+                      src={theme.thumbnailUrl}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  </div>
 
-                {/* Course Details */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
-                    {course.aboutCourse}
-                  </p>
-                </div>
+                  {/* Course Details */}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
+                      {course.aboutCourse}
+                    </p>
+                  </div>
 
-                {/* Course Footer */}
-                <div className="p-3 bg-gray-50 dark:bg-gray-600 border-t border-gray-100 dark:border-gray-600">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <div className="flex items-center">
-                      <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full truncate max-w-[120px] sm:max-w-[150px]">
-                        {course.semester?.name}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center space-x-3 text-xs">
-                      <div className="flex items-center space-x-1">
-                        <CheckSquare className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">{course.assignmentCount}</span>
-                        <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Assignments</span>
-                        <span className="text-gray-500 dark:text-gray-400 sm:hidden">Assign.</span>
+                  {/* Course Footer */}
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                      <div className="flex items-center">
+                        <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full truncate max-w-[120px] sm:max-w-[150px]">
+                          {course.semester?.name}
+                        </span>
                       </div>
-                      <div className="w-px h-3 bg-gray-300 dark:bg-gray-500"></div>
-                      <div className="flex items-center space-x-1">
-                        <Book className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">{course.lectureCount}</span>
-                        <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Lectures</span>
-                        <span className="text-gray-500 dark:text-gray-400 sm:hidden">Lect.</span>
+
+                      <div className="flex items-center space-x-3 text-xs">
+                        <div className="flex items-center space-x-1">
+                          <CheckSquare className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
+                          <span className="font-medium text-gray-700 dark:text-gray-300">{course.assignmentCount}</span>
+                          <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Assignments</span>
+                          <span className="text-gray-500 dark:text-gray-400 sm:hidden">Assign.</span>
+                        </div>
+                        <div className="w-px h-3 bg-gray-300 dark:bg-gray-500"></div>
+                        <div className="flex items-center space-x-1">
+                          <Book className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
+                          <span className="font-medium text-gray-700 dark:text-gray-300">{course.lectureCount}</span>
+                          <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Lectures</span>
+                          <span className="text-gray-500 dark:text-gray-400 sm:hidden">Lect.</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Assignment Summary Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 h-fit">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-              <Layers className="h-5 w-5 mr-2 text-primary dark:text-blue-400" />
-              Assignment Status
-            </h2>
-          </div>
-
-          <AssignmentStatusChart
-            allAssignmentsCount={allAssignmentsCount}
-            pendingAssignmentsCount={pendingAssignmentsCount}
-            submittedAssignmentsCount={submittedAssignmentsCount}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden h-fit">
+          <SectionHeader
+            icon={FileText}
+            title="Assignment Summary"
+            gradient="rounded-t-2xl bg-gradient-to-r from-violet-500 to-purple-600"
           />
+          <div className="p-6">
+            <AssignmentStatusChart
+              allAssignmentsCount={allAssignmentsCount}
+              pendingAssignmentsCount={pendingAssignmentsCount}
+              submittedAssignmentsCount={submittedAssignmentsCount}
+            />
+          </div>
         </div>
       </div>
 
       {/* Upcoming Events Section - Now Dynamic */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-            <Calendar className="h-5 w-5 mr-2 text-primary dark:text-blue-400" />
-            Upcoming Live Classes
-          </h2>
-          <button
-            className="text-accent1/80 hover:text-accent1 dark:text-blue-400 dark:hover:text-blue-300 flex items-center text-sm font-medium"
-            onClick={() => setActiveSection("LiveClass")}
-          >
-            View All <ChevronRight className="h-4 w-4 ml-1" />
-          </button>
-        </div>
-
-        {upcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upcomingEvents.map((event) => (
-              <div
-                key={event._id}
-                className="group flex flex-col bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600 hover:border-accent1/60 dark:hover:border-blue-400/60 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
-                onClick={() => window.open(event.link, '_blank')}
-              >
-                <div className="relative h-40">
-                  {/* Using a generic placeholder image as none is provided in the data */}
-                  <img
-                    src={DEFAULT_IMAGE}
-                    alt={event.subject}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-flex items-center">
-                      <Calendar className="h-3.5 w-3.5 text-primary dark:text-blue-400 mr-1.5" />
-                      <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
-                        {formatDate(event.start)} · {formatTime(event.start)}
-                      </span>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+        <SectionHeader
+          icon={Calendar}
+          title="Upcoming Live Classes"
+          gradient="rounded-t-2xl bg-gradient-to-r from-rose-500 to-pink-600"
+          count={upcomingEvents.length}
+          rightContent={
+            <button
+              className="flex items-center gap-1 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
+              onClick={() => setActiveSection("LiveClass")}
+            >
+              View All <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          }
+        />
+        <div className="p-6">
+          {upcomingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {upcomingEvents.map((event) => (
+                <div
+                  key={event._id}
+                  className="group flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-accent1/60 dark:hover:border-blue-400/60 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
+                  onClick={() => window.open(event.link, '_blank')}
+                >
+                  <div className="relative h-40" style={{ background: "linear-gradient(135deg, #1e293b, #334155)" }}>
+                    <img
+                      src={fallbacks.courseBanner}
+                      alt={event.subject}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-flex items-center">
+                        <Calendar className="h-3.5 w-3.5 text-primary dark:text-blue-400 mr-1.5" />
+                        <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                          {formatDate(event.start)} · {formatTime(event.start)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-4">
-                  <h3 className="text-base font-medium text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors mb-1">
-                    {event.subject}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                    {event.description}
-                  </p>
-                </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-medium text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors mb-1">
+                      {event.subject}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                      {event.description}
+                    </p>
+                  </div>
 
-                <div className="mt-auto border-t border-gray-100 dark:border-gray-600 p-3 flex items-center justify-between">
-                  <span className="text-xs font-medium text-accent1 dark:text-blue-400">
-                    Join Class
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-accent1 dark:text-blue-400" />
+                  <div className="mt-auto border-t border-gray-100 dark:border-gray-700 p-3 flex items-center justify-between">
+                    <span className="text-xs font-medium text-accent1 dark:text-blue-400">
+                      Join Class
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-accent1 dark:text-blue-400" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <Calendar className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Upcoming Classes</h3>
-            <p className="text-gray-400 dark:text-gray-500">New classes scheduled by your teachers will appear here.</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Upcoming Classes</h3>
+              <p className="text-gray-400 dark:text-gray-500">New classes scheduled by your teachers will appear here.</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Assignments Section - Now Dynamic */}
-      <div id="recent-assignments" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-            <CheckSquare className="h-5 w-5 mr-2 text-primary dark:text-blue-400" />
-            Recent Assignments
-          </h2>
-        </div>
-
-        <div className="overflow-x-auto">
-          {recentAssignments.length > 0 ? (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-600">
-                  <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                    Assignment
-                  </th>
-                  <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                    Course
-                  </th>
-                  <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                    Due Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentAssignments.map((assignment) => {
-                  const status = getAssignmentStatus(assignment);
-                  return (
-                    <tr
-                      key={assignment._id}
-                      className="border-b border-gray-50 dark:border-gray-700 hover:bg-accent2/30 dark:hover:bg-gray-700/50 cursor-pointer"
-                      onClick={() => handleAssignmentClick(assignment)}
-                    >
-                      <td className="py-3 px-4">
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-md bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center text-primary dark:text-blue-400 mr-3">
-                            <CheckSquare className="h-4 w-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-800 dark:text-white">
-                              {assignment.title}
-                            </span>
-                            {assignment.description && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
-                                {assignment.description}
+      <div id="recent-assignments" className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+        <SectionHeader
+          icon={CheckSquare}
+          title="Recent Assignments"
+          gradient="rounded-t-2xl bg-gradient-to-r from-amber-500 to-orange-500"
+          count={recentAssignments.length}
+        />
+        <div className="p-6">
+          <div className="overflow-x-auto">
+            {recentAssignments.length > 0 ? (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-700">
+                    <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                      Assignment
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                      Course
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                      Due Date
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentAssignments.map((assignment) => {
+                    const status = getAssignmentStatus(assignment);
+                    return (
+                      <tr
+                        key={assignment._id}
+                        className="border-b border-gray-50 dark:border-gray-700 hover:bg-accent2/30 dark:hover:bg-gray-700/50 cursor-pointer"
+                        onClick={() => handleAssignmentClick(assignment)}
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="h-8 w-8 rounded-md bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center text-primary dark:text-blue-400 mr-3">
+                              <CheckSquare className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-gray-800 dark:text-white">
+                                {assignment.title}
                               </span>
-                            )}
+                              {assignment.description && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                                  {assignment.description}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-500 dark:text-gray-400">
-                        {assignment.courseName}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1.5" />
-                          <span className="text-sm text-gray-600 dark:text-gray-300">
-                            {assignment.dueDate ? formatDate(assignment.dueDate) : "No due date"}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-500 dark:text-gray-400">
+                          {assignment.courseName}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1.5" />
+                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                              {assignment.dueDate ? formatDate(assignment.dueDate) : "No due date"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusStyle(status)}`}
+                          >
+                            {getStatusLabel(status)}
                           </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusStyle(status)}`}
-                        >
-                          {getStatusLabel(status)}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-8">
-              <CheckSquare className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Assignments Yet</h3>
-              <p className="text-gray-400 dark:text-gray-500">Assignments will appear here when they are created.</p>
-            </div>
-          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8">
+                <CheckSquare className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Assignments Yet</h3>
+                <p className="text-gray-400 dark:text-gray-500">Assignments will appear here when they are created.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

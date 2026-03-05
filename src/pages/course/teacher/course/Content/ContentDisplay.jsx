@@ -8,6 +8,14 @@ import {
 } from "lucide-react";
 import Markdown from "react-markdown";
 
+// Resolve relative file paths (/uploads/...) to the backend origin
+const BACKEND_URL = window.RUNTIME_CONFIG?.BACKEND_URL || '';
+const getFullUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 const ContentDisplay = ({
   content,
   onDelete,
@@ -43,7 +51,7 @@ const ContentDisplay = ({
       if (content.fileType === "pdf") {
         return (
           <iframe
-            src={content.fileUrl}
+            src={getFullUrl(content.fileUrl)}
             className="w-full h-full border rounded"
             title={content.fileName}
           />
@@ -53,7 +61,7 @@ const ContentDisplay = ({
           <div className="p-4 bg-gray-50 rounded-md">
             <p>File: {content.fileName}</p>
             <a
-              href={content.fileUrl}
+              href={getFullUrl(content.fileUrl)}
               target="_blank"
               rel="noreferrer"
               className="text-blue-500 hover:underline flex items-center"
@@ -73,7 +81,7 @@ const ContentDisplay = ({
           case "pdf":
             return (
               <iframe
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 className="w-full h-full border rounded"
                 title={content.fileName}
               />
@@ -81,7 +89,7 @@ const ContentDisplay = ({
           case "image":
             return (
               <img
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 alt={content.title}
                 className="max-w-full h-auto rounded mx-auto"
               />
@@ -89,7 +97,7 @@ const ContentDisplay = ({
           case "presentation":
             return (
               <iframe
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 className="w-full h-64 border"
                 title={content.title}
               />
@@ -99,7 +107,7 @@ const ContentDisplay = ({
               <div className="p-4 bg-gray-50 rounded-md">
                 <p>Document file: {content.fileName}</p>
                 <a
-                  href={content.fileUrl}
+                  href={getFullUrl(content.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-blue-500 hover:underline flex items-center"
@@ -113,7 +121,7 @@ const ContentDisplay = ({
               <div className="p-4 bg-gray-50 rounded-md">
                 <p>File: {content.fileName}</p>
                 <a
-                  href={content.fileUrl}
+                  href={getFullUrl(content.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-blue-500 hover:underline flex items-center"
@@ -179,7 +187,7 @@ const ContentDisplay = ({
           <div className="p-4 bg-gray-50 rounded-md">
             <p className="mb-4">{content.description}</p>
             <iframe
-              src={content.url}
+              src={getFullUrl(content.url)}
               title={content.title}
               className="w-full h-[70vh] rounded-md border"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

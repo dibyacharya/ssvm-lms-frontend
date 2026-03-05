@@ -4,7 +4,6 @@ import {
   ChevronDown,
   Loader2,
   BookOpen,
-  Calendar,
   Users,
   ClipboardList,
   Video,
@@ -26,14 +25,14 @@ import { getCoursesById } from "../../../services/course.service";
 import { useCourse } from "../../../context/CourseContext";
 import { TfiAnnouncement } from "react-icons/tfi";
 import { Si1Panel } from "react-icons/si";
+import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 // Import your components
-import CourseBrief from "./course/CourseBrief";
-import WeeklyPlanManager from "./course/WeeklyPlanner";
+import CourseDescription from "./course/CourseDescription";
+import DescriptionSyllabus from "./course/DescriptionSyllabus";
+import ClassList from "./course/ClassList";
 import StudentTable from "./course/StudentDetail";
 import AllAssignments from "../../Assignment/teacher/AllAssignments";
 import LectureReview from "./course/LectureReview";
-import SyllabusManager from "./course/Syllabus";
-import CourseSchedule from "./course/CourseSchedule";
 import AttendanceHeatMap from "./course/AttendenceHeatMap";
 import AttendanceTracker from "./course/AttendanceTracker";
 import AttendanceStats from "./course/AttendanceStats";
@@ -50,6 +49,8 @@ import ProfileDropdown from "../../../utils/ProfileDropDown";
 import AllActivities from "../../Activity/teacher/AllActivities";
 import BlogCreator from "./course/Blog/BlogCreator";
 import ContinuousAssessment from "./course/ContinuousAssessment";
+import MOM from "./course/MOM";
+import Handouts from "./course/Handouts";
 import { useMeetingsV2 } from "../../../context/MeetingV2Context";
 
 const CourseManagement = () => {
@@ -72,6 +73,14 @@ const CourseManagement = () => {
   const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const assignmentContext = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search || "");
+    return {
+      assignmentId: searchParams.get("assignmentId") || "",
+      batchId: searchParams.get("batchId") || "",
+      semesterId: searchParams.get("semesterId") || "",
+    };
+  }, [location.search]);
   
   // Update selectedOption when courseID changes (e.g., navigating to different course)
   useEffect(() => {
@@ -140,11 +149,16 @@ const CourseManagement = () => {
 
   const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
 
-  // Create the handler function for the button
+  // Create the handler function for the button - uses only VConf URLs (host URL for teachers)
   const handleJoinLiveClass = () => {
     const activeMeeting = liveMeeting;
     if (activeMeeting) {
-      window.open(activeMeeting.link, '_blank', 'noopener,noreferrer');
+      const joinUrl = activeMeeting.vconfHostUrl || activeMeeting.vconfJoinUrl;
+      if (joinUrl) {
+        window.open(joinUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        alert("Video conference room is not ready yet. Please try again in a moment.");
+      }
     } else {
       alert("There is no live class to join at the moment.");
     }
@@ -171,7 +185,7 @@ const CourseManagement = () => {
 
       try {
         setLoading(true);
-        const response = await getCoursesById(courseId);
+        const response = await getCoursesById(courseId, assignmentContext);
 
         // Normalize syllabus shape to { modules: [] }
         const normalizedSyllabus = (() => {
@@ -212,7 +226,7 @@ const CourseManagement = () => {
     };
 
     fetchData();
-  }, [courseID, setCourseData]);
+  }, [courseID, assignmentContext, setCourseData]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -236,10 +250,9 @@ const CourseManagement = () => {
       title: "Course",
       icon: <BookOpen className="w-5 h-5" />,
       items: [
-        { label: "Course Brief", icon: <FileText className="w-5 h-5" /> },
+        { label: "Course Description", icon: <FileText className="w-5 h-5" /> },
         { label: "Syllabus", icon: <BookOpen className="w-5 h-5" /> },
-        { label: "Weekly Plan", icon: <Calendar className="w-5 h-5" /> },
-        { label: "Class Schedule", icon: <Clock className="w-5 h-5" /> },
+        { label: "Class List", icon: <Clock className="w-5 h-5" /> },
       ],
     },
     attendance: {
@@ -253,7 +266,7 @@ const CourseManagement = () => {
         { label: "Heat Map", icon: <BarChart2 className="w-5 h-5" /> },
         { label: "Status Sheet", icon: <Layout className="w-5 h-5" /> },
         {
-          label: "Class List",
+          label: "Student List",
           icon: <Users className="w-5 h-5" />,
         },
       ],
@@ -264,8 +277,8 @@ const CourseManagement = () => {
       items: [
         // { label: "Subjective", icon: <FileText className="w-5 h-5" /> },
         // { label: "Objective", icon: <Layout className="w-5 h-5" /> },
-        { label: "Activity", icon: <Activity className="w-5 h-5" /> },
-        { label: "Continuous Assessment", icon: <BarChart2 className="w-5 h-5" /> },
+        { label: "Continuous Assessment Plan", icon: <BarChart2 className="w-5 h-5" /> },
+        { label: "Continuous Assessment", icon: <Activity className="w-5 h-5" /> },
       ],
     },
   };
@@ -297,9 +310,9 @@ const CourseManagement = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm relative">
         <div className="">
           <div className="min-h-96">
-            {selectedOption === "Course Brief" && <CourseBrief />}
-            {selectedOption === "Weekly Plan" && <WeeklyPlanManager />}
-            {selectedOption === "Class List" && <StudentTable />}
+            {selectedOption === "Course Description" && <CourseDescription />}
+            {selectedOption === "Student List" && <StudentTable />}
+            {selectedOption === "Class List" && <ClassList />}
             {selectedOption === "Subjective" && (
               <AllAssignments courseID={courseID} initialTab="subjective" hideTabs={true} />
             )}
@@ -309,12 +322,14 @@ const CourseManagement = () => {
             {selectedOption === "Activity" && (
               <AllActivities courseID={courseID} />
             )}
+            {selectedOption === "Continuous Assessment" && (
+              <ContinuousAssessment mode="assessment" />
+            )}
             {selectedOption === "Home" && (
               <TeacherHome setSelectedOption={setSelectedOption} />
             )}
             {selectedOption === "Recorded Lectures" && <LectureReview />}
-            {selectedOption === "Syllabus" && <SyllabusManager />}
-            {selectedOption === "Class Schedule" && <CourseSchedule />}
+            {selectedOption === "Syllabus" && <DescriptionSyllabus />}
             {selectedOption === "Heat Map" && <AttendanceHeatMap />}
             {selectedOption === "Mark Attendance" && <AttendanceTracker />}
             {selectedOption === "Status Sheet" && <AttendanceStats />}
@@ -327,7 +342,7 @@ const CourseManagement = () => {
               <AnnouncementManagement courseID={courseID} />
             )}
             {selectedOption === "Gradebook" && <Gradebook />}
-            {selectedOption === "Continuous Assessment" && <ContinuousAssessment />}
+            {selectedOption === "Continuous Assessment Plan" && <ContinuousAssessment mode="plan" />}
             {selectedOption === "Discussion" && <DiscussionForum />}
           </div>
         </div>
@@ -387,8 +402,8 @@ const CourseManagement = () => {
         </button>
 
         {openDropdown === menuKey && (
-          <div className="absolute left-0 mt-2 w-[600px] bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-xl border border-gray-200 dark:border-gray-600 py-5 z-50">
-            <div className="grid grid-cols-2 gap-5 px-5">
+          <div className="absolute left-0 mt-1.5 w-fit min-w-[200px] max-w-[220px] bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600 p-1 z-50">
+            <div className="flex flex-col gap-0.5">
               {items.map((item) => (
                 <button
                   key={item.label}
@@ -396,14 +411,14 @@ const CourseManagement = () => {
                     setSelectedOption(item.label);
                     setOpenDropdown(null);
                   }}
-                  className={`flex items-center space-x-3 p-5 rounded-lg transition-colors ${
+                  className={`flex h-9 w-full items-center gap-1.5 px-2 py-1 rounded transition-colors ${
                     selectedOption === item.label
                       ? "bg-accent1/10 dark:bg-accent1/20 text-accent1 dark:text-accent1"
                       : "hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   <div
-                    className={`p-2 rounded-lg flex-shrink-0 ${
+                    className={`p-1 rounded flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4 ${
                       selectedOption === item.label
                         ? "bg-accent1/20 dark:bg-accent1/30"
                         : "bg-gray-100 dark:bg-gray-700"
@@ -411,7 +426,9 @@ const CourseManagement = () => {
                   >
                     {item.icon}
                   </div>
-                  <span className="font-medium text-left whitespace-nowrap">{item.label}</span>
+                  <span className="font-medium text-xs leading-4 text-left whitespace-nowrap">
+                    {item.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -457,55 +474,75 @@ const CourseManagement = () => {
         </div>
       </header>
 
-      {/* Live Class Buttons */}
-      {liveMeeting && (
-        <button
-          onClick={handleJoinLiveClass}
-          className=" absolute top-20 flex justify-center items-center gap-2  right-8 text-lg px-6 py-2 bg-primary/80 text-white rounded-lg hover:bg-primary transition-colors z-[900]"
-        >
-          <MdLiveTv />
-          Join Live Class
-        </button>
-      )}
-      
       {/* Course Header Banner */}
-      <div className="w-[90%] m-auto pt-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-primary dark:text-blue-400">
-              {courseData.title}
-            </h1>
-            <p className="text-xl text-primary/60 dark:text-blue-400/70 mt-2">
-              {courseData.teacher?.name}
-            </p>
+      {(() => {
+        const theme = resolveCourseTheme(courseData);
+        return (
+          <div className="w-[90%] m-auto pt-4">
+            <div className="relative rounded-2xl overflow-hidden mb-6" style={{ background: theme.gradientCSS }}>
+              <img
+                src={theme.bannerUrl}
+                alt=""
+                className="w-full h-48 object-cover"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                    {courseData.title}
+                  </h1>
+                  <p className="text-lg text-white/80 mt-1 drop-shadow">
+                    {courseData.teacher?.name}
+                  </p>
+                </div>
+                {liveMeeting ? (
+                  <div className="ml-8">
+                    <a
+                      href={liveMeeting.vconfHostUrl || liveMeeting.vconfJoinUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!liveMeeting.vconfHostUrl && !liveMeeting.vconfJoinUrl) {
+                          e.preventDefault();
+                          alert("Video conference room is not ready yet. Please try again in a moment.");
+                        }
+                      }}
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline"
+                    >
+                      <MdLiveTv />
+                      Join Live Class
+                    </a>
+                  </div>
+                ) : (
+                  <div className="ml-8">
+                    <button
+                      disabled
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg cursor-not-allowed border border-white/30"
+                    >
+                      <MdLiveTv />
+                      No Live Class Now
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          
-          {/* Live Class Button */}
-         {!liveMeeting && <div className="ml-8">
-            <button
-              disabled
-              className="flex justify-center items-center gap-2 text-lg px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 rounded-lg cursor-not-allowed"
-            >
-              <MdLiveTv />
-              No Live Class Now
-            </button>
-          </div>}
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Navigation Bar */}
-      <nav className="absolute shadow-sm top-0  bg-red-400 dark:bg-red-500 w-full z-40">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-6 top-3 z-10 border border-black dark:border-gray-600 flex items-center space-x-2 px-4 py-2 bg-white/20 dark:bg-gray-800/20 rounded-lg text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white hover:shadow-md transition-all"
-        >
-          <ArrowLeft className="h-5 w-5 text-black dark:text-white" />
-          <span className="text-black dark:text-white">Back</span>
-        </button>
-        
-        <div className="absolute top-40 left-6 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex mx-auto items-center space-x-6">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm w-full border-b border-gray-200 dark:border-gray-700">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-14">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center space-x-2 px-4 py-2 mr-6 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md transition-all"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Back</span>
+            </button>
+            <div className="flex items-center space-x-6">
               {/* Home Button with underline effect */}
               <button
                 onClick={() => setSelectedOption("Home")}
@@ -576,13 +613,14 @@ const CourseManagement = () => {
                   <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
                 )}
               </button>
+
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8 relative mt-20">
+      <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderContent()}
       </main>
     </div>

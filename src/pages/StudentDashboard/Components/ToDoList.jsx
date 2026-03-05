@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, X, Edit2, Save, Move } from "lucide-react";
-import { Activity, BookOpen, MessageSquare, FileText } from "lucide-react";
+import { Activity, BookOpen, MessageSquare, FileText, CheckSquare } from "lucide-react";
+import DashboardBanner from "./DashboardBanner";
 
 // Define the four quadrants of Swayam
 const SWAYAM_QUADRANTS = {
@@ -353,7 +354,15 @@ const SwayamKanbanBoard = () => {
     ).length;
   };
   return (
-    <div className="flex flex-col min-h-screen p-6 bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col min-h-screen p-6 bg-gray-100 dark:bg-gray-900 space-y-6">
+      {/* Header Banner */}
+      <DashboardBanner
+        icon={CheckSquare}
+        title="My Study Planner"
+        subtitle="Organize your learning across all four quadrants"
+        gradient="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500"
+      />
+
       {/* Swayam Quadrants Section */}
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="relative mb-16">

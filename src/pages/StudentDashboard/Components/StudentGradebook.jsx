@@ -6,7 +6,9 @@ import {
   getStudentOwnGrades,
 } from "../../../services/course.service";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
+import { getEndExamLabel, getMidExamLabel } from "../../../utils/periodLabel";
 import { BookOpen, Award, FileText } from "lucide-react";
+import DashboardBanner from "./DashboardBanner";
 
 const StudentGradebook = () => {
   const [courses, setCourses] = useState([]);
@@ -103,19 +105,14 @@ const StudentGradebook = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Award className="h-8 w-8 text-accent1" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Gradebook
-            </h1>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            View your published grades for all enrolled courses
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Banner */}
+        <DashboardBanner
+          icon={Award}
+          title="Gradebook"
+          subtitle="View your published grades for all enrolled courses"
+          gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+        />
 
         {/* Courses List */}
         {courses.length === 0 ? (
@@ -134,6 +131,10 @@ const StudentGradebook = () => {
               const courseData = courseGrades[course._id];
               const isExpanded = expandedCourse === course._id;
               const isLoading = isExpanded && !courseData;
+              const coursePeriodType = course.periodType || course.semester?.periodType || "semester";
+              const coursePeriodLabel = coursePeriodType.charAt(0).toUpperCase() + coursePeriodType.slice(1);
+              const courseEndExamLabel = getEndExamLabel(coursePeriodType);
+              const courseMidExamLabel = getMidExamLabel(coursePeriodType);
 
               return (
                 <div
@@ -154,7 +155,7 @@ const StudentGradebook = () => {
                           {course.courseName || course.name}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {course.courseCode || course.code} • Semester{" "}
+                          {course.courseCode || course.code} • {coursePeriodLabel}{" "}
                           {course.semNumber || course.semester?.semNumber || "N/A"}
                         </p>
                       </div>
@@ -221,7 +222,7 @@ const StudentGradebook = () => {
                                     {courseData.assessmentPlan.endTermExam}%
                                   </p>
                                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    End Term Exam
+                                    {courseEndExamLabel}
                                   </p>
                                 </div>
                                 <div className="text-center">
@@ -229,7 +230,7 @@ const StudentGradebook = () => {
                                     {courseData.assessmentPlan.midTermExam}%
                                   </p>
                                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    Mid Term Exam
+                                    {courseMidExamLabel}
                                   </p>
                                 </div>
                                 <div className="text-center">
@@ -256,7 +257,7 @@ const StudentGradebook = () => {
                                 <div className="flex justify-between items-center">
                                   <div>
                                     <p className="font-medium text-gray-900 dark:text-white">
-                                      End Term Exam
+                                      {courseEndExamLabel}
                                     </p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
                                       Weightage: {courseData.assessmentPlan.endTermExam}%
@@ -286,7 +287,7 @@ const StudentGradebook = () => {
                                 <div className="flex justify-between items-center">
                                   <div>
                                     <p className="font-medium text-gray-900 dark:text-white">
-                                      Mid Term Exam
+                                      {courseMidExamLabel}
                                     </p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
                                       Weightage: {courseData.assessmentPlan.midTermExam}%

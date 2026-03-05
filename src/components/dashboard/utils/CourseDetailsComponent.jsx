@@ -1,6 +1,11 @@
 import { Users, Video, FileText, Calendar, Clock } from "lucide-react";
+import { getMidExamLabel, getEndExamLabel } from "../../../utils/periodLabel";
 
 export default function CourseDetailsComponents({ course }) {
+  const periodType = course?.periodType || course?.semester?.periodType || "semester";
+  const midExamLabel = getMidExamLabel(periodType);
+  const endExamLabel = getEndExamLabel(periodType);
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -34,14 +39,14 @@ export default function CourseDetailsComponents({ course }) {
           <div className="flex items-center space-x-3">
             <Calendar className="h-5 w-5 text-green-600" />
             <span>
-              Mid-Sem Exam:{" "}
+              {midExamLabel}:{" "}
               {formatDate(course.courseSchedule.midSemesterExamDate)}
             </span>
           </div>
           <div className="flex items-center space-x-3">
             <Calendar className="h-5 w-5 text-green-600" />
             <span>
-              End-Sem Exam:{" "}
+              {endExamLabel}:{" "}
               {formatDate(course.courseSchedule.endSemesterExamDate)}
             </span>
           </div>

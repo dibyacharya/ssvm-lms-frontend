@@ -8,6 +8,14 @@ import {
 } from "lucide-react";
 import Markdown from "react-markdown";
 
+// Resolve relative file paths (/uploads/...) to the backend origin
+const BACKEND_URL = window.RUNTIME_CONFIG?.BACKEND_URL || '';
+const getFullUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 const StudentContentDisplay = ({
   content,
   onNext,
@@ -25,10 +33,10 @@ const StudentContentDisplay = ({
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(
-        document.fullscreenElement ||
+        !!(document.fullscreenElement ||
           document.mozFullScreenElement ||
           document.webkitFullscreenElement ||
-          document.msFullscreenElement
+          document.msFullscreenElement)
       );
     };
 
@@ -56,8 +64,6 @@ const StudentContentDisplay = ({
 
   // Toggle fullscreen mode
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-
     // Find the main content element
     const contentElement = document.querySelector(".content-display-container");
 
@@ -67,13 +73,10 @@ const StudentContentDisplay = ({
         if (contentElement.requestFullscreen) {
           contentElement.requestFullscreen();
         } else if (contentElement.mozRequestFullScreen) {
-          /* Firefox */
           contentElement.mozRequestFullScreen();
         } else if (contentElement.webkitRequestFullscreen) {
-          /* Chrome, Safari & Opera */
           contentElement.webkitRequestFullscreen();
         } else if (contentElement.msRequestFullscreen) {
-          /* IE/Edge */
           contentElement.msRequestFullscreen();
         }
       }
@@ -82,13 +85,10 @@ const StudentContentDisplay = ({
       if (document.exitFullscreen) {
         document.exitFullscreen();
       } else if (document.mozCancelFullScreen) {
-        /* Firefox */
         document.mozCancelFullScreen();
       } else if (document.webkitExitFullscreen) {
-        /* Chrome, Safari & Opera */
         document.webkitExitFullscreen();
       } else if (document.msExitFullscreen) {
-        /* IE/Edge */
         document.msExitFullscreen();
       }
     }
@@ -118,7 +118,7 @@ const StudentContentDisplay = ({
       if (content.fileType === "pdf") {
         return (
           <iframe
-            src={content.fileUrl}
+            src={getFullUrl(content.fileUrl)}
             className="w-full h-full border rounded"
             title={content.fileName}
           />
@@ -128,7 +128,7 @@ const StudentContentDisplay = ({
           <div className="p-4 bg-gray-50 rounded-md">
             <p>File: {content.fileName}</p>
             <a
-              href={content.fileUrl}
+              href={getFullUrl(content.fileUrl)}
               target="_blank"
               rel="noreferrer"
               className="text-blue-500 hover:underline flex items-center"
@@ -148,7 +148,7 @@ const StudentContentDisplay = ({
           case "pdf":
             return (
               <iframe
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 className="w-full h-full border rounded"
                 title={content.fileName}
               />
@@ -156,7 +156,7 @@ const StudentContentDisplay = ({
           case "image":
             return (
               <img
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 alt={content.title}
                 className="max-w-full h-auto rounded mx-auto"
               />
@@ -164,7 +164,7 @@ const StudentContentDisplay = ({
           case "presentation":
             return (
               <iframe
-                src={content.fileUrl}
+                src={getFullUrl(content.fileUrl)}
                 className="w-full h-64 border"
                 title={content.title}
               />
@@ -174,7 +174,7 @@ const StudentContentDisplay = ({
               <div className="p-4 bg-gray-50 rounded-md">
                 <p>Document file: {content.fileName}</p>
                 <a
-                  href={content.fileUrl}
+                  href={getFullUrl(content.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-blue-500 hover:underline flex items-center"
@@ -188,7 +188,7 @@ const StudentContentDisplay = ({
               <div className="p-4 bg-gray-50 rounded-md">
                 <p>File: {content.fileName}</p>
                 <a
-                  href={content.fileUrl}
+                  href={getFullUrl(content.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-blue-500 hover:underline flex items-center"
@@ -254,7 +254,7 @@ const StudentContentDisplay = ({
           <div className="p-4 bg-gray-50 rounded-md">
             <p className="mb-4">{content.description}</p>
             <iframe
-              src={content.url}
+              src={getFullUrl(content.url)}
               title={content.title}
               className="w-full h-[70vh] rounded-md border"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

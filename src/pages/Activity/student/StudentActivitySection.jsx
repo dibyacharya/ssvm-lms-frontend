@@ -16,6 +16,7 @@ import {
 } from "../../../services/activity.service";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
+import CoursePageBanner from "../../../components/shared/CoursePageBanner";
 
 const StudentActivitySection = ({ courseID, selectedID }) => {
   const [activities, setActivities] = useState([]);
@@ -29,14 +30,12 @@ const StudentActivitySection = ({ courseID, selectedID }) => {
   const fetchActivities = async () => {
     try {
       setIsLoading(true);
-      console.log(courseID);
       const data = await getAllCourseActivities({ courseID });
 
       setActivities(data.activities);
 
       // Set the first activity as selected by default if available
       if (data && data.activities.length > 0) {
-        console.log(data.activities[selectedID]);
         setSelectedActivity(data.activities[selectedID]);
       }
     } catch (err) {
@@ -72,8 +71,6 @@ const StudentActivitySection = ({ courseID, selectedID }) => {
       // Call the submitActivity function
       const response = await submitActivity(selectedActivity._id, formData);
 
-      console.log("Activity submitted successfully:", response);
-
       // Show success message
       toast.success("Activity submitted successfully!");
 
@@ -81,12 +78,12 @@ const StudentActivitySection = ({ courseID, selectedID }) => {
       fetchActivities();
     } catch (error) {
       console.error("Error submitting activity:", error);
-      toast.success(`Failed to submit activity: ${error.message}`);
+      toast.error(`Failed to submit activity: ${error.message}`);
     }
   };
 
   const getCurrentSubmission = () => {
-    if (!selectedActivity || !courseData?.student?.id) return null;
+    if (!selectedActivity?.submissions || !courseData?.student?.id) return null;
 
     return selectedActivity.submissions.find(
       (submission) => submission.student === courseData.student.id
@@ -108,20 +105,46 @@ const StudentActivitySection = ({ courseID, selectedID }) => {
         <LoadingSpinner />
       </div>
     );
-  if (error) return <div className="text-red-500 dark:text-red-400 p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">{error}</div>;
+  if (error) return (
+    <div>
+      <CoursePageBanner
+        icon={CheckCircle}
+        title="Activities"
+        subtitle="Complete and submit your course activities"
+        gradient="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-500"
+      />
+      <div className="text-red-500 dark:text-red-400 p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">{error}</div>
+    </div>
+  );
   if (!activities || activities.length === 0)
-    return <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600">No activities found.</div>;
+    return (
+      <div>
+        <CoursePageBanner
+          icon={CheckCircle}
+          title="Activities"
+          subtitle="Complete and submit your course activities"
+          gradient="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-500"
+        />
+        <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-gray-600">No activities found.</div>
+      </div>
+    );
 
   const submission = getCurrentSubmission();
 
   return (
-    <div className="flex bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <CoursePageBanner
+        icon={CheckCircle}
+        title="Activities"
+        subtitle="Complete and submit your course activities"
+        gradient="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-500"
+      />
+      <div className="flex">
       {/* Sidebar */}
       <div className="w-1/4 bg-gray-50 dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-600 min-h-screen">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Activities</h2>
         <div className="space-y-2">
           {activities.map((activity) => {
-            const hasSubmitted = activity.submissions.some(
+            const hasSubmitted = (activity.submissions || []).some(
               (sub) => sub.student === courseData?.student?.id
             );
 
@@ -424,6 +447,7 @@ const StudentActivitySection = ({ courseID, selectedID }) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

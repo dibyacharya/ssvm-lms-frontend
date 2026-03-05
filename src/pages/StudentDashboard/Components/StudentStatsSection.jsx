@@ -16,6 +16,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useAuth } from "../../../context/AuthContext";
+import { BarChart2 } from "lucide-react";
+import DashboardBanner from "./DashboardBanner";
 
 // Student data
 const studentData = {
@@ -191,13 +193,13 @@ const prepareComparisonData = (student, classAvg) => {
       fullMark: 10,
     },
     {
-      name: "Mid Sem",
+      name: "Mid Exam",
       student: student.midSem,
       classAverage: classAvg.midSem,
       fullMark: 20,
     },
     {
-      name: "End Sem",
+      name: "End Exam",
       student: student.endSem,
       classAverage: classAvg.endSem,
       fullMark: 50,
@@ -219,8 +221,8 @@ const prepareSubjectPerformance = (student) => {
     { name: "Assignments", value: assignmentPercentage, fill: "#8884d8" },
     { name: "Quizzes", value: quizPercentage, fill: "#83a6ed" },
     { name: "Activities", value: activityPercentage, fill: "#8dd1e1" },
-    { name: "Mid Sem", value: midSemPercentage, fill: "#82ca9d" },
-    { name: "End Sem", value: endSemPercentage, fill: "#ffc658" },
+    { name: "Mid Exam", value: midSemPercentage, fill: "#82ca9d" },
+    { name: "End Exam", value: endSemPercentage, fill: "#ffc658" },
   ];
 };
 
@@ -248,40 +250,38 @@ const StudentStatsSection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
-              <p className="text-gray-600">
-                Roll Number: {studentData.rollNumber}
-              </p>
-            </div>
-            <div className="mt-4 md:mt-0 flex space-x-2">
-              <div className="bg-blue-100 p-4 rounded-lg text-center">
-                <p className="text-sm text-blue-600 font-medium">Total Score</p>
-                <p className="text-xl font-bold text-blue-800">
-                  {totalStats.obtained}/{totalStats.maximum}
-                </p>
+        {/* Header Banner */}
+        <div className="mb-6">
+          <DashboardBanner
+            icon={BarChart2}
+            title={user.name}
+            subtitle={`Roll Number: ${studentData.rollNumber}`}
+            gradient="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-500"
+            rightContent={
+              <div className="flex space-x-2">
+                <div className="bg-white/15 backdrop-blur-sm p-4 rounded-lg text-center">
+                  <p className="text-sm text-white/80 font-medium">Total Score</p>
+                  <p className="text-xl font-bold text-white">
+                    {totalStats.obtained}/{totalStats.maximum}
+                  </p>
+                </div>
+                <div className="bg-white/15 backdrop-blur-sm p-4 rounded-lg text-center">
+                  <p className="text-sm text-white/80 font-medium">Percentage</p>
+                  <p className="text-xl font-bold text-white">
+                    {totalStats.percentage}%
+                  </p>
+                </div>
+                <div className="bg-white/15 backdrop-blur-sm p-4 rounded-lg text-center">
+                  <p className="text-sm text-white/80 font-medium">Attendance</p>
+                  <p className="text-xl font-bold text-white">
+                    {calculateAttendancePercentage()}%
+                  </p>
+                </div>
               </div>
-              <div className="bg-green-100 p-4 rounded-lg text-center">
-                <p className="text-sm text-green-600 font-medium">Percentage</p>
-                <p className="text-xl font-bold text-green-800">
-                  {totalStats.percentage}%
-                </p>
-              </div>
-              <div className="bg-purple-100 p-4 rounded-lg text-center">
-                <p className="text-sm text-purple-600 font-medium">
-                  Attendance
-                </p>
-                <p className="text-xl font-bold text-purple-800">
-                  {calculateAttendancePercentage()}%
-                </p>
-              </div>
-            </div>
-          </div>
+            }
+          />
         </div>
 
         {/* Dashboard Grid */}

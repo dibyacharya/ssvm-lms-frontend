@@ -39,6 +39,7 @@ const TeacherAssignmentGrading = () => {
       console.log('[TeacherAssignmentGrading] Fetching assignment by ID...');
       const assignmentResponse = await getAssignmentById({ assignmentID: assignmentId });
       const assign = assignmentResponse.assignment;
+      if (!assign) { setError("Assignment not found"); setIsLoading(false); return; }
       console.log('[TeacherAssignmentGrading] Assignment fetched:', {
         id: assign._id,
         title: assign.title,
@@ -376,7 +377,6 @@ const TeacherAssignmentGrading = () => {
     searchTerm,
     sortBy
   });
-  console.log(courseData,assignment?.submissions);
   const handleGradeChange = (studentId, value) => {
     console.log('[TeacherAssignmentGrading] Grade changed:', { studentId, value });
     setGrades(prev => {

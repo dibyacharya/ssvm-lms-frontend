@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { getAllCourseAnnouncements } from "../../../../../services/announcement.service"; // Adjust the import path as needed
+import { Bell } from "lucide-react";
+import { getAllCourseAnnouncements } from "../../../../services/announcement.service";
 import { useParams } from "react-router-dom";
 import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+import CoursePageBanner from "../../../../components/shared/CoursePageBanner";
 
 const AllAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -24,8 +26,10 @@ const AllAnnouncements = () => {
   };
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+    if (courseID) {
+      fetchAnnouncements();
+    }
+  }, [courseID]);
 
   useEffect(() => {
     let filtered = announcements;
@@ -74,10 +78,14 @@ const AllAnnouncements = () => {
   const groupedAnnouncements = groupAnnouncementsByWeek(filteredAnnouncements);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg border border-gray-100 dark:border-gray-600">
-      <h1 className="text-2xl font-bold text-primary dark:text-blue-400 mb-4">
-        All Announcements
-      </h1>
+    <div className="max-w-7xl mx-auto">
+      <CoursePageBanner
+        icon={Bell}
+        title="All Announcements"
+        subtitle="Stay updated with the latest course announcements"
+        gradient="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-500"
+      />
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg border border-gray-100 dark:border-gray-600">
 
       {/* Search and Filter Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
@@ -155,6 +163,7 @@ const AllAnnouncements = () => {
             <p className="text-tertiary dark:text-gray-500">Try adjusting your search or filter to find more announcements.</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -16,6 +16,25 @@ import {
 import DiscussionService from "../../../../services/discussion.service";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import CoursePageBanner from "../../../../components/shared/CoursePageBanner";
+
+const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      </div>
+      {count != null && (
+        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+      )}
+    </div>
+  </div>
+);
 
 const DiscussionForum = () => {
   const { user } = useAuth();
@@ -321,7 +340,7 @@ let response;
     return (
       <div className="relative">
         <button
-          className="bg-transparent p-1 rounded-full hover:bg-gray-100"
+          className="bg-transparent p-1 rounded-full hover:bg-gray-100 transition-colors"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -332,7 +351,7 @@ let response;
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-1 py-1 w-36 bg-white rounded-md shadow-lg z-10 border">
+          <div className="absolute right-0 mt-1 py-1 w-36 bg-white rounded-xl shadow-lg z-10 border border-gray-100">
             {children}
           </div>
         )}
@@ -342,7 +361,7 @@ let response;
 
   const DropdownItem = ({ icon, children, danger = false, onClick }) => (
     <button
-      className={`w-full text-left px-4 py-2 text-sm flex items-center hover:bg-gray-100 ${
+      className={`w-full text-left px-4 py-2 text-sm flex items-center hover:bg-gray-50 transition-colors ${
         danger ? "text-red-600" : ""
       }`}
       onClick={(e) => {
@@ -357,20 +376,23 @@ let response;
 
   const Tab = ({ active, icon, label, onClick }) => (
     <button
-      className={`px-4 py-2 border-b-2 flex items-center ${
+      className={`px-5 py-3 rounded-t-lg flex items-center transition-all duration-200 font-medium text-sm ${
         active
-          ? "border-primary text-primary"
-          : "border-transparent text-gray-600 hover:text-gray-800"
+          ? "text-teal-700 border-b-2 border-transparent bg-white"
+          : "border-b-2 border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700"
       }`}
       onClick={onClick}
     >
+      {active && (
+        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full" />
+      )}
       {icon}
       <span className="ml-1">{label}</span>
     </button>
   );
 
   const Badge = ({ children, className }) => (
-    <span className={`px-2 py-1 text-xs rounded ${className}`}>{children}</span>
+    <span className={`px-2 py-1 text-xs rounded-full ${className}`}>{children}</span>
   );
 
   const Button = ({
@@ -384,11 +406,11 @@ let response;
     const getButtonClass = () => {
       switch (variant) {
         case "primary":
-          return "bg-primary/80 hover:bg-primary text-white";
+          return "bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg";
         case "outline":
-          return "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700";
+          return "border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm hover:shadow";
         case "link":
-          return "text-primary hover:text-blue-800 bg-transparent";
+          return "text-teal-600 hover:text-teal-800 bg-transparent";
         default:
           return "bg-gray-100 hover:bg-gray-200 text-gray-700";
       }
@@ -397,7 +419,7 @@ let response;
     return (
       <button
         type={type}
-        className={`px-4 py-2 rounded-md font-medium text-sm ${getButtonClass()} ${
+        className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 ${getButtonClass()} ${
           disabled ? "opacity-50 cursor-not-allowed" : ""
         } ${className}`}
         onClick={onClick}
@@ -409,8 +431,8 @@ let response;
   };
 
   const FileAttachment = ({ file }) => (
-    <div className="flex items-center p-2  rounded mb-2 bg-gray-50">
-      <FileText className="w-4 h-4 text-primary mr-2" />
+    <div className="flex items-center p-2 rounded-lg mb-2 bg-gray-50 border border-gray-100">
+      <FileText className="w-4 h-4 text-teal-600 mr-2" />
       <div>
         <div className="text-sm font-medium">
           {typeof file === "string" ? file : file.name}
@@ -433,13 +455,13 @@ let response;
 
   const DiscussionCard = ({ discussion, isCourse, onClick }) => (
     <div
-      className="mb-4 p-4 border rounded-lg shadow-sm hover:shadow cursor-pointer bg-white"
+      className="mb-4 p-4 rounded-xl border border-gray-100 hover:shadow-md hover:border-teal-200 transition-all duration-200 cursor-pointer bg-white"
       onClick={() => onClick(discussion._id)}
     >
       <div className="flex justify-between">
         <div>
           <div className="flex items-center mb-2">
-            <div className="m-4 p-4 w-6 h-6 rounded-full bg-green-200 text-black flex items-center justify-center">
+            <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
               {discussion.author.name.split(" ")[0].charAt(0)}
             </div>
             <div>
@@ -453,7 +475,7 @@ let response;
           <h5 className="text-lg font-medium mb-2">{discussion.title}</h5>
           {isCourse && discussion.course && (
             <div className="mb-2">
-              <Badge className="bg-primary/20 text-primary">
+              <Badge className="bg-teal-50 text-teal-700 border border-teal-200">
                 {discussion.courseName || `Course: ${discussion.course}`}
               </Badge>
             </div>
@@ -495,9 +517,9 @@ let response;
 
   const Comment = ({ comment, level = 0, discussionId }) => (
     <div key={comment._id} className={`mb-4 ${level > 0 ? "ml-12" : ""}`}>
-      <div className="p-4 border rounded-lg bg-white">
+      <div className={`p-4 rounded-xl bg-white hover:bg-gray-50/50 transition-all duration-200 ${level > 0 ? "border-l-4 border-teal-300 border-t border-r border-b border-t-gray-100 border-r-gray-100 border-b-gray-100" : "border border-gray-100"}`}>
         <div className="flex items-center mb-3">
-          <div className="m-4 p-4 w-6 h-6 rounded-full bg-green-200 text-black flex items-center justify-center">
+          <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
             {comment.author.name.split(" ")[0].charAt(0)}
           </div>
           <div>
@@ -540,7 +562,7 @@ let response;
         {comment.attachments &&
           comment.attachments.length > 0 &&
           !comment.isDeleted && (
-            <div className="border-t pt-2 mt-2">
+            <div className="border-t border-gray-100 pt-2 mt-2">
               {comment.attachments.map((file, index) => (
                 <FileAttachment key={index} file={file} />
               ))}
@@ -550,7 +572,7 @@ let response;
         {!comment.isDeleted && (
           <div className="mt-2 text-sm">
             <button
-              className="text-primary/80 flex items-center hover:text-primary"
+              className="text-teal-600 flex items-center hover:text-teal-800 transition-colors"
               onClick={() => setReplyingTo(comment._id)}
             >
               <Reply className="w-4 h-4 mr-1" /> Reply
@@ -561,15 +583,15 @@ let response;
 
       {replyingTo === comment._id && (
         <div className="mt-2 ml-12">
-          <div className="p-4 border rounded-lg bg-white">
+          <div className="p-4 rounded-xl border border-gray-100 bg-white border-l-4 border-l-amber-400">
             <form onSubmit={(e) => handleAddReply(e, comment._id)}>
               <div className="flex">
-                <div className="m-4 p-4 w-6 h-6 rounded-full bg-green-200 text-black flex items-center justify-center">
+                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-xs font-bold">
                   {"@"}
                 </div>
                 <div className="flex-grow">
                   <textarea
-                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     rows="3"
                     placeholder={`Reply to ${comment.author.name}...`}
                     value={replyText}
@@ -627,9 +649,9 @@ let response;
                       {replyAttachments.map((file, index) => (
                         <div
                           key={index}
-                          className="flex items-center p-2 border rounded mb-1 bg-gray-50"
+                          className="flex items-center p-2 border border-gray-100 rounded-lg mb-1 bg-gray-50"
                         >
-                          <FileText className="w-4 h-4 text-primary mr-2" />
+                          <FileText className="w-4 h-4 text-teal-600 mr-2" />
                           <div className="flex-grow">
                             <div className="text-sm truncate">{file.name}</div>
                             <div className="text-xs text-gray-500">
@@ -637,7 +659,7 @@ let response;
                             </div>
                           </div>
                           <button
-                            className="text-red-500 hover:text-red-700 p-1"
+                            className="text-red-500 hover:text-red-700 p-1 transition-colors"
                             onClick={() => {
                               setReplyAttachments(
                                 replyAttachments.filter((_, i) => i !== index)
@@ -707,67 +729,70 @@ let response;
       <div className="discussion-detail">
         <Button
           variant="link"
-          className="mb-4 flex items-center"
+          className="mb-4 flex items-center group"
           onClick={() => setSelectedDiscussion(null)}
         >
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to discussions
+          <ChevronLeft className="w-4 h-4 mr-1 text-teal-500 group-hover:text-teal-700 transition-colors" /> Back to discussions
         </Button>
 
-        <div className="mb-6 p-6 border rounded-lg shadow-sm bg-white">
-          <div className="flex justify-between mb-4">
-            <div className="flex items-center">
-              <div className="m-4 p-4 w-6 h-6 rounded-full bg-green-200 text-black flex items-center justify-center">
-                {selectedDiscussion.author.name.split(" ")[0].charAt(0)}
-              </div>
-              <div>
-                <div className="font-medium">
-                  {selectedDiscussion.author.name}
+        <div className="mb-6 rounded-xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500" />
+          <div className="p-6">
+            <div className="flex justify-between mb-4">
+              <div className="flex items-center">
+                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                  {selectedDiscussion.author.name.split(" ")[0].charAt(0)}
                 </div>
-                <div className="text-sm text-gray-500">
-                  {new Date(selectedDiscussion.createdAt).toLocaleString()}
+                <div>
+                  <div className="font-medium">
+                    {selectedDiscussion.author.name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(selectedDiscussion.createdAt).toLocaleString()}
+                  </div>
                 </div>
               </div>
+              <DropdownMenu>
+                <DropdownItem
+                  icon={<Edit className="w-4 h-4" />}
+                  onClick={() => alert("Edit functionality would go here")}
+                >
+                  Edit
+                </DropdownItem>
+                <DropdownItem
+                  icon={<Trash2 className="w-4 h-4" />}
+                  danger
+                  onClick={() => handleDeleteDiscussion(selectedDiscussion._id)}
+                >
+                  Delete
+                </DropdownItem>
+              </DropdownMenu>
             </div>
-            <DropdownMenu>
-              <DropdownItem
-                icon={<Edit className="w-4 h-4" />}
-                onClick={() => alert("Edit functionality would go here")}
-              >
-                Edit
-              </DropdownItem>
-              <DropdownItem
-                icon={<Trash2 className="w-4 h-4" />}
-                danger
-                onClick={() => handleDeleteDiscussion(selectedDiscussion._id)}
-              >
-                Delete
-              </DropdownItem>
-            </DropdownMenu>
-          </div>
 
-          <h4 className="text-xl font-medium mb-3">
-            {selectedDiscussion.title}
-          </h4>
-          <div className="mb-4 whitespace-pre-line text-gray-700">
-            {selectedDiscussion.content}
-          </div>
+            <h4 className="text-xl font-medium mb-3">
+              {selectedDiscussion.title}
+            </h4>
+            <div className="mb-4 whitespace-pre-line text-gray-700">
+              {selectedDiscussion.content}
+            </div>
 
-          {selectedDiscussion.attachments &&
-            selectedDiscussion.attachments.length > 0 && (
-              <div className="pt-3 mt-3">
-                <div className="text-sm font-medium mb-2">Attachments</div>
-                {selectedDiscussion.attachments.map((file, index) => (
-                  <a
-                    href={file.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    key={index}
-                  >
-                    <FileAttachment key={index} file={file} />
-                  </a>
-                ))}
-              </div>
-            )}
+            {selectedDiscussion.attachments &&
+              selectedDiscussion.attachments.length > 0 && (
+                <div className="pt-3 mt-3">
+                  <div className="text-sm font-medium mb-2">Attachments</div>
+                  {selectedDiscussion.attachments.map((file, index) => (
+                    <a
+                      href={file.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={index}
+                    >
+                      <FileAttachment key={index} file={file} />
+                    </a>
+                  ))}
+                </div>
+              )}
+          </div>
         </div>
 
         <div className="comments-section">
@@ -789,85 +814,88 @@ let response;
             ))}
 
           {/* Add comment form */}
-          <div className="mt-6 p-4 border rounded-lg bg-white">
-            <form onSubmit={handleAddComment}>
-              <div className="flex">
-                <div className="m-4 p-4 w-6 h-6 rounded-full bg-green-200 text-black flex items-center justify-center">
-                  {"@"}
-                </div>
-                <div className="flex-grow">
-                  <textarea
-                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows="3"
-                    placeholder="Add a comment..."
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    required
-                  />
-                  <div className="flex justify-between mt-2">
-                    <div>
-                      <input
-                        type="file"
-                        multiple
-                        className="hidden"
-                        ref={commentFileInputRef}
-                        onChange={handleCommentFileSelect}
-                      />
+          <div className="mt-6 rounded-xl border border-gray-100 bg-white overflow-hidden shadow-sm">
+            <div className="h-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400" />
+            <div className="p-4">
+              <form onSubmit={handleAddComment}>
+                <div className="flex">
+                  <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                    {"@"}
+                  </div>
+                  <div className="flex-grow">
+                    <textarea
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      rows="3"
+                      placeholder="Add a comment..."
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      required
+                    />
+                    <div className="flex justify-between mt-2">
+                      <div>
+                        <input
+                          type="file"
+                          multiple
+                          className="hidden"
+                          ref={commentFileInputRef}
+                          onChange={handleCommentFileSelect}
+                        />
+                        <Button
+                          variant="outline"
+                          className="flex items-center"
+                          onClick={() => commentFileInputRef.current?.click()}
+                          type="button"
+                        >
+                          <Paperclip className="w-4 h-4 mr-1" /> Attach Files
+                        </Button>
+                      </div>
                       <Button
-                        variant="outline"
+                        variant="primary"
                         className="flex items-center"
-                        onClick={() => commentFileInputRef.current?.click()}
-                        type="button"
+                        type="submit"
+                        disabled={loading || !commentText.trim()}
                       >
-                        <Paperclip className="w-4 h-4 mr-1" /> Attach Files
+                        <Send className="w-4 h-4 mr-1" /> Post Comment
                       </Button>
                     </div>
-                    <Button
-                      variant="primary"
-                      className="flex items-center"
-                      type="submit"
-                      disabled={loading || !commentText.trim()}
-                    >
-                      <Send className="w-4 h-4 mr-1" /> Post Comment
-                    </Button>
-                  </div>
 
-                  {/* Display selected files */}
-                  {commentAttachments.length > 0 && (
-                    <div className="mt-2">
-                      <div className="text-sm font-medium mb-1">
-                        Selected files:
-                      </div>
-                      {commentAttachments.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center p-2 border rounded mb-1 bg-gray-50"
-                        >
-                          <FileText className="w-4 h-4 text-primary mr-2" />
-                          <div className="flex-grow">
-                            <div className="text-sm truncate">{file.name}</div>
-                            <div className="text-xs text-gray-500">
-                              {formatFileSize(file.size)}
-                            </div>
-                          </div>
-                          <button
-                            className="text-red-500 hover:text-red-700 p-1"
-                            onClick={() => {
-                              setCommentAttachments(
-                                commentAttachments.filter((_, i) => i !== index)
-                              );
-                            }}
-                            type="button"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                    {/* Display selected files */}
+                    {commentAttachments.length > 0 && (
+                      <div className="mt-2">
+                        <div className="text-sm font-medium mb-1">
+                          Selected files:
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        {commentAttachments.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center p-2 border border-gray-100 rounded-lg mb-1 bg-gray-50"
+                          >
+                            <FileText className="w-4 h-4 text-teal-600 mr-2" />
+                            <div className="flex-grow">
+                              <div className="text-sm truncate">{file.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {formatFileSize(file.size)}
+                              </div>
+                            </div>
+                            <button
+                              className="text-red-500 hover:text-red-700 p-1 transition-colors"
+                              onClick={() => {
+                                setCommentAttachments(
+                                  commentAttachments.filter((_, i) => i !== index)
+                                );
+                              }}
+                              type="button"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -876,173 +904,179 @@ let response;
 
   const renderNewDiscussionForm = () => {
     return (
-      <div className="mb-6 p-6 border rounded-lg shadow-sm bg-white">
-        <h5 className="text-lg font-medium mb-4">Create New Discussion</h5>
+      <div className="mb-6 rounded-xl border border-gray-100 shadow-sm bg-white overflow-hidden">
+        <SectionHeader
+          icon={FileText}
+          title="Create New Discussion"
+          gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+        />
 
-        <form onSubmit={handleCreateDiscussion}>
-        { activeTab==="teacher" && <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Discussion Type
-            </label>
-            <div className="flex">
-              <div className="mr-4">
-                <input
-                  type="radio"
-                  id="type-teacher"
-                  name="discussion-type"
-                  className="mr-1"
-                  checked={activeTab === "teacher"}
-                  onChange={() => {}} // Controlled by tab
-                  readOnly
-                />
-                <label htmlFor="type-teacher">Teacher Discussion</label>
-              </div>
-              <div>
-                <input
-                  type="radio"
-                  id="type-course"
-                  name="discussion-type"
-                  className="mr-1"
-                  checked={activeTab === "course"}
-                  onChange={() => {}} // Controlled by tab
-                  readOnly
-                />
-                <label htmlFor="type-course">Course Discussion</label>
-              </div>
-            </div>
-          </div>}
-
-          {activeTab === "course" && !courseID && (
-            <div className="mb-4">
+        <div className="p-6">
+          <form onSubmit={handleCreateDiscussion}>
+          { activeTab==="teacher" && <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
-                Select Course
+                Discussion Type
               </label>
-              <select
-                className="w-full p-2 border rounded"
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                required={activeTab === "course"}
-              >
-                <option value="">-- Select a Course --</option>
-                {courses.map((course) => (
-                  <option key={course._id} value={course._id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Enter discussion title"
-              value={newDiscussionTitle}
-              onChange={(e) => setNewDiscussionTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Content</label>
-            <textarea
-              className="w-full p-2 border rounded"
-              rows="5"
-              placeholder="Enter discussion content"
-              value={newDiscussionContent}
-              onChange={(e) => setNewDiscussionContent(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Attachments
-            </label>
-            <div className="border-dashed border-2 border-gray-300 p-4 text-center rounded">
-              <Paperclip className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-              <div className="text-sm text-gray-500">
-                Drag and drop files here or click to browse
+              <div className="flex">
+                <div className="mr-4">
+                  <input
+                    type="radio"
+                    id="type-teacher"
+                    name="discussion-type"
+                    className="mr-1"
+                    checked={activeTab === "teacher"}
+                    onChange={() => {}} // Controlled by tab
+                    readOnly
+                  />
+                  <label htmlFor="type-teacher">Teacher Discussion</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="type-course"
+                    name="discussion-type"
+                    className="mr-1"
+                    checked={activeTab === "course"}
+                    onChange={() => {}} // Controlled by tab
+                    readOnly
+                  />
+                  <label htmlFor="type-course">Course Discussion</label>
+                </div>
               </div>
-              <input
-                type="file"
-                className="hidden"
-                multiple
-                ref={discussionFileInputRef}
-                onChange={handleDiscussionFileSelect}
-              />
-              <Button
-                variant="outline"
-                className="mt-2"
-                onClick={() => discussionFileInputRef.current?.click()}
-                type="button"
-              >
-                Browse Files
-              </Button>
-            </div>
+            </div>}
 
-            {/* Display selected files */}
-            {newDiscussionAttachments.length > 0 && (
-              <div className="mt-2">
-                <div className="text-sm font-medium mb-1">Selected files:</div>
-                {newDiscussionAttachments.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-2 border rounded mb-1 bg-gray-50"
-                  >
-                    <FileText className="w-4 h-4 text-primary mr-2" />
-                    <div className="flex-grow">
-                      <div className="text-sm truncate">{file.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {formatFileSize(file.size)}
-                      </div>
-                    </div>
-                    <button
-                      className="text-red-500 hover:text-red-700 p-1"
-                      onClick={() => {
-                        setNewDiscussionAttachments(
-                          newDiscussionAttachments.filter((_, i) => i !== index)
-                        );
-                      }}
-                      type="button"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+            {activeTab === "course" && !courseID && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Select Course
+                </label>
+                <select
+                  className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  required={activeTab === "course"}
+                >
+                  <option value="">-- Select a Course --</option>
+                  {courses.map((course) => (
+                    <option key={course._id} value={course._id}>
+                      {course.title}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
-          </div>
 
-          <div className="flex justify-end mt-4">
-            <Button
-              variant="outline"
-              className="mr-2"
-              onClick={() => {
-                setShowNewDiscussionForm(false);
-                setNewDiscussionTitle("");
-                setNewDiscussionContent("");
-                setNewDiscussionAttachments([]);
-              }}
-              type="button"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={
-                loading ||
-                !newDiscussionTitle.trim() ||
-                !newDiscussionContent.trim()
-              }
-            >
-              Create Discussion
-            </Button>
-          </div>
-        </form>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                placeholder="Enter discussion title"
+                value={newDiscussionTitle}
+                onChange={(e) => setNewDiscussionTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Content</label>
+              <textarea
+                className="w-full p-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                rows="5"
+                placeholder="Enter discussion content"
+                value={newDiscussionContent}
+                onChange={(e) => setNewDiscussionContent(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Attachments
+              </label>
+              <div className="border-dashed border-2 border-gray-300 p-4 text-center rounded-xl hover:border-amber-400 transition-colors">
+                <Paperclip className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                <div className="text-sm text-gray-500">
+                  Drag and drop files here or click to browse
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  multiple
+                  ref={discussionFileInputRef}
+                  onChange={handleDiscussionFileSelect}
+                />
+                <Button
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => discussionFileInputRef.current?.click()}
+                  type="button"
+                >
+                  Browse Files
+                </Button>
+              </div>
+
+              {/* Display selected files */}
+              {newDiscussionAttachments.length > 0 && (
+                <div className="mt-2">
+                  <div className="text-sm font-medium mb-1">Selected files:</div>
+                  {newDiscussionAttachments.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center p-2 border border-gray-100 rounded-lg mb-1 bg-gray-50"
+                    >
+                      <FileText className="w-4 h-4 text-amber-600 mr-2" />
+                      <div className="flex-grow">
+                        <div className="text-sm truncate">{file.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {formatFileSize(file.size)}
+                        </div>
+                      </div>
+                      <button
+                        className="text-red-500 hover:text-red-700 p-1 transition-colors"
+                        onClick={() => {
+                          setNewDiscussionAttachments(
+                            newDiscussionAttachments.filter((_, i) => i !== index)
+                          );
+                        }}
+                        type="button"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="outline"
+                className="mr-2"
+                onClick={() => {
+                  setShowNewDiscussionForm(false);
+                  setNewDiscussionTitle("");
+                  setNewDiscussionContent("");
+                  setNewDiscussionAttachments([]);
+                }}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={
+                  loading ||
+                  !newDiscussionTitle.trim() ||
+                  !newDiscussionContent.trim()
+                }
+              >
+                Create Discussion
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     );
   };
@@ -1066,7 +1100,7 @@ let response;
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border-l-4 border-red-500">
             {error}
           </div>
         )}
@@ -1081,33 +1115,49 @@ let response;
 
   return (
     <div className="discussion-forum p-4 bg-gray-50 min-h-screen">
-      <div className="container mx-auto bg-white shadow-sm rounded-lg p-6">
-        <h2 className="text-2xl font-bold mb-6">Discussion Forums</h2>
+      <CoursePageBanner
+        icon={MessageSquare}
+        title="Discussion Forums"
+        subtitle="Engage with peers and instructors"
+        gradient="bg-gradient-to-r from-teal-500 via-emerald-500 to-green-500"
+        rightContent={
+          discussions.length > 0 && (
+            <span className="px-3 py-1.5 text-sm font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+              {discussions.length}
+            </span>
+          )
+        }
+      />
+      <div className="container mx-auto rounded-2xl shadow-sm border border-gray-100 overflow-hidden bg-white">
 
-        {user.role === "teacher" && (
-          <Tab
-            active={activeTab === "teacher"}
-            icon={<User className="w-4 h-4" />}
-            label="Teacher Forum"
-            onClick={() => {
-              setActiveTab("teacher");
-              setSelectedDiscussion(null);
-              setShowNewDiscussionForm(false);
-            }}
-          />
-        )}
-        <Tab
-          active={activeTab === "course"}
-          icon={<Users className="w-4 h-4" />}
-          label="Course Forum"
-          onClick={() => {
-            setActiveTab("course");
-            setSelectedDiscussion(null);
-            setShowNewDiscussionForm(false);
-          }}
-        />
+        <div className="px-6 pt-4">
+          <div className="flex border-b border-gray-200 relative">
+            {user.role === "teacher" && (
+              <Tab
+                active={activeTab === "teacher"}
+                icon={<User className="w-4 h-4" />}
+                label="Teacher Forum"
+                onClick={() => {
+                  setActiveTab("teacher");
+                  setSelectedDiscussion(null);
+                  setShowNewDiscussionForm(false);
+                }}
+              />
+            )}
+            <Tab
+              active={activeTab === "course"}
+              icon={<Users className="w-4 h-4" />}
+              label="Course Forum"
+              onClick={() => {
+                setActiveTab("course");
+                setSelectedDiscussion(null);
+                setShowNewDiscussionForm(false);
+              }}
+            />
+          </div>
+        </div>
 
-        <div className="forum-content">
+        <div className="forum-content p-6">
           {selectedDiscussion
             ? renderDiscussionDetail()
             : renderDiscussionList()}

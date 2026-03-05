@@ -1,24 +1,56 @@
 import React, { useState, useEffect } from "react";
-import { BarChart3, Calculator, Target, Edit3 } from "lucide-react";
+import { BarChart3, Calculator, Target, LinkIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { getContinuousAssessmentPlan } from "../../../../services/course.service";
 
 const AssessmentMarksSummary = () => {
   const { courseID } = useParams();
   const [assessmentData, setAssessmentData] = useState([]);
   const [totalMarks, setTotalMarks] = useState(0);
 
-  // Load assessment data from localStorage
+  // Load assessment data from backend (preferred) or localStorage (fallback)
   useEffect(() => {
-    const savedData = localStorage.getItem(`continuousAssessment_${courseID}`);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      setAssessmentData(parsedData);
-      
-      // Calculate total marks
-      const total = parsedData.reduce((sum, category) => {
-        return sum + (category.totalMarks || 0);
-      }, 0);
-      setTotalMarks(total);
+    const fetchData = async () => {
+      try {
+        const categories = await getContinuousAssessmentPlan(courseID);
+        if (categories && categories.length > 0) {
+          const formattedCategories = categories.map(cat => ({
+            id: cat._id,
+            _id: cat._id,
+            category: cat.category,
+            number: cat.number,
+            eachMarks: cat.eachMarks,
+            calculationMethod: cat.calculationMethod,
+            totalMarks: cat.totalMarks,
+            selectedAssignments: cat.selectedAssignments || [],
+            linkedCount: (cat.selectedAssignments || []).length
+          }));
+          setAssessmentData(formattedCategories);
+
+          const total = formattedCategories.reduce((sum, category) => {
+            return sum + (category.totalMarks || 0);
+          }, 0);
+          setTotalMarks(total);
+          return;
+        }
+      } catch (error) {
+        console.error("Error fetching from backend, falling back to localStorage:", error);
+      }
+
+      // Fallback to localStorage
+      const savedData = localStorage.getItem(`continuousAssessment_${courseID}`);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        setAssessmentData(parsedData);
+        const total = parsedData.reduce((sum, category) => {
+          return sum + (category.totalMarks || 0);
+        }, 0);
+        setTotalMarks(total);
+      }
+    };
+
+    if (courseID) {
+      fetchData();
     }
   }, [courseID]);
 
@@ -54,7 +86,7 @@ const AssessmentMarksSummary = () => {
             {/* Assessment Categories List */}
             <div className="space-y-3">
               {assessmentData.map((category, index) => (
-                <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={category.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-sm font-semibold text-blue-600">{index + 1}</span>
@@ -62,8 +94,14 @@ const AssessmentMarksSummary = () => {
                     <div>
                       <div className="font-medium text-gray-800">{category.category}</div>
                       <div className="text-sm text-gray-600">
-                        {category.number} × {category.eachMarks} marks ({category.calculationMethod})
+                        {category.number} &times; {category.eachMarks} marks ({category.calculationMethod})
                       </div>
+                      {category.linkedCount > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-green-600 mt-0.5">
+                          <LinkIcon className="w-3 h-3" />
+                          <span>{category.linkedCount} assignment(s) linked</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">
@@ -81,7 +119,7 @@ const AssessmentMarksSummary = () => {
                 <span>{totalMarks}/100%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-blue-600 h-3 rounded-full transition-all duration-300"
                   style={{ width: `${Math.min(totalMarks, 100)}%` }}
                 ></div>
@@ -127,7 +165,7 @@ const AssessmentMarksSummary = () => {
             <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 mb-4">No assessment plan created yet</p>
             <p className="text-sm text-gray-400">
-              Go to Assessment → Continuous Assessment to create your assessment plan
+              Go to Assessment &rarr; Continuous Assessment Plan to create your assessment plan
             </p>
           </div>
         )}

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { MonitorPlay, Search, ChevronDown, Calendar } from "lucide-react";
+import { MonitorPlay, Search, ChevronDown, Calendar, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllCourses } from "../../../services/course.service";
 import { useMeetingsV2 } from "../../../context/MeetingV2Context"; // New meeting context
+import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
+import { getPeriodLabel } from "../../../utils/periodLabel";
 
 const TeacherCourses = () => {
   const [coursesData, setCoursesData] = useState({
@@ -18,11 +20,6 @@ const TeacherCourses = () => {
   // 2. Get meetings data from the new context
   const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
-  const image = [
-    "https://thumbs.dreamstime.com/b/businessman-looking-dice-sketch-thoughtful-chalkboard-connected-game-probability-theory-73451825.jpg",
-    "https://i.ytimg.com/vi/96bNsQgv10A/maxresdefault.jpg",
-  ];
-  
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -40,7 +37,7 @@ const TeacherCourses = () => {
   // Pre-fetch meetings for all courses once when courses are loaded
   useEffect(() => {
     if (coursesData.courses && coursesData.courses.length > 0) {
-      const uniqueCourseIds = [...new Set(coursesData.courses.map(c => c._id).filter(Boolean))];
+      const uniqueCourseIds = [...new Set((coursesData?.courses || []).map(c => c._id).filter(Boolean))];
       // Fire-and-forget: fetch meetings for all courses in parallel
       uniqueCourseIds.forEach(courseId => {
         fetchMeetingsForCourse(courseId).catch(() => {});
@@ -48,12 +45,26 @@ const TeacherCourses = () => {
     }
   }, [coursesData.courses, fetchMeetingsForCourse]);
 
-  const getSemesterInfo = (startDate) => {
+  const getSemesterInfo = (course) => {
+    const startDate = course.semester?.startDate;
+    if (!startDate) return { season: "Unknown", year: "Unknown", periodLabel: getPeriodLabel(course.semester?.periodType) };
+
     const date = new Date(startDate);
     const month = date.getMonth();
     const year = date.getFullYear();
+    const periodType = course.semester?.periodType || "semester";
+    const label = getPeriodLabel(periodType);
+    const semNumber = course.semester?.semNumber;
+
+    // For non-semester period types, use the period name directly
+    if (periodType !== "semester") {
+      const season = semNumber ? `${label} ${semNumber}` : `${label}`;
+      return { season, year: year.toString(), periodLabel: label };
+    }
+
+    // Semester: use Spring/Fall convention
     let season = (month >= 0 && month <= 4) ? "Spring" : "Fall";
-    return { season, year: year.toString() };
+    return { season, year: year.toString(), periodLabel: label };
   };
 
   const groupCoursesBySemester = (courses) => {
@@ -62,13 +73,14 @@ const TeacherCourses = () => {
 
     courses.forEach((course) => {
       if (!course.semester || !course.semester.startDate) return;
-      const { season, year } = getSemesterInfo(course.semester.startDate);
+      const { season, year, periodLabel: pLabel } = getSemesterInfo(course);
       const semesterId = `${season}-${year}`;
 
       if (!semesterMap[semesterId]) {
         semesterMap[semesterId] = {
           season,
           year,
+          periodLabel: pLabel,
           semesterId: course.semester._id,
           courses: [],
         };
@@ -76,16 +88,14 @@ const TeacherCourses = () => {
 
       semesterMap[semesterId].courses.push({
         ...course,
-        // Correctly calculate student count
-        students: course.students ? course.students.length : 0, 
-        image: `https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&h=600&fit=crop`,
+        students: course.students ? course.students.length : 0,
       });
     });
 
     return Object.values(semesterMap).sort((a, b) => {
       if (b.year !== a.year) return parseInt(b.year) - parseInt(a.year);
-      const seasonOrder = { Spring: 0, Fall: 2 };
-      return seasonOrder[a.season] - seasonOrder[b.season];
+      // Sort by season name for non-semester types
+      return a.season.localeCompare(b.season);
     });
   };
 
@@ -111,6 +121,7 @@ const TeacherCourses = () => {
 
 
   const semesters = groupCoursesBySemester(coursesData.courses);
+  const uniqueSeasons = [...new Set(semesters.map((s) => s.season))];
 
   const filteredSemesters = semesters.filter((semester) => {
     const semesterMatch = filterSemester === "All" || semester.season === filterSemester;
@@ -129,7 +140,7 @@ const TeacherCourses = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800">
+      <div className="flex justify-center items-center h-64 bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 dark:border-emerald-400"></div>
       </div>
     );
@@ -137,62 +148,83 @@ const TeacherCourses = () => {
 
   if (error) {
     return (
-      <div className="text-red-500 dark:text-red-400 text-center p-8 bg-red-50 dark:bg-red-900/20 rounded-lg mx-auto max-w-xl border border-red-200 dark:border-red-800">
-        <h3 className="text-lg font-bold mb-2">Error Loading Courses</h3>
-        <p>{error}</p>
+      <div className="max-w-6xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
+        <div className="text-red-500 dark:text-red-400 text-center p-8 bg-red-50 dark:bg-red-900/20 rounded-2xl mx-auto max-w-xl border border-red-200 dark:border-red-800 shadow-sm">
+          <h3 className="text-lg font-bold mb-2">Error Loading Courses</h3>
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 bg-white dark:bg-gray-800">
-      <h1 className="text-3xl font-bold text-black dark:text-white mb-6">My Courses</h1>
-
-      {/* Search and Filter */}
-      <div className="flex flex-wrap gap-4 mb-8 w-full justify-between items-center">
-        <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 w-full md:w-1/3 border border-gray-200 dark:border-gray-600">
-          <Search className="h-5 w-5 text-primary dark:text-primary/90 mr-2" />
-          <input
-            type="text"
-            placeholder="Search courses..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
-          />
-        </div>
-        <div className="flex gap-2">
-          <div className="relative w-fit">
-            <select
-              value={filterSemester}
-              onChange={(e) => setFilterSemester(e.target.value)}
-              className="appearance-none bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-200 pr-8 border border-gray-200 dark:border-gray-600"
-            >
-              <option value="All">All Semesters</option>
-              <option value="Spring">Spring</option>
-              <option value="Fall">Fall</option>
-            </select>
-            <ChevronDown className="absolute right-2 top-3 h-5 w-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6 bg-gray-50 dark:bg-gray-900">
+      {/* Page Header Gradient Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+        <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+        <div className="absolute top-4 left-[40%] w-16 h-16 bg-white/5 rounded-full" />
+        <div className="relative z-10 flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <BookOpen className="w-7 h-7 text-white" />
           </div>
-          <div className="relative w-fit">
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="appearance-none bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-200 pr-8 border border-gray-200 dark:border-gray-600"
-            >
-              <option value="All">All Years</option>
-              {uniqueYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-            <Calendar className="absolute right-2 top-3 h-5 w-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">My Courses</h1>
+            <p className="text-white/80 text-sm font-medium mt-1.5">Manage and track your courses</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filter Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 p-4">
+        <div className="flex flex-wrap gap-4 w-full justify-between items-center">
+          <div className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 w-full md:w-1/3">
+            <Search className="h-5 w-5 text-primary dark:text-primary/90 mr-2 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search courses..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+            />
+          </div>
+          <div className="flex gap-3">
+            <div className="relative w-fit">
+              <select
+                value={filterSemester}
+                onChange={(e) => setFilterSemester(e.target.value)}
+                className="appearance-none bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 text-gray-700 dark:text-gray-200 pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+              >
+                <option value="All">All Periods</option>
+                {uniqueSeasons.map((season) => (
+                  <option key={season} value={season}>
+                    {season}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
+            </div>
+            <div className="relative w-fit">
+              <select
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                className="appearance-none bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 text-gray-700 dark:text-gray-200 pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+              >
+                <option value="All">All Years</option>
+                {uniqueYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <Calendar className="absolute right-2.5 top-3 h-4 w-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
+            </div>
           </div>
         </div>
       </div>
 
       {filteredCourses.length === 0 ? (
-        <div className="text-center p-12 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 p-12 text-center">
           <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No courses found</h3>
           <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
         </div>
@@ -202,31 +234,37 @@ const TeacherCourses = () => {
           const activeMeeting = findLiveMeetingForSemester(semester.courses);
 
           return (
-            <div key={semester.semesterId || index} className="mb-12">
+            <div key={semester.semesterId || index} className="mb-8">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-3">
-                  <span className="bg-white dark:bg-gray-700 text-primary dark:text-primary/90 border-primary dark:border-primary/70 border-2 px-6 py-2 rounded-full text-sm font-medium">
+                  <span className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-700 px-5 py-2 rounded-full text-sm font-medium">
                     {semester.season}
                   </span>
-                  <span className="bg-white dark:bg-gray-700 text-primary dark:text-primary/90 border-primary dark:border-primary/70 border-2 px-6 py-2 rounded-full text-sm font-medium">
+                  <span className="bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-700 px-5 py-2 rounded-full text-sm font-medium">
                     {semester.year}
                   </span>
                 </div>
-                {/* 5. DYNAMIC BUTTON - Renders as a link if active, or a disabled button if not */}
+                {/* 5. DYNAMIC BUTTON - Uses only VConf URLs */}
                 {activeMeeting ? (
                   <a
-                    href={activeMeeting.link}
+                    href={activeMeeting.vconfHostUrl || activeMeeting.vconfJoinUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-red-600 dark:bg-red-500 text-white px-6 py-2 rounded-md text-sm hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center gap-2 animate-pulse"
+                    onClick={(e) => {
+                      if (!activeMeeting.vconfHostUrl && !activeMeeting.vconfJoinUrl) {
+                        e.preventDefault();
+                        alert("Video conference room is not ready yet. Please try again in a moment.");
+                      }
+                    }}
+                    className="bg-green-600 dark:bg-green-500 text-white px-6 py-2 rounded-xl text-sm hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center gap-2 animate-pulse shadow-sm"
                   >
                     <MonitorPlay className="h-5 w-5" />
-                    Join Live 
+                    Join Live
                   </a>
                 ) : (
                   <button
                     disabled
-                    className="bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 px-6 py-2 rounded-md text-sm flex items-center gap-2 cursor-not-allowed"
+                    className="bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 px-6 py-2 rounded-xl text-sm flex items-center gap-2 cursor-not-allowed"
                   >
                     <MonitorPlay className="h-5 w-5" />
                     No Live Lecture
@@ -234,18 +272,33 @@ const TeacherCourses = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                {semester.courses.map((course, idx) => (
-                  <Link key={course._id} to={`/teacher/course/${course._id}`}>
-                    <div className="group bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-md dark:shadow-lg hover:shadow-lg dark:hover:shadow-xl transition-shadow duration-300 h-full border border-gray-200 dark:border-gray-600">
-                      <div className="relative h-36 overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {semester.courses.map((course, idx) => {
+                  const query = new URLSearchParams();
+                  if (course.assignmentId) query.set("assignmentId", course.assignmentId);
+                  if (course.batchId) query.set("batchId", course.batchId);
+                  if (course.semesterId) query.set("semesterId", course.semesterId);
+                  const search = query.toString();
+                  const linkTarget = search
+                    ? `/teacher/course/${course._id}?${search}`
+                    : `/teacher/course/${course._id}`;
+                  const cardKey =
+                    course.assignmentId ||
+                    `${course._id}-${course.batchId || "na"}-${course.semesterId || "na"}-${idx}`;
+
+                  const theme = resolveCourseTheme(course);
+                  return (
+                  <Link key={cardKey} to={linkTarget}>
+                    <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-tertiary/10 hover:shadow-lg transition-all duration-300 h-full">
+                      <div className="relative h-36 overflow-hidden" style={{ background: theme.gradientCSS }}>
                         <img
-                          src={image[idx % image.length]}
+                          src={theme.thumbnailUrl}
                           alt={course.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-50 transition-opacity duration-300"></div>
-                        <div className="absolute bottom-2 left-2 bg-primary dark:bg-primary/90 text-white text-xs font-medium px-2 py-1 rounded-md shadow-md">
+                        <div className="absolute bottom-2 left-2 text-white text-xs font-medium px-2 py-1 rounded-md shadow-md" style={{ backgroundColor: theme.accentColor }}>
                           {course?.studentCount} Students
                         </div>
                       </div>
@@ -253,6 +306,9 @@ const TeacherCourses = () => {
                         <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-1 group-hover:text-primary dark:group-hover:text-primary/90 transition-colors">
                           {course.title}
                         </h3>
+                        <p className="text-xs font-medium text-primary dark:text-primary/90 mb-1">
+                          {course.cohortLabel || course.batchName || "Batch context unavailable"}
+                        </p>
                         <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
                           {course.aboutCourse.length > 80 ? `${course.aboutCourse.substring(0, 80)}...` : course.aboutCourse}
                         </p>
@@ -282,7 +338,8 @@ const TeacherCourses = () => {
                       </div>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )

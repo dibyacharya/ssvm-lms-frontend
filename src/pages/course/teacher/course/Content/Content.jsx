@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Video, Presentation, Plus, Edit, Trash2, Upload, Eye, Download, Link, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, Video, Presentation, Plus, Edit, Trash2, Upload, Download, Link, ExternalLink, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useCourse } from '../../../../../context/CourseContext';
-import { 
-  addModuleContent, 
-  updateContentItem, 
-  deleteContentItem 
+import {
+  addModuleContent,
+  updateContentItem,
+  deleteContentItem
 } from '../../../../../services/content.service';
 import { getCoursesById } from '../../../../../services/course.service';
+import { resolveModuleTheme, resolveContentTheme } from '../../../../../utils/lmsAssetResolver';
+import LmsAssetImage from '../../../../../components/common/LmsAssetImage';
 
 const ContentSection = () => {
   const { courseData, setCourseData } = useCourse();
@@ -17,10 +19,13 @@ const ContentSection = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [expandedModule, setExpandedModule] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewingItem, setViewingItem] = useState(null);
+  const [viewerLoading, setViewerLoading] = useState(true);
+  const [viewerFailed, setViewerFailed] = useState(false);
 
   // Content type configurations
   const contentTypes = {
-    pdfs: { label: 'PDFs', icon: FileText, key: 'pdfs', countKey: 'pdfCount' },
+    pdfs: { label: 'Course Content', icon: FileText, key: 'pdfs', countKey: 'pdfCount' },
     ppts: { label: 'Presentations', icon: Presentation, key: 'ppts', countKey: 'pptCount' },
     videos: { label: 'Videos', icon: Video, key: 'videos', countKey: 'videoCount' },
     links: { label: 'Links', icon: Link, key: 'links', countKey: 'linkCount' }
@@ -90,11 +95,16 @@ const ContentSection = () => {
       formData.append('name', contentData.name);
       formData.append('description', contentData.description || '');
       
-      // For links, add the URL
+      // For links, add the URL (backend expects 'fileUrl')
       if (selectedContentType === 'links' && contentData.url) {
-        formData.append('url', contentData.url);
+        formData.append('fileUrl', contentData.url);
       }
-      
+
+      // For videos, add URL if provided (YouTube/Vimeo)
+      if (selectedContentType === 'videos' && contentData.url) {
+        formData.append('videoUrl', contentData.url);
+      }
+
       if (file) {
         formData.append('file', file);
       }
@@ -142,13 +152,17 @@ const ContentSection = () => {
       formData.append('description', updatedData.description || '');
       
       if (selectedContentType === 'links' && updatedData.url) {
-        formData.append('url', updatedData.url);
+        formData.append('fileUrl', updatedData.url);
       }
-      
+
+      if (selectedContentType === 'videos' && updatedData.url) {
+        formData.append('videoUrl', updatedData.url);
+      }
+
       if (file) {
         formData.append('file', file);
       }
-      
+
       if (thumbnail) {
         formData.append('thumbnail', thumbnail);
       }
@@ -183,6 +197,62 @@ const ContentSection = () => {
     });
   };
 
+  // Inline viewer helpers
+  const BACKEND_URL = window.RUNTIME_CONFIG?.BACKEND_URL || '';
+
+  const getFullUrl = (url) => {
+    if (!url) return null;
+    // If already a full URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Prepend backend URL for relative paths
+    return `${BACKEND_URL}${url}`;
+  };
+
+  // Helper: Get PPT-to-PDF conversion URL (backend converts PPT→PDF via LibreOffice)
+  const getPptPreviewUrl = (fileUrl) => {
+    return `${BACKEND_URL}/api/preview/ppt-to-pdf?file=${encodeURIComponent(fileUrl)}`;
+  };
+
+  const convertToEmbedUrl = (url) => {
+    if (!url) return url;
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1].split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('/').pop().split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
+      const videoId = url.split('/').pop().split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
+  };
+
+  const getInlineViewerUrl = (item, type) => {
+    if (type === 'links') {
+      const linkUrl = item.url || item.link || item.fileUrl;
+      return getFullUrl(linkUrl);
+    }
+    const url = getFullUrl(item.fileUrl || item.videoUrl || item.url);
+    if (!url) return null;
+    if (type === 'pdfs') return `${url}#toolbar=0`;
+    if (type === 'ppts') return `${getPptPreviewUrl(item.fileUrl)}#toolbar=0`;
+    if (type === 'videos') return convertToEmbedUrl(url);
+    return null;
+  };
+
+  const handleViewInline = (item) => {
+    setViewingItem(item);
+    setViewerLoading(true);
+    setViewerFailed(false);
+  };
+
+  const handleCloseViewer = () => {
+    setViewingItem(null);
+  };
+
   const renderContentItems = () => {
     if (!selectedModule || !selectedModule[selectedContentType]) {
       return (
@@ -198,12 +268,13 @@ const ContentSection = () => {
     return (
       <div key={`${selectedModule._id}-${selectedContentType}-${refreshKey}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <ContentCard 
-            key={item._id} 
-            item={item} 
+          <ContentCard
+            key={item._id}
+            item={item}
             contentType={selectedContentType}
             onDelete={() => handleDeleteContent(item._id)}
             onEdit={() => setEditingItem(item)}
+            onView={() => handleViewInline(item)}
             formatFileSize={formatFileSize}
             formatDate={formatDate}
           />
@@ -214,41 +285,56 @@ const ContentSection = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Left Sidebar - Module Accordion */}
+      {/* Left Sidebar - Module Accordion (hidden when viewing content) */}
+      {!viewingItem && (
       <div className="w-80 bg-white shadow-lg border-r">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Course Modules</h2>
-          <p className="text-sm text-gray-600 mt-1">{courseData?.title}</p>
+        <div className="relative overflow-hidden p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+          <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+          <h2 className="relative z-10 text-xl font-bold text-white">Course Modules</h2>
+          <p className="relative z-10 text-sm text-white/70 mt-1">{courseData?.title}</p>
         </div>
         
         <div className="overflow-y-auto h-full pb-20">
           {courseData?.syllabus?.modules?.map((module) => (
             <div key={module._id} className="border-b">
               {/* Module Header */}
-              <div 
-                onClick={() => handleModuleToggle(module._id)}
-                className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
-                  expandedModule === module._id ? 'bg-blue-50' : ''
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 mb-1">
-                      Module {module.moduleNumber}: {module.moduleTitle}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {module.description}
-                    </p>
+              {(() => {
+                const modTheme = resolveModuleTheme(module);
+                return (
+                  <div
+                    onClick={() => handleModuleToggle(module._id)}
+                    className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
+                      expandedModule === module._id ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <LmsAssetImage
+                        src={modTheme.moduleThumbnailUrl}
+                        alt={module.moduleTitle}
+                        gradientCSS={modTheme.gradientCSS}
+                        containerClassName="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 mb-1">
+                          Module {module.moduleNumber}: {module.moduleTitle}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-1">
+                          {module.description}
+                        </p>
+                      </div>
+                      <div className="ml-2 flex-shrink-0">
+                        {expandedModule === module._id ? (
+                          <ChevronDown size={20} className="text-blue-600" />
+                        ) : (
+                          <ChevronRight size={20} className="text-gray-400" />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="ml-2">
-                    {expandedModule === module._id ? (
-                      <ChevronDown size={20} className="text-blue-600" />
-                    ) : (
-                      <ChevronRight size={20} className="text-gray-400" />
-                    )}
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Module Content - Accordion Panel */}
               {expandedModule === module._id && (
@@ -289,25 +375,126 @@ const ContentSection = () => {
           ))}
         </div>
       </div>
+      )}
 
       {/* Right Content Area */}
       <div className="flex-1 flex flex-col">
-        {selectedModule ? (
+        {viewingItem ? (
+          /* INLINE VIEWER - Shows file/link on the same page */
           <>
-            {/* Header */}
-            <div className="bg-white shadow-sm border-b p-6">
+            <div className="bg-white shadow-sm border-b p-4">
               <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleCloseViewer}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                    title="Back to files"
+                  >
+                    <ArrowLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="text-lg font-semibold text-gray-900 truncate max-w-md">
+                      {viewingItem.name || viewingItem.title}
+                    </h1>
+                    <p className="text-sm text-gray-500">
+                      {contentTypes[selectedContentType]?.label}
+                    </p>
+                  </div>
+                </div>
+                {selectedContentType !== 'links' && (viewingItem.fileUrl || viewingItem.videoUrl) && (
+                  <a
+                    href={getFullUrl(viewingItem.fileUrl || viewingItem.videoUrl)}
+                    download
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+                  >
+                    <Download size={16} />
+                    <span>Download</span>
+                  </a>
+                )}
+              </div>
+            </div>
+            <div className="flex-1 relative">
+              {(() => {
+                const viewerUrl = getInlineViewerUrl(viewingItem, selectedContentType);
+                if (!viewerUrl) {
+                  return (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <FileText className="mx-auto text-gray-400 mb-4" size={48} />
+                        <p className="text-gray-500">Preview not available for this file type.</p>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <>
+                    {viewerLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                        <div className="text-center">
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                          <p className="mt-2 text-gray-600">Loading...</p>
+                        </div>
+                      </div>
+                    )}
+                    <iframe
+                      src={viewerUrl}
+                      className="w-full h-full border-0"
+                      style={{ minHeight: '70vh' }}
+                      title={viewingItem.name || viewingItem.title}
+                      onLoad={() => setViewerLoading(false)}
+                      onError={() => { setViewerLoading(false); setViewerFailed(true); }}
+                      sandbox={selectedContentType === 'links' ? 'allow-same-origin allow-scripts allow-popups allow-forms' : undefined}
+                    />
+                    {viewerFailed && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <div className="text-center max-w-md">
+                          <FileText className="mx-auto text-gray-400 mb-4" size={48} />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load preview</h3>
+                          <p className="text-gray-500 mb-4">The content could not be embedded. Try downloading or opening directly.</p>
+                          <div className="flex justify-center gap-3">
+                            <a
+                              href={viewerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+                            >
+                              <ExternalLink size={16} />
+                              Open in New Tab
+                            </a>
+                            <button
+                              onClick={() => { setViewerFailed(false); setViewerLoading(true); }}
+                              className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm"
+                            >
+                              Try Again
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </>
+        ) : selectedModule ? (
+          <>
+            {/* Header Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 shadow-lg">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
+              <div className="absolute top-4 right-40 w-12 h-12 bg-white/10 rounded-full" />
+              <div className="relative z-10 flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
+                  <h1 className="text-xl font-bold text-white">
                     Module {selectedModule.moduleNumber}: {selectedModule.moduleTitle}
                   </h1>
-                  <p className="text-gray-600 ">
+                  <p className="text-white/70 text-sm mt-1">
                     Viewing {contentTypes[selectedContentType]?.label}
                   </p>
                 </div>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                  className="bg-white text-blue-600 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all shadow-md flex items-center space-x-2"
                 >
                   <Plus size={20} />
                   <span>Add {contentTypes[selectedContentType]?.label}</span>
@@ -364,7 +551,9 @@ const ContentSection = () => {
 };
 
 // Content Card Component
-const ContentCard = ({ item, contentType, onDelete, onEdit, formatFileSize, formatDate }) => {
+const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSize, formatDate }) => {
+  const contentTheme = resolveContentTheme(item, contentType);
+
   const getFileIcon = () => {
     switch (contentType) {
       case 'pdfs':
@@ -380,37 +569,27 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, formatFileSize, form
     }
   };
 
-  const handleViewClick = () => {
-    if (contentType === 'links') {
-      window.open(item.url || item.link, '_blank');
-    } else {
-      window.open(item.fileUrl || item.videoUrl, '_blank');
-    }
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={onView}
+    >
       {/* Thumbnail */}
-      <div className="h-40 bg-gray-100 flex items-center justify-center">
-        {item.thumbnail?.thumbnailUrl ? (
-          <img 
-            src={item.thumbnail.thumbnailUrl} 
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-gray-400">
-            {getFileIcon()}
-          </div>
-        )}
-      </div>
+      <LmsAssetImage
+        src={contentTheme.contentThumbnailUrl}
+        alt={item.name || item.title}
+        gradientCSS={contentTheme.gradientCSS}
+        fallbackIcon={getFileIcon()}
+        containerClassName="h-40 w-full"
+        className="w-full h-full object-cover"
+      />
 
       {/* Content */}
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
           {item.name || item.title}
         </h3>
-        
+
         {item.description && (
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">
             {item.description || item.content}
@@ -435,24 +614,15 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, formatFileSize, form
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-2">
-            <button
-              onClick={handleViewClick}
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-              title={contentType === 'links' ? 'Open Link' : 'View'}
-            >
-              {contentType === 'links' ? <ExternalLink size={16} /> : <Eye size={16} />}
-            </button>
-            <button
-              onClick={onEdit}
-              className="text-green-600 hover:text-green-800 transition-colors"
-              title="Edit"
-            >
-              <Edit size={16} />
-            </button>
-          </div>
+        {/* Actions - Edit & Delete only */}
+        <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={onEdit}
+            className="text-green-600 hover:text-green-800 transition-colors"
+            title="Edit"
+          >
+            <Edit size={16} />
+          </button>
           <button
             onClick={onDelete}
             className="text-red-600 hover:text-red-800 transition-colors"
@@ -477,7 +647,7 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
   const [thumbnail, setThumbnail] = useState(null);
 
   const contentTypes = {
-    pdfs: { label: 'PDFs' },
+    pdfs: { label: 'Course Content' },
     ppts: { label: 'Presentations' },
     videos: { label: 'Videos' },
     links: { label: 'Links' }
@@ -487,6 +657,8 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
     if (contentType === 'links' && !formData.url.trim()) return;
+    if (contentType === 'videos' && !file && !formData.url.trim()) return;
+    if ((contentType === 'pdfs' || contentType === 'ppts') && !file) return;
     onAdd(formData, file, thumbnail);
   };
 
@@ -499,14 +671,10 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
       case 'videos':
         return '.mp4,.avi,.mov,.wmv,.flv,.webm';
       case 'links':
-        return ''; // No file upload for links
+        return '';
       default:
         return '';
     }
-  };
-
-  const isFileRequired = () => {
-    return contentType !== 'links';
   };
 
   return (
@@ -515,7 +683,7 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
         <h2 className="text-xl font-semibold mb-4">
           Add {contentTypes[contentType]?.label}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -542,34 +710,44 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
             />
           </div>
 
-          {contentType === 'links' && (
+          {(contentType === 'links' || contentType === 'videos') && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL *
+                Video URL {contentType === 'links' ? '*' : ''}
               </label>
               <input
                 type="url"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com"
-                required
+                placeholder={contentType === 'videos' ? 'https://www.youtube.com/watch?v=...' : 'https://example.com'}
+                required={contentType === 'links'}
               />
+              {contentType === 'videos' && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Paste a YouTube or Vimeo URL, or upload a video file below
+                </p>
+              )}
             </div>
           )}
 
-          {isFileRequired() && (
+          {contentType !== 'links' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                File {isFileRequired() ? '*' : ''}
+                File {contentType !== 'videos' ? '*' : ''}
               </label>
               <input
                 type="file"
                 accept={getAcceptedFileTypes()}
                 onChange={(e) => setFile(e.target.files[0])}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required={isFileRequired()}
+                required={contentType !== 'videos' && contentType !== 'links'}
               />
+              {contentType === 'videos' && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload .mp4, .avi, .mov, .wmv, .flv, .webm (optional if URL provided)
+                </p>
+              )}
             </div>
           )}
 
@@ -612,13 +790,13 @@ const EditContentModal = ({ item, contentType, onClose, onUpdate, isLoading }) =
   const [formData, setFormData] = useState({
     name: item.name || item.title || '',
     description: item.description || item.content || '',
-    url: item.url || item.link || ''
+    url: item.url || item.link || item.fileUrl || ''
   });
   const [file, setFile] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
 
   const contentTypes = {
-    pdfs: { label: 'PDFs' },
+    pdfs: { label: 'Course Content' },
     ppts: { label: 'Presentations' },
     videos: { label: 'Videos' },
     links: { label: 'Links' }
@@ -652,7 +830,7 @@ const EditContentModal = ({ item, contentType, onClose, onUpdate, isLoading }) =
         <h2 className="text-xl font-semibold mb-4">
           Edit {contentTypes[contentType]?.label}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -679,19 +857,22 @@ const EditContentModal = ({ item, contentType, onClose, onUpdate, isLoading }) =
             />
           </div>
 
-          {contentType === 'links' && (
+          {(contentType === 'links' || contentType === 'videos') && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL *
+                {contentType === 'videos' ? 'Video URL' : 'URL'} {contentType === 'links' ? '*' : ''}
               </label>
               <input
                 type="url"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com"
-                required
+                placeholder={contentType === 'videos' ? 'https://www.youtube.com/watch?v=...' : 'https://example.com'}
+                required={contentType === 'links'}
               />
+              {contentType === 'videos' && (
+                <p className="text-xs text-gray-500 mt-1">YouTube or Vimeo URL</p>
+              )}
             </div>
           )}
 

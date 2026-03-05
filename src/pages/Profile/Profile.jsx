@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import profileService from "../../services/profile.service";
 import StudentProfileView from "../../components/profile/StudentProfileView";
 import TeacherProfileView from "../../components/profile/TeacherProfileView";
+import { getPeriodLabel } from "../../utils/periodLabel";
 import {
   STUDENT_CANONICAL_FIELDS,
   STUDENT_EDITABLE_FIELDS,
@@ -165,6 +166,7 @@ export default function Profile() {
   const [programProgress, setProgramProgress] = useState([]);
   const [programProgressError, setProgramProgressError] = useState("");
   const [expandedSemesters, setExpandedSemesters] = useState([]);
+  const [periodLabel, setPeriodLabel] = useState(getPeriodLabel());
 
   const [editMode, setEditMode] = useState(false);
   const [editDraft, setEditDraft] = useState({});
@@ -226,6 +228,11 @@ export default function Profile() {
           if (requestId !== requestIdRef.current) return;
           const semesters = normalizeProgressPayload(progressResponse);
           setProgramProgress(semesters);
+          // Extract periodType from progress response (backend now sends it)
+          const pt = progressResponse?.periodType
+            || progressResponse?.data?.periodType
+            || "semester";
+          setPeriodLabel(getPeriodLabel(pt));
           setExpandedSemesters((prev) =>
             prev.filter((semesterNo) =>
               semesters.some((semester) => semester.semesterNo === semesterNo)
@@ -372,12 +379,27 @@ export default function Profile() {
     );
   };
 
-  const profilePhotoUrl =
-    profileData?.profilePhotoUrl ||
-    profileData?.photoUrl ||
-    profileData?.user?.photoUrl ||
-    profileData?.personalDetails?.["Profile Photo"] ||
-    "";
+  const profilePhotoUrl = useMemo(() => {
+    let raw =
+      profileData?.profilePhotoUrl ||
+      profileData?.photoUrl ||
+      profileData?.user?.photoUrl ||
+      profileData?.personalDetails?.["Profile Photo"] ||
+      "";
+    if (!raw) return "";
+    // If already a full URL (Azure or external), use as-is
+    if (/^https?:\/\//i.test(raw)) return raw;
+    // Strip any broken host prefix (e.g. "0.0.0.0:5000/uploads/..." → "/uploads/...")
+    // This handles legacy URLs stored with incorrect host format
+    const uploadsIdx = raw.indexOf("/uploads/");
+    if (uploadsIdx > 0) {
+      raw = raw.substring(uploadsIdx);
+    }
+    // Prepend backend base URL for relative paths
+    const backendUrl =
+      (typeof window !== "undefined" && window.RUNTIME_CONFIG?.BACKEND_URL) || "";
+    return backendUrl ? `${backendUrl}${raw}` : raw;
+  }, [profileData]);
 
   const headerFields = useMemo(() => {
     const details = isPlainObject(profileData?.personalDetails)
@@ -433,10 +455,10 @@ export default function Profile() {
       },
       {
         label: "Stage",
-        value: academic.currentStage || (semester ? `Semester ${semester}` : ""),
+        value: academic.currentStage || (semester ? `${periodLabel} ${semester}` : ""),
       },
     ];
-  }, [isTeacherProfile, profileData]);
+  }, [isTeacherProfile, profileData, periodLabel]);
 
   const isFieldEditable = useCallback(
     (field) =>
@@ -564,6 +586,7 @@ export default function Profile() {
             toggleSemester={toggleSemester}
             toSemesterLabel={toSemesterLabel}
             toGpaDisplay={toGpaDisplay}
+            periodLabel={periodLabel}
           />
         )}
 

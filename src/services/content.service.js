@@ -48,12 +48,7 @@ export const addModuleContent = async (courseID, moduleID, formData) => {
 
     const response = await api.post(
       `/syllabus/course/${courseID}/syllabus/module/${moduleID}/content`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      formData
     );
 
     toast.success("Content added to module successfully!");
@@ -80,12 +75,7 @@ export const updateContentItem = async (
 
     const response = await api.put(
       `/syllabus/course/${courseID}/syllabus/module/${moduleID}/content/${contentType}/${contentID}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      formData
     );
 
     toast.success("Content updated successfully!");

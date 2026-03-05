@@ -1,6 +1,14 @@
 // FileViewer.js
 import React from "react";
 
+// Resolve relative file paths (/uploads/...) to the backend origin
+const BACKEND_URL = window.RUNTIME_CONFIG?.BACKEND_URL || '';
+const getFullUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 const FileViewer = ({ selectedFile }) => {
   if (!selectedFile) {
     return (
@@ -13,7 +21,7 @@ const FileViewer = ({ selectedFile }) => {
   if (selectedFile.fileType === "pdf") {
     return (
       <iframe
-        src={`${selectedFile.fileUrl}#toolbar=1&navpanes=1`}
+        src={`${getFullUrl(selectedFile.fileUrl)}#toolbar=1&navpanes=1`}
         className="w-full h-full border-0"
         title={selectedFile.fileName}
       />
@@ -39,7 +47,7 @@ const FileViewer = ({ selectedFile }) => {
           </p>
           <div className="flex justify-center">
             <a
-              href={selectedFile.fileUrl}
+              href={getFullUrl(selectedFile.fileUrl)}
               download={selectedFile.fileName}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
             >
@@ -79,7 +87,7 @@ const FileViewer = ({ selectedFile }) => {
           </p>
           <div className="flex justify-center">
             <a
-              href={selectedFile.fileUrl}
+              href={getFullUrl(selectedFile.fileUrl)}
               download={selectedFile.fileName}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
             >

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { useCourse } from "../../../../context/CourseContext";
+import { getMidExamShort, getEndExamShort } from "../../../../utils/periodLabel";
 
 const StudentGradingTable = () => {
   const { courseData } = useCourse();
-  
+  const periodType = courseData?.periodType || courseData?.semester?.periodType || "semester";
+  const midLabel = getMidExamShort(periodType);
+  const endLabel = getEndExamShort(periodType);
+
   // Initialize students from courseData or empty array
   const [students, setStudents] = useState(() => {
     if (courseData?.students && courseData.students.length > 0) {
@@ -139,9 +143,9 @@ const StudentGradingTable = () => {
           "Activity-2 (10 Marks)": student.activity2,
           "Activity (Eqv 10 Marks)": equivalentActivity,
           "Total Internal (30 Marks)": totalInternal,
-          "Mid-Sem (20 Marks)": student.midSem,
+          [`${midLabel} (20 Marks)`]: student.midSem,
           "Total (50 Marks)": total50,
-          "END-SEM (50 Marks)": student.endSem,
+          [`${endLabel} (50 Marks)`]: student.endSem,
           "Total (100 Marks)": total100,
           GRADE: grade,
         };
@@ -259,7 +263,7 @@ const StudentGradingTable = () => {
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-center text-xs font-medium uppercase tracking-wider">
-                <div>Mid-Sem</div>
+                <div>{midLabel}</div>
                 <div className="text-gray-500 text-xs">(20 Marks)</div>
               </th>
 
@@ -269,7 +273,7 @@ const StudentGradingTable = () => {
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-yellow-500 text-white text-center text-xs font-medium uppercase tracking-wider">
-                <div>END-SEM</div>
+                <div>{endLabel}</div>
                 <div className="text-yellow-200 text-xs">(50 Marks)</div>
               </th>
 

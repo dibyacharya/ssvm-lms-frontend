@@ -8,15 +8,14 @@ import {
   Save,
   X,
   Edit3,
-  CheckSquare,
-  Square,
-  ArrowLeft,
   FileText,
   Eye,
   CheckCircle,
 } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getAllCourseAssignments } from "../../../../services/assignment.service";
+import CreateAssignmentNew from "../../../Assignment/teacher/CreateAssignmentNew";
+import { useCourse } from "../../../../context/CourseContext";
 import {
   getContinuousAssessmentPlan,
   createContinuousAssessmentCategory,
@@ -24,14 +23,51 @@ import {
   deleteContinuousAssessmentCategory,
   bulkUpdateContinuousAssessmentPlan,
   getAssessmentPlan,
+  getCAConfig,
 } from "../../../../services/course.service";
-import CreateAssignmentNew from "../../../Assignment/teacher/CreateAssignmentNew";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../../utils/LoadingAnimation";
 
-const ContinuousAssessment = () => {
+const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
+  <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
+    <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+    <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+    <div className="relative z-10 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      </div>
+      {count != null && (
+        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+      )}
+    </div>
+  </div>
+);
+
+const normalizeCalculationMethod = (method) => {
+  if (method === "Average of Best of n") {
+    return "Average of the Best 'n'";
+  }
+  return method;
+};
+
+const isNDerivedFromNumber = (method) => {
+  const normalizedMethod = normalizeCalculationMethod(method);
+  return normalizedMethod === "Average of all" || normalizedMethod === "Sum of all";
+};
+
+// Ordinal helper: 1→1st, 2→2nd, 3→3rd, 4→4th, etc.
+const getOrdinal = (n) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
+
+const ContinuousAssessment = ({ mode = "plan" }) => {
   const { courseID } = useParams();
-  const navigate = useNavigate();
+  const isAssessmentMode = mode === "assessment";
   const [assessmentCategories, setAssessmentCategories] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,31 +84,24 @@ const ContinuousAssessment = () => {
   const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
   const [createAssignmentType, setCreateAssignmentType] = useState('subjective');
+  const [currentCategoryId, setCurrentCategoryId] = useState(null);
+  const [currentCategoryEachMarks, setCurrentCategoryEachMarks] = useState(0);
+  const [currentCategoryName, setCurrentCategoryName] = useState('');
+  const [currentAssignmentIndex, setCurrentAssignmentIndex] = useState(1);
+  // (sessionCreatedCount removed — we derive the index from category.selectedAssignments.length)
+  // View-only modal for category-specific assignments
+  const [showViewAssignmentsModal, setShowViewAssignmentsModal] = useState(false);
+  const [viewCategoryAssignments, setViewCategoryAssignments] = useState([]);
+  const [viewCategoryName, setViewCategoryName] = useState('');
 
-  // Assessment category options (removed exam options)
-  const categoryOptions = [
-    "General Assignment",
-    "Objective one", 
-    "Activity-Based Assignment",
-    "Quiz Test",
-    "Engagement in Lectures",
-    "Presentation/viva",
-    "Lab Report",
-    "Project Report",
-    "Group Project",
-    "Individual Project",
-    "Case Study",
-    "Research Paper"
-  ];
-
-  // Calculation method options
-  const calculationOptions = [
-    "Average of Best of n",
-    "Average of all",
-    "Average of the Best 'n'",
-    "Sum of all",
-    "Sum of the Best 'n'"
-  ];
+  // Config fetched from backend — no hardcoding
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [calculationOptions, setCalculationOptions] = useState([]);
+  const [categoryConfig, setCategoryConfig] = useState({});
+  // Default category name derived from config (first available)
+  const defaultCategoryName = categoryOptions.length > 0 ? categoryOptions[0] : "General Assignment";
+  // Default calculation method derived from config (first available)
+  const defaultCalcMethod = calculationOptions.length > 0 ? calculationOptions[0] : "Average of all";
 
   // Load data from backend on component mount
   useEffect(() => {
@@ -81,7 +110,29 @@ const ContinuousAssessment = () => {
 
       try {
         setLoading(true);
-        
+
+        // Fetch CA config (category types, calculation methods, category→assignmentType mapping)
+        try {
+          const config = await getCAConfig();
+          if (config) {
+            if (config.categoryTypes && config.categoryTypes.length > 0) {
+              setCategoryOptions(config.categoryTypes);
+            }
+            if (config.calculationMethods && config.calculationMethods.length > 0) {
+              // Normalize: frontend uses "Average of the Best 'n'" format
+              const normalized = config.calculationMethods
+                .map(m => normalizeCalculationMethod(m))
+                .filter((v, i, arr) => arr.indexOf(v) === i); // deduplicate after normalization
+              setCalculationOptions(normalized);
+            }
+            if (config.categoryConfig) {
+              setCategoryConfig(config.categoryConfig);
+            }
+          }
+        } catch (configErr) {
+          console.warn("Could not fetch CA config, using defaults:", configErr);
+        }
+
         // Fetch assessment plan
         const planData = await getAssessmentPlan(courseID);
         if (planData) {
@@ -96,18 +147,26 @@ const ContinuousAssessment = () => {
         const categories = await getContinuousAssessmentPlan(courseID);
         if (categories && categories.length > 0) {
           // Convert backend format to frontend format (use _id as id, handle selectedAssignments)
-          const formattedCategories = categories.map(cat => ({
-            id: cat._id,
-            _id: cat._id,
-            category: cat.category,
-            number: cat.number,
-            eachMarks: cat.eachMarks,
-            calculationMethod: cat.calculationMethod,
-            n: cat.n,
-            totalMarks: cat.totalMarks,
-            selectedAssignments: cat.selectedAssignments || [],
-            assignmentDetails: cat.selectedAssignments || [] // Backend populates this
-          }));
+          const formattedCategories = categories.map(cat => {
+            const normalizedMethod = normalizeCalculationMethod(cat.calculationMethod);
+            const numberValue = parseInt(cat.number, 10) || 1;
+            const nValue = isNDerivedFromNumber(normalizedMethod)
+              ? numberValue
+              : (parseInt(cat.n, 10) || 1);
+
+            return {
+              id: cat._id,
+              _id: cat._id,
+              category: cat.category,
+              number: cat.number,
+              eachMarks: cat.eachMarks,
+              calculationMethod: normalizedMethod,
+              n: nValue,
+              totalMarks: cat.totalMarks,
+              selectedAssignments: cat.selectedAssignments || [],
+              assignmentDetails: cat.selectedAssignments || [] // Backend populates this
+            };
+          });
           setAssessmentCategories(formattedCategories);
         } else {
           // No categories exist yet - start with empty array
@@ -124,6 +183,12 @@ const ContinuousAssessment = () => {
     fetchData();
   }, [courseID]);
 
+  useEffect(() => {
+    if (isAssessmentMode) {
+      setIsEditing(false);
+    }
+  }, [isAssessmentMode]);
+
   // Calculate total marks whenever categories change
   useEffect(() => {
     const total = assessmentCategories.reduce((sum, category) => {
@@ -135,17 +200,17 @@ const ContinuousAssessment = () => {
   const addNewCategory = async () => {
     try {
       const newCategoryData = {
-        category: "General Assignment",
+        category: defaultCategoryName,
         number: 1,
         eachMarks: 10,
-        calculationMethod: "Average of Best of n",
+        calculationMethod: defaultCalcMethod,
         n: 1,
         totalMarks: 10,
         selectedAssignments: []
       };
 
       const created = await createContinuousAssessmentCategory(courseID, newCategoryData);
-      
+
       // Add to local state
       const newCategory = {
         id: created._id || created.data?._id,
@@ -172,13 +237,20 @@ const ContinuousAssessment = () => {
     const category = assessmentCategories.find(cat => cat.id === id || cat._id === id);
     if (!category) return;
 
-    const updated = { ...category, [field]: value };
-    
+    const normalizedValue =
+      field === "calculationMethod" ? normalizeCalculationMethod(value) : value;
+    const updated = { ...category, [field]: normalizedValue };
+
     // Recalculate total marks based on calculation method
     let totalMarks = 0;
-    const num = parseInt(updated.number) || 0;
-    const eachMarks = parseInt(updated.eachMarks) || 0;
-    const n = parseInt(updated.n) || 0;
+    const num = parseInt(updated.number, 10) || 0;
+    const eachMarks = parseInt(updated.eachMarks, 10) || 0;
+
+    if (isNDerivedFromNumber(updated.calculationMethod)) {
+      updated.n = num;
+    }
+
+    const n = parseInt(updated.n, 10) || 0;
 
     switch (updated.calculationMethod) {
       case "Average of all":
@@ -187,7 +259,6 @@ const ContinuousAssessment = () => {
       case "Sum of all":
         totalMarks = num * eachMarks;
         break;
-      case "Average of Best of n":
       case "Average of the Best 'n'":
         totalMarks = Math.min(n, num) * eachMarks;
         break;
@@ -201,7 +272,7 @@ const ContinuousAssessment = () => {
     updated.totalMarks = totalMarks;
 
     // Update local state immediately
-    setAssessmentCategories(prev => prev.map(cat => 
+    setAssessmentCategories(prev => prev.map(cat =>
       (cat.id === id || cat._id === id) ? updated : cat
     ));
 
@@ -209,14 +280,15 @@ const ContinuousAssessment = () => {
     try {
       const categoryId = category._id || category.id;
       await updateContinuousAssessmentCategory(courseID, categoryId, {
-        [field]: value,
+        [field]: normalizedValue,
+        n: updated.n,
         totalMarks: updated.totalMarks
       });
     } catch (error) {
       console.error("Error updating category:", error);
       toast.error(error.response?.data?.error || "Failed to update category");
       // Revert on error
-      setAssessmentCategories(prev => prev.map(cat => 
+      setAssessmentCategories(prev => prev.map(cat =>
         (cat.id === id || cat._id === id) ? category : cat
       ));
     }
@@ -229,7 +301,7 @@ const ContinuousAssessment = () => {
     try {
       const categoryId = category._id || category.id;
       await deleteContinuousAssessmentCategory(courseID, categoryId);
-      
+
       // Remove from local state
       setAssessmentCategories(prev => prev.filter(cat => cat.id !== id && cat._id !== id));
       toast.success("Category deleted successfully");
@@ -246,17 +318,26 @@ const ContinuousAssessment = () => {
   const handleSave = async () => {
     try {
       // Convert frontend format to backend format
-      const categoriesToSave = assessmentCategories.map(cat => ({
-        category: cat.category,
-        number: cat.number,
-        eachMarks: cat.eachMarks,
-        calculationMethod: cat.calculationMethod,
-        n: cat.n,
-        totalMarks: cat.totalMarks,
-        selectedAssignments: Array.isArray(cat.selectedAssignments) 
-          ? cat.selectedAssignments.map(a => typeof a === 'string' ? a : a._id || a.id)
-          : []
-      }));
+      const categoriesToSave = assessmentCategories.map(cat => {
+        const normalizedMethod = normalizeCalculationMethod(cat.calculationMethod);
+        const numberValue = parseInt(cat.number, 10) || 1;
+        const nValue = isNDerivedFromNumber(normalizedMethod)
+          ? numberValue
+          : (parseInt(cat.n, 10) || 1);
+
+        return {
+          _id: cat._id || cat.id,
+          category: cat.category,
+          number: cat.number,
+          eachMarks: cat.eachMarks,
+          calculationMethod: normalizedMethod,
+          n: nValue,
+          totalMarks: cat.totalMarks,
+          selectedAssignments: Array.isArray(cat.selectedAssignments)
+            ? cat.selectedAssignments.map(a => typeof a === 'string' ? a : a._id || a.id)
+            : []
+        };
+      });
 
       await bulkUpdateContinuousAssessmentPlan(courseID, categoriesToSave);
       setIsEditing(false);
@@ -272,17 +353,25 @@ const ContinuousAssessment = () => {
     try {
       const categories = await getContinuousAssessmentPlan(courseID);
       if (categories && categories.length > 0) {
-        const formattedCategories = categories.map(cat => ({
-          id: cat._id,
-          _id: cat._id,
-          category: cat.category,
-          number: cat.number,
-          eachMarks: cat.eachMarks,
-          calculationMethod: cat.calculationMethod,
-          n: cat.n,
-          totalMarks: cat.totalMarks,
-          selectedAssignments: cat.selectedAssignments || []
-        }));
+        const formattedCategories = categories.map(cat => {
+          const normalizedMethod = normalizeCalculationMethod(cat.calculationMethod);
+          const numberValue = parseInt(cat.number, 10) || 1;
+          const nValue = isNDerivedFromNumber(normalizedMethod)
+            ? numberValue
+            : (parseInt(cat.n, 10) || 1);
+
+          return {
+            id: cat._id,
+            _id: cat._id,
+            category: cat.category,
+            number: cat.number,
+            eachMarks: cat.eachMarks,
+            calculationMethod: normalizedMethod,
+            n: nValue,
+            totalMarks: cat.totalMarks,
+            selectedAssignments: cat.selectedAssignments || []
+          };
+        });
         setAssessmentCategories(formattedCategories);
       } else {
         setAssessmentCategories([]);
@@ -293,34 +382,52 @@ const ContinuousAssessment = () => {
     setIsEditing(false);
   };
 
-  // Fetch assignments for selection
+  // Fetch assignments for selection - returns filtered list
   const fetchAssignments = async (categoryType) => {
-    if (!courseID) return;
-    
+    if (!courseID) return [];
+
     try {
       setLoadingAssignments(true);
       const response = await getAllCourseAssignments({ courseID });
       const assignments = response.assignments || [];
-      
-      // Filter assignments based on category type
-      let filteredAssignments = [];
-      if (categoryType === "General Assignment") {
-        // Show assignments with subjective questions
-        filteredAssignments = assignments.filter(assignment => {
-          const questions = assignment.questions || [];
-          return questions.some(q => q.type === 'subjective');
-        });
-      } else if (categoryType === "Objective one") {
-        // Show assignments with objective questions
-        filteredAssignments = assignments.filter(assignment => {
-          const questions = assignment.questions || [];
-          return questions.some(q => q.type === 'objective');
-        });
-      }
-      
+
+      // Collect assignment IDs already selected by OTHER categories
+      const currentCategory = assessmentCategories.find(c => c.category === categoryType);
+      const currentCategorySelectedIds = new Set(
+        (currentCategory?.selectedAssignments || []).map(id =>
+          (typeof id === 'string' ? id : (id._id || id.id))?.toString()
+        )
+      );
+      const otherCategorySelectedIds = new Set();
+      assessmentCategories.forEach(cat => {
+        if (cat.category !== categoryType && cat.selectedAssignments) {
+          cat.selectedAssignments.forEach(id => {
+            const idStr = (typeof id === 'string' ? id : (id._id || id.id))?.toString();
+            if (idStr) otherCategorySelectedIds.add(idStr);
+          });
+        }
+      });
+
+      // Derive assignment type from backend config — no hardcoded category name checks
+      const configEntry = categoryConfig[categoryType];
+      const expectedType = configEntry?.assignmentType || (categoryType.toLowerCase().includes("objective") ? "objective" : "subjective");
+
+      // Filter assignments based on category's assignment type
+      let filteredAssignments = assignments.filter(assignment => {
+        const questions = assignment.questions || [];
+        const id = assignment._id?.toString();
+        // Check if assignment matches the category's expected type
+        const matchesType = questions.some(q => q.type === expectedType);
+        // Exclude assignments already selected by OTHER categories (but keep current category's own)
+        const notTakenByOther = !otherCategorySelectedIds.has(id) || currentCategorySelectedIds.has(id);
+        return matchesType && notTakenByOther;
+      });
+
       setAvailableAssignments(filteredAssignments);
+      return filteredAssignments;
     } catch (error) {
       console.error("Error fetching assignments:", error);
+      return [];
     } finally {
       setLoadingAssignments(false);
     }
@@ -329,18 +436,36 @@ const ContinuousAssessment = () => {
   // Handle category selection change
   const handleCategoryChange = (id, value) => {
     updateCategory(id, 'category', value);
-    
-    // If General Assignment or Objective one is selected, show options
-    if (value === "General Assignment" || value === "Objective one") {
-      // Don't show modal immediately, just update the category
-      // The modal will be shown when user clicks on the row
-    }
+    // Category updated — modal will be shown when user clicks on the row actions
   };
 
-  // Handle "Add new" button click
-  const handleAddNew = (categoryType) => {
-    // Set the assignment type and show the create form
-    const assignmentType = categoryType === "General Assignment" ? "subjective" : "objective";
+  // Handle slot click — open CreateAssignmentNew wizard for a specific slot
+  // Uses category ID (not name) to avoid duplicate-name bugs
+  const handleAddNew = (catId, slotIndex) => {
+    const category = assessmentCategories.find(c => (c._id || c.id) === catId);
+    if (!category) return;
+
+    const categoryType = category.category;
+    const existingCount = (category?.selectedAssignments?.length) || 0;
+    const maxAllowed = parseInt(category?.number, 10) || 0;
+
+    // Block if this slot is already filled
+    if (slotIndex <= existingCount) {
+      return; // already created
+    }
+    // Block if beyond max
+    if (maxAllowed > 0 && slotIndex > maxAllowed) {
+      return;
+    }
+
+    // Store category metadata for passing to backend when creating assignments
+    setCurrentCategoryId(catId);
+    setCurrentCategoryEachMarks(category?.eachMarks || 0);
+    setCurrentCategoryName(categoryType);
+    setCurrentAssignmentIndex(slotIndex);
+    // Derive assignment type from backend config — no hardcoding
+    const configEntry = categoryConfig[categoryType];
+    const assignmentType = configEntry?.assignmentType || (categoryType.toLowerCase().includes("objective") ? "objective" : "subjective");
     setCreateAssignmentType(assignmentType);
     setIsCreatingAssignment(true);
   };
@@ -349,30 +474,70 @@ const ContinuousAssessment = () => {
   const handleBackFromCreate = () => {
     setIsCreatingAssignment(false);
     setCreateAssignmentType('subjective');
+    setCurrentCategoryId(null);
+    setCurrentCategoryEachMarks(0);
+    setCurrentCategoryName('');
+    setCurrentAssignmentIndex(1);
   };
 
-  // Handle assignment saved
-  const handleAssignmentSaved = (assignment) => {
-    setIsCreatingAssignment(false);
-    setCreateAssignmentType('subjective');
-    // Optionally refresh assignments list
+  // Handle assignment saved from CreateAssignmentNew wizard
+  const handleAssignmentSaved = async (createdAssignment) => {
     toast.success("Assignment created successfully!");
+    setIsCreatingAssignment(false);
+    setCurrentCategoryId(null);
+    setCurrentCategoryEachMarks(0);
+    setCurrentCategoryName('');
+    setCurrentAssignmentIndex(1);
+
+    // Refresh CA categories to reflect newly linked assignments
+    try {
+      const categories = await getContinuousAssessmentPlan(courseID);
+      if (categories && categories.length > 0) {
+        const formattedCategories = categories.map(cat => {
+          const normalizedMethod = normalizeCalculationMethod(cat.calculationMethod);
+          const numberValue = parseInt(cat.number, 10) || 1;
+          const nValue = isNDerivedFromNumber(normalizedMethod)
+            ? numberValue
+            : (parseInt(cat.n, 10) || 1);
+          return {
+            id: cat._id,
+            _id: cat._id,
+            category: cat.category,
+            number: cat.number,
+            eachMarks: cat.eachMarks,
+            calculationMethod: normalizedMethod,
+            n: nValue,
+            totalMarks: cat.totalMarks,
+            selectedAssignments: cat.selectedAssignments || [],
+            assignmentDetails: cat.selectedAssignments || []
+          };
+        });
+        setAssessmentCategories(formattedCategories);
+      }
+    } catch (refreshError) {
+      console.error("Error refreshing categories:", refreshError);
+    }
   };
 
   // Handle "Select" button click
   const handleSelect = async (id, categoryType) => {
     setSelectedCategoryId(id);
-    await fetchAssignments(categoryType);
+    const fetchedList = await fetchAssignments(categoryType);
     setShowAssignmentModal(true);
-    
+
     // Load previously selected assignments for this category
+    // Only pre-select assignments that are actually available in the fetched list
     const category = assessmentCategories.find(cat => cat.id === id || cat._id === id);
     if (category?.selectedAssignments) {
+      const availableIds = new Set((fetchedList || []).map(a => (a._id || a.id).toString()));
       const selected = {};
       category.selectedAssignments.forEach(assignmentId => {
-        // Handle both string IDs and object IDs
-        const id = typeof assignmentId === 'string' ? assignmentId : assignmentId._id || assignmentId.id;
-        selected[id] = true;
+        const aId = typeof assignmentId === 'string' ? assignmentId : assignmentId._id || assignmentId.id;
+        const aIdStr = aId?.toString();
+        // Only pre-select if assignment exists in the available list
+        if (aIdStr && availableIds.has(aIdStr)) {
+          selected[aIdStr] = true;
+        }
       });
       setSelectedAssignments(selected);
     } else {
@@ -391,7 +556,7 @@ const ContinuousAssessment = () => {
   // Save selected assignments to category
   const handleSaveSelectedAssignments = async () => {
     const selectedIds = Object.keys(selectedAssignments).filter(id => selectedAssignments[id]);
-    
+
     const category = assessmentCategories.find(cat => cat.id === selectedCategoryId || cat._id === selectedCategoryId);
     if (!category) return;
 
@@ -402,7 +567,7 @@ const ContinuousAssessment = () => {
       });
 
       // Update local state
-      setAssessmentCategories(prev => prev.map(cat => 
+      setAssessmentCategories(prev => prev.map(cat =>
         (cat.id === selectedCategoryId || cat._id === selectedCategoryId)
           ? { ...cat, selectedAssignments: selectedIds }
           : cat
@@ -418,6 +583,30 @@ const ContinuousAssessment = () => {
     }
   };
 
+  // Handle "View All Assignments" for non-standard categories
+  const handleViewCategoryAssignments = async (category) => {
+    if (!courseID) return;
+    setViewCategoryName(category.category);
+    setShowViewAssignmentsModal(true);
+    setLoadingAssignments(true);
+    try {
+      const response = await getAllCourseAssignments({ courseID });
+      const allAssignments = response.assignments || [];
+      const selectedIds = (category.selectedAssignments || []).map(id =>
+        typeof id === 'string' ? id : (id._id || id.id)?.toString()
+      );
+      const filtered = allAssignments.filter(a =>
+        selectedIds.includes(a._id?.toString())
+      );
+      setViewCategoryAssignments(filtered);
+    } catch (error) {
+      console.error("Error fetching category assignments:", error);
+      setViewCategoryAssignments([]);
+    } finally {
+      setLoadingAssignments(false);
+    }
+  };
+
   const remainingMarks = assessmentPlan.continuousAssessment - totalMarks;
 
   if (loading) {
@@ -430,355 +619,415 @@ const ContinuousAssessment = () => {
     );
   }
 
-  // If creating assignment, show the create form
+  // If creating assignment, show the full CreateAssignmentNew wizard
   if (isCreatingAssignment) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={handleBackFromCreate}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors font-medium"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Back to Continuous Assessment</span>
-            </button>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Create New {createAssignmentType === 'subjective' ? 'General' : 'Objective'} Assignment
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Create a new assignment to include in your continuous assessment plan
-            </p>
-          </div>
-          <div className="p-6">
-            <CreateAssignmentNew
-              courseID={courseID}
-              inModal={false}
-              assignmentType={createAssignmentType}
-              onSave={handleAssignmentSaved}
-              onCancel={handleBackFromCreate}
-            />
-          </div>
-        </div>
-      </div>
+      <CreateAssignmentNew
+        onBack={handleBackFromCreate}
+        onSave={handleAssignmentSaved}
+        courseID={courseID}
+        assignmentType={createAssignmentType}
+        categoryRef={currentCategoryId}
+        configuredMarks={currentCategoryEachMarks}
+        categoryName={currentCategoryName}
+        assignmentIndex={currentAssignmentIndex}
+      />
     );
   }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Continuous Assessments Plan</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Plan and configure assessment categories for your course</p>
-        </div>
-        {!isEditing ? (
-          <button
-            onClick={handleEdit}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Edit3 className="w-4 h-4 mr-2" />
-            Edit Plan
-          </button>
-        ) : (
-          <div className="flex space-x-2">
-            <button
-              onClick={handleCancel}
-              className="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors shadow-sm"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save
-            </button>
+      {/* Header - Gradient Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 shadow-lg">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+        <div className="absolute -bottom-6 right-20 w-24 h-24 bg-white/5 rounded-full" />
+        <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2" />
+        <div className="relative z-10 px-8 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-purple-900/20">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                {isAssessmentMode ? "Continuous Assessment" : "Continuous Assessments Plan"}
+              </h2>
+              <p className="text-white/70 mt-0.5 text-sm">
+                {isAssessmentMode
+                  ? "Create and map assignments using your configured assessment plan"
+                  : "Plan and configure assessment categories for your course"}
+              </p>
+            </div>
           </div>
-        )}
+          {!isAssessmentMode && !isEditing ? (
+            <button
+              onClick={handleEdit}
+              className="inline-flex items-center px-5 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all shadow-lg shadow-purple-900/10 font-semibold border border-white/20"
+            >
+              <Edit3 className="w-4 h-4 mr-2" />
+              Edit Plan
+            </button>
+          ) : !isAssessmentMode ? (
+            <div className="flex space-x-2">
+              <button
+                onClick={handleCancel}
+                className="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all font-semibold border border-white/20"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="inline-flex items-center px-5 py-2.5 bg-white text-purple-700 rounded-xl hover:bg-white/90 transition-all shadow-lg font-semibold"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* Assessment Configuration */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Continuous Assessment</h3>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Allocated: {totalMarks}/{assessmentPlan.continuousAssessment} marks
-            </span>
-            {remainingMarks > 0 && (
-              <span className="text-sm text-red-600 dark:text-red-400 font-medium">
-                Add another {remainingMarks} marks
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        {/* Section Header with Gradient */}
+        <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+          <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-white tracking-tight">Continuous Assessment</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Allocated marks gradient pill */}
+              <span className="px-3 py-1.5 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+                {totalMarks}/{assessmentPlan.continuousAssessment} marks
               </span>
-            )}
-            {remainingMarks < 0 && (
-              <span className="text-sm text-red-600 dark:text-red-400 font-medium">
-                Reduce by {Math.abs(remainingMarks)} marks
-              </span>
-            )}
+              {remainingMarks > 0 && (
+                <span className="px-3 py-1.5 text-xs font-bold text-yellow-100 bg-yellow-500/30 rounded-full backdrop-blur-sm">
+                  +{remainingMarks} needed
+                </span>
+              )}
+              {remainingMarks < 0 && (
+                <span className="px-3 py-1.5 text-xs font-bold text-red-100 bg-red-500/30 rounded-full backdrop-blur-sm">
+                  -{Math.abs(remainingMarks)} over
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Table Header */}
-        <div className="grid grid-cols-6 gap-4 mb-4 pb-3 border-b-2 border-gray-300 dark:border-gray-600">
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">Category</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">Number</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">Each of Marks</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">Marks Calculation Based on</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">n</div>
-          <div className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide flex items-center">Total Marks</div>
-        </div>
-
-        {/* Assessment Rows */}
-        {assessmentCategories.length === 0 && !isEditing ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No assessment categories configured yet. Click "Edit Plan" to add categories.
+        <div className="p-6">
+          {/* Table Header */}
+          <div className="grid grid-cols-6 gap-4 mb-4 px-3 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-700/30 border border-gray-200/60 dark:border-gray-600/40">
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Category</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Number</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Each of Marks</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Marks Calculation Based on</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">n</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Total Marks</div>
           </div>
-        ) : (
-          assessmentCategories.map((category, index) => (
-            <div key={category.id || category._id} className="grid grid-cols-6 gap-4 mb-4 items-start py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 transition-colors border border-gray-200 dark:border-gray-600">
-            {/* Category Dropdown */}
-            <div className="flex items-start">
-              {isEditing ? (
-                <div className="w-full flex flex-col gap-2">
-                  <select
-                    value={category.category}
-                    onChange={(e) => handleCategoryChange(category.id || category._id, e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {categoryOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                  {(category.category === "General Assignment" || category.category === "Objective one") && (
-                    <div className="flex gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleAddNew(category.category);
-                        }}
-                        className="relative px-2 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm cursor-pointer flex items-center justify-center group"
-                        title="Add new"
+
+          {/* Assessment Rows */}
+          {assessmentCategories.length === 0 && !isEditing ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              {isAssessmentMode
+                ? "No assessment categories configured yet. First complete your plan in Continuous Assessment Plan."
+                : 'No assessment categories configured yet. Click "Edit Plan" to add categories.'}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {assessmentCategories.map((category, index) => (
+                <div key={category.id || category._id} className="py-3 px-3 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 rounded-lg transition-all duration-200 border border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:shadow-sm">
+                  <div className="grid grid-cols-6 gap-4 items-start">
+                  {/* Category Dropdown */}
+                  <div className="flex items-start">
+                    {isEditing && !isAssessmentMode ? (
+                      <div className="w-full">
+                        <select
+                          value={category.category}
+                          onChange={(e) => handleCategoryChange(category.id || category._id, e.target.value)}
+                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                          {categoryOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="w-full flex flex-col">
+                        <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">{category.category}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Number Input */}
+                  <div className="flex items-center">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={category.number}
+                        onChange={(e) => updateCategory(category.id || category._id, 'number', e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        min="1"
+                      />
+                    ) : (
+                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.number}</span>
+                    )}
+                  </div>
+
+                  {/* Each of Marks Input */}
+                  <div className="flex items-center">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={category.eachMarks}
+                        onChange={(e) => updateCategory(category.id || category._id, 'eachMarks', e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        min="1"
+                      />
+                    ) : (
+                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.eachMarks}</span>
+                    )}
+                  </div>
+
+                  {/* Calculation Method Dropdown */}
+                  <div className="flex items-center">
+                    {isEditing ? (
+                      <select
+                        value={category.calculationMethod}
+                        onChange={(e) => updateCategory(category.id || category._id, 'calculationMethod', e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
-                        <Plus className="w-4 h-4" />
-                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          Add new
-                        </span>
-                      </button>
+                        {calculationOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.calculationMethod}</span>
+                    )}
+                  </div>
+
+                  {/* n Value Input */}
+                  <div className="flex items-center">
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={isNDerivedFromNumber(category.calculationMethod) ? category.number : category.n}
+                        onChange={(e) => updateCategory(category.id || category._id, 'n', e.target.value)}
+                        disabled={isNDerivedFromNumber(category.calculationMethod)}
+                        className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white ${
+                          isNDerivedFromNumber(category.calculationMethod)
+                            ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
+                            : "bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        }`}
+                        min="1"
+                      />
+                    ) : (
+                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">
+                        {isNDerivedFromNumber(category.calculationMethod) ? category.number : category.n}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Total Marks Display */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">{category.totalMarks}</span>
+                    {isEditing && (
                       <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleSelect(category.id || category._id, category.category);
-                        }}
-                        className="relative px-2 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm cursor-pointer flex items-center justify-center group"
-                        title="Select"
+                        onClick={() => deleteCategory(category.id || category._id)}
+                        className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors ml-2"
+                        title="Delete category"
                       >
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          Select
-                        </span>
+                        <Trash2 className="w-4 h-4" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Determine assignment type based on category
-                          const sectionName = category.category === "General Assignment" ? "Subjective" : "Objective";
-                          localStorage.setItem(`course_${courseID}_selectedSection`, sectionName);
-                          // Dispatch custom event to notify CourseManagement to update
-                          window.dispatchEvent(new CustomEvent('sectionChange', { detail: { section: sectionName } }));
-                        }}
-                        className="relative px-2 py-1.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors shadow-sm cursor-pointer flex items-center justify-center group"
-                        title="View All"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          View All
-                        </span>
-                      </button>
+                    )}
+                  </div>
+                  </div>
+                  {/* Slot-based assignment creation + View */}
+                  {isAssessmentMode && (
+                    <div className="mt-3">
+                      {/* Assignment Slots — one per number */}
+                      {(() => {
+                        const catId = category._id || category.id;
+                        const totalSlots = parseInt(category?.number, 10) || 0;
+                        const existingCount = (category?.selectedAssignments?.length) || 0;
+                        const allCreated = totalSlots > 0 && existingCount >= totalSlots;
+
+                        return (
+                          <>
+                            <div className="flex flex-row flex-wrap items-center gap-2">
+                              {Array.from({ length: totalSlots }, (_, i) => {
+                                const slotIndex = i + 1;
+                                const isCreated = slotIndex <= existingCount;
+                                // Only the NEXT uncreated slot is clickable (sequential creation)
+                                const isNextSlot = slotIndex === existingCount + 1;
+
+                                return (
+                                  <button
+                                    key={slotIndex}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (!isCreated && isNextSlot) {
+                                        handleAddNew(catId, slotIndex);
+                                      }
+                                    }}
+                                    disabled={isCreated || !isNextSlot}
+                                    className={`px-3 py-1.5 rounded-lg transition-all text-xs font-medium flex items-center gap-1.5 ${
+                                      isCreated
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                                        : isNextSlot
+                                          ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm shadow-blue-500/25 hover:shadow-md cursor-pointer'
+                                          : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-600 cursor-not-allowed'
+                                    }`}
+                                    title={
+                                      isCreated
+                                        ? `${getOrdinal(slotIndex)} ${category.category} — Created`
+                                        : isNextSlot
+                                          ? `Create ${getOrdinal(slotIndex)} ${category.category}`
+                                          : `Complete ${getOrdinal(slotIndex - 1)} first`
+                                    }
+                                  >
+                                    {isCreated ? (
+                                      <CheckCircle className="w-3.5 h-3.5" />
+                                    ) : isNextSlot ? (
+                                      <Plus className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <span className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-500 inline-block" />
+                                    )}
+                                    <span>{getOrdinal(slotIndex)} {category.category}</span>
+                                  </button>
+                                );
+                              })}
+
+                              {/* View All Assignments */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleViewCategoryAssignments(category);
+                                }}
+                                className="px-3 py-1.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5 text-xs font-medium"
+                                title="View All Assignments"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>View</span>
+                              </button>
+                            </div>
+
+                            {/* Progress indicator */}
+                            {totalSlots > 0 && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${allCreated ? 'bg-green-500' : 'bg-blue-500'}`}
+                                    style={{ width: `${Math.min((existingCount / totalSlots) * 100, 100)}%` }}
+                                  />
+                                </div>
+                                <span className={`text-xs font-medium ${allCreated ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                  {existingCount}/{totalSlots}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="w-full flex flex-col">
-                  <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">{category.category}</span>
-                  {(category.category === "General Assignment" || category.category === "Objective one") && category.selectedAssignments && category.selectedAssignments.length > 0 && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {category.selectedAssignments.length} assignment(s) selected
-                    </span>
-                  )}
-                  {category.assignmentDetails && category.assignmentDetails.length > 0 && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {category.assignmentDetails.length} assignment(s) linked
-                    </span>
-                  )}
-                </div>
-              )}
+              ))}
             </div>
+          )}
 
-            {/* Number Input */}
-            <div className="flex items-center">
-              {isEditing ? (
-                <input
-                  type="number"
-                  value={category.number}
-                  onChange={(e) => updateCategory(category.id || category._id, 'number', e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  min="1"
-                />
-              ) : (
-                <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.number}</span>
-              )}
+          {/* Add More Category Button */}
+          {isEditing && (
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={addNewCategory}
+                className="inline-flex items-center px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add More Category
+              </button>
             </div>
-
-            {/* Each of Marks Input */}
-            <div className="flex items-center">
-              {isEditing ? (
-                <input
-                  type="number"
-                  value={category.eachMarks}
-                  onChange={(e) => updateCategory(category.id || category._id, 'eachMarks', e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  min="1"
-                />
-              ) : (
-                <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.eachMarks}</span>
-              )}
-            </div>
-
-            {/* Calculation Method Dropdown */}
-            <div className="flex items-center">
-              {isEditing ? (
-                <select
-                  value={category.calculationMethod}
-                  onChange={(e) => updateCategory(category.id || category._id, 'calculationMethod', e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {calculationOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              ) : (
-                <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.calculationMethod}</span>
-              )}
-            </div>
-
-            {/* n Value Input */}
-            <div className="flex items-center">
-              {isEditing ? (
-                <input
-                  type="number"
-                  value={category.n}
-                  onChange={(e) => updateCategory(category.id || category._id, 'n', e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  min="1"
-                />
-              ) : (
-                <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.n}</span>
-              )}
-            </div>
-
-            {/* Total Marks Display */}
-            <div className="flex items-center justify-between">
-              <span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">{category.totalMarks}</span>
-              {isEditing && (
-                <button
-                  onClick={() => deleteCategory(category.id || category._id)}
-                  className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors ml-2"
-                  title="Delete category"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        ))
-        )}
-
-        {/* Add More Category Button */}
-        {isEditing && (
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={addNewCategory}
-              className="inline-flex items-center px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add More Category
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Summary Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Calculator className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      {/* Summary Card with Gradient Header */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <SectionHeader
+          icon={Calculator}
+          title="Continuous Assessment Summary"
+          gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+        />
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Total marks allocated: {totalMarks}/{assessmentPlan.continuousAssessment}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-lg font-semibold text-gray-800 dark:text-white">Continuous Assessment Summary</h4>
-              <p className="text-gray-600 dark:text-gray-400">Total marks allocated: {totalMarks}/{assessmentPlan.continuousAssessment}</p>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-800 dark:text-white">{totalMarks}%</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">of {assessmentPlan.continuousAssessment}% allocated</div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-gray-800 dark:text-white">{totalMarks}%</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">of {assessmentPlan.continuousAssessment}% allocated</div>
-          </div>
+
+          {remainingMarks > 0 && (
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg border-l-4 border-l-yellow-500">
+              <div className="flex items-center">
+                <Target className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" />
+                <span className="text-yellow-800 dark:text-yellow-300 text-sm">
+                  You need to allocate {remainingMarks} more marks to complete the continuous assessment plan.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {remainingMarks < 0 && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg border-l-4 border-l-red-500">
+              <div className="flex items-center">
+                <BarChart3 className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
+                <span className="text-red-800 dark:text-red-300 text-sm">
+                  Total marks exceed the allocated {assessmentPlan.continuousAssessment}%. Please adjust your assessment plan.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {remainingMarks === 0 && totalMarks > 0 && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg border-l-4 border-l-green-500">
+              <div className="flex items-center">
+                <Target className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+                <span className="text-green-800 dark:text-green-300 text-sm font-medium">
+                  Perfect! All {assessmentPlan.continuousAssessment}% continuous assessment marks have been allocated.
+                </span>
+              </div>
+            </div>
+          )}
         </div>
-        
-        {remainingMarks > 0 && (
-          <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <div className="flex items-center">
-              <Target className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" />
-              <span className="text-yellow-800 dark:text-yellow-300 text-sm">
-                You need to allocate {remainingMarks} more marks to complete the continuous assessment plan.
-              </span>
-            </div>
-          </div>
-        )}
-
-        {remainingMarks < 0 && (
-          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <div className="flex items-center">
-              <BarChart3 className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
-              <span className="text-red-800 dark:text-red-300 text-sm">
-                Total marks exceed the allocated {assessmentPlan.continuousAssessment}%. Please adjust your assessment plan.
-              </span>
-            </div>
-          </div>
-        )}
-
-        {remainingMarks === 0 && totalMarks > 0 && (
-          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <div className="flex items-center">
-              <Target className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
-              <span className="text-green-800 dark:text-green-300 text-sm font-medium">
-                Perfect! All {assessmentPlan.continuousAssessment}% continuous assessment marks have been allocated.
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Assignment Selection Modal */}
       {showAssignmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] flex flex-col">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex justify-between items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+            {/* Modal Gradient Header */}
+            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-sky-500 to-blue-600">
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+              <div className="relative z-10 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  <h3 className="text-xl font-bold text-white">
                     Select Assignments
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-white/70 mt-1">
                     Choose assignments to include in this category
                   </p>
                 </div>
@@ -788,13 +1037,13 @@ const ContinuousAssessment = () => {
                     setSelectedAssignments({});
                     setSelectedCategoryId(null);
                   }}
-                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-6">
               {loadingAssignments ? (
                 <div className="text-center py-8 text-gray-600 dark:text-gray-400">
@@ -812,7 +1061,12 @@ const ContinuousAssessment = () => {
                   <button
                     onClick={() => {
                       setShowAssignmentModal(false);
-                      handleAddNew(assessmentCategories.find(c => c.id === selectedCategoryId)?.category || "General Assignment");
+                      const cat = assessmentCategories.find(c => c.id === selectedCategoryId || c._id === selectedCategoryId);
+                      if (cat) {
+                        const catId = cat._id || cat.id;
+                        const nextSlot = (cat.selectedAssignments?.length || 0) + 1;
+                        handleAddNew(catId, nextSlot);
+                      }
                     }}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
@@ -855,7 +1109,7 @@ const ContinuousAssessment = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {Object.keys(selectedAssignments).filter(id => selectedAssignments[id]).length} assignment(s) selected
@@ -879,6 +1133,93 @@ const ContinuousAssessment = () => {
                   Save Selected ({Object.keys(selectedAssignments).filter(id => selectedAssignments[id]).length})
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View-only modal for category-specific assignments */}
+      {showViewAssignmentsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-purple-500 to-indigo-600">
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
+              <div className="relative z-10 flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {viewCategoryName} - Assignments
+                  </h3>
+                  <p className="text-sm text-white/70 mt-1">
+                    Assignments linked to this category
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowViewAssignmentsModal(false);
+                    setViewCategoryAssignments([]);
+                    setViewCategoryName('');
+                  }}
+                  className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-lg"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingAssignments ? (
+                <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                  <p className="mt-2">Loading assignments...</p>
+                </div>
+              ) : viewCategoryAssignments.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 dark:text-gray-500 mb-2">
+                    <FileText className="w-12 h-12 mx-auto" />
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    No assignments linked to this category yet. Use "Select Assignments" to link assignments.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {viewCategoryAssignments.map((assignment) => (
+                    <div
+                      key={assignment._id}
+                      className="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white">{assignment.title}</div>
+                        {assignment.description && (
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                            {assignment.description}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                          <span>{assignment.totalPoints} points</span>
+                          {assignment.dueDate && (
+                            <span>Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowViewAssignmentsModal(false);
+                  setViewCategoryAssignments([]);
+                  setViewCategoryName('');
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

@@ -22,6 +22,7 @@ import {
 } from "../../../services/assignment.service";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
+import CoursePageBanner from "../../../components/shared/CoursePageBanner";
 
 const StudentAssignmentSection = ({ courseID, selectedID }) => {
   const { user } = useAuth();
@@ -426,13 +427,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       // Add file if selected - ensure it's a valid File object
       if (selectedFile && selectedFile instanceof File) {
         formData.append('submissionFile', selectedFile);
-        console.log('Adding file to FormData:', {
-          name: selectedFile.name,
-          size: selectedFile.size,
-          type: selectedFile.type
-        });
       } else if (selectedFile) {
-        console.warn('Selected file is not a valid File object:', selectedFile);
         toast.error('Invalid file selected. Please choose a file again.');
         setIsLoading(false);
         return;
@@ -443,16 +438,6 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
         toast.error('Please provide answers or upload a file');
         setIsLoading(false);
         return;
-      }
-
-      // Log FormData contents for debugging
-      console.log('FormData contents:');
-      for (let pair of formData.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`${pair[0]}: File - ${pair[1].name} (${pair[1].size} bytes, type: ${pair[1].type})`);
-        } else {
-          console.log(`${pair[0]}: ${pair[1]}`);
-        }
       }
 
       // Submit to API
@@ -521,8 +506,16 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   // No assignments
   if (!assignments || assignments.length === 0) {
     return (
-      <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
-        No assignments found.
+      <div>
+        <CoursePageBanner
+          icon={CheckCircle}
+          title="Assignments"
+          subtitle="View and submit your graded assignments"
+          gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+        />
+        <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
+          No assignments found.
+        </div>
       </div>
     );
   }
@@ -530,8 +523,16 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   // No selected assignment
   if (!selectedAssignment) {
     return (
-      <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
-        Please select an assignment.
+      <div>
+        <CoursePageBanner
+          icon={CheckCircle}
+          title="Assignments"
+          subtitle="View and submit your graded assignments"
+          gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+        />
+        <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
+          Please select an assignment.
+        </div>
       </div>
     );
   }
@@ -673,12 +674,16 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   };
 
   return (
-    <div className="flex bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <CoursePageBanner
+        icon={CheckCircle}
+        title="Assignments"
+        subtitle="View and submit your graded assignments"
+        gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+      />
+      <div className="flex">
       {/* Sidebar - Assignment List */}
       <div className="w-1/4 bg-white dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-        <div className="flex items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Assignments</h2>
-        </div>
         <div className="space-y-2">
           {assignments.map((assignment, index) => {
             // Check if student has submitted (using studentSubmission field from API)
@@ -1249,6 +1254,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

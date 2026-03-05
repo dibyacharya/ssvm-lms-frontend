@@ -5,6 +5,7 @@ import AIApprovalModal from './AIApprovalModal';
 import AddQuestionModal from './AddQuestionModal';
 import AIGenerationModal from './AIGenerationModal';
 import { parseFile, getSampleCSVFormat, getSampleJSONFormat } from '../utils/questionParser';
+import { getCourseDescription } from '../../../services/course.service';
 
 const QuestionsStep = ({
   questions, setQuestions,
@@ -57,58 +58,72 @@ const QuestionsStep = ({
 
   const bloomLevels = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 
-  // Helper function to extract course outcomes from courseData
-  // Expected format: courseData.courseOutcomes = [{ code: 'CO1', description: 'Description' }, ...]
-  // Or courseData.courseOutcomes = ['CO1 (Description)', 'CO2 (Description)', ...]
+  // State for backend-fetched course outcomes
+  const [backendCourseOutcomes, setBackendCourseOutcomes] = useState([]);
+
+  // Fetch course outcomes from backend API on mount
+  useEffect(() => {
+    const fetchOutcomes = async () => {
+      const courseId = courseData?._id || courseData?.id;
+      if (!courseId) return;
+      try {
+        const result = await getCourseDescription(courseId);
+        const desc = result?.description || result;
+        if (desc?.courseOutcomes && Array.isArray(desc.courseOutcomes) && desc.courseOutcomes.length > 0) {
+          // Backend format: { code, outcome, bloomLevel, ncrfLevel, weightage }
+          const formatted = desc.courseOutcomes
+            .map((co, idx) => ({
+              code: co.code || `CO${idx + 1}`,
+              description: co.outcome || co.description || ''
+            }))
+            .filter(co => co.description); // Skip outcomes with empty text
+          setBackendCourseOutcomes(formatted);
+        }
+      } catch (err) {
+        console.log('Could not fetch course outcomes from backend:', err.message);
+      }
+    };
+    fetchOutcomes();
+  }, [courseData]);
+
+  // Helper function to extract course outcomes from courseData or backend
   const getCourseOutcomes = () => {
-    if (!courseData) {
-      console.log('No courseData available');
-      return [];
+    // Priority 1: Backend-fetched outcomes
+    if (backendCourseOutcomes.length > 0) {
+      return backendCourseOutcomes;
     }
-    
-    // Check if courseOutcomes exists as an array
+
+    if (!courseData) return [];
+
+    // Priority 2: courseOutcomes from context (backend format { code, outcome } or { code, description })
     if (courseData.courseOutcomes && Array.isArray(courseData.courseOutcomes) && courseData.courseOutcomes.length > 0) {
-      console.log('Found courseOutcomes:', courseData.courseOutcomes);
-      return courseData.courseOutcomes;
+      return courseData.courseOutcomes.map((co, idx) => ({
+        code: co.code || `CO${idx + 1}`,
+        description: co.outcome || co.description || String(co)
+      }));
     }
-    
-    // Check alternative field names
-    if (courseData.course_outcomes && Array.isArray(courseData.course_outcomes) && courseData.course_outcomes.length > 0) {
-      console.log('Found course_outcomes:', courseData.course_outcomes);
-      return courseData.course_outcomes;
-    }
-    
-    // Check if learningOutcomes exist and can be converted
+
+    // Priority 3: learningOutcomes from context
     if (courseData.learningOutcomes && Array.isArray(courseData.learningOutcomes) && courseData.learningOutcomes.length > 0) {
-      console.log('Found learningOutcomes, converting to course outcomes format:', courseData.learningOutcomes);
-      // Try to extract CO codes from learning outcomes
-      // Format might be "LO1: Description" or "CO1: Description"
       return courseData.learningOutcomes.map((outcome, index) => {
         const outcomeStr = String(outcome);
-        // Try to extract CO code
         const coMatch = outcomeStr.match(/^(CO\d+)/i);
         const loMatch = outcomeStr.match(/^(LO\d+)/i);
-        
+
         if (coMatch) {
-          // Already has CO format
           const code = coMatch[1];
           const description = outcomeStr.replace(/^CO\d+[:\s]*/i, '').trim();
           return { code, description: description || outcomeStr };
         } else if (loMatch) {
-          // Convert LO to CO
-          const loCode = loMatch[1];
-          const code = loCode.replace(/^LO/i, 'CO');
+          const code = loMatch[1].replace(/^LO/i, 'CO');
           const description = outcomeStr.replace(/^LO\d+[:\s]*/i, '').trim();
           return { code, description: description || outcomeStr };
         } else {
-          // Default: create CO code from index
           return { code: `CO${index + 1}`, description: outcomeStr };
         }
       });
     }
-    
-    console.log('No course outcomes found in courseData. Available fields:', Object.keys(courseData));
-    // If not found, return empty array (can be populated from API)
+
     return [];
   };
 
@@ -207,6 +222,10 @@ const QuestionsStep = ({
     const apiEndpoint = window.RUNTIME_CONFIG?.QGEN_URL;
 
     try {
+      if (!apiEndpoint) {
+        throw new Error("Question generation service URL is not configured. Please check RUNTIME_CONFIG.QGEN_URL.");
+      }
+
       // Extract modules, topics, and units from courseData
       const modules = [];
       const topics = [];
@@ -216,7 +235,7 @@ const QuestionsStep = ({
         courseData.syllabus.modules.forEach((module, moduleIndex) => {
           // Add module identifier (e.g., "M1", "M2")
           modules.push(`M${module.moduleNumber || moduleIndex + 1}`);
-          
+
           // Add topics for this module
           if (module.topics && Array.isArray(module.topics)) {
             module.topics.forEach((topic, topicIndex) => {
@@ -300,6 +319,10 @@ const QuestionsStep = ({
     const apiEndpoint = window.RUNTIME_CONFIG?.QGEN_URL;
 
     try {
+      if (!apiEndpoint) {
+        throw new Error("Question generation service URL is not configured. Please check RUNTIME_CONFIG.QGEN_URL.");
+      }
+
       // Extract modules, topics, and units from courseData
       const modules = [];
       const topics = [];
@@ -309,7 +332,7 @@ const QuestionsStep = ({
         courseData.syllabus.modules.forEach((module, moduleIndex) => {
           // Add module identifier (e.g., "M1", "M2")
           modules.push(`M${module.moduleNumber || moduleIndex + 1}`);
-          
+
           // Add topics for this module
           if (module.topics && Array.isArray(module.topics)) {
             module.topics.forEach((topic, topicIndex) => {
@@ -1047,7 +1070,7 @@ const QuestionsStep = ({
                               )}
                               {q.courseOutcome && (
                                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                  {q.courseOutcome}
+                                  {formatOutcomeForDisplay(q.courseOutcome)}
                                 </span>
                               )}
                             </div>

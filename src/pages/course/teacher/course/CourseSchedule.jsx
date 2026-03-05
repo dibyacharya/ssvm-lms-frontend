@@ -14,6 +14,7 @@ import {
   FileClock,
 } from "lucide-react";
 import SaveButton from "../../../../utils/CourseSaveButton";
+import { getMidExamLabel, getEndExamLabel } from "../../../../utils/periodLabel";
 import { useParams } from "react-router-dom";
 
 const CourseSchedule = () => {
@@ -29,6 +30,9 @@ const CourseSchedule = () => {
   const [newTime, setNewTime] = useState("");
   const [isAddingTime, setIsAddingTime] = useState(false);
   const { courseID } = useParams();
+  const periodType = courseData?.semester?.periodType || courseData?.periodType || "semester";
+  const midExamLabel = getMidExamLabel(periodType);
+  const endExamLabel = getEndExamLabel(periodType);
   // Format date strings for input date fields
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
@@ -133,7 +137,7 @@ const CourseSchedule = () => {
 
               <div className="flex flex-col space-y-2">
                 <label className="text-sm font-medium text-tertiary">
-                  Mid-Semester Exam Date
+                  {midExamLabel} Date
                 </label>
                 <div className="flex items-center p-4 rounded-xl border border-tertiary/20 bg-gray-50 hover:border-primary/30 transition-all duration-200">
                   <BookOpen className="w-5 h-5 text-primary mr-3" />
@@ -152,7 +156,7 @@ const CourseSchedule = () => {
 
               <div className="flex flex-col space-y-2">
                 <label className="text-sm font-medium text-tertiary">
-                  End Semester Exam Date
+                  {endExamLabel} Date
                 </label>
                 <div className="flex items-center p-4 rounded-xl border border-tertiary/20 bg-gray-50 hover:border-primary/30 transition-all duration-200">
                   <BookOpen className="w-5 h-5 text-primary mr-3" />
