@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Clock, Calendar, Users, Video, Search, Filter, PlayCircle, FileText, Download, Trash2
+  Calendar, Users, Video, Search, Filter, PlayCircle, FileText, Download, Trash2
 } from 'lucide-react';
 import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { getVconfMeetings, deleteVconfRecording } from '../../services/vconf.service';
@@ -124,13 +124,6 @@ function VconfRecordings() {
                   >
                     <FileText size={18} />
                   </button>
-                  <button
-                    onClick={() => navigate(`/vconf/mom/${rec.id}`)}
-                    className="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                    title="View MOM"
-                  >
-                    <Clock size={18} />
-                  </button>
                   <button className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Download">
                     <Download size={18} />
                   </button>
@@ -138,7 +131,6 @@ function VconfRecordings() {
 
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500" title="Transcript Ready"></div>
-                  <div className="w-2 h-2 rounded-full bg-purple-500" title="MOM Ready"></div>
                   {user?.role === 'teacher' && (
                     <button
                       onClick={async () => {

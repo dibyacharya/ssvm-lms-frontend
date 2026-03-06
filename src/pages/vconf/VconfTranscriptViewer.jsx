@@ -99,13 +99,6 @@ function VconfTranscriptViewer() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => navigate(`/vconf/mom/${id}`)}
-              className="flex items-center px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium transition-colors border border-purple-100"
-            >
-              <FileText size={16} className="mr-2" />
-              View MOM
-            </button>
             <button className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200">
               <Download size={16} className="mr-2" />
               Download
