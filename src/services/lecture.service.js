@@ -11,12 +11,9 @@ export const updateLecture = async (courseId, lectureId, lectureData) => {
       `/lectures/${courseId}/lectures/${lectureId}`,
       lectureData,
       {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          timeout: 300000,
-        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 300000,
       }
     );
     return response.data;
@@ -27,6 +24,6 @@ export const updateLecture = async (courseId, lectureId, lectureData) => {
 };
 
 export const getAllStudentLectures = async (courseId) => {
-  const response = await api.get(`/lectures/student/${courseId}/lectures`);
+  const response = await api.get(`/lectures/${courseId}/lectures`);
   return response.data;
 };

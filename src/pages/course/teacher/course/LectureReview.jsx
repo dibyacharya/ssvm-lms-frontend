@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import VideoEditor from "../../../EditLecture/EditLecture";
 import { useParams } from "react-router-dom";
-// import { updateLecture } from "../../../../services/lecture.service";
+import { updateLecture } from "../../../../services/lecture.service";
 import LoadingSpinner from "../../../../utils/LoadingAnimation";
 import { useCourse } from "../../../../context/CourseContext";
 import {
@@ -54,6 +54,12 @@ const LectureReview = () => {
   const [editingHandoutId, setEditingHandoutId] = useState(null);
   const [showHandoutForm, setShowHandoutForm] = useState(false);
   const [savingHandout, setSavingHandout] = useState(false);
+
+  // MOM edit state
+  const [isEditingMOM, setIsEditingMOM] = useState(false);
+  const [editedSegments, setEditedSegments] = useState([]);
+  const [savingMOM, setSavingMOM] = useState(false);
+  const [momSaveMessage, setMomSaveMessage] = useState("");
 
   useEffect(() => {
     if (courseID) {
@@ -464,8 +470,8 @@ const LectureReview = () => {
             <VideoEditor
               videoUrl={(() => {
                 const raw = currentLecture.videoUrl || currentLecture.recordingUrl;
-                // Azure/external URLs need CORS proxy; local/blob URLs work directly
-                if (raw && !raw.startsWith("blob:") && !raw.startsWith("/uploads/")) {
+                // blob: URLs work directly; everything else (Azure, /uploads/) goes through streaming proxy
+                if (raw && !raw.startsWith("blob:")) {
                   const backendUrl = window.RUNTIME_CONFIG?.BACKEND_URL || "http://localhost:5000";
                   return `${backendUrl}/api/lectures/stream/${currentLecture._id}`;
                 }
@@ -496,21 +502,139 @@ const LectureReview = () => {
                     <p className="text-purple-100 text-xs">{currentLecture.title}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowMOMModal(false)}
-                  className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
-                >
-                  <X size={18} className="text-white" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Edit / Save / Cancel buttons */}
+                  {currentLecture.transcriptStatus === "ready" && currentLecture.transcriptSegments?.length > 0 && !isEditingMOM && (
+                    <button
+                      onClick={() => {
+                        setEditedSegments(currentLecture.transcriptSegments.map(seg => ({ ...seg })));
+                        setIsEditingMOM(true);
+                        setMomSaveMessage("");
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white text-xs font-medium hover:bg-white/30 transition-colors flex items-center gap-1"
+                    >
+                      <Edit className="w-3 h-3" /> Edit
+                    </button>
+                  )}
+                  {isEditingMOM && (
+                    <>
+                      <button
+                        disabled={savingMOM}
+                        onClick={async () => {
+                          setSavingMOM(true);
+                          setMomSaveMessage("");
+                          try {
+                            const res = await updateLecture(courseID, currentLecture._id, {
+                              transcriptSegments: editedSegments,
+                            });
+                            // Update the local lecture data
+                            currentLecture.transcriptSegments = editedSegments.map(seg => ({ ...seg }));
+                            currentLecture.transcriptText = editedSegments.map(s => s.text).filter(Boolean).join(" ");
+                            setIsEditingMOM(false);
+                            setMomSaveMessage("Saved!");
+                            setTimeout(() => setMomSaveMessage(""), 2000);
+                          } catch (err) {
+                            console.error("Error saving MOM:", err);
+                            setMomSaveMessage("Failed to save");
+                          } finally {
+                            setSavingMOM(false);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-green-500/80 backdrop-blur-sm text-white text-xs font-medium hover:bg-green-500 transition-colors flex items-center gap-1"
+                      >
+                        <Save className="w-3 h-3" /> {savingMOM ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        disabled={savingMOM}
+                        onClick={() => { setIsEditingMOM(false); setEditedSegments([]); setMomSaveMessage(""); }}
+                        className="px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white text-xs font-medium hover:bg-white/30 transition-colors flex items-center gap-1"
+                      >
+                        <X className="w-3 h-3" /> Cancel
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => { setShowMOMModal(false); setIsEditingMOM(false); setEditedSegments([]); setMomSaveMessage(""); }}
+                    className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+                  >
+                    <X size={18} className="text-white" />
+                  </button>
+                </div>
               </div>
             </div>
+            {/* Success/Error message */}
+            {momSaveMessage && (
+              <div className={`px-6 py-2 text-sm font-medium ${momSaveMessage === "Saved!" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+                {momSaveMessage}
+              </div>
+            )}
             <div className="flex-1 overflow-y-auto p-6">
               {currentLecture.transcriptStatus === "processing" ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-3" />
                   <p>Transcript is being generated...</p>
                 </div>
+              ) : isEditingMOM && editedSegments.length > 0 ? (
+                /* ── Edit Mode ── */
+                <div className="space-y-4">
+                  {editedSegments.map((seg, idx) => (
+                    <div key={idx} className="flex gap-3 p-3 rounded-lg border border-purple-200 bg-purple-50/50">
+                      <span className="text-xs text-gray-400 font-mono min-w-[50px] pt-2 text-right">
+                        {(() => { const m = Math.floor((seg.start || 0) / 60); const s = Math.floor((seg.start || 0) % 60); return `${m}:${s.toString().padStart(2, "0")}`; })()}
+                      </span>
+                      <div className="flex-1 space-y-2">
+                        <input
+                          type="text"
+                          value={seg.speaker}
+                          onChange={(e) => {
+                            const updated = [...editedSegments];
+                            updated[idx] = { ...updated[idx], speaker: e.target.value };
+                            setEditedSegments(updated);
+                          }}
+                          className="w-40 text-xs font-semibold text-purple-600 border border-purple-300 rounded px-2 py-1 bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                          placeholder="Speaker"
+                        />
+                        <textarea
+                          value={seg.text}
+                          onChange={(e) => {
+                            const updated = [...editedSegments];
+                            updated[idx] = { ...updated[idx], text: e.target.value };
+                            setEditedSegments(updated);
+                          }}
+                          rows={2}
+                          className="w-full text-sm text-gray-700 border border-gray-300 rounded px-2 py-1.5 bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none resize-y leading-relaxed"
+                          placeholder="Transcript text..."
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          const updated = editedSegments.filter((_, i) => i !== idx);
+                          setEditedSegments(updated);
+                        }}
+                        className="self-start mt-1 p-1 rounded hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors"
+                        title="Remove segment"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => {
+                      const lastSeg = editedSegments[editedSegments.length - 1];
+                      setEditedSegments([...editedSegments, {
+                        start: lastSeg ? (lastSeg.end || lastSeg.start + 5) : 0,
+                        end: lastSeg ? (lastSeg.end || lastSeg.start + 5) + 5 : 5,
+                        speaker: "Teacher",
+                        text: "",
+                      }]);
+                    }}
+                    className="w-full py-2 rounded-lg border-2 border-dashed border-purple-300 text-purple-500 text-sm font-medium hover:bg-purple-50 hover:border-purple-400 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Add Segment
+                  </button>
+                </div>
               ) : currentLecture.transcriptSegments && currentLecture.transcriptSegments.length > 0 ? (
+                /* ── Read Mode ── */
                 <div className="space-y-3">
                   {currentLecture.transcriptSegments.map((seg, idx) => (
                     <div key={idx} className="flex gap-3 group hover:bg-gray-50 rounded-lg p-2 transition-colors">

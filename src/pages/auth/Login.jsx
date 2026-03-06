@@ -8,8 +8,6 @@ import toast from "react-hot-toast";
 
 // Carousel images
 const carouselImages = [
-  "/image1.jpg",
-  "/image2.jpg",
   "/image3.jpg",
   "/image4.jpg",
   "/image5.jpg"
@@ -169,7 +167,7 @@ const Login = () => {
                 htmlFor="identifier"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                User ID (Roll No / Enrolment No / Employee ID)
+                User ID
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
