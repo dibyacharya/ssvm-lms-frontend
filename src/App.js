@@ -41,8 +41,6 @@ const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
 const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
 const VconfTranscripts = React.lazy(() => import("./pages/vconf/VconfTranscripts"));
 const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
-const VconfMomViewer = React.lazy(() => import("./pages/vconf/VconfMomViewer"));
-const VconfAnalytics = React.lazy(() => import("./pages/vconf/VconfAnalytics"));
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -262,27 +260,6 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/vconf/mom/:id"
-            element={
-              <PrivateRoute roles={["teacher", "student"]}>
-                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
-                  <VconfMomViewer />
-                </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/vconf/analytics"
-            element={
-              <PrivateRoute roles={["teacher"]}>
-                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
-                  <VconfAnalytics />
-                </Suspense>
-              </PrivateRoute>
-            }
-          />
-
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>

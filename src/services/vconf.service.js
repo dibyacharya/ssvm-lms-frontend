@@ -79,7 +79,7 @@ export const getVconfRecordingStream = (meetingId) => {
   return `${baseURL}/vconf/meetings/${meetingId}/recording/stream`;
 };
 
-// ─── AI / Transcript / MOM ───
+// ─── Transcript ───
 
 export const getVconfTranscript = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/transcript`);
@@ -91,40 +91,15 @@ export const insertVconfTranscript = async (meetingId, data) => {
   return res.data;
 };
 
-export const getVconfSummary = async (meetingId) => {
-  const res = await api.get(`/vconf/meetings/${meetingId}/summary`);
-  return res.data;
-};
-
-export const getVconfMom = async (meetingId) => {
-  const res = await api.get(`/vconf/meetings/${meetingId}/mom`);
-  return res.data;
-};
-
-export const getVconfTopics = async (meetingId) => {
-  const res = await api.get(`/vconf/meetings/${meetingId}/topics`);
-  return res.data;
-};
-
 export const getVconfLiveAI = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/live-ai`);
   return res.data;
 };
 
-// ─── Analytics ───
+// ─── Attendance ───
 
 export const getVconfAttendance = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/attendance`);
-  return res.data;
-};
-
-export const getVconfDashboard = async () => {
-  const res = await api.get("/vconf/dashboard");
-  return res.data;
-};
-
-export const getVconfTeacherContribution = async (teacherId) => {
-  const res = await api.get(`/vconf/teachers/${teacherId}/contribution`);
   return res.data;
 };
 

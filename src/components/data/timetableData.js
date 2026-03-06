@@ -456,19 +456,6 @@ export const semesterTimetables = [
 ];
 
 /**
- * Helper function to convert day name to day number (0 = Sunday, 1 = Monday, etc.)
- */
-export const dayNameToNumber = {
-  Sunday: 0,
-  Monday: 1,
-  Tuesday: 2,
-  Wednesday: 3,
-  Thursday: 4,
-  Friday: 5,
-  Saturday: 6
-};
-
-/**
  * Get timetable data for a specific semester
  * @param {number} semester - Semester number (e.g., 2, 4)
  * @returns {Object|null} Timetable object for the semester or null if not found
@@ -572,18 +559,3 @@ export const generateTimetableEvents = (semester, startDate = new Date(), endDat
   return events;
 };
 
-// Legacy exports for backward compatibility (deprecated)
-/**
- * @deprecated Use getTimetableForSemester(4) instead
- */
-export const weekdayTimetable = semesterTimetables.find(t => t.semester === 4)?.weekdayTimetable || [];
-
-/**
- * @deprecated Use getTimetableForSemester(4) instead
- */
-export const weekendTimetable = semesterTimetables.find(t => t.semester === 4)?.weekendTimetable || [];
-
-/**
- * @deprecated Use getFullTimetableForSemester(4) instead
- */
-export const fullTimetable = getFullTimetableForSemester(4) || [];
