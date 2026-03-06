@@ -16,6 +16,7 @@ import { getAllStudentCourses } from "../../services/course.service";
 import { generateTimetableEvents, getAvailableSemesters } from "../data/timetableData";
 import { getPeriodLabel } from "../../utils/periodLabel";
 import { Video } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DashboardBanner from "../../pages/StudentDashboard/Components/DashboardBanner";
 
 // Set up the localizer for react-big-calendar
@@ -37,7 +38,7 @@ const EventComponent = ({ event }) => (
   </div>
 );
 
-const SubjectMeeting = ({ meeting, onJoin }) => (
+const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
   <div className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md dark:hover:shadow-lg transition-shadow duration-300">
     <div className="flex justify-between items-start mb-4">
       <div>
@@ -103,6 +104,17 @@ const SubjectMeeting = ({ meeting, onJoin }) => (
           Join Meeting
         </div>
       </a>
+    )}
+    {!meeting.isTimetable && (meeting.vconfRoomId || meeting._id) && (
+      <button
+        onClick={() => onJoinVConf(meeting)}
+        className="block w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
+      >
+        <div className="flex items-center justify-center">
+          <FaVideo className="mr-2" />
+          Join Live Class
+        </div>
+      </button>
     )}
   </div>
 );
@@ -239,8 +251,14 @@ const CreateMeeting = () => {
     setSelectedDate(date);
   };
 
+  const navigate = useNavigate();
+
   const handleJoinMeeting = (meeting) => {
     window.open(meeting.link, "_blank");
+  };
+
+  const handleJoinVConf = (meeting) => {
+    navigate(`/vconf/meeting/${meeting.vconfRoomId || meeting._id}`);
   };
 
   // Format meetings for react-big-calendar's `events` prop
@@ -364,6 +382,7 @@ const CreateMeeting = () => {
                     key={meeting._id}
                     meeting={meeting}
                     onJoin={handleJoinMeeting}
+                    onJoinVConf={handleJoinVConf}
                   />
                 ))}
               </div>
@@ -462,6 +481,15 @@ const CreateMeeting = () => {
                 >
                   <FaVideo className="mr-2" />
                   Join Meeting
+                </button>
+              )}
+              {!selectedMeeting.isTimetable && (selectedMeeting.vconfRoomId || selectedMeeting._id) && (
+                <button
+                  className="flex-1 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
+                  onClick={() => handleJoinVConf(selectedMeeting)}
+                >
+                  <FaVideo className="mr-2" />
+                  Join Live Class
                 </button>
               )}
               <button

@@ -3,7 +3,6 @@ import {
   FaTachometerAlt,
   FaBook,
   FaCalendarCheck,
-  FaChalkboardTeacher,
   FaTasks,
   FaUserGraduate,
   FaSignOutAlt,
@@ -43,11 +42,6 @@ const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
       id: "Gradebook",
       label: "Gradebook",
       icon: <FaGraduationCap />,
-    },
-    {
-      id: "LiveClass",
-      label: "Live Class",
-      icon: <FaChalkboardTeacher />,
     },
     {
       id: "ToDo",

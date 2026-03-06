@@ -154,28 +154,27 @@ const AttendanceTracker = () => {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-8">
-      <div className="flex justify-between items-center absolute -top-10 right-36">
-        <SaveButton urlId={courseID} />
-      </div>
-
       {/* Header Section - Gradient Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-green-500 shadow-lg">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
         <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-full" />
         <div className="relative z-10 px-8 py-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <ClipboardCheck className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <ClipboardCheck className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white tracking-tight">
+                  Attendance Tracker
+                </h1>
+                <p className="text-emerald-100 mt-1">
+                  Track and manage student attendance records
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">
-                Attendance Tracker
-              </h1>
-              <p className="text-emerald-100 mt-1">
-                Track and manage student attendance records
-              </p>
-            </div>
+            <SaveButton urlId={courseID} />
           </div>
         </div>
       </div>
