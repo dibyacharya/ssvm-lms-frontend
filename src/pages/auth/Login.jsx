@@ -135,7 +135,7 @@ const Login = () => {
             Empowering Minds, <br /> One Login at a Time.
           </h2>
           <p className="text-lg text-gray-100">
-            Welcome to the future of learning with KIITX LMS.
+            Welcome to the future of learning with KiiT X eLearning.
           </p>
           <div className="mt-2 flex gap-2">
           <div className="h-4 w-4  bg-white rounded-full"></div>
@@ -150,7 +150,7 @@ const Login = () => {
         <div className="w-full max-w-md">
           <div className="text-left mb-10">
             <h1 className="text-4xl font-bold text-gray-800">
-              KIITX LMS
+              KiiT X eLearning
             </h1>
             <p className="text-gray-500 mt-2">Welcome back! Please sign in to your account.</p>
           </div>
