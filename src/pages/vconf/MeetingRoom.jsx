@@ -11,8 +11,6 @@ import {
   joinVconfMeeting,
   startVconfMeeting,
   endVconfMeeting,
-  getVconfLiveAI,
-  insertVconfTranscript,
   startVconfRecording,
   stopVconfRecording,
   getVconfMeeting,
@@ -463,37 +461,14 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
   const handleManualInject = async (e) => {
     e.preventDefault();
-    if (!manualText.trim() || !activeMeetingId) return;
-    try {
-      await insertVconfTranscript(activeMeetingId, { speaker: manualSpeaker, text: manualText });
-      setManualText("");
-      // Will be fetched automatically by the polling useEffect
-    } catch (e) {
-      console.error("Failed to inject transcript", e);
-    }
+    // Transcript injection disabled (AI features removed)
+    setManualText("");
   };
 
   useEffect(() => {
     const interval = setInterval(() => setElapsedTime(t => t + 1), 1000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!activeMeetingId) return;
-    const fetchAi = async () => {
-      try {
-        const data = await getVconfLiveAI(activeMeetingId);
-        if (data.transcripts) {
-          setLiveTranscripts(data.transcripts.reverse());
-        }
-      } catch (err) {
-        console.error("Failed to fetch transcripts", err);
-      }
-    };
-    fetchAi(); // initial
-    const interval = setInterval(fetchAi, 3000); // Poll every 3 seconds
-    return () => clearInterval(interval);
-  }, [activeMeetingId]);
 
   useEffect(() => {
     const handleAudioPlaybackChanged = (canPlayback) => {
@@ -554,16 +529,9 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     };
     room.on('dataReceived', handleDataReceived);
 
-    // In case LiveKit STT is enabled on server
+    // LiveKit STT handler (transcript storage disabled — AI features removed)
     const handleTranscription = (segments, participant) => {
-      const name = participant?.identity || 'Speaker';
-      for (const seg of segments) {
-        if (seg.isFinal && seg.text && seg.text.trim().length > 0) {
-          if (activeMeetingId) {
-            insertVconfTranscript(activeMeetingId, { speaker: name, text: seg.text }).catch(e => console.error("Transcript insert error:", e));
-          }
-        }
-      }
+      // No-op: transcript insertion disabled
     };
     room.on('transcriptionReceived', handleTranscription);
 
@@ -586,11 +554,8 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       recognition.lang = 'en-US';
 
       recognition.onresult = (event) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
-        if (transcript.trim().length > 0) {
-          const speakerName = user?.role === 'teacher' ? `Teacher ${user?.name}` : `Student ${user?.name}`;
-          insertVconfTranscript(activeMeetingId, { speaker: speakerName, text: transcript, time: elapsedTimeRef.current }).catch(e => console.error(e));
-        }
+        // Transcript insertion disabled (AI features removed)
+        // Speech recognition still runs for local display if needed
       };
 
       recognition.onerror = (event) => {

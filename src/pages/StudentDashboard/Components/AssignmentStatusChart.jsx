@@ -129,14 +129,14 @@ const AssignmentStatusChart = ({
       </div>
 
       {/* CSS Variables for Tooltip Styling */}
-      <style jsx>{`
-        :global(:root) {
+      <style>{`
+        :root {
           --tooltip-bg: white;
           --tooltip-border: #e5e7eb;
           --tooltip-text: #374151;
         }
-        
-        :global(.dark) {
+
+        .dark {
           --tooltip-bg: #374151;
           --tooltip-border: #4b5563;
           --tooltip-text: #f3f4f6;

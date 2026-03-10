@@ -1,17 +1,33 @@
+# dependencies
 /node_modules
-.env# mac junk
-.DS_Store
-**/.DS_Store
+node_modules/
 
 # build output
 build/
 dist/
 
-# dependencies
-node_modules/
-
-# env
+# env / secrets
 .env
 .env.*
+.env.local
+
+# mac junk
+.DS_Store
+**/.DS_Store
+
+# editor / IDE
+.vscode/
+.idea/
+.claude/
+
+# test / coverage
 coverage/
+
+# backup / temp
+*.bak
+*.bak.*
 public/config.js.bak.codex
+
+# logs
+*.log
+npm-debug.log*

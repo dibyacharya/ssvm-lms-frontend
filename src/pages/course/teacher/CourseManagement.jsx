@@ -561,7 +561,11 @@ const CourseManagement = () => {
               </button>
 
               {/* Dropdown Menus */}
-              {Object.keys(navigationOptions).map((key) => renderDropdown(key))}
+              {Object.keys(navigationOptions).map((key) => (
+                <React.Fragment key={key}>
+                  {renderDropdown(key)}
+                </React.Fragment>
+              ))}
 
               {/* Recordings Button with underline effect */}
               <button

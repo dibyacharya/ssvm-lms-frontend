@@ -429,7 +429,11 @@ const CourseDetails = () => {
               <span>Back</span>
             </button>
             <div className="flex items-center space-x-6">
-              {["home", "courses"].map((key) => renderDropdown(key))}
+              {["home", "courses"].map((key) => (
+                <React.Fragment key={key}>
+                  {renderDropdown(key)}
+                </React.Fragment>
+              ))}
 
               {/* Class Rec. Button with underline effect */}
               <button
@@ -463,7 +467,11 @@ const CourseDetails = () => {
                 )}
               </button>
 
-              {["assessment", "assignment"].map((key) => renderDropdown(key))}
+              {["assessment", "assignment"].map((key) => (
+                <React.Fragment key={key}>
+                  {renderDropdown(key)}
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </div>

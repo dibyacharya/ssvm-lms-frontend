@@ -20,7 +20,6 @@ const LiveClassSection = () => {
   const navigate = useNavigate();
   const vconfLinks = [
     { label: "View Recordings", path: "/vconf/recordings", icon: Video, color: "blue" },
-    { label: "View Transcripts", path: "/vconf/transcripts", icon: FileText, color: "purple" },
   ];
 
   const colorMap = {

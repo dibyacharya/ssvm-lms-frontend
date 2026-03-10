@@ -420,7 +420,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                 const theme = resolveCourseTheme(course);
                 return (
                 <Link
-                  key={course.id}
+                  key={course._id}
                   to={`/student/course/${course._id}`}
                   className="group relative flex flex-col justify-between rounded-lg border border-gray-100 dark:border-gray-700 hover:border-2 hover:border-accent1/30 dark:hover:border-blue-400/50 shadow-accent1 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden bg-white dark:bg-gray-800"
                   onClick={() => {

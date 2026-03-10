@@ -39,7 +39,6 @@ import Profile from "./pages/Profile/Profile.jsx";
 const VconfMeetingRoom = React.lazy(() => import("./pages/vconf/MeetingRoom"));
 const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
 const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
-const VconfTranscripts = React.lazy(() => import("./pages/vconf/VconfTranscripts"));
 const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
 const App = () => {
    useEffect(() => {
@@ -236,16 +235,6 @@ const Layout = () => {
               <PrivateRoute roles={["teacher", "student"]}>
                 <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
                   <VconfRecordings />
-                </Suspense>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/vconf/transcripts"
-            element={
-              <PrivateRoute roles={["teacher", "student"]}>
-                <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
-                  <VconfTranscripts />
                 </Suspense>
               </PrivateRoute>
             }

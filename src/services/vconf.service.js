@@ -3,7 +3,7 @@ import api from "./api";
 /**
  * Video Conferencing Service — Full API
  *
- * All calls route through LMS backend proxy at /vconf/*
+ * All calls route through LMS backend at /vconf/*
  * Auth is handled by the axios interceptor (JWT token auto-attached).
  */
 
@@ -79,20 +79,10 @@ export const getVconfRecordingStream = (meetingId) => {
   return `${baseURL}/vconf/meetings/${meetingId}/recording/stream`;
 };
 
-// ─── Transcript ───
+// ─── Transcript (stub — AI features removed) ───
 
 export const getVconfTranscript = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/transcript`);
-  return res.data;
-};
-
-export const insertVconfTranscript = async (meetingId, data) => {
-  const res = await api.post(`/vconf/meetings/${meetingId}/transcript`, data);
-  return res.data;
-};
-
-export const getVconfLiveAI = async (meetingId) => {
-  const res = await api.get(`/vconf/meetings/${meetingId}/live-ai`);
   return res.data;
 };
 
@@ -100,17 +90,5 @@ export const getVconfLiveAI = async (meetingId) => {
 
 export const getVconfAttendance = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/attendance`);
-  return res.data;
-};
-
-// ─── Room-level (existing, kept for backward compat) ───
-
-export const getVconfRecording = async (roomId) => {
-  const res = await api.get(`/vconf/recording/${roomId}`);
-  return res.data;
-};
-
-export const getVconfRoomStatus = async (roomId) => {
-  const res = await api.get(`/vconf/status/${roomId}`);
   return res.data;
 };

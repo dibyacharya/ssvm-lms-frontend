@@ -215,6 +215,16 @@ const StudentContentSection = () => {
   const getPptPreviewUrl = (fileUrl) =>
     `${BACKEND_URL}/api/preview/ppt-to-pdf?file=${encodeURIComponent(fileUrl)}`;
 
+  // Detect if a video item is an uploaded file (vs YouTube/Vimeo URL)
+  const isUploadedVideo = (item) => {
+    if (item?.fileKey || item?.fileName) return true;
+    const url = item?.fileUrl || item?.url || "";
+    if (!url) return false;
+    if (url.includes("blob.core.windows.net") || url.includes("/uploads/")) return true;
+    if (url && !url.includes("youtube.com") && !url.includes("youtu.be") && !url.includes("vimeo.com")) return true;
+    return false;
+  };
+
   const convertToEmbedUrl = (url) => {
     if (!url) return url;
     if (url.includes("youtube.com/watch?v=")) {
@@ -438,22 +448,36 @@ const StudentContentSection = () => {
                       </div>
                     )}
 
-                    <iframe
-                      src={viewerUrl}
-                      className="w-full h-full border-0"
-                      style={{ minHeight: "70vh" }}
-                      title={viewingItem.name || viewingItem.title}
-                      onLoad={() => setViewerLoading(false)}
-                      onError={() => {
-                        setViewerLoading(false);
-                        setViewerFailed(true);
-                      }}
-                      sandbox={
-                        selectedContentType === "links"
-                          ? "allow-same-origin allow-scripts allow-popups allow-forms"
-                          : undefined
-                      }
-                    />
+                    {selectedContentType === "videos" && isUploadedVideo(viewingItem) ? (
+                      <video
+                        src={viewerUrl}
+                        controls
+                        className="w-full h-full"
+                        style={{ minHeight: "70vh", backgroundColor: "#000" }}
+                        onLoadedData={() => setViewerLoading(false)}
+                        onError={() => {
+                          setViewerLoading(false);
+                          setViewerFailed(true);
+                        }}
+                      />
+                    ) : (
+                      <iframe
+                        src={viewerUrl}
+                        className="w-full h-full border-0"
+                        style={{ minHeight: "70vh" }}
+                        title={viewingItem.name || viewingItem.title}
+                        onLoad={() => setViewerLoading(false)}
+                        onError={() => {
+                          setViewerLoading(false);
+                          setViewerFailed(true);
+                        }}
+                        sandbox={
+                          selectedContentType === "links"
+                            ? "allow-same-origin allow-scripts allow-popups allow-forms"
+                            : undefined
+                        }
+                      />
+                    )}
 
                     {viewerFailed && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white">
