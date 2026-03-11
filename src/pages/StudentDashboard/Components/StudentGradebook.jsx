@@ -157,6 +157,11 @@ const StudentGradebook = () => {
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {course.courseCode || course.code} • {coursePeriodLabel}{" "}
                           {course.semNumber || course.semester?.semNumber || "N/A"}
+                          {course.creditPoints ? (
+                            <span className="ml-2">
+                              • LTPC: {course.creditPoints.lecture || 0}-{course.creditPoints.tutorial || 0}-{course.creditPoints.practical || 0}-{course.creditPoints.totalCredits || 0}
+                            </span>
+                          ) : null}
                         </p>
                       </div>
                     </div>

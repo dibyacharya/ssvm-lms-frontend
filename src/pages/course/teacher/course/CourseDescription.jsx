@@ -417,7 +417,16 @@ const CourseDescription = () => {
             <div className="p-5 space-y-2.5">
               <InfoCard icon={<Hash className="w-4 h-4 text-indigo-500" />} label="Course Code" value={description.courseCode || description.kiitxCourseCode} accent="bg-indigo-50/60" />
               <InfoCard icon={<FileText className="w-4 h-4 text-blue-500" />} label="Course Type" value={description.courseType ? description.courseType.charAt(0).toUpperCase() + description.courseType.slice(1) : null} accent="bg-blue-50/60" />
-              <InfoCard icon={<Award className="w-4 h-4 text-amber-500" />} label="Credits" value={description.courseCredits} accent="bg-amber-50/60" />
+              <InfoCard
+                icon={<Award className="w-4 h-4 text-amber-500" />}
+                label="Credits"
+                value={
+                  description.creditPoints
+                    ? `${description.creditPoints.lecture}-${description.creditPoints.tutorial}-${description.creditPoints.practical}-${description.creditPoints.totalCredits}`
+                    : description.courseCredits
+                }
+                accent="bg-amber-50/60"
+              />
               <InfoCard icon={<GraduationCap className="w-4 h-4 text-purple-500" />} label="NCRF Level" value={description.ncrfLevel} accent="bg-purple-50/60" />
               {description.avgNcrfLevel != null && (
                 <InfoCard icon={<Target className="w-4 h-4 text-teal-500" />} label="Average NCRF Level" value={typeof description.avgNcrfLevel === "number" ? parseFloat(description.avgNcrfLevel.toFixed(2)) : description.avgNcrfLevel} accent="bg-teal-50/60" />

@@ -4,10 +4,12 @@ import {
   FaBook,
   FaUserCircle,
   FaSignOutAlt,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 import TeacherCourses from "./Components/TeacherCourses";
 import TeacherDashboard2 from "./Components/TeacherDashboard2/TeacherDashboard2.jsx";
+import Timetable from "../../components/timetable/Timetable.jsx";
 import { useAuth } from "../../context/AuthContext.js";
 import { Link, useNavigate } from "react-router-dom";
 import { useUtilityContext } from "../../context/UtilityContext.js";
@@ -36,6 +38,11 @@ const TeacherDashboard = () => {
       id: "myCourses",
       label: "My Courses",
       icon: <FaBook />,
+    },
+    {
+      id: "Timetable",
+      label: "Timetable",
+      icon: <FaCalendarAlt />,
     },
     {
       id: "Analytics",
@@ -179,6 +186,7 @@ const TeacherDashboard = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-xl h-full border border-gray-100 dark:border-gray-600">
           {activeSection === "Dashboard" && <TeacherDashboard2 />}
           {activeSection === "myCourses" && <TeacherCourses />}
+          {activeSection === "Timetable" && <Timetable />}
           {activeSection === "Analytics" && <TeacherAnalyticsDashboard />}
         </div>
       </div>
