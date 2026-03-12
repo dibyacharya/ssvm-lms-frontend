@@ -39,10 +39,10 @@ const CourseInfo = ({ course }) => {
         <div className="flex items-center space-x-4 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
           <Star className="w-7 h-7 text-yellow-500 dark:text-yellow-400" />
           <p className="text-gray-800 dark:text-gray-200 font-medium">
-            Credit Points: Lecture ({course.creditPoints.lecture}), Tutorial (
-            {course.creditPoints.tutorial}), Practical (
-            {course.creditPoints.practical}), Project (
-            {course.creditPoints.project})
+            Credit Points: Lecture ({course.creditPoints?.lecture || 0}), Tutorial (
+            {course.creditPoints?.tutorial || 0}), Practical (
+            {course.creditPoints?.practical || 0}), Total (
+            {course.creditPoints?.totalCredits || 0})
           </p>
         </div>
 

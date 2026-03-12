@@ -355,7 +355,8 @@ const CourseBrief = () => {
                   activeSection === "credits"
                     ? tempCreditPoints
                     : courseData.creditPoints
-                ).map(([type, value]) => (
+                ).filter(([type]) => ["lecture", "tutorial", "practical"].includes(type))
+                .map(([type, value]) => (
                   <div key={type}>{renderCreditItem(type, value)}</div>
                 ))}
                 <div className="col-span-2">
