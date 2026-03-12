@@ -301,19 +301,24 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionState]);
 
-  // Auto-start recording for teacher using LiveKit tracks
+  // Auto-start recording for teacher once any track is published
   useEffect(() => {
     if (user?.role === 'teacher' && connectionState === 'connected' && !isRecording && !recordingStartedRef.current) {
+      // Only auto-start when at least one track (camera or mic) is available
+      const videoPublication = localParticipant?.getTrackPublication(Track.Source.Camera);
+      const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
+      const hasTrack = videoPublication?.track?.mediaStreamTrack || audioPublication?.track?.mediaStreamTrack;
+      if (!hasTrack) return; // Wait until teacher enables camera or mic
+
       recordingStartedRef.current = true;
       recordingIntendedStopRef.current = false;
-      // Small delay to let LiveKit tracks publish first
       const timer = setTimeout(() => {
         startLocalRecording();
-      }, 2000);
+      }, 500);
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.role, connectionState, isRecording]);
+  }, [user?.role, connectionState, isRecording, isCameraEnabled, isMicrophoneEnabled]);
 
   // Safety: if isRecording is true but mediaRecorder ref is lost (e.g. HMR), reset state
   useEffect(() => {
@@ -391,11 +396,10 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       }
 
       if (tracks.length === 0) {
-        // Fallback: try getUserMedia if LiveKit tracks not ready
-        console.warn("[Recording] No LiveKit tracks found, falling back to getUserMedia");
-        const mStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        recordingStreamRef.current = mStream;
-        setupMediaRecorder(mStream);
+        // No tracks available yet -- skip recording, will retry when tracks are published
+        console.warn("[Recording] No tracks available yet, waiting for camera/mic to be enabled");
+        recordingStartedRef.current = false; // Allow retry
+        return;
       } else {
         console.log("[Recording] Using LiveKit tracks:", tracks.map(t => t.kind).join(', '));
         const combinedStream = new MediaStream(tracks);
@@ -1207,7 +1211,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                 )}
               >
                 {isRecordingPaused ? <Play size={24} /> : <Pause size={24} />}
-                <span className="text-[10px] mt-1 font-medium">{!isRecording ? "Starting..." : isRecordingPaused ? "Resume" : "Pause"}</span>
+                <span className="text-[10px] mt-1 font-medium">{!isRecording ? "Record" : isRecordingPaused ? "Resume" : "Pause"}</span>
               </button>
 
               <div className="h-8 w-px bg-slate-700 mx-2"></div>

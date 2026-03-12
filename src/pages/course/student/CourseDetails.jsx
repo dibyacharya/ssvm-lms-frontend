@@ -19,7 +19,6 @@ import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 import MentorInfo from "../../../components/dashboard/utils/MentorInfo";
 import CourseInfo from "../../../components/dashboard/utils/CourseInfo";
-import WeeklyPlanTable from "../../../components/dashboard/utils/WeeklyInfo";
 import SyllabusAccordion from "../../../components/dashboard/utils/SyllabusComponent";
 import LectureContent from "../../../components/dashboard/utils/RecordedComponent";
 import AssignmentsList from "../../../components/dashboard/utils/AssignmentComponent/AssignmentList";
@@ -293,7 +292,6 @@ const CourseDetails = () => {
                 </div>
                 <CourseInfo course={course} />
               </div>
-              <WeeklyPlanTable course={course} />
             </div>
           </div>
         );
