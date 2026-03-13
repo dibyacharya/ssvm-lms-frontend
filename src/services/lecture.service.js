@@ -23,6 +23,16 @@ export const updateLecture = async (courseId, lectureId, lectureData) => {
   }
 };
 
+export const deleteLecture = async (courseId, lectureId) => {
+  try {
+    const response = await api.delete(`/lectures/${courseId}/lectures/${lectureId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting lecture:", error);
+    throw error;
+  }
+};
+
 export const getAllStudentLectures = async (courseId) => {
   const response = await api.get(`/lectures/${courseId}/lectures`);
   return response.data;

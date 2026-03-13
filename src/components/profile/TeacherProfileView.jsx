@@ -53,9 +53,22 @@ const TeacherProfileView = ({
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   {field.label}
                 </div>
-                <div className="mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">
-                  {toDisplay(field.value)}
-                </div>
+                {field.label === "Tags" && field.value ? (
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {String(field.value).split(", ").map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-block rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">
+                    {toDisplay(field.value)}
+                  </div>
+                )}
               </div>
             ))}
           </div>

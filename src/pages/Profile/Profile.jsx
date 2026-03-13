@@ -407,20 +407,51 @@ export default function Profile() {
       : {};
 
     if (isTeacherProfile) {
-      return [
+      // Build associated schools from backend (fetched from Program.school via courses)
+      const backendSchools = Array.isArray(profileData?.associatedSchools)
+        ? profileData.associatedSchools
+        : [];
+      const schoolValue =
+        backendSchools.length > 0
+          ? backendSchools.join(", ")
+          : details["School Associated"] || "";
+
+      // Build access role tags (DEAN, PROGRAM_COORDINATOR, etc.)
+      const accessRoles = Array.isArray(profileData?.user?.accessRoles)
+        ? profileData.user.accessRoles
+        : [];
+      const roleTags = accessRoles
+        .filter((r) => r && r !== "TEACHER") // "TEACHER" is redundant since designation shows it
+        .map((r) =>
+          r
+            .split("_")
+            .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+            .join(" ")
+        );
+
+      const fields = [
         {
           label: "Name",
           value: buildTeacherDisplayName(details, profileData?.user?.name || ""),
         },
         {
           label: "Designation",
-          value: details["Designation"] || profileData?.user?.designation || "",
+          value: details["Designation"] || profileData?.user?.designation || "Teacher",
         },
         {
           label: "School Associated",
-          value: details["School Associated"] || "",
+          value: schoolValue,
         },
       ];
+
+      if (roleTags.length > 0) {
+        fields.push({
+          label: "Tags",
+          value: roleTags.join(", "),
+        });
+      }
+
+      return fields;
     }
 
     const academic = isPlainObject(profileData?.academicSummary)

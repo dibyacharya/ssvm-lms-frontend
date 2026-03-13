@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ArrowLeft,
   ChevronDown,
@@ -139,14 +139,31 @@ const CourseManagement = () => {
   }, []);
 
   // Find live meeting instance for this course based on backend-computed status
-  const liveMeeting = useMemo(() => {
-    if (!courseID || !courseMeetings.length) return null;
-    return courseMeetings.find(
-      (meeting) =>
-        meeting.course === courseID &&
-        meeting.status === "live"
+  // Live meeting detection — checks every 15s for meetings starting within 5 min
+  const [liveMeeting, setLiveMeeting] = useState(null);
+  const checkLiveMeeting = useCallback(() => {
+    if (!courseID || !courseMeetings.length) { setLiveMeeting(null); return; }
+    const now = new Date();
+    const THRESHOLD_MS = 5 * 60 * 1000;
+
+    const live = courseMeetings.find(
+      (m) => m.course === courseID && m.status === "live"
     );
+    if (live) { setLiveMeeting(live); return; }
+
+    const upcoming = courseMeetings.find((m) => {
+      if (m.course !== courseID || m.status !== "upcoming") return false;
+      const diff = new Date(m.start) - now;
+      return diff > 0 && diff <= THRESHOLD_MS;
+    });
+    setLiveMeeting(upcoming || null);
   }, [courseID, courseMeetings]);
+
+  useEffect(() => {
+    checkLiveMeeting();
+    const timer = setInterval(checkLiveMeeting, 15_000);
+    return () => clearInterval(timer);
+  }, [checkLiveMeeting]);
 
   const { courseData, setCourseData, markSessionsAsSaved } = useCourse();
 
@@ -572,21 +589,13 @@ const CourseManagement = () => {
                 </div>
                 {liveMeeting ? (
                   <div className="ml-8">
-                    <a
-                      href={liveMeeting.vconfHostUrl || liveMeeting.vconfJoinUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => {
-                        if (!liveMeeting.vconfHostUrl && !liveMeeting.vconfJoinUrl) {
-                          e.preventDefault();
-                          alert("Video conference room is not ready yet. Please try again in a moment.");
-                        }
-                      }}
-                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline shadow-lg"
+                    <button
+                      onClick={() => navigate(`/vconf/meeting/${liveMeeting._id}`)}
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline shadow-lg cursor-pointer"
                     >
                       <MdLiveTv />
-                      Join Live Class
-                    </a>
+                      {liveMeeting.status === "live" ? "Join Live Class" : "🔴 Class Starting Soon"}
+                    </button>
                   </div>
                 ) : (
                   <div className="ml-8">

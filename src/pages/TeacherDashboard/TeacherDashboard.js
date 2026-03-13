@@ -13,9 +13,10 @@ import Timetable from "../../components/timetable/Timetable.jsx";
 import { useAuth } from "../../context/AuthContext.js";
 import { Link, useNavigate } from "react-router-dom";
 import { useUtilityContext } from "../../context/UtilityContext.js";
-import { HelpCircle, Settings } from "lucide-react";
+import { HelpCircle, Settings, Video } from "lucide-react";
 import { IoMdAnalytics } from "react-icons/io";
 import TeacherAnalyticsDashboard from "./TeacherAnalyticsDashboard.jsx";
+import useLiveClassAlert from "../../hooks/useLiveClassAlert";
 
 const TeacherDashboard = () => {
   // const [activeSection, setActiveSection] = useState("Dashboard");
@@ -23,6 +24,7 @@ const TeacherDashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { alertClass, minutesLeft, isLive, joinUrl } = useLiveClassAlert(5);
 
   const handleLogout = () => {
     logout();
@@ -109,6 +111,37 @@ const TeacherDashboard = () => {
               </li>
             ))}
           </ul>
+
+          {/* Live Class Alert — blinks when class starts within 5 min */}
+          {alertClass && joinUrl && (
+            <div className="px-2 mt-3">
+              <button
+                onClick={() => navigate(joinUrl)}
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all group"
+              >
+                <span className="relative flex justify-center w-7">
+                  <Video size={20} className="text-red-600 dark:text-red-400" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500" />
+                </span>
+                <span
+                  className={`whitespace-nowrap transition-opacity duration-300 flex flex-col items-start ${
+                    isCollapsed ? "opacity-0" : "opacity-100"
+                  }`}
+                  style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
+                >
+                  <span className="text-sm font-semibold text-red-700 dark:text-red-400 animate-pulse">
+                    {isLive ? "Live Class" : "Join Class"}
+                  </span>
+                  <span className="text-[10px] text-red-500 dark:text-red-400/80 leading-tight truncate max-w-[140px]">
+                    {isLive
+                      ? alertClass.subject || alertClass.title || "Now"
+                      : `Starts in ${minutesLeft} min`}
+                  </span>
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Profile and Logout */}

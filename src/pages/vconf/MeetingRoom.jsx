@@ -1,9 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Mic, MicOff, Video, VideoOff, Monitor, PhoneOff,
-  MessageSquare, Users, Sparkles, X, Wifi, WifiOff, Pause, Play, Disc,
-  Send, ArrowUpRight, CheckCircle2, RefreshCw
+  MessageSquare, Users, Hand, X, Wifi, WifiOff, Pause, Play, Disc,
+  Send, ArrowUpRight, CheckCircle2, RefreshCw,
+  BarChart3, HelpCircle, Subtitles
 } from 'lucide-react';
+import ChatPanel from './components/ChatPanel';
+import PollPanel from './components/PollPanel';
+import QnAPanel from './components/QnAPanel';
+import CaptionOverlay from './components/CaptionOverlay';
+import CaptionInput from './components/CaptionInput';
+import MeetingReport from './components/MeetingReport';
+import { useMeetingChat } from './hooks/useMeetingChat';
+import { useMeetingPolls } from './hooks/useMeetingPolls';
+import { useMeetingQnA } from './hooks/useMeetingQnA';
+import { useMeetingCaptions } from './hooks/useMeetingCaptions';
+import { flushVconfChat } from '../../services/vconf.service';
 import { motion, AnimatePresence } from 'motion/react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +35,6 @@ import {
   useParticipants,
   useRoomContext,
   useConnectionState,
-  useChat,
   useTracks,
   VideoTrack,
   GridLayout,
@@ -47,6 +58,7 @@ if (!document.head.querySelector('[data-hide-lk-controls]')) {
 // Replaces LiveKit's <VideoConference /> with a custom layout:
 // - Screen share active -> shared screen full + teacher webcam PiP overlay (bottom-right)
 // - No screen share -> normal grid of all camera tracks
+// - Uses browser native PiP API so the face window persists when switching tabs/pages
 const CustomVideoLayout = ({ meetingTitle }) => {
   const { localParticipant } = useLocalParticipant();
   const tracks = useTracks(
@@ -82,6 +94,164 @@ const CustomVideoLayout = ({ meetingTitle }) => {
   const [pipPos, setPipPos] = useState(null);
   const dragState = useRef(null);
 
+  // Browser native PiP state — uses a canvas to render circular face
+  // When native PiP is showing, the in-page PiP is hidden (only ONE face visible at a time)
+  const nativePipVideoRef = useRef(null);   // hidden <video> element for PiP
+  const nativePipCanvasRef = useRef(null);  // canvas that renders the round face
+  const nativePipAnimRef = useRef(null);    // requestAnimationFrame ID
+  const nativePipActiveRef = useRef(false);
+  const [nativePipShowing, setNativePipShowing] = useState(false);
+
+  // Render the camera feed into a circular canvas → request native PiP on that canvas stream
+  useEffect(() => {
+    const cleanupNativePip = () => {
+      if (nativePipActiveRef.current && document.pictureInPictureElement) {
+        document.exitPictureInPicture().catch(() => {});
+      }
+      if (nativePipAnimRef.current) {
+        cancelAnimationFrame(nativePipAnimRef.current);
+        nativePipAnimRef.current = null;
+      }
+      if (nativePipVideoRef.current) {
+        nativePipVideoRef.current.srcObject = null;
+        nativePipVideoRef.current.remove();
+        nativePipVideoRef.current = null;
+      }
+      if (nativePipCanvasRef.current) {
+        nativePipCanvasRef.current.remove();
+        nativePipCanvasRef.current = null;
+      }
+      nativePipActiveRef.current = false;
+      setNativePipShowing(false);
+    };
+
+    if (!screenShareTrack || !isTrackReference(screenShareTrack)) {
+      cleanupNativePip();
+      return;
+    }
+
+    // Screen share is active — try to launch circular canvas PiP for the sharer's camera
+    if (!sharerCameraTrack || !isTrackReference(sharerCameraTrack)) return;
+    if (!document.pictureInPictureEnabled) return;
+
+    // Wait for the VideoTrack component to render the <video> element in DOM
+    const timer = setTimeout(() => {
+      const pipContainer = pipRef.current;
+      if (!pipContainer) return;
+      const sourceVideoEl = pipContainer.querySelector('video');
+      if (!sourceVideoEl) return;
+
+      // Don't re-create if already active
+      if (nativePipActiveRef.current && document.pictureInPictureElement) return;
+
+      // Create a hidden canvas to render circular face
+      const size = 300; // canvas size (square)
+      let canvas = nativePipCanvasRef.current;
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        canvas.style.display = 'none';
+        document.body.appendChild(canvas);
+        nativePipCanvasRef.current = canvas;
+      }
+      const ctx = canvas.getContext('2d');
+
+      // Render loop: draw circular face on canvas
+      const drawCircularFrame = () => {
+        if (!nativePipCanvasRef.current) return;
+
+        // Clear with transparent black background
+        ctx.clearRect(0, 0, size, size);
+
+        // Outer glow / border
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.7)'; // emerald border
+        ctx.fill();
+
+        // Clip to circle and draw video
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2 - 6, 0, Math.PI * 2);
+        ctx.clip();
+
+        try {
+          const vw = sourceVideoEl.videoWidth || size;
+          const vh = sourceVideoEl.videoHeight || size;
+          const innerSize = size - 12;
+          const scale = Math.max(innerSize / vw, innerSize / vh);
+          const sw = vw * scale;
+          const sh = vh * scale;
+          const sx = 6 + (innerSize - sw) / 2;
+          const sy = 6 + (innerSize - sh) / 2;
+          ctx.drawImage(sourceVideoEl, sx, sy, sw, sh);
+        } catch (e) { /* cross-origin or no data yet */ }
+
+        ctx.restore();
+        nativePipAnimRef.current = requestAnimationFrame(drawCircularFrame);
+      };
+
+      drawCircularFrame();
+
+      // Create a hidden <video> from the canvas stream and request PiP on it
+      const canvasStream = canvas.captureStream(30);
+      let pipVideo = nativePipVideoRef.current;
+      if (!pipVideo) {
+        pipVideo = document.createElement('video');
+        pipVideo.style.display = 'none';
+        pipVideo.playsInline = true;
+        pipVideo.muted = true;
+        document.body.appendChild(pipVideo);
+        nativePipVideoRef.current = pipVideo;
+      }
+
+      // Listen for PiP close event → show in-page PiP again
+      pipVideo.onleavepictureinpicture = () => {
+        nativePipActiveRef.current = false;
+        setNativePipShowing(false);
+        console.log("[PiP] Native PiP closed — showing in-page PiP");
+      };
+
+      pipVideo.srcObject = canvasStream;
+      pipVideo.play().then(() => {
+        pipVideo.requestPictureInPicture()
+          .then(() => {
+            nativePipActiveRef.current = true;
+            setNativePipShowing(true); // hide in-page PiP
+            console.log("[PiP] Circular canvas PiP activated — in-page PiP hidden");
+          })
+          .catch((err) => {
+            console.warn("[PiP] Native PiP not available, using in-page PiP:", err.message);
+            setNativePipShowing(false);
+          });
+      }).catch(() => {});
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!screenShareTrack, !!sharerCameraTrack]);
+
+  // Cleanup native PiP on unmount
+  useEffect(() => {
+    return () => {
+      if (nativePipActiveRef.current && document.pictureInPictureElement) {
+        document.exitPictureInPicture().catch(() => {});
+      }
+      if (nativePipAnimRef.current) {
+        cancelAnimationFrame(nativePipAnimRef.current);
+      }
+      if (nativePipVideoRef.current) {
+        nativePipVideoRef.current.srcObject = null;
+        nativePipVideoRef.current.remove();
+      }
+      if (nativePipCanvasRef.current) {
+        nativePipCanvasRef.current.remove();
+      }
+      nativePipActiveRef.current = false;
+    };
+  }, []);
+
   const handlePipMouseDown = (e) => {
     if (!pipRef.current) return;
     const rect = pipRef.current.getBoundingClientRect();
@@ -115,7 +285,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
   // -- Screen Share Mode (PiP Layout) --
   if (screenShareTrack && isTrackReference(screenShareTrack)) {
     return (
-      <div className="relative w-full h-full bg-black">
+      <div className="relative w-full h-full bg-black" data-recording-target="true" data-screen-share-active="true">
         {/* Main area: show shared screen for viewers, or "You are sharing" for the sharer */}
         {isLocalSharing ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-900 to-black relative">
@@ -148,16 +318,18 @@ const CustomVideoLayout = ({ meetingTitle }) => {
               </div>
             )}
             {/* Self camera PiP (round) - teacher sees their own face while sharing */}
+            {/* Hidden when native PiP is showing (only ONE face at a time) */}
             {sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
               <div
                 ref={pipRef}
                 onMouseDown={handlePipMouseDown}
                 className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30"
-                style={
-                  pipPos
+                style={{
+                  ...(pipPos
                     ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
-                    : { bottom: 24, right: 24 }
-                }
+                    : { bottom: 24, right: 24 }),
+                  ...(nativePipShowing ? { opacity: 0, pointerEvents: 'none' } : {}),
+                }}
               >
                 <VideoTrack
                   trackRef={sharerCameraTrack}
@@ -174,16 +346,18 @@ const CustomVideoLayout = ({ meetingTitle }) => {
         )}
 
         {/* PiP: Sharer's Webcam (bottom-right, draggable) - only for viewers */}
+        {/* Hidden when native PiP is showing (only ONE face at a time) */}
         {!isLocalSharing && sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
           <div
             ref={pipRef}
             onMouseDown={handlePipMouseDown}
             className="absolute z-20 w-52 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 cursor-grab active:cursor-grabbing hover:border-white/40 transition-all bg-slate-900"
-            style={
-              pipPos
+            style={{
+              ...(pipPos
                 ? { left: pipPos.x, top: pipPos.y, position: 'fixed', aspectRatio: '4/3' }
-                : { bottom: 24, right: 24, aspectRatio: '4/3' }
-            }
+                : { bottom: 24, right: 24, aspectRatio: '4/3' }),
+              ...(nativePipShowing ? { opacity: 0, pointerEvents: 'none' } : {}),
+            }}
           >
             <VideoTrack
               trackRef={sharerCameraTrack}
@@ -239,7 +413,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
 
   // -- Normal Mode (Grid Layout) --
   return (
-    <div className="w-full h-full p-2">
+    <div className="w-full h-full p-2" data-recording-target="true">
       <GridLayout tracks={cameraTracks} style={{ height: '100%' }}>
         <ParticipantTile />
       </GridLayout>
@@ -248,15 +422,14 @@ const CustomVideoLayout = ({ meetingTitle }) => {
 };
 
 // We separate the actual room content into a child component so it can use LiveKit hooks
-function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRightPanel, setShowRightPanel, meetingData, setClassEnded }) {
+function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRightPanel, setShowRightPanel, meetingData, setClassEnded, classEndedByTeacherRef }) {
   const { user } = useAuth();
   const { localParticipant, isMicrophoneEnabled, isCameraEnabled, isScreenShareEnabled } = useLocalParticipant();
   const room = useRoomContext();
   const connectionState = useConnectionState();
   const participants = useParticipants();
   const navigate = useNavigate();
-  const { send, chatMessages, isSending } = useChat();
-  const [chatInput, setChatInput] = useState("");
+  // LiveKit useChat removed — now using useMeetingChat hook for persistent chat
   const [elapsedTime, setElapsedTime] = useState(0);
   const elapsedTimeRef = useRef(0);
   useEffect(() => {
@@ -288,6 +461,59 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   const recordingIntendedStopRef = useRef(false);
   const recordingStreamRef = useRef(null);
 
+  // ─── Phase 1 Feature Hooks ───
+
+  const chatHook = useMeetingChat(
+    activeMeetingId,
+    (cmd) => {
+      if (localParticipant) {
+        const encoded = new TextEncoder().encode(JSON.stringify(cmd));
+        localParticipant.publishData(encoded, { reliable: true });
+      }
+    },
+    user?._id,
+    user?.name || user?.email || "Unknown",
+    user?.role === "teacher" ? "teacher" : "student"
+  );
+
+  const pollHook = useMeetingPolls(
+    activeMeetingId,
+    (cmd) => {
+      if (localParticipant) {
+        const encoded = new TextEncoder().encode(JSON.stringify(cmd));
+        localParticipant.publishData(encoded, { reliable: true });
+      }
+    },
+    user?._id
+  );
+
+  const qnaHook = useMeetingQnA(
+    activeMeetingId,
+    (cmd) => {
+      if (localParticipant) {
+        const encoded = new TextEncoder().encode(JSON.stringify(cmd));
+        localParticipant.publishData(encoded, { reliable: true });
+      }
+    },
+    user?._id
+  );
+
+  const captionHook = useMeetingCaptions(
+    activeMeetingId,
+    (cmd) => {
+      if (localParticipant) {
+        const encoded = new TextEncoder().encode(JSON.stringify(cmd));
+        localParticipant.publishData(encoded, { reliable: true });
+      }
+    },
+    user?.role === "teacher"
+  );
+
+  // Sync elapsed time to captions hook
+  useEffect(() => {
+    captionHook.setElapsed(elapsedTime);
+  }, [elapsedTime]);
+
   // Show "Disconnected" screen when room disconnects (network drop / teacher ended from server)
   const wasConnectedRef = useRef(false);
   useEffect(() => {
@@ -295,30 +521,46 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       wasConnectedRef.current = true;
     }
     if (connectionState === 'disconnected' && wasConnectedRef.current) {
-      // Don't close tab -- show disconnected screen with rejoin option
-      setClassEnded('disconnected');
+      // If CLASS_ENDED was already received via DataChannel, classEnded is already 'ended'
+      if (classEndedByTeacherRef.current) return;
+
+      // For students: check meeting status API to determine if teacher ended the class
+      if (user?.role !== 'teacher') {
+        getVconfMeeting(activeMeetingId)
+          .then(res => {
+            const meeting = res?.data?.meeting || res?.data;
+            if (meeting?.status === 'ended' || meeting?.status === 'completed') {
+              classEndedByTeacherRef.current = true;
+              setClassEnded('ended');
+            } else {
+              // Genuine network disconnect — show "Connection Lost" with rejoin option
+              setClassEnded('disconnected');
+            }
+          })
+          .catch(() => {
+            // API call failed (likely network issue) — show disconnected
+            setClassEnded('disconnected');
+          });
+      } else {
+        setClassEnded('disconnected');
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionState]);
 
-  // Auto-start recording for teacher once any track is published
+  // Auto-start recording for teacher once connected (canvas-based, captures all participants)
   useEffect(() => {
     if (user?.role === 'teacher' && connectionState === 'connected' && !isRecording && !recordingStartedRef.current) {
-      // Only auto-start when at least one track (camera or mic) is available
-      const videoPublication = localParticipant?.getTrackPublication(Track.Source.Camera);
-      const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
-      const hasTrack = videoPublication?.track?.mediaStreamTrack || audioPublication?.track?.mediaStreamTrack;
-      if (!hasTrack) return; // Wait until teacher enables camera or mic
-
       recordingStartedRef.current = true;
       recordingIntendedStopRef.current = false;
+      // Delay slightly to let the LiveKit room render video elements in the DOM
       const timer = setTimeout(() => {
         startLocalRecording();
-      }, 500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.role, connectionState, isRecording, isCameraEnabled, isMicrophoneEnabled]);
+  }, [user?.role, connectionState, isRecording]);
 
   // Safety: if isRecording is true but mediaRecorder ref is lost (e.g. HMR), reset state
   useEffect(() => {
@@ -329,6 +571,11 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording]);
+
+  // Canvas-based recording: captures all participants via a canvas element
+  const canvasRef = useRef(null);
+  const canvasStreamRef = useRef(null);
+  const canvasAnimFrameRef = useRef(null);
 
   const setupMediaRecorder = (stream) => {
     let mimeOptions = 'video/webm;codecs=vp8,opus';
@@ -345,6 +592,16 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     };
 
     mediaRecorder.onstop = async () => {
+      // Stop canvas rendering loop
+      if (canvasAnimFrameRef.current) {
+        cancelAnimationFrame(canvasAnimFrameRef.current);
+        canvasAnimFrameRef.current = null;
+      }
+      // Stop canvas stream tracks
+      if (canvasStreamRef.current) {
+        canvasStreamRef.current.getTracks().forEach(track => track.stop());
+        canvasStreamRef.current = null;
+      }
       // Only stop tracks if we own the stream (fallback getUserMedia), NOT LiveKit tracks
       if (recordingStreamRef.current) {
         recordingStreamRef.current.getTracks().forEach(track => track.stop());
@@ -360,6 +617,18 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       }
 
       const blob = new Blob(recordedChunks.current, { type: 'video/webm' });
+      console.log(`[Recording] Final blob size: ${(blob.size / 1024 / 1024).toFixed(2)} MB`);
+
+      if (blob.size < 1024) {
+        console.warn("[Recording] Recording too small, likely empty — skipping upload");
+        setMediaError("Recording was empty — no data captured");
+        setTimeout(() => setMediaError(""), 5000);
+        recordedChunks.current = [];
+        setIsRecording(false);
+        setIsRecordingPaused(false);
+        return;
+      }
+
       try {
         await uploadVconfRecording(activeMeetingId, blob);
         console.log("Recording uploaded successfully");
@@ -378,12 +647,199 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     mediaRecorder.start(1000);
   };
 
-  // Start recording using LiveKit's published tracks (no separate getUserMedia needed)
+  // Start recording by capturing the entire video area via a hidden canvas
+  // This approach captures all visible participants, not just the teacher's own tracks
   const startLocalRecording = async () => {
     try {
       recordingIntendedStopRef.current = false;
 
-      // Get tracks from LiveKit local participant
+      // Strategy: Use a canvas to capture the video area DOM element
+      // This captures ALL participants (teacher + students + screen shares)
+      const videoArea = document.querySelector('[data-recording-target="true"]') ||
+                        document.querySelector('.lk-grid-layout') ||
+                        document.querySelector('[data-lk-room]');
+
+      if (!videoArea) {
+        console.warn("[Recording] No video area found, falling back to direct track capture");
+        return startDirectTrackRecording();
+      }
+
+      // Create an off-screen canvas for recording
+      const canvas = document.createElement('canvas');
+      canvas.width = 1280;
+      canvas.height = 720;
+      canvasRef.current = canvas;
+      const ctx = canvas.getContext('2d');
+
+      // Find all video elements in the video area
+      // Detects screen-share PiP mode and renders accordingly
+      const renderFrame = () => {
+        if (!canvasRef.current) return;
+        ctx.fillStyle = '#1e293b'; // slate-800 background
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Check if we're in screen share + PiP mode
+        const isScreenShareMode = videoArea.hasAttribute('data-screen-share-active');
+        const videos = videoArea.querySelectorAll('video');
+
+        if (videos.length === 0) {
+          // No videos — draw a "No video" placeholder
+          ctx.fillStyle = '#475569';
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Recording in progress...', canvas.width / 2, canvas.height / 2);
+        } else if (isScreenShareMode && videos.length >= 2) {
+          // ─── Screen Share + PiP Layout ───
+          // First video = screen share (full canvas), last small video = PiP face
+          // Heuristic: the largest video is screen share, the one inside the PiP container is the face
+          const pipContainer = videoArea.querySelector('[class*="rounded-full"], [class*="rounded-2xl"]');
+          let screenShareVideo = null;
+          let pipVideo = null;
+
+          if (pipContainer) {
+            pipVideo = pipContainer.querySelector('video');
+          }
+
+          // The screen share video is the one NOT inside the PiP container
+          for (const v of videos) {
+            if (v !== pipVideo) {
+              screenShareVideo = v;
+              break;
+            }
+          }
+
+          // Draw screen share full canvas
+          if (screenShareVideo) {
+            try {
+              ctx.drawImage(screenShareVideo, 0, 0, canvas.width, canvas.height);
+            } catch (e) { /* cross-origin */ }
+          }
+
+          // Draw PiP face in bottom-right corner (circular clip)
+          if (pipVideo) {
+            const pipSize = 160; // diameter of PiP circle
+            const pipMargin = 24;
+            const pipX = canvas.width - pipSize - pipMargin;
+            const pipY = canvas.height - pipSize - pipMargin;
+            const pipCenterX = pipX + pipSize / 2;
+            const pipCenterY = pipY + pipSize / 2;
+            const pipRadius = pipSize / 2;
+
+            ctx.save();
+            // Draw circular border
+            ctx.beginPath();
+            ctx.arc(pipCenterX, pipCenterY, pipRadius + 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)'; // emerald-400/60
+            ctx.fill();
+
+            // Clip to circle and draw face
+            ctx.beginPath();
+            ctx.arc(pipCenterX, pipCenterY, pipRadius, 0, Math.PI * 2);
+            ctx.clip();
+            try {
+              // Cover-fit the video into the circle area
+              const vw = pipVideo.videoWidth || pipSize;
+              const vh = pipVideo.videoHeight || pipSize;
+              const scale = Math.max(pipSize / vw, pipSize / vh);
+              const sw = vw * scale;
+              const sh = vh * scale;
+              const sx = pipX + (pipSize - sw) / 2;
+              const sy = pipY + (pipSize - sh) / 2;
+              ctx.drawImage(pipVideo, sx, sy, sw, sh);
+            } catch (e) { /* cross-origin */ }
+            ctx.restore();
+          }
+        } else if (videos.length === 1) {
+          // Single video — full canvas
+          try {
+            ctx.drawImage(videos[0], 0, 0, canvas.width, canvas.height);
+          } catch (e) { /* cross-origin or no data */ }
+        } else {
+          // Grid layout for multiple videos (no screen share)
+          const cols = Math.ceil(Math.sqrt(videos.length));
+          const rows = Math.ceil(videos.length / cols);
+          const cellW = canvas.width / cols;
+          const cellH = canvas.height / rows;
+          videos.forEach((video, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            try {
+              ctx.drawImage(video, col * cellW, row * cellH, cellW, cellH);
+            } catch (e) { /* cross-origin or no data */ }
+          });
+        }
+
+        canvasAnimFrameRef.current = requestAnimationFrame(renderFrame);
+      };
+
+      renderFrame();
+
+      // Get canvas stream at 15fps
+      const canvasStream = canvas.captureStream(15);
+      canvasStreamRef.current = canvasStream;
+
+      // Also capture audio from all participants
+      const audioTracks = [];
+      // Teacher's mic
+      const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
+      if (audioPublication?.track?.mediaStreamTrack) {
+        audioTracks.push(audioPublication.track.mediaStreamTrack);
+      }
+      // Remote participants' audio — get from all <audio> elements in the room
+      const audioElements = document.querySelectorAll('audio[data-lk-source]');
+      audioElements.forEach(el => {
+        if (el.srcObject) {
+          el.srcObject.getAudioTracks().forEach(t => audioTracks.push(t));
+        }
+      });
+
+      // If no audio from DOM, try AudioContext to capture all room audio
+      if (audioTracks.length === 0) {
+        try {
+          const audioCtx = new AudioContext();
+          const dest = audioCtx.createMediaStreamDestination();
+          // Capture teacher's mic directly if available
+          if (audioPublication?.track?.mediaStreamTrack) {
+            const source = audioCtx.createMediaStreamSource(
+              new MediaStream([audioPublication.track.mediaStreamTrack])
+            );
+            source.connect(dest);
+          }
+          audioTracks.push(...dest.stream.getAudioTracks());
+        } catch (e) {
+          console.warn("[Recording] Could not capture audio:", e);
+        }
+      }
+
+      // Combine canvas video + audio tracks
+      const combinedStream = new MediaStream([
+        ...canvasStream.getVideoTracks(),
+        ...audioTracks,
+      ]);
+
+      recordingStreamRef.current = null; // We manage canvas stream separately
+      setupMediaRecorder(combinedStream);
+
+      setIsRecording(true);
+      setIsRecordingPaused(false);
+
+      console.log("[Recording] Canvas-based recording started — capturing all participants");
+
+      // Backend API call -- non-blocking
+      startVconfRecording(activeMeetingId).catch(e => {
+        console.warn("Backend recording API failed, but local recording continues:", e);
+      });
+    } catch (e) {
+      console.error("[Recording] Canvas recording failed, trying direct track capture:", e);
+      return startDirectTrackRecording();
+    }
+  };
+
+  // Fallback: direct track recording (original approach, improved)
+  const startDirectTrackRecording = async () => {
+    try {
+      recordingIntendedStopRef.current = false;
+
       const videoPublication = localParticipant?.getTrackPublication(Track.Source.Camera);
       const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
 
@@ -396,22 +852,31 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       }
 
       if (tracks.length === 0) {
-        // No tracks available yet -- skip recording, will retry when tracks are published
-        console.warn("[Recording] No tracks available yet, waiting for camera/mic to be enabled");
-        recordingStartedRef.current = false; // Allow retry
-        return;
-      } else {
-        console.log("[Recording] Using LiveKit tracks:", tracks.map(t => t.kind).join(', '));
-        const combinedStream = new MediaStream(tracks);
-        // Don't store in recordingStreamRef -- these are LiveKit's tracks, we shouldn't stop them
-        recordingStreamRef.current = null;
-        setupMediaRecorder(combinedStream);
+        // Fallback: request camera+mic directly for recording only
+        console.warn("[Recording] No LiveKit tracks, requesting getUserMedia fallback");
+        try {
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          recordingStreamRef.current = fallbackStream; // We own this stream
+          setupMediaRecorder(fallbackStream);
+          setIsRecording(true);
+          setIsRecordingPaused(false);
+          startVconfRecording(activeMeetingId).catch(() => {});
+          return;
+        } catch (fallbackErr) {
+          console.error("[Recording] getUserMedia fallback also failed:", fallbackErr);
+          recordingStartedRef.current = false;
+          return;
+        }
       }
+
+      console.log("[Recording] Using direct LiveKit tracks:", tracks.map(t => t.kind).join(', '));
+      const combinedStream = new MediaStream(tracks);
+      recordingStreamRef.current = null;
+      setupMediaRecorder(combinedStream);
 
       setIsRecording(true);
       setIsRecordingPaused(false);
 
-      // Backend API call -- non-blocking
       startVconfRecording(activeMeetingId).catch(e => {
         console.warn("Backend recording API failed, but local recording continues:", e);
       });
@@ -511,6 +976,10 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             setTimeout(() => setMediaError(""), 3000);
           } else if (data.type === 'FORCE_TAB') {
             setShowRightPanel(data.tab);
+          } else if (data.type === 'CLASS_ENDED') {
+            // Teacher explicitly ended the class — show "Class Ended" screen
+            classEndedByTeacherRef.current = true;
+            setClassEnded('ended');
           }
         }
 
@@ -528,6 +997,24 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         } else if (data.type === 'LOWER_ALL_HANDS') {
           setRaisedHands(new Set());
           setIsHandRaised(false);
+        }
+
+        // ─── Phase 1 DataChannel Routing ───
+        // Chat
+        if (data.type === 'CHAT_MSG') {
+          chatHook.handleIncoming(data);
+        }
+        // Polls
+        if (data.type === 'POLL_LAUNCH' || data.type === 'POLL_CLOSE' || data.type === 'POLL_RESULTS' || data.type === 'POLL_RESPONSE') {
+          pollHook.handleIncoming(data);
+        }
+        // Q&A
+        if (data.type === 'QNA_NEW' || data.type === 'QNA_UPVOTE' || data.type === 'QNA_ANSWER' || data.type === 'QNA_DISMISS' || data.type === 'QNA_HIGHLIGHT') {
+          qnaHook.handleIncoming(data);
+        }
+        // Captions
+        if (data.type === 'CAPTION_UPDATE' || data.type === 'CAPTION_CLEAR') {
+          captionHook.handleIncoming(data);
         }
       } catch (e) { }
     };
@@ -703,16 +1190,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim() || !send) return;
-    try {
-      await send(chatInput);
-      setChatInput("");
-    } catch (err) {
-      console.error("Failed to send message", err);
-    }
-  };
+  // handleSendMessage removed — chat now handled by ChatPanel component
 
   // Hand raise overlay on participant video tiles
   useEffect(() => {
@@ -785,7 +1263,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   return (
     <>
       {/* Top Bar */}
-      <header className="h-14 flex items-center justify-between px-4 bg-slate-900/90 border-b border-slate-800 z-10 w-full">
+      <header className="h-12 flex items-center justify-between px-4 bg-slate-900/90 border-b border-slate-800 z-10 w-full shrink-0 overflow-hidden">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <span className="font-semibold text-sm">{meetingData?.title || 'Meeting Room'}</span>
@@ -830,7 +1308,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
         {isHandRaised && user?.role === 'student' && (
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-amber-500/90 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center space-x-2 backdrop-blur-sm animate-bounce">
-            <Sparkles size={14} />
+            <Hand size={14} />
             <span className="text-xs font-bold">Your hand is raised</span>
             <button onClick={handleRaiseHand} className="text-[10px] bg-white text-amber-600 px-2 py-0.5 rounded-full font-bold ml-2">Lower</button>
           </div>
@@ -853,9 +1331,25 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
           </div>
         )}
 
-        <div className="relative flex-1 bg-black livekit-custom-container h-full overflow-hidden">
-          <CustomVideoLayout meetingTitle={meetingData?.title} />
-          <RoomAudioRenderer />
+        <div className="relative flex-1 bg-black livekit-custom-container h-full overflow-hidden flex flex-col">
+          <div className="relative flex-1 overflow-hidden">
+            <CustomVideoLayout meetingTitle={meetingData?.title} />
+            <RoomAudioRenderer />
+            {/* Caption Overlay — floating on video */}
+            <CaptionOverlay
+              currentCaption={captionHook.currentCaption}
+              captionsEnabled={captionHook.captionsEnabled}
+              settings={captionHook.settings}
+              updateSettings={captionHook.updateSettings}
+            />
+          </div>
+          {/* Teacher Caption Input — above footer */}
+          {user?.role === 'teacher' && (
+            <CaptionInput
+              sendCaption={captionHook.sendCaption}
+              clearCaption={captionHook.clearCaption}
+            />
+          )}
         </div>
 
         {/* Right Panel */}
@@ -865,44 +1359,81 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
               initial={{ x: 300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 300, opacity: 0 }}
-              className="w-80 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20 h-full"
+              className={"w-80 border-l flex flex-col shadow-xl z-20 h-full " + (
+                showRightPanel === 'polls' || showRightPanel === 'qna' || showRightPanel === 'chat'
+                  ? 'bg-slate-900 border-slate-700'
+                  : 'bg-white border-slate-200'
+              )}
             >
-              <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-50">
-                <h3 className="font-semibold text-slate-800 text-sm uppercase tracking-wide">
+              <div className={"h-12 border-b flex items-center justify-between px-4 " + (
+                showRightPanel === 'polls' || showRightPanel === 'qna' || showRightPanel === 'chat'
+                  ? 'border-slate-700 bg-slate-800'
+                  : 'border-slate-200 bg-slate-50'
+              )}>
+                <h3 className={"font-semibold text-sm uppercase tracking-wide " + (
+                  showRightPanel === 'polls' || showRightPanel === 'qna' || showRightPanel === 'chat'
+                    ? 'text-slate-200'
+                    : 'text-slate-800'
+                )}>
                   {showRightPanel === 'chat' && 'Meeting Chat'}
                   {showRightPanel === 'participants' && 'Participants (' + participants.length + ')'}
                   {showRightPanel === 'ai' && 'Live Transcript'}
                   {showRightPanel === 'admin' && 'Admin Panel'}
                   {showRightPanel === 'dashboard' && 'Class Dashboard'}
+                  {showRightPanel === 'polls' && 'Polls & Quizzes'}
+                  {showRightPanel === 'qna' && 'Q&A'}
                 </h3>
-                <button onClick={() => setShowRightPanel(null)} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowRightPanel(null)} className={
+                  showRightPanel === 'polls' || showRightPanel === 'qna' || showRightPanel === 'chat'
+                    ? 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-400 hover:text-slate-600'
+                }>
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
+              <div className={"flex-1 overflow-y-auto " + (
+                showRightPanel === 'polls' || showRightPanel === 'qna' || showRightPanel === 'chat'
+                  ? 'bg-slate-900'
+                  : 'bg-slate-50/50'
+              )}>
                 {showRightPanel === 'chat' && (
-                  <div className="space-y-4">
-                    {chatMessages.map((msg, idx) => {
-                      const isMe = msg.from?.isLocal;
-                      const senderName = isMe ? "Me" : (msg.from?.identity || "Unknown");
-                      const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  <ChatPanel
+                    messages={chatHook.messages}
+                    sendMessage={chatHook.sendMessage}
+                    userName={user?.name || user?.email || "Unknown"}
+                    userRole={user?.role === "teacher" ? "teacher" : "student"}
+                  />
+                )}
 
-                      return (
-                        <div key={idx} className={"flex flex-col " + (isMe ? 'items-end' : 'items-start')}>
-                          <div className={"flex items-baseline space-x-2 mb-1 " + (isMe ? 'flex-row-reverse space-x-reverse' : '')}>
-                            <span className="text-xs font-bold text-slate-700">{senderName}</span>
-                            <span className="text-[10px] text-slate-400">{time}</span>
-                          </div>
-                          <div className={"px-3 py-2 rounded-lg text-sm max-w-[85%] break-words " + (
-                            isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none'
-                          )}>
-                            {msg.message}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                {showRightPanel === 'polls' && (
+                  <PollPanel
+                    polls={pollHook.polls}
+                    activePoll={pollHook.activePoll}
+                    pollResults={pollHook.pollResults}
+                    votedPolls={pollHook.votedPolls}
+                    createPoll={pollHook.createPoll}
+                    launchPoll={pollHook.launchPoll}
+                    closePoll={pollHook.closePoll}
+                    vote={pollHook.vote}
+                    fetchResults={pollHook.fetchResults}
+                    broadcastResults={pollHook.broadcastResults}
+                    isTeacher={user?.role === 'teacher'}
+                  />
+                )}
+
+                {showRightPanel === 'qna' && (
+                  <QnAPanel
+                    questions={qnaHook.questions}
+                    highlightedIdx={qnaHook.highlightedIdx}
+                    askQuestion={qnaHook.askQuestion}
+                    upvote={qnaHook.upvote}
+                    answer={qnaHook.answer}
+                    dismiss={qnaHook.dismiss}
+                    highlight={qnaHook.highlight}
+                    isTeacher={user?.role === 'teacher'}
+                    userId={user?._id}
+                  />
                 )}
 
                 {showRightPanel === 'ai' && (
@@ -1044,7 +1575,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                               </div>
                               {raisedHands.has(p.identity) && (
                                 <div className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-0.5 border border-white">
-                                  <Sparkles size={8} />
+                                  <Hand size={8} />
                                 </div>
                               )}
                             </div>
@@ -1126,42 +1657,24 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                 )}
               </div>
 
-              {showRightPanel === 'chat' && (
-                <div className="flex flex-col h-full">
-                  <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-200">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Type a message..."
-                        className="w-full pl-4 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
-                        value={chatInput}
-                        onChange={e => setChatInput(e.target.value)}
-                        disabled={isSending}
-                      />
-                      <button type="submit" disabled={isSending} className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-700 p-1 disabled:opacity-50">
-                        <Send size={16} />
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
+              {/* Chat input is now inside ChatPanel component */}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* Bottom Control Bar */}
-      <footer className="h-20 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-6 z-20 w-full shrink-0">
-        <div className="flex items-center space-x-4 w-1/4">
+      <footer className="h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-3 z-20 w-full shrink-0 overflow-hidden">
+        <div className="flex items-center space-x-2 shrink-0">
           <div className="flex flex-col">
-            <span className="text-xs text-slate-400">Connection: Excellent</span>
+            <span className="text-[10px] text-slate-400">Connected</span>
             <span className="text-[10px] text-emerald-500 flex items-center gap-1">
-              <Wifi size={10} /> LiveKit Connected
+              <Wifi size={10} /> LiveKit
             </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-center space-x-3 w-1/2">
+        <div className="flex items-center justify-center space-x-2 flex-1 min-w-0">
           <ControlButton
             icon={isMicrophoneEnabled ? Mic : MicOff}
             active={isMicrophoneEnabled}
@@ -1189,7 +1702,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
           {user?.role === 'student' && (
             <ControlButton
-              icon={Sparkles}
+              icon={Hand}
               active={isHandRaised}
               onClick={handleRaiseHand}
               label={isHandRaised ? "Lower Hand" : "Raise Hand"}
@@ -1202,7 +1715,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
               <button
                 onClick={handleToggleRecording}
                 disabled={!isRecording}
-                className={"flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all " + (
+                className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
                   isRecordingPaused
                     ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
                     : isRecording
@@ -1221,6 +1734,16 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
           <button
             onClick={async () => {
               try {
+                // Flush all Phase 1 buffers before ending
+                try {
+                  await Promise.allSettled([
+                    chatHook.flushMessages(),
+                    captionHook.flushCaptions(),
+                  ]);
+                } catch (flushErr) {
+                  console.warn("[MeetingRoom] Buffer flush error:", flushErr);
+                }
+
                 if (user?.role === 'teacher' && activeMeetingId) {
                   // Stop recording and upload
                   if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -1253,23 +1776,52 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                 console.error("Failed to end class:", e);
               }
 
+              if (user?.role === 'teacher') {
+                // Notify all students that the class has been ended by teacher
+                sendCommand({ type: 'CLASS_ENDED' });
+                // Small delay to ensure DataChannel message is delivered before disconnecting
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+
+              classEndedByTeacherRef.current = true;
               room.disconnect();
               sessionStorage.removeItem(`joined_${activeMeetingId}`);
               setClassEnded('ended');
             }}
-            className="flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-red-900/20 cursor-pointer"
+            className="flex items-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-xs transition-colors shadow-lg shadow-red-900/20 cursor-pointer shrink-0"
           >
-            <PhoneOff size={18} className="mr-2" />
-            {user?.role === 'teacher' ? 'End Class' : 'Leave Class'}
+            <PhoneOff size={16} className="mr-1.5" />
+            {user?.role === 'teacher' ? 'End' : 'Leave'}
           </button>
         </div>
 
-        <div className="flex items-center justify-end space-x-2 w-1/4">
+        <div className="flex items-center justify-end space-x-1 shrink-0">
           <ControlButton
             icon={MessageSquare}
             active={showRightPanel === 'chat'}
             onClick={() => setShowRightPanel(showRightPanel === 'chat' ? null : 'chat')}
             label="Chat"
+            variant="ghost"
+          />
+          <ControlButton
+            icon={BarChart3}
+            active={showRightPanel === 'polls'}
+            onClick={() => setShowRightPanel(showRightPanel === 'polls' ? null : 'polls')}
+            label="Polls"
+            variant="ghost"
+          />
+          <ControlButton
+            icon={HelpCircle}
+            active={showRightPanel === 'qna'}
+            onClick={() => setShowRightPanel(showRightPanel === 'qna' ? null : 'qna')}
+            label="Q&A"
+            variant="ghost"
+          />
+          <ControlButton
+            icon={Subtitles}
+            active={captionHook.captionsEnabled}
+            onClick={() => captionHook.setCaptionsEnabled(!captionHook.captionsEnabled)}
+            label="CC"
             variant="ghost"
           />
           <ControlButton
@@ -1280,7 +1832,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             variant="ghost"
           />
           <ControlButton
-            icon={Sparkles}
+            icon={Hand}
             active={showRightPanel === 'ai'}
             onClick={() => setShowRightPanel(showRightPanel === 'ai' ? null : 'ai')}
             label="Transcript"
@@ -1301,11 +1853,13 @@ export default function MeetingRoom() {
   const [connectionDetails, setConnectionDetails] = useState(null);
   const [meetingError, setMeetingError] = useState('');
   const [classEnded, setClassEnded] = useState(false);
+  const classEndedByTeacherRef = useRef(false);
   const [rejoinCounter, setRejoinCounter] = useState(0);
   const [hasJoined, setHasJoined] = useState(() => {
     return sessionStorage.getItem(`joined_${id}`) === 'true';
   });
   const [meetingData, setMeetingData] = useState(null);
+  const [showReport, setShowReport] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
   const activeMeetingId = id || searchParams.get('id');
@@ -1352,7 +1906,7 @@ export default function MeetingRoom() {
   }, [activeMeetingId, rejoinCounter]);
 
   return (
-    <div className="h-screen bg-slate-900 text-white overflow-hidden flex flex-col relative">
+    <div className="fixed inset-0 bg-slate-900 text-white overflow-hidden flex flex-col z-[9999]">
       {classEnded ? (
         <div className="flex flex-col items-center justify-center h-full p-8">
           <div className="bg-slate-800 p-10 rounded-2xl shadow-xl max-w-md w-full text-center border border-slate-700">
@@ -1382,6 +1936,7 @@ export default function MeetingRoom() {
             <div className="space-y-3">
               <button
                 onClick={() => {
+                  classEndedByTeacherRef.current = false;
                   setClassEnded(false);
                   setConnectionDetails(null);
                   setHasJoined(true);
@@ -1394,12 +1949,21 @@ export default function MeetingRoom() {
                 Rejoin Classroom
               </button>
               {classEnded === 'ended' && (
-                <button
-                  onClick={() => window.close()}
-                  className="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium py-3 px-4 rounded-xl transition-colors"
-                >
-                  Close Tab
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowReport(true)}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                  >
+                    <BarChart3 size={18} />
+                    View Meeting Report
+                  </button>
+                  <button
+                    onClick={() => window.close()}
+                    className="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium py-3 px-4 rounded-xl transition-colors"
+                  >
+                    Close Tab
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -1440,8 +2004,17 @@ export default function MeetingRoom() {
             setShowRightPanel={setShowRightPanel}
             meetingData={meetingData}
             setClassEnded={setClassEnded}
+            classEndedByTeacherRef={classEndedByTeacherRef}
           />
         </LiveKitRoom>
+      )}
+
+      {/* Meeting Report Modal */}
+      {showReport && (
+        <MeetingReport
+          meetingId={activeMeetingId}
+          onClose={() => setShowReport(false)}
+        />
       )}
     </div>
   );
@@ -1463,10 +2036,10 @@ function ControlButton({ icon: Icon, active, onClick, label, variant = 'secondar
   return (
     <button
       onClick={onClick}
-      className={"flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all " + bgClass}
+      className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + bgClass}
     >
-      <Icon size={22} className={iconClass} />
-      <span className="text-[10px] mt-1 font-medium">{label}</span>
+      <Icon size={18} className={iconClass} />
+      <span className="text-[9px] mt-0.5 font-medium">{label}</span>
     </button>
   );
 }

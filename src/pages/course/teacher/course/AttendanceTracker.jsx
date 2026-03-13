@@ -225,8 +225,32 @@ const AttendanceTracker = () => {
     return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   };
 
-  const [currentDate, setCurrentDate] = useState(getCurrentDate());
-  const [currentTime, setCurrentTime] = useState(getCurrentTime());
+  // Auto-select the most recent existing session (from vconf auto-attendance) for today,
+  // otherwise default to current date/time
+  const [currentDate, setCurrentDate] = useState(() => {
+    const today = getCurrentDate();
+    const sessions = courseData?.attendance?.sessions || {};
+    const todaySessions = Object.keys(sessions)
+      .filter((k) => k.startsWith(today))
+      .sort();
+    if (todaySessions.length > 0) {
+      const lastSession = todaySessions[todaySessions.length - 1];
+      return lastSession.split("_")[0] || today;
+    }
+    return today;
+  });
+  const [currentTime, setCurrentTime] = useState(() => {
+    const today = getCurrentDate();
+    const sessions = courseData?.attendance?.sessions || {};
+    const todaySessions = Object.keys(sessions)
+      .filter((k) => k.startsWith(today))
+      .sort();
+    if (todaySessions.length > 0) {
+      const lastSession = todaySessions[todaySessions.length - 1];
+      return lastSession.split("_")[1] || getCurrentTime();
+    }
+    return getCurrentTime();
+  });
 
   useEffect(() => {
     createAttendanceSession(currentDate, currentTime);
@@ -468,6 +492,41 @@ const AttendanceTracker = () => {
                   />
                 </div>
               </div>
+
+              {/* Quick-select existing sessions (from live classes) */}
+              {Object.keys(attendanceSessions).length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Previous Sessions
+                  </label>
+                  <select
+                    className="w-full p-3 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-200 shadow-sm text-gray-800 font-medium text-sm"
+                    value={`${currentDate}_${currentTime}`}
+                    onChange={(e) => {
+                      const [date, time] = e.target.value.split("_");
+                      if (date) setCurrentDate(date);
+                      if (time) setCurrentTime(time);
+                    }}
+                  >
+                    <option value="">Select a session...</option>
+                    {Object.keys(attendanceSessions)
+                      .sort()
+                      .reverse()
+                      .map((key) => {
+                        const [d, t] = key.split("_");
+                        const count = (attendanceSessions[key] || []).length;
+                        const label = t
+                          ? `${d} at ${t} (${count} present)`
+                          : `${d} (${count} present)`;
+                        return (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Donut Chart */}

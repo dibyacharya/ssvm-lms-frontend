@@ -14,10 +14,12 @@ import {
   Plus,
   Save,
   Trash2,
+  BarChart3,
 } from "lucide-react";
+import MeetingReport from "../../../vconf/components/MeetingReport";
 import VideoEditor from "../../../EditLecture/EditLecture";
 import { useParams } from "react-router-dom";
-import { updateLecture } from "../../../../services/lecture.service";
+import { updateLecture, deleteLecture } from "../../../../services/lecture.service";
 import LoadingSpinner from "../../../../utils/LoadingAnimation";
 import { useCourse } from "../../../../context/CourseContext";
 import {
@@ -54,6 +56,10 @@ const LectureReview = () => {
   const [editingHandoutId, setEditingHandoutId] = useState(null);
   const [showHandoutForm, setShowHandoutForm] = useState(false);
   const [savingHandout, setSavingHandout] = useState(false);
+
+  // Meeting Report state
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportMeetingId, setReportMeetingId] = useState(null);
 
   // MOM edit state
   const [isEditingMOM, setIsEditingMOM] = useState(false);
@@ -124,6 +130,33 @@ const LectureReview = () => {
 
   const openHandoutsModal = () => {
     setShowHandoutsModal(true);
+  };
+
+  const openReportModal = (lecture) => {
+    if (lecture.vconfMeetingId) {
+      setReportMeetingId(lecture.vconfMeetingId);
+      setShowReportModal(true);
+    }
+  };
+
+  // Delete lecture
+  const [deletingLectureId, setDeletingLectureId] = useState(null);
+  const [deletedLectures, setDeletedLectures] = useState(new Set());
+
+  const handleDeleteLecture = async (lectureId) => {
+    if (!window.confirm("Are you sure you want to delete this lecture? This action cannot be undone.")) return;
+    try {
+      setDeletingLectureId(lectureId);
+      await deleteLecture(courseID, lectureId);
+      setDeletedLectures((prev) => new Set([...prev, lectureId]));
+      setSuccessMessage("Lecture deleted successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Delete lecture failed:", err);
+      alert("Failed to delete lecture. Please try again.");
+    } finally {
+      setDeletingLectureId(null);
+    }
   };
 
   const handleCreateHandout = async () => {
@@ -301,7 +334,7 @@ const LectureReview = () => {
               {expandedModules[module._id] && (
                 <div className="p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {module.lectures.map((lecture, index) => (
+                    {module.lectures.filter((l) => !deletedLectures.has(l._id)).map((lecture, index) => (
                       <LectureCard
                         key={lecture._id}
                         lecture={lecture}
@@ -315,6 +348,10 @@ const LectureReview = () => {
                         onEditVideo={() => openVideoModal(lecture)}
                         onMOM={() => openMOMModal(lecture)}
                         onHandouts={() => openHandoutsModal()}
+                        onReport={() => openReportModal(lecture)}
+                        hasReport={!!lecture.vconfMeetingId}
+                        onDelete={() => handleDeleteLecture(lecture._id)}
+                        isDeleting={deletingLectureId === lecture._id}
                         onCardClick={() => openVideoModal(lecture)}
                         onReportIssue={() => setShowIssueForm(lecture._id)}
                         showIssueForm={showIssueForm === lecture._id}
@@ -665,6 +702,14 @@ const LectureReview = () => {
         </div>
       )}
 
+      {/* Meeting Report Modal */}
+      {showReportModal && reportMeetingId && (
+        <MeetingReport
+          meetingId={reportMeetingId}
+          onClose={() => { setShowReportModal(false); setReportMeetingId(null); }}
+        />
+      )}
+
       {/* Handouts Modal */}
       {showHandoutsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -825,6 +870,10 @@ const LectureCard = ({
   onIssueTextChange,
   onSendIssue,
   onCancelIssue,
+  onReport,
+  hasReport,
+  onDelete,
+  isDeleting,
 }) => {
   const duration = formatDuration(lecture.recordingDuration);
   const classStart = lecture.createdAt;
@@ -833,8 +882,22 @@ const LectureCard = ({
   return (
     <div
       onClick={onCardClick}
-      className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg hover:border-rose-200 transition-all duration-300 cursor-pointer"
+      className={`relative bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg hover:border-rose-200 transition-all duration-300 cursor-pointer ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
     >
+      {/* Delete button — top-right corner */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
+        disabled={isDeleting}
+        className="absolute top-2 right-2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all duration-200 shadow-sm"
+        title="Delete Lecture"
+      >
+        {isDeleting ? (
+          <span className="w-3.5 h-3.5 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <Trash2 className="w-3.5 h-3.5" />
+        )}
+      </button>
+
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">
           <div className="flex items-center gap-2">
@@ -847,7 +910,7 @@ const LectureCard = ({
               </span>
             )}
           </div>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 mr-6">
             {formatDateTime(lecture.createdAt)}
           </span>
         </div>
@@ -892,6 +955,16 @@ const LectureCard = ({
             <Video className="mr-1 h-3 w-3 flex-shrink-0" />
             Edit Video
           </button>
+
+          {hasReport && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onReport(); }}
+              className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200"
+            >
+              <BarChart3 className="mr-1 h-3 w-3 flex-shrink-0" />
+              Meeting Report
+            </button>
+          )}
         </div>
       </div>
     </div>

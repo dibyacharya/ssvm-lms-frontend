@@ -92,3 +92,98 @@ export const getVconfAttendance = async (meetingId) => {
   const res = await api.get(`/vconf/meetings/${meetingId}/attendance`);
   return res.data;
 };
+
+// ─── Persistent Chat ───
+
+export const flushVconfChat = async (meetingId, messages) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/chat/flush`, { messages });
+  return res.data;
+};
+
+export const getVconfChat = async (meetingId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/chat`);
+  return res.data;
+};
+
+// ─── Polls / Quizzes ───
+
+export const createVconfPoll = async (meetingId, data) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/polls`, data);
+  return res.data;
+};
+
+export const getVconfPolls = async (meetingId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/polls`);
+  return res.data;
+};
+
+export const launchVconfPoll = async (meetingId, pollId) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/polls/${pollId}/launch`);
+  return res.data;
+};
+
+export const closeVconfPoll = async (meetingId, pollId) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/polls/${pollId}/close`);
+  return res.data;
+};
+
+export const respondToVconfPoll = async (meetingId, pollId, selectedOptions) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/polls/${pollId}/respond`, { selectedOptions });
+  return res.data;
+};
+
+export const getVconfPollResults = async (meetingId, pollId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/polls/${pollId}/results`);
+  return res.data;
+};
+
+// ─── Q&A ───
+
+export const submitVconfQuestion = async (meetingId, text, isAnonymous = false) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/qna`, { text, isAnonymous });
+  return res.data;
+};
+
+export const getVconfQuestions = async (meetingId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/qna`);
+  return res.data;
+};
+
+export const toggleVconfUpvote = async (meetingId, questionIdx) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/qna/${questionIdx}/upvote`);
+  return res.data;
+};
+
+export const answerVconfQuestion = async (meetingId, questionIdx, answer) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/qna/${questionIdx}/answer`, { answer });
+  return res.data;
+};
+
+export const dismissVconfQuestion = async (meetingId, questionIdx) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/qna/${questionIdx}/dismiss`);
+  return res.data;
+};
+
+export const highlightVconfQuestion = async (meetingId, questionIdx) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/qna/${questionIdx}/highlight`);
+  return res.data;
+};
+
+// ─── Captions (Manual) ───
+
+export const flushVconfCaptions = async (meetingId, captions) => {
+  const res = await api.post(`/vconf/meetings/${meetingId}/captions/flush`, { captions });
+  return res.data;
+};
+
+export const getVconfCaptions = async (meetingId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/captions`);
+  return res.data;
+};
+
+// ─── Post-Meeting Report ───
+
+export const getVconfMeetingReport = async (meetingId) => {
+  const res = await api.get(`/vconf/meetings/${meetingId}/report`);
+  return res.data;
+};
