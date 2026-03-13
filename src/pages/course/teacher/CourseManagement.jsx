@@ -26,6 +26,7 @@ import { useCourse } from "../../../context/CourseContext";
 import { TfiAnnouncement } from "react-icons/tfi";
 import { Si1Panel } from "react-icons/si";
 import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
+import { getCourseBannerProps } from "../../../utils/courseBannerHelper";
 // Import your components
 import CourseDescription from "./course/CourseDescription";
 import DescriptionSyllabus from "./course/DescriptionSyllabus";
@@ -474,20 +475,93 @@ const CourseManagement = () => {
         </div>
       </header>
 
-      {/* Course Header Banner */}
+      {/* Course Header Banner — Unique gradient + subject symbols */}
       {(() => {
-        const theme = resolveCourseTheme(courseData);
+        const { grad, symbols, seed } = getCourseBannerProps(courseData);
+        // Pick 12 symbols for the wider banner
+        const picked = [];
+        for (let i = 0; i < 12; i++) picked.push(symbols[(seed + i * 3) % symbols.length]);
+        // Scatter positions for wide banner (viewBox 800×192)
+        const positions = [];
+        let sx = (seed * 7) % 800;
+        let sy = (seed * 3) % 140;
+        for (let i = 0; i < 12; i++) {
+          sx = (sx + 197) % 760 + 20;
+          sy = ((sy + 53 + (i * 17)) % 150) + 15;
+          const size = 18 + ((seed + i * 7) % 16);
+          const opacity = 0.08 + ((seed + i * 11) % 10) / 100;
+          const rotate = ((seed + i * 23) % 40) - 20;
+          positions.push({ x: sx, y: sy, size, opacity, rotate });
+        }
+
         return (
           <div className="w-[90%] m-auto pt-4">
-            <div className="relative rounded-2xl overflow-hidden mb-6" style={{ background: theme.gradientCSS }}>
-              <img
-                src={theme.bannerUrl}
-                alt=""
-                className="w-full h-48 object-cover"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+            <div className="relative rounded-2xl overflow-hidden mb-6 h-48 group">
+              {/* Full SVG banner background */}
+              <svg
+                viewBox="0 0 800 192"
+                preserveAspectRatio="xMidYMid slice"
+                className="absolute inset-0 w-full h-full"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id={`cb-${seed}`} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor={grad.from} />
+                    <stop offset="50%" stopColor={grad.via} />
+                    <stop offset="100%" stopColor={grad.to} />
+                  </linearGradient>
+                </defs>
+                <rect width="800" height="192" fill={`url(#cb-${seed})`} />
+
+                {/* Decorative background circles */}
+                <circle cx={640 + (seed % 80)} cy={50 + (seed % 50)} r={80 + (seed % 30)} fill="white" opacity="0.06" />
+                <circle cx={150 + (seed % 60)} cy={130 + (seed % 40)} r={60 + (seed % 25)} fill="white" opacity="0.05" />
+                <circle cx={400 + (seed % 100)} cy={30 + (seed % 40)} r={45 + (seed % 20)} fill="white" opacity="0.04" />
+
+                {/* Scattered subject symbols */}
+                {picked.map((sym, i) => (
+                  <text
+                    key={i}
+                    x={positions[i].x}
+                    y={positions[i].y}
+                    fontSize={positions[i].size}
+                    fill="white"
+                    opacity={positions[i].opacity}
+                    fontFamily="system-ui, sans-serif"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    transform={`rotate(${positions[i].rotate}, ${positions[i].x}, ${positions[i].y})`}
+                  >
+                    {sym}
+                  </text>
+                ))}
+
+                {/* Large hero symbol */}
+                <text
+                  x={680 + (seed % 60)}
+                  y={80 + (seed % 40)}
+                  fontSize="56"
+                  fill="white"
+                  opacity="0.1"
+                  fontFamily="system-ui, sans-serif"
+                  fontWeight="bold"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  transform={`rotate(${(seed % 30) - 15}, ${680 + (seed % 60)}, ${80 + (seed % 40)})`}
+                >
+                  {symbols[seed % symbols.length]}
+                </text>
+              </svg>
+
+              {/* Shimmer on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
+
+              {/* Bottom gradient for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+              {/* Content overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between z-10">
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white drop-shadow-lg">
                     {courseData.title}
@@ -508,7 +582,7 @@ const CourseManagement = () => {
                           alert("Video conference room is not ready yet. Please try again in a moment.");
                         }
                       }}
-                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline"
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline shadow-lg"
                     >
                       <MdLiveTv />
                       Join Live Class
@@ -518,7 +592,7 @@ const CourseManagement = () => {
                   <div className="ml-8">
                     <button
                       disabled
-                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg cursor-not-allowed border border-white/30"
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl cursor-not-allowed border border-white/30 shadow-lg"
                     >
                       <MdLiveTv />
                       No Live Class Now

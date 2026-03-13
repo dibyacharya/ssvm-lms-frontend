@@ -5,142 +5,10 @@ import { getAllCourses } from "../../../services/course.service";
 import { useMeetingsV2 } from "../../../context/MeetingV2Context"; // New meeting context
 import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import { getPeriodLabel } from "../../../utils/periodLabel";
+import { getCourseBannerProps, scatterPositions } from "../../../utils/courseBannerHelper";
 
-// ── 24 unique vibrant gradient palettes for course banners ──────────
-const CARD_GRADIENTS = [
-  { from: "#0ea5e9", via: "#6366f1", to: "#a855f7" },   // Sky → Indigo → Purple
-  { from: "#f43f5e", via: "#ec4899", to: "#d946ef" },   // Rose → Pink → Fuchsia
-  { from: "#10b981", via: "#14b8a6", to: "#06b6d4" },   // Emerald → Teal → Cyan
-  { from: "#f97316", via: "#f59e0b", to: "#eab308" },   // Orange → Amber → Yellow
-  { from: "#8b5cf6", via: "#a78bfa", to: "#c084fc" },   // Violet → Lavender → Purple
-  { from: "#059669", via: "#047857", to: "#065f46" },   // Emerald deep tones
-  { from: "#2563eb", via: "#3b82f6", to: "#60a5fa" },   // Blue spectrum
-  { from: "#dc2626", via: "#f43f5e", to: "#fb7185" },   // Red → Rose → Pink
-  { from: "#7c3aed", via: "#6d28d9", to: "#4f46e5" },   // Purple → Violet → Indigo
-  { from: "#0891b2", via: "#0e7490", to: "#155e75" },   // Cyan deep tones
-  { from: "#ea580c", via: "#c2410c", to: "#9a3412" },   // Orange deep tones
-  { from: "#4f46e5", via: "#7c3aed", to: "#9333ea" },   // Indigo → Violet → Purple
-  { from: "#0d9488", via: "#2dd4bf", to: "#5eead4" },   // Teal bright
-  { from: "#b91c1c", via: "#991b1b", to: "#7f1d1d" },   // Red deep tones
-  { from: "#1d4ed8", via: "#2563eb", to: "#3b82f6" },   // Blue deep → bright
-  { from: "#c026d3", via: "#a21caf", to: "#86198f" },   // Fuchsia tones
-  { from: "#16a34a", via: "#22c55e", to: "#4ade80" },   // Green vibrant
-  { from: "#0369a1", via: "#0284c7", to: "#0ea5e9" },   // Blue ocean
-  { from: "#9333ea", via: "#c084fc", to: "#e879f9" },   // Purple → Light Purple → Pink
-  { from: "#d97706", via: "#b45309", to: "#92400e" },   // Amber deep tones
-  { from: "#4338ca", via: "#6366f1", to: "#818cf8" },   // Indigo spectrum
-  { from: "#be185d", via: "#e11d48", to: "#f43f5e" },   // Pink → Rose
-  { from: "#047857", via: "#10b981", to: "#34d399" },   // Emerald bright
-  { from: "#7e22ce", via: "#a855f7", to: "#c084fc" },   // Purple bright
-];
+// Gradients, symbols, and banner helpers are imported from courseBannerHelper
 
-// ── Subject-specific symbols rendered as SVG text/paths on banners ───
-// Each entry: keywords to match, array of unicode/text symbols to scatter
-const SUBJECT_SYMBOLS = [
-  { keywords: ["math", "algebra", "calculus", "statistics", "trigonometry", "arithmetic", "geometry", "linear algebra", "discrete", "probability", "numerical"],
-    symbols: ["∑", "π", "∫", "√", "∞", "Δ", "±", "≈", "∂", "θ", "λ", "∮"] },
-  { keywords: ["physics", "quantum", "thermodynamics", "optics", "mechanics", "electromagnetism", "relativity", "astrophysics", "nuclear"],
-    symbols: ["⚛", "Ψ", "Ω", "ℏ", "∇", "⊗", "λ", "μ", "∝", "⇌", "Δ", "E=mc²"] },
-  { keywords: ["chemistry", "organic", "inorganic", "biochem", "pharmaceutical", "chemical", "polymer"],
-    symbols: ["⚗", "⬡", "H₂O", "CO₂", "→", "⇌", "Δ", "mol", "pH", "∆H", "≡", "⊕"] },
-  { keywords: ["computer", "programming", "cs ", "software", "web dev", "database", "cyber", "python", "java", "javascript", "cloud", "devops", "networking", "dsa", "data science", "coding"],
-    symbols: ["</>", "{ }", "01", "λ", ">>", "&&", "||", "=>", "++", "#!", "/*", "[]"] },
-  { keywords: ["machine learning", "ml ", "m.l.", "ai ", "a.i.", "artificial intelligence", "deep learning", "nlp", "neural"],
-    symbols: ["🧠", "⊕", "∑wᵢ", "σ(x)", "∇L", "η", "⊗", "ŷ", "f(x)", "θ", "Δw", "GPU"] },
-  { keywords: ["biology", "botany", "zoology", "life science", "microbiology", "genetics", "ecology", "biotechnology", "bioinformatics"],
-    symbols: ["🧬", "🔬", "🌿", "⊕", "∞", "ATP", "DNA", "RNA", "♀", "♂", "μm", "pH"] },
-  { keywords: ["economics", "economy", "micro economics", "macro economics", "econometrics", "fiscal", "monetary"],
-    symbols: ["₹", "$", "€", "£", "📈", "∑", "GDP", "Δ%", "μ", "σ²", "∞", "S&D"] },
-  { keywords: ["history", "ancient", "medieval", "modern history", "civilization", "archaeology", "heritage", "renaissance"],
-    symbols: ["⏳", "🏛", "⚔", "📜", "†", "∞", "AD", "BC", "Ω", "☆", "⚓", "♛"] },
-  { keywords: ["literature", "english", "language", "linguistics", "poetry", "novel", "literary", "hindi", "sanskrit", "odia", "french"],
-    symbols: ["✍", "📖", "❝❞", "¶", "…", "—", "Aa", "ℬ", "ℛ", "λόγ", "∞", "§"] },
-  { keywords: ["law", "legal", "jurisprudence", "constitutional", "criminal law", "civil law", "judiciary"],
-    symbols: ["⚖", "§", "¶", "†", "©", "™", "℗", "®", "Art.", "IPC", "⊕", "∴"] },
-  { keywords: ["medicine", "anatomy", "physiology", "pathology", "pharmacology", "medical", "mbbs", "surgery", "clinical", "nursing"],
-    symbols: ["⚕", "♡", "Rx", "℞", "⊕", "μg", "mL", "IV", "DNA", "ECG", "∴", "☤"] },
-  { keywords: ["engineering", "mechanics", "electronics", "electrical", "civil eng", "mechanical eng", "structural", "robotics", "vlsi", "signal"],
-    symbols: ["⚙", "⊕", "Ω", "V=IR", "∫", "Δ", "∇", "AC", "DC", "Hz", "kN", "⏚"] },
-  { keywords: ["business", "management", "finance", "mba", "marketing", "accounting", "entrepreneurship", "commerce", "banking"],
-    symbols: ["📊", "₹", "$", "ROI", "%", "KPI", "B2B", "∑", "SWOT", "P&L", "€", "IPO"] },
-  { keywords: ["geography", "geospatial", "cartography", "climate", "topography", "gis ", "remote sensing", "oceanography"],
-    symbols: ["🌍", "🧭", "📍", "∠", "°N", "°E", "Δh", "km²", "∞", "≈", "GPS", "⊕"] },
-  { keywords: ["education", "pedagogy", "teaching", "curriculum", "b.ed", "learning theory"],
-    symbols: ["🎓", "📚", "✏", "📝", "∞", "A+", "Q&A", "IQ", "EQ", "∴", "⊕", "Δ"] },
-  { keywords: ["music", "vocal", "instrument", "rhythm", "melody", "classical music", "singing"],
-    symbols: ["♪", "♫", "♩", "♬", "𝄞", "♭", "♯", "𝄢", "∞", "BPM", "4/4", "Δ"] },
-  { keywords: ["art", "painting", "sculpture", "design", "drawing", "visual art", "fine art", "craft"],
-    symbols: ["🎨", "✦", "◆", "△", "○", "◐", "⬡", "✿", "∞", "φ", "◎", "★"] },
-  { keywords: ["psychology", "cognitive", "behavioral", "counseling", "mental health", "psychotherapy"],
-    symbols: ["Ψ", "🧠", "∞", "⊕", "Id", "Ego", "IQ", "EQ", "σ", "μ", "Δ", "∴"] },
-  { keywords: ["philosophy", "ethics", "metaphysics", "logic", "ontology", "epistemology"],
-    symbols: ["∴", "∵", "∞", "⊕", "∃", "∀", "¬", "→", "↔", "Ψ", "Ω", "φ"] },
-  { keywords: ["political", "polity", "governance", "public admin", "civics", "upsc", "ias", "international relations"],
-    symbols: ["⚖", "🏛", "☆", "§", "†", "∴", "IAS", "GS", "Art.", "PIL", "∞", "⊕"] },
-  { keywords: ["plumbing", "hvac", "mechanical system", "piping", "sanitary", "drainage"],
-    symbols: ["🔧", "⊕", "PSI", "GPM", "∅", "Δp", "≈", "m³", "∞", "⏚", "∇", "kPa"] },
-  { keywords: ["environmental", "sustainability", "ecology", "pollution", "green energy", "renewable"],
-    symbols: ["🌱", "♻", "CO₂", "∞", "⊕", "H₂O", "kWh", "Δ°C", "O₃", "ppm", "∇", "☀"] },
-  { keywords: ["astronomy", "space", "cosmos", "stellar", "planetary", "telescope"],
-    symbols: ["★", "☆", "☽", "☀", "∞", "AU", "ly", "Mpc", "Ω", "Δv", "⊕", "λ"] },
-];
-
-// Fallback generic symbols for courses that don't match any subject
-const GENERIC_SYMBOLS = ["✦", "◆", "○", "△", "⊕", "∞", "★", "◎", "⬡", "⬢", "☆", "∴"];
-
-/** Match course text against keyword map → return matching symbols */
-function _matchSubjectSymbols(course) {
-  const searchText = ` ${[
-    course.title,
-    course.courseCode,
-    course.department,
-    course.program,
-    typeof course.aboutCourse === "string" ? course.aboutCourse.slice(0, 200) : "",
-  ].filter(Boolean).join(" ").toLowerCase()} `;
-
-  for (const entry of SUBJECT_SYMBOLS) {
-    for (const kw of entry.keywords) {
-      if (searchText.includes(kw)) return entry.symbols;
-    }
-  }
-  return GENERIC_SYMBOLS;
-}
-
-/** Stable hash for deterministic per-course selection */
-function _hash(str) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-/** Generate unique banner props for a course */
-function getUniqueBanner(course, index) {
-  const key = (course._id || "") + (course.title || "") + index;
-  const h = _hash(key);
-  const grad = CARD_GRADIENTS[h % CARD_GRADIENTS.length];
-  const symbols = _matchSubjectSymbols(course);
-  return { grad, symbols, seed: h % 1000 };
-}
-
-/**
- * Scatter subject symbols across the banner as semi-transparent text.
- * Uses deterministic positions based on seed so they're stable per course.
- */
-function _scatterPositions(seed, count) {
-  const positions = [];
-  // Golden-ratio-ish spacing for nice distribution
-  let x = (seed * 7) % 400;
-  let y = (seed * 3) % 100;
-  for (let i = 0; i < count; i++) {
-    x = (x + 137) % 380 + 10;            // Wrap within 10–390
-    y = ((y + 53 + (i * 17)) % 110) + 10; // Wrap within 10–120
-    const size = 14 + ((seed + i * 7) % 12);   // Font size 14–25
-    const opacity = 0.08 + ((seed + i * 11) % 10) / 100; // 0.08–0.17
-    const rotate = ((seed + i * 23) % 40) - 20;  // –20° to +20°
-    positions.push({ x, y, size, opacity, rotate });
-  }
-  return positions;
-}
 
 /** Inline SVG banner – unique gradient + subject symbols per course */
 const CourseBannerSVG = ({ grad, symbols, seed }) => {
@@ -149,7 +17,7 @@ const CourseBannerSVG = ({ grad, symbols, seed }) => {
   for (let i = 0; i < 8; i++) {
     picked.push(symbols[(seed + i * 3) % symbols.length]);
   }
-  const positions = _scatterPositions(seed, 8);
+  const positions = scatterPositions(seed, 8);
 
   return (
     <svg
@@ -489,7 +357,7 @@ const TeacherCourses = () => {
                     course.assignmentId ||
                     `${course._id}-${course.batchId || "na"}-${course.semesterId || "na"}-${idx}`;
 
-                  const { grad, symbols, seed } = getUniqueBanner(course, idx);
+                  const { grad, symbols, seed } = getCourseBannerProps(course, idx);
                   return (
                   <Link key={cardKey} to={linkTarget}>
                     <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
