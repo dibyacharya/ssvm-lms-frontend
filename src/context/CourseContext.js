@@ -9,7 +9,6 @@ const initialCourseData = {
     lecture: 30,
     tutorial: 15,
     practical: 25,
-    project: 30,
   },
 
   learningOutcomes: [
