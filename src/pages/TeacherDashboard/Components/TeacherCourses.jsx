@@ -1,10 +1,136 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { MonitorPlay, Search, ChevronDown, Calendar, BookOpen } from "lucide-react";
+import { MonitorPlay, Search, ChevronDown, Calendar, BookOpen, Users, ClipboardList, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllCourses } from "../../../services/course.service";
 import { useMeetingsV2 } from "../../../context/MeetingV2Context"; // New meeting context
 import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import { getPeriodLabel } from "../../../utils/periodLabel";
+
+// ── 24 unique vibrant gradient palettes for course banners ──────────
+const CARD_GRADIENTS = [
+  { from: "#0ea5e9", via: "#6366f1", to: "#a855f7" },   // Sky → Indigo → Purple
+  { from: "#f43f5e", via: "#ec4899", to: "#d946ef" },   // Rose → Pink → Fuchsia
+  { from: "#10b981", via: "#14b8a6", to: "#06b6d4" },   // Emerald → Teal → Cyan
+  { from: "#f97316", via: "#f59e0b", to: "#eab308" },   // Orange → Amber → Yellow
+  { from: "#8b5cf6", via: "#a78bfa", to: "#c084fc" },   // Violet → Lavender → Purple
+  { from: "#059669", via: "#047857", to: "#065f46" },   // Emerald deep tones
+  { from: "#2563eb", via: "#3b82f6", to: "#60a5fa" },   // Blue spectrum
+  { from: "#dc2626", via: "#f43f5e", to: "#fb7185" },   // Red → Rose → Pink
+  { from: "#7c3aed", via: "#6d28d9", to: "#4f46e5" },   // Purple → Violet → Indigo
+  { from: "#0891b2", via: "#0e7490", to: "#155e75" },   // Cyan deep tones
+  { from: "#ea580c", via: "#c2410c", to: "#9a3412" },   // Orange deep tones
+  { from: "#4f46e5", via: "#7c3aed", to: "#9333ea" },   // Indigo → Violet → Purple
+  { from: "#0d9488", via: "#2dd4bf", to: "#5eead4" },   // Teal bright
+  { from: "#b91c1c", via: "#991b1b", to: "#7f1d1d" },   // Red deep tones
+  { from: "#1d4ed8", via: "#2563eb", to: "#3b82f6" },   // Blue deep → bright
+  { from: "#c026d3", via: "#a21caf", to: "#86198f" },   // Fuchsia tones
+  { from: "#16a34a", via: "#22c55e", to: "#4ade80" },   // Green vibrant
+  { from: "#0369a1", via: "#0284c7", to: "#0ea5e9" },   // Blue ocean
+  { from: "#9333ea", via: "#c084fc", to: "#e879f9" },   // Purple → Light Purple → Pink
+  { from: "#d97706", via: "#b45309", to: "#92400e" },   // Amber deep tones
+  { from: "#4338ca", via: "#6366f1", to: "#818cf8" },   // Indigo spectrum
+  { from: "#be185d", via: "#e11d48", to: "#f43f5e" },   // Pink → Rose
+  { from: "#047857", via: "#10b981", to: "#34d399" },   // Emerald bright
+  { from: "#7e22ce", via: "#a855f7", to: "#c084fc" },   // Purple bright
+];
+
+// ── Decorative SVG patterns – each course gets a unique combo ───────
+const PATTERNS = [
+  // Circles cluster
+  (seed) => (
+    <g opacity="0.15">
+      <circle cx={120 + (seed % 80)} cy={30 + (seed % 50)} r={60 + (seed % 30)} fill="white" />
+      <circle cx={280 + (seed % 60)} cy={70 + (seed % 40)} r={40 + (seed % 20)} fill="white" opacity="0.6" />
+      <circle cx={50 + (seed % 40)} cy={90 + (seed % 30)} r={25 + (seed % 15)} fill="white" opacity="0.4" />
+    </g>
+  ),
+  // Diagonal lines
+  (seed) => (
+    <g opacity="0.12" stroke="white" strokeWidth="2" fill="none">
+      <line x1={seed % 50} y1="0" x2={200 + (seed % 100)} y2="144" />
+      <line x1={80 + (seed % 50)} y1="0" x2={280 + (seed % 100)} y2="144" />
+      <line x1={160 + (seed % 50)} y1="0" x2={360 + (seed % 50)} y2="144" />
+      <circle cx={300 + (seed % 60)} cy={40 + (seed % 40)} r={50 + (seed % 25)} strokeWidth="1.5" />
+    </g>
+  ),
+  // Waves
+  (seed) => (
+    <g opacity="0.12" fill="white">
+      <path d={`M0,${90 + (seed % 20)} Q${100 + (seed % 60)},${60 + (seed % 30)} ${200 + (seed % 60)},${80 + (seed % 25)} T400,${70 + (seed % 30)} L400,144 L0,144 Z`} />
+      <circle cx={320 + (seed % 50)} cy={30 + (seed % 30)} r={35 + (seed % 20)} opacity="0.5" />
+    </g>
+  ),
+  // Geometric triangles
+  (seed) => (
+    <g opacity="0.1" fill="white">
+      <polygon points={`${300 + (seed % 50)},10 ${360 + (seed % 50)},80 ${240 + (seed % 50)},80`} />
+      <polygon points={`${80 + (seed % 40)},40 ${130 + (seed % 40)},100 ${30 + (seed % 40)},100`} opacity="0.6" />
+      <circle cx={200 + (seed % 80)} cy={60 + (seed % 30)} r={30 + (seed % 20)} opacity="0.4" />
+    </g>
+  ),
+  // Dots grid
+  (seed) => (
+    <g opacity="0.15" fill="white">
+      {[...Array(5)].map((_, i) => (
+        <React.Fragment key={i}>
+          {[...Array(3)].map((_, j) => (
+            <circle
+              key={`${i}-${j}`}
+              cx={60 + i * (60 + (seed % 15))}
+              cy={25 + j * (40 + (seed % 10))}
+              r={3 + (seed % 3)}
+            />
+          ))}
+        </React.Fragment>
+      ))}
+      <circle cx={320 + (seed % 40)} cy={50 + (seed % 30)} r={45 + (seed % 20)} opacity="0.3" />
+    </g>
+  ),
+  // Hexagon mesh
+  (seed) => (
+    <g opacity="0.1" stroke="white" strokeWidth="1.5" fill="none">
+      <polygon points={`${250 + (seed % 40)},20 ${290 + (seed % 40)},40 ${290 + (seed % 40)},80 ${250 + (seed % 40)},100 ${210 + (seed % 40)},80 ${210 + (seed % 40)},40`} />
+      <polygon points={`${100 + (seed % 30)},50 ${130 + (seed % 30)},65 ${130 + (seed % 30)},95 ${100 + (seed % 30)},110 ${70 + (seed % 30)},95 ${70 + (seed % 30)},65`} opacity="0.7" />
+      <circle cx={350 + (seed % 30)} cy={40 + (seed % 30)} r={30 + (seed % 15)} fill="white" opacity="0.3" />
+    </g>
+  ),
+];
+
+/** Stable hash for deterministic per-course selection */
+function _hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+/** Generate unique banner props for a course */
+function getUniqueBanner(course, index) {
+  const key = (course._id || "") + (course.title || "") + index;
+  const h = _hash(key);
+  const grad = CARD_GRADIENTS[h % CARD_GRADIENTS.length];
+  const pattern = PATTERNS[(h >> 4) % PATTERNS.length];
+  return { grad, pattern, seed: h % 1000 };
+}
+
+/** Inline SVG banner – unique per course, no external image needed */
+const CourseBannerSVG = ({ grad, pattern, seed }) => (
+  <svg
+    viewBox="0 0 400 144"
+    preserveAspectRatio="xMidYMid slice"
+    className="absolute inset-0 w-full h-full"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id={`cg-${seed}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor={grad.from} />
+        <stop offset="50%" stopColor={grad.via} />
+        <stop offset="100%" stopColor={grad.to} />
+      </linearGradient>
+    </defs>
+    <rect width="400" height="144" fill={`url(#cg-${seed})`} />
+    {pattern(seed)}
+  </svg>
+);
 
 const TeacherCourses = () => {
   const [coursesData, setCoursesData] = useState({
@@ -286,53 +412,70 @@ const TeacherCourses = () => {
                     course.assignmentId ||
                     `${course._id}-${course.batchId || "na"}-${course.semesterId || "na"}-${idx}`;
 
-                  const theme = resolveCourseTheme(course);
+                  const { grad, pattern, seed } = getUniqueBanner(course, idx);
                   return (
                   <Link key={cardKey} to={linkTarget}>
-                    <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-tertiary/10 hover:shadow-lg transition-all duration-300 h-full">
-                      <div className="relative h-36 overflow-hidden" style={{ background: theme.gradientCSS }}>
-                        <img
-                          src={theme.thumbnailUrl}
-                          alt={course.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-50 transition-opacity duration-300"></div>
-                        <div className="absolute bottom-2 left-2 text-white text-xs font-medium px-2 py-1 rounded-md shadow-md" style={{ backgroundColor: theme.accentColor }}>
-                          {course?.studentCount} Students
+                    <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                      {/* ── Unique SVG Banner ────────────────────── */}
+                      <div className="relative h-36 overflow-hidden">
+                        <CourseBannerSVG grad={grad} pattern={pattern} seed={seed} />
+                        {/* Shimmer overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
+                        {/* Bottom fade for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                        {/* Course title on banner */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                          <h3 className="text-white font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
+                            {course.title}
+                          </h3>
+                          <p className="text-white/80 text-xs mt-0.5 font-medium drop-shadow">
+                            {course.cohortLabel || course.batchName || ""}
+                          </p>
+                        </div>
+                        {/* Student count badge */}
+                        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/20 backdrop-blur-md text-white text-xs font-semibold pl-2 pr-2.5 py-1 rounded-full border border-white/30 shadow-lg">
+                          <Users className="w-3 h-3" />
+                          {course?.studentCount ?? 0}
                         </div>
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-1 group-hover:text-primary dark:group-hover:text-primary/90 transition-colors">
-                          {course.title}
-                        </h3>
-                        <p className="text-xs font-medium text-primary dark:text-primary/90 mb-1">
-                          {course.cohortLabel || course.batchName || "Batch context unavailable"}
+
+                      {/* ── Card Body ────────────────────────────── */}
+                      <div className="p-4 space-y-3">
+                        {/* Course code + description */}
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                          {(course.aboutCourse || "").length > 90
+                            ? `${course.aboutCourse.substring(0, 90)}...`
+                            : course.aboutCourse || "No description available"}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-                          {course.aboutCourse.length > 80 ? `${course.aboutCourse.substring(0, 80)}...` : course.aboutCourse}
-                        </p>
-                        <div className="mb-3">
-                          <h4 className="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Schedule:</h4>
-                          <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
-                            {course.schedule?.classDaysAndTimes.map(
-                              (schedule, index) => (
-                                <li key={index} className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3 text-primary dark:text-primary/90" />
-                                  <span>{schedule.day}: {schedule.time}</span>
-                                </li>
+
+                        {/* Schedule */}
+                        {course.schedule?.classDaysAndTimes?.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {course.schedule.classDaysAndTimes.slice(0, 3).map(
+                              (schedule, sIdx) => (
+                                <span
+                                  key={sIdx}
+                                  className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
+                                >
+                                  <Calendar className="h-2.5 w-2.5 flex-shrink-0" />
+                                  {schedule.day}
+                                </span>
                               )
                             )}
-                          </ul>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
-                            <MonitorPlay className="h-3 w-3 text-primary dark:text-primary/90" />
-                            <span>{course.totalLectureCount} Lectures</span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
-                            <Search className="h-3 w-3 text-primary dark:text-primary/90" />
-                            <span>{course.assignments?.length || 0} Assignments</span>
+                        )}
+
+                        {/* Stats row */}
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                            <MonitorPlay className="h-3.5 w-3.5 text-emerald-500" />
+                            <span className="font-medium">{course.totalLectureCount || 0}</span>
+                            <span>Lectures</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                            <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
+                            <span className="font-medium">{course.assignments?.length || 0}</span>
+                            <span>Assignments</span>
                           </div>
                         </div>
                       </div>
