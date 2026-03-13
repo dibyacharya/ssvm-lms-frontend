@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Book, PlayCircle, Clock, Calendar, BookOpen } from "lucide-react";
+import { Book, PlayCircle, Clock, Calendar, BookOpen, ClipboardList } from "lucide-react";
 import { getAllStudentCourses } from "../../../services/course.service";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
-import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import { getPeriodLabel } from "../../../utils/periodLabel";
+import { getCourseBannerProps } from "../../../utils/courseBannerHelper";
+import CourseBannerSVG from "../../../components/shared/CourseBannerSVG";
 
 function calculateSemesterWeeks(startDate, endDate) {
   // 1. Create Date objects from the input strings
@@ -218,63 +219,56 @@ const Courseware = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {courses.map((course, index) => {
-                  const theme = resolveCourseTheme(course);
+                  const { grad, symbols, seed } = getCourseBannerProps(course, index);
                   return (
                     <Link
                       key={course._id}
                       to={`/student/course/${course._id}`}
-                      className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-tertiary/10 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                     >
-                      {/* Course Image */}
-                      <div className="relative overflow-hidden h-48" style={{ background: theme.gradientCSS }}>
-                        <img
-                          src={theme.thumbnailUrl}
-                          alt={course.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-200">
-                            {course.semester.name}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Course Content */}
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center">
-                            <Book className="h-5 w-5 text-accent1 dark:text-blue-400 mr-2 flex-shrink-0" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-accent1 dark:group-hover:text-blue-400 transition-colors">
+                      <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                        {/* SVG Banner with Subject Symbols */}
+                        <div className="relative h-36 overflow-hidden">
+                          <CourseBannerSVG grad={grad} symbols={symbols} seed={seed} />
+                          {/* Shimmer overlay on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
+                          {/* Bottom fade for text readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                          {/* Course title on banner */}
+                          <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                            <h3 className="text-white font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
                               {course.title}
                             </h3>
+                            <p className="text-white/80 text-xs mt-0.5 font-medium drop-shadow">
+                              {course.semester?.name || ""}
+                            </p>
+                          </div>
+                          {/* Semester badge */}
+                          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full border border-white/30 shadow-lg">
+                            <Calendar className="w-3 h-3" />
+                            {calculateSemesterWeeks(course.semester.startDate, course.semester.endDate)}w
                           </div>
                         </div>
 
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                          {course.aboutCourse}
-                        </p>
+                        {/* Card Body */}
+                        <div className="p-4 space-y-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                            {(course.aboutCourse || "").length > 90
+                              ? `${course.aboutCourse.substring(0, 90)}...`
+                              : course.aboutCourse || "No description available"}
+                          </p>
 
-                        {/* Course Stats */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                              <PlayCircle className="h-4 w-4 mr-1" />
-                              <span>{course.lectureCount} lectures</span>
+                          {/* Stats row */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                              <PlayCircle className="h-3.5 w-3.5 text-emerald-500" />
+                              <span className="font-medium">{course.lectureCount || 0}</span>
+                              <span>Lectures</span>
                             </div>
-                            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                              <Clock className="h-4 w-4 mr-1" />
-                              <span>{calculateSemesterWeeks(course.semester.startDate, course.semester.endDate)} weeks</span>
+                            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                              <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
+                              <span className="font-medium">{course.assignmentCount || 0}</span>
+                              <span>Assignments</span>
                             </div>
-                          </div>
-
-                          {/* Semester Dates */}
-                          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-600">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            <span>
-                              {formatDate(course.semester.startDate)} - {formatDate(course.semester.endDate)}
-                            </span>
                           </div>
                         </div>
                       </div>

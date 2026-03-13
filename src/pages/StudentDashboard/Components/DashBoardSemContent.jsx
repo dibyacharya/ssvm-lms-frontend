@@ -23,7 +23,9 @@ import { getAllStudentCourses } from "../../../services/course.service";
 import { getStudentAssignmentStats } from "../../../services/assignment.service";
 import calculateAttendance from "../../../utils/Functions/CalculateStudentAttendencePercentage";
 import AssignmentStatusChart from "./AssignmentStatusChart";
-import { resolveCourseTheme, fallbacks } from "../../../utils/courseThemeResolver";
+import { fallbacks } from "../../../utils/courseThemeResolver";
+import { getCourseBannerProps } from "../../../utils/courseBannerHelper";
+import CourseBannerSVG from "../../../components/shared/CourseBannerSVG";
 
 const SectionHeader = ({ icon: Icon, title, gradient, count, rightContent }) => (
   <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
@@ -416,62 +418,51 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
           />
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {coursesData.courses?.slice(0, 4).map((course) => {
-                const theme = resolveCourseTheme(course);
+              {coursesData.courses?.slice(0, 4).map((course, idx) => {
+                const { grad, symbols, seed } = getCourseBannerProps(course, idx);
                 return (
                 <Link
                   key={course._id}
                   to={`/student/course/${course._id}`}
-                  className="group relative flex flex-col justify-between rounded-lg border border-gray-100 dark:border-gray-700 hover:border-2 hover:border-accent1/30 dark:hover:border-blue-400/50 shadow-accent1 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden bg-white dark:bg-gray-800"
-                  onClick={() => {
-                    if (course.available) {
-                      navigate(`/student/course/${course._id}`);
-                    }
-                  }}
                 >
-                  {/* Course Image */}
-                  <div className="relative h-40 w-full" style={{ background: theme.gradientCSS }}>
-                    <img
-                      src={theme.thumbnailUrl}
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.target.style.display = 'none'; }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  </div>
-
-                  {/* Course Details */}
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
-                      {course.aboutCourse}
-                    </p>
-                  </div>
-
-                  {/* Course Footer */}
-                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                      <div className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full truncate max-w-[120px] sm:max-w-[150px]">
-                          {course.semester?.name}
-                        </span>
+                  <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                    {/* SVG Banner with Subject Symbols */}
+                    <div className="relative h-36 overflow-hidden">
+                      <CourseBannerSVG grad={grad} symbols={symbols} seed={seed} />
+                      {/* Shimmer overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
+                      {/* Bottom fade for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      {/* Course title on banner */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                        <h3 className="text-white font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-white/80 text-xs mt-0.5 font-medium drop-shadow">
+                          {course.semester?.name || ""}
+                        </p>
                       </div>
+                    </div>
 
-                      <div className="flex items-center space-x-3 text-xs">
-                        <div className="flex items-center space-x-1">
-                          <CheckSquare className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-                          <span className="font-medium text-gray-700 dark:text-gray-300">{course.assignmentCount}</span>
-                          <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Assignments</span>
-                          <span className="text-gray-500 dark:text-gray-400 sm:hidden">Assign.</span>
+                    {/* Card Body */}
+                    <div className="p-4 space-y-3">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                        {(course.aboutCourse || "").length > 90
+                          ? `${course.aboutCourse.substring(0, 90)}...`
+                          : course.aboutCourse || "No description available"}
+                      </p>
+
+                      {/* Stats row */}
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <Book className="h-3.5 w-3.5 text-emerald-500" />
+                          <span className="font-medium">{course.lectureCount || 0}</span>
+                          <span>Lectures</span>
                         </div>
-                        <div className="w-px h-3 bg-gray-300 dark:bg-gray-500"></div>
-                        <div className="flex items-center space-x-1">
-                          <Book className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-                          <span className="font-medium text-gray-700 dark:text-gray-300">{course.lectureCount}</span>
-                          <span className="text-gray-500 dark:text-gray-400 hidden sm:inline">Lectures</span>
-                          <span className="text-gray-500 dark:text-gray-400 sm:hidden">Lect.</span>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <CheckSquare className="h-3.5 w-3.5 text-blue-500" />
+                          <span className="font-medium">{course.assignmentCount || 0}</span>
+                          <span>Assignments</span>
                         </div>
                       </div>
                     </div>
