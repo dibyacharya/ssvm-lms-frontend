@@ -201,7 +201,7 @@ const StudentProfileView = ({
                                   <tr className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                     <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Course Code</th>
                                     <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Course Name</th>
-                                    <th colSpan={4} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">LTPC</th>
+                                    <th colSpan={4} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">CREDITS</th>
                                     <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Grade</th>
                                     <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Backlog Status</th>
                                   </tr>
@@ -209,7 +209,7 @@ const StudentProfileView = ({
                                     <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">L</th>
                                     <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">T</th>
                                     <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">P</th>
-                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">C</th>
+                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">Cr</th>
                                   </tr>
                                 </thead>
                                 <tbody>

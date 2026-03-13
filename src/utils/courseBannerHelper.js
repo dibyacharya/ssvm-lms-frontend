@@ -5,8 +5,6 @@
  * subject-specific symbols.  Used by TeacherCourses (cards) and
  * CourseManagement (full-width page banner).
  */
-import React from "react";
-
 // ── 24 unique vibrant gradient palettes ─────────────────────────────
 export const CARD_GRADIENTS = [
   { from: "#0ea5e9", via: "#6366f1", to: "#a855f7" },

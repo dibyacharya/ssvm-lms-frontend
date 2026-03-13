@@ -253,7 +253,7 @@ const CourseManagement = () => {
       items: [
         { label: "Course Description", icon: <FileText className="w-5 h-5" /> },
         { label: "Syllabus", icon: <BookOpen className="w-5 h-5" /> },
-        { label: "Class List", icon: <Clock className="w-5 h-5" /> },
+        { label: "Class Schedule", icon: <Clock className="w-5 h-5" /> },
       ],
     },
     attendance: {
@@ -313,7 +313,7 @@ const CourseManagement = () => {
           <div className="min-h-96">
             {selectedOption === "Course Description" && <CourseDescription />}
             {selectedOption === "Student List" && <StudentTable />}
-            {selectedOption === "Class List" && <ClassList />}
+            {selectedOption === "Class Schedule" && <ClassList />}
             {selectedOption === "Subjective" && (
               <AllAssignments courseID={courseID} initialTab="subjective" hideTabs={true} />
             )}
