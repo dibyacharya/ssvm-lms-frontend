@@ -14,7 +14,6 @@ import Courseware from "./Components/Courseware";
 import SwayamKanbanBoard from "./Components/ToDoList";
 import { useUtilityContext } from "../../context/UtilityContext";
 import StudentStatsSection from "./Components/StudentStatsSection";
-import StudentGradebook from "./Components/StudentGradebook";
 import Timetable from "../../components/timetable/Timetable.jsx";
 
 const LiveClassSection = () => {
@@ -78,7 +77,6 @@ const Dashboard = () => {
         {activeSection === "MyStats" && <StudentStatsSection />}
         {activeSection === "Assignment" && <AssignmentList />}
         {activeSection === "Courseware" && <Courseware />}
-        {activeSection === "Gradebook" && <StudentGradebook />}
         {activeSection === "Timetable" && <Timetable />}
         {activeSection === "ToDo" && <SwayamKanbanBoard />}
       </div>

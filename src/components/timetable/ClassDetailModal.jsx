@@ -19,7 +19,7 @@ import { formatTime, getCourseColor } from "../../utils/timetableUtils";
  * Determine class status relative to current time.
  * Returns: "upcoming" | "starting_soon" | "live" | "ended" | "cancelled"
  *
- * starting_soon = within 10 minutes before start time
+ * starting_soon = within 5 minutes before start time
  * live          = between start and end time
  */
 const getClassStatus = (entry) => {
@@ -35,9 +35,9 @@ const getClassStatus = (entry) => {
   // Class is currently live
   if (now >= start && now <= end) return "live";
 
-  // Starting within 10 minutes
-  const tenMinBefore = new Date(start.getTime() - 10 * 60 * 1000);
-  if (now >= tenMinBefore && now < start) return "starting_soon";
+  // Starting within 5 minutes — join button enables 5 min before class
+  const fiveMinBefore = new Date(start.getTime() - 5 * 60 * 1000);
+  if (now >= fiveMinBefore && now < start) return "starting_soon";
 
   return "upcoming";
 };
@@ -90,7 +90,7 @@ const ClassDetailModal = ({ entry, onClose }) => {
   const classStatus = useMemo(() => getClassStatus(entry), [entry]);
   const statusConfig = STATUS_CONFIG[classStatus];
 
-  // Can join: only when class is live or starting soon (within 10 min)
+  // Can join: only when class is live or starting soon (within 5 min)
   const canJoin =
     entry.vconfJoinUrl &&
     (entry.mode || "").toLowerCase() !== "offline" &&

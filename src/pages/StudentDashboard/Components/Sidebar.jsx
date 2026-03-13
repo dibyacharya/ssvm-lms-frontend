@@ -7,7 +7,6 @@ import {
   FaTasks,
   FaUserGraduate,
   FaSignOutAlt,
-  FaGraduationCap,
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
@@ -35,19 +34,14 @@ const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
       icon: <FaBook />,
     },
     {
-      id: "MyStats",
-      label: "My Stats",
-      icon: <FaCalendarCheck />,
-    },
-    {
-      id: "Gradebook",
-      label: "Gradebook",
-      icon: <FaGraduationCap />,
-    },
-    {
       id: "Timetable",
       label: "Timetable",
       icon: <FaCalendarAlt />,
+    },
+    {
+      id: "MyStats",
+      label: "My Stats",
+      icon: <FaCalendarCheck />,
     },
     {
       id: "ToDo",

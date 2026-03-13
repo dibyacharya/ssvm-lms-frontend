@@ -148,34 +148,34 @@ const Timetable = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-5">
         {/* Header Banner */}
         <DashboardBanner
           icon={CalendarIcon}
           title="Timetable"
           subtitle="Your weekly class schedule"
-          gradient="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500"
+          gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500"
         />
 
         {/* Controls Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-5 py-3.5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             {/* Week Navigation */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={goToPrevWeek}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:scale-95"
                 title="Previous week"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
 
               <button
                 onClick={goToToday}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all active:scale-95 ${
                   isCurrentWeek
-                    ? "bg-accent1 text-white"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/25"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-gray-600"
                 }`}
               >
                 Today
@@ -183,25 +183,27 @@ const Timetable = () => {
 
               <button
                 onClick={goToNextWeek}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:scale-95"
                 title="Next week"
               >
-                <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <ChevronRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
 
-              <span className="text-sm font-semibold text-gray-900 dark:text-white ml-2">
-                {weekLabel}
-              </span>
+              <div className="ml-3 pl-3 border-l border-gray-200 dark:border-gray-700">
+                <span className="text-sm font-bold text-gray-800 dark:text-white">
+                  {weekLabel}
+                </span>
+              </div>
             </div>
 
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
               <button
                 onClick={() => setViewMode("week")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   viewMode === "week"
                     ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
@@ -209,10 +211,10 @@ const Timetable = () => {
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   viewMode === "list"
                     ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -224,15 +226,15 @@ const Timetable = () => {
 
         {/* Course Legend */}
         {uniqueCourses.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 px-1">
             {uniqueCourses.map((course) => {
               const color = getCourseColor(course.courseCode);
               return (
                 <div
                   key={course.courseCode}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${color.bg} ${color.text} border ${color.border}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${color.bg} ${color.text} border ${color.border} shadow-sm`}
                 >
-                  <span className={`w-2 h-2 rounded-full ${color.dot}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${color.dot}`} />
                   {course.courseCode}
                 </div>
               );

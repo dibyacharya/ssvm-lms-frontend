@@ -1090,13 +1090,15 @@ let response;
               ? "Teacher Discussions"
               : "Course Discussions"}
           </h4>
-          <Button
-            variant="primary"
-            onClick={() => setShowNewDiscussionForm(true)}
-            className="flex items-center"
-          >
-            <MessageSquare className="w-4 h-4 mr-1" /> New Discussion
-          </Button>
+          {user.role === "teacher" && (
+            <Button
+              variant="primary"
+              onClick={() => setShowNewDiscussionForm(true)}
+              className="flex items-center"
+            >
+              <MessageSquare className="w-4 h-4 mr-1" /> New Discussion
+            </Button>
+          )}
         </div>
 
         {error && (

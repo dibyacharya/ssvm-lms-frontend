@@ -220,7 +220,7 @@ export const unpublishGrades = async (courseID) => {
 // Student Grading APIs (following API documentation)
 export const getStudentAssessmentPlan = async (courseId) => {
   try {
-    const response = await api.get(`/grading/courses/${courseId}/assessment-plan`);
+    const response = await api.get(`/courses/${courseId}/assessment-plan`);
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
@@ -233,7 +233,7 @@ export const getStudentAssessmentPlan = async (courseId) => {
 
 export const getStudentContinuousAssessmentPlan = async (courseId) => {
   try {
-    const response = await api.get(`/grading/courses/${courseId}/continuous-assessment-plan`);
+    const response = await api.get(`/courses/${courseId}/continuous-assessment-plan`);
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
@@ -256,7 +256,7 @@ export const getCourseMaterials = async (courseId) => {
 
 export const getStudentOwnGrades = async (courseId) => {
   try {
-    const response = await api.get(`/grading/courses/${courseId}/grading`);
+    const response = await api.get(`/courses/${courseId}/grading`);
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {

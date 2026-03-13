@@ -8,6 +8,7 @@ import {
   getCourseColor,
 } from "../../utils/timetableUtils";
 import LoadingSpinner from "../../utils/LoadingAnimation";
+import { CalendarDays } from "lucide-react";
 
 // Time slots from 8 AM to 6 PM (hour labels on the left)
 const HOUR_SLOTS = Array.from({ length: 11 }, (_, i) => i + 8); // 8..18
@@ -53,12 +54,20 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
     };
   };
 
+  // Current hour for the "now" indicator line
+  const now = new Date();
+  const currentHour = now.getHours() + now.getMinutes() / 60;
+  const nowLinePercent =
+    currentHour >= 8 && currentHour <= 18
+      ? ((currentHour - 8) / 10) * 100
+      : null;
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header row with day names */}
-      <div className="grid grid-cols-[50px_repeat(6,1fr)] border-b border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-[56px_repeat(6,1fr)] border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
         {/* Time column header */}
-        <div className="px-1 py-2 text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center border-r border-gray-200 dark:border-gray-700">
+        <div className="px-1 py-3 text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center border-r border-gray-200 dark:border-gray-700 uppercase tracking-wider">
           Time
         </div>
         {displayDays.map((date) => {
@@ -68,48 +77,59 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
           return (
             <div
               key={dk}
-              className={`px-1 py-2 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 ${
+              className={`px-1 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative transition-colors ${
                 isToday
-                  ? "bg-accent1/10 dark:bg-accent1/20"
+                  ? "bg-emerald-50 dark:bg-emerald-900/25"
                   : ""
               }`}
             >
+              {/* Today pill indicator */}
+              {isToday && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-emerald-500" />
+              )}
               <p
-                className={`text-xs font-semibold ${
+                className={`text-xs font-bold tracking-wide ${
                   isToday
-                    ? "text-accent1"
-                    : "text-gray-900 dark:text-white"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-gray-700 dark:text-gray-200"
                 }`}
               >
                 {getDayShortLabel(dayKey)}
               </p>
-              <p
-                className={`text-[10px] ${
-                  isToday
-                    ? "text-accent1/80"
-                    : "text-gray-500 dark:text-gray-400"
-                }`}
-              >
-                {formatDateDisplay(date)}
-              </p>
+              <div className="flex items-center justify-center gap-1 mt-0.5">
+                <p
+                  className={`text-[10px] font-medium ${
+                    isToday
+                      ? "text-emerald-500 dark:text-emerald-400"
+                      : "text-gray-400 dark:text-gray-500"
+                  }`}
+                >
+                  {formatDateDisplay(date)}
+                </p>
+                {isToday && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">
+                    TODAY
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
       {/* Time grid body */}
-      <div className="grid grid-cols-[50px_repeat(6,1fr)]" style={{ minHeight: "420px" }}>
+      <div className="grid grid-cols-[56px_repeat(6,1fr)]" style={{ minHeight: "460px" }}>
         {/* Time labels column */}
-        <div className="border-r border-gray-200 dark:border-gray-700 relative">
+        <div className="border-r border-gray-200 dark:border-gray-700 relative bg-gray-50/50 dark:bg-gray-900/20">
           {HOUR_SLOTS.map((hour) => (
             <div
               key={hour}
               className="border-b border-gray-100 dark:border-gray-700/50 flex items-start justify-center"
               style={{ height: `${100 / 10}%` }}
             >
-              <span className="text-[10px] text-gray-500 dark:text-gray-400 pt-0.5 leading-none">
+              <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 pt-1 leading-none tabular-nums">
                 {hour <= 12 ? hour : hour - 12}
-                {hour < 12 ? "am" : "pm"}
+                <span className="text-[8px] ml-[1px]">{hour < 12 ? "AM" : "PM"}</span>
               </span>
             </div>
           ))}
@@ -124,18 +144,43 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
           return (
             <div
               key={dk}
-              className={`border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative ${
-                isToday ? "bg-accent1/5 dark:bg-accent1/10" : ""
+              className={`border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative transition-colors ${
+                isToday
+                  ? "bg-emerald-50/60 dark:bg-emerald-900/10"
+                  : "hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
               }`}
             >
+              {/* Today's left & right accent borders */}
+              {isToday && (
+                <>
+                  <div className="absolute inset-y-0 left-0 w-[2px] bg-emerald-400/40 z-[5]" />
+                  <div className="absolute inset-y-0 right-0 w-[2px] bg-emerald-400/40 z-[5]" />
+                </>
+              )}
+
               {/* Hour grid lines */}
               {HOUR_SLOTS.map((hour) => (
                 <div
                   key={hour}
-                  className="border-b border-gray-100 dark:border-gray-700/50"
+                  className={`border-b ${
+                    isToday
+                      ? "border-emerald-100 dark:border-emerald-900/30"
+                      : "border-gray-100 dark:border-gray-700/50"
+                  }`}
                   style={{ height: `${100 / 10}%` }}
                 />
               ))}
+
+              {/* "Now" indicator line (only for today) */}
+              {isToday && nowLinePercent !== null && (
+                <div
+                  className="absolute left-0 right-0 z-20 flex items-center"
+                  style={{ top: `${nowLinePercent}%` }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-red-500 -ml-1 shadow-sm shadow-red-500/50" />
+                  <div className="flex-1 h-[2px] bg-red-500/70 shadow-sm shadow-red-500/30" />
+                </div>
+              )}
 
               {/* Entry blocks positioned absolutely */}
               {dayEntries.map((entry) => {
@@ -147,15 +192,15 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
                   <button
                     key={entry.instanceId}
                     onClick={() => onEntryClick?.(entry)}
-                    className={`absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-left overflow-hidden cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] border ${
+                    className={`absolute left-1 right-1 rounded-lg px-1.5 py-1 text-left overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.03] hover:z-30 border ${
                       color.bg
                     } ${color.border} ${
-                      isCancelled ? "opacity-50 line-through" : ""
+                      isCancelled ? "opacity-40 line-through" : "shadow-sm"
                     }`}
                     style={{
                       top: style.top,
                       height: style.height,
-                      minHeight: "22px",
+                      minHeight: "24px",
                       zIndex: 10,
                     }}
                     title={`${entry.courseCode} - ${entry.courseTitle}\n${formatTime(new Date(entry.instanceStart))} - ${formatTime(new Date(entry.instanceEnd))}`}
@@ -177,6 +222,16 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
                   </button>
                 );
               })}
+
+              {/* Empty state for today if no classes */}
+              {isToday && dayEntries.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center opacity-40">
+                    <CalendarDays className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
+                    <p className="text-[10px] text-emerald-500 font-medium">No classes today</p>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

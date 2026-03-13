@@ -892,14 +892,6 @@ const LectureCard = ({
             <Video className="mr-1 h-3 w-3 flex-shrink-0" />
             Edit Video
           </button>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); onMOM(); }}
-            className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-purple-300 text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all duration-200"
-          >
-            <FileText className="mr-1 h-3 w-3" />
-            MOM
-          </button>
         </div>
       </div>
     </div>

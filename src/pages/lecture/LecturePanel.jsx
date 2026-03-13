@@ -16,7 +16,8 @@ import {
   Maximize,
   Minimize,
   FileText,
-  Video
+  Video,
+  Download
 } from "lucide-react";
 import AutoResizeTextbox from "./utils/searcbox";
 import { useCourse } from "../../context/CourseContext";
@@ -32,12 +33,21 @@ const keyTakeaways = [
   "Understanding market fundamentals is crucial before making any investment decisions in the stock market.",
 ];
 
+// Resolve video URL — blob: URLs work directly; everything else goes through streaming proxy
+const resolveVideoUrl = (lecture) => {
+  const raw = lecture?.videoUrl || lecture?.recordingUrl;
+  if (!raw) return null;
+  if (raw.startsWith("blob:")) return raw;
+  const backendUrl = window.RUNTIME_CONFIG?.BACKEND_URL || "http://localhost:5000";
+  return `${backendUrl}/api/lectures/stream/${lecture._id}`;
+};
+
 // Helper function to convert video URLs to embed URLs (if needed)
 const getVideoComponent = (videoUrl) => {
-  console.log(videoUrl);
   return (
     <video
-      src={videoUrl} // Direct src instead of source element
+      key={videoUrl}
+      src={videoUrl}
       className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
       controls
       controlsList="nodownload"
@@ -261,9 +271,22 @@ export default function LecturePanel() {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-6 border border-gray-200 dark:border-gray-600">
               {selectedLecture ? (
                 <div>
-                  {selectedLecture.videoUrl && (
-                    <div className="aspect-video w-full mb-6 rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
-                      {getVideoComponent(selectedLecture.videoUrl)}
+                  {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
+                    <div className="mb-6">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
+                        {getVideoComponent(resolveVideoUrl(selectedLecture))}
+                      </div>
+                      {/* Download Button */}
+                      <div className="flex justify-end mt-3">
+                        <a
+                          href={resolveVideoUrl(selectedLecture)}
+                          download={`${selectedLecture.title || "recording"}.mp4`}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                        >
+                          <Download size={16} />
+                          Download Recording
+                        </a>
+                      </div>
                     </div>
                   )}
 
@@ -436,9 +459,22 @@ export default function LecturePanel() {
                     </div>
                   </div>
 
-                  {selectedLecture.videoUrl && (
-                    <div className="aspect-video w-full mb-6 rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
-                      {getVideoComponent(selectedLecture.videoUrl)}
+                  {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
+                    <div className="mb-6">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
+                        {getVideoComponent(resolveVideoUrl(selectedLecture))}
+                      </div>
+                      {/* Download Button */}
+                      <div className="flex justify-end mt-3">
+                        <a
+                          href={resolveVideoUrl(selectedLecture)}
+                          download={`${selectedLecture.title || "recording"}.mp4`}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                        >
+                          <Download size={16} />
+                          Download Recording
+                        </a>
+                      </div>
                     </div>
                   )}
 
