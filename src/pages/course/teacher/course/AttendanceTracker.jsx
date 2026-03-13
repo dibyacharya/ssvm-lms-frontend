@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useCourse } from "../../../../context/CourseContext";
 import {
   Calendar,
   Clock,
-  Circle,
-  Check,
   ClipboardCheck,
   AlertCircle,
   Users,
   CheckCircle,
   XCircle,
-  Switch,
+  Phone,
 } from "lucide-react";
 import SaveButton from "../../../../utils/CourseSaveButton";
 import { useParams } from "react-router-dom";
@@ -33,6 +31,37 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
   </div>
 );
 
+/** Compact progress bar with percentage label */
+const ProgressBar = ({ value = 0, color = "emerald" }) => {
+  const pct = Math.min(100, Math.max(0, Math.round(value)));
+  const barColor =
+    pct >= 75
+      ? "bg-emerald-500"
+      : pct >= 50
+      ? "bg-yellow-500"
+      : "bg-red-500";
+  const textColor =
+    pct >= 75
+      ? "text-emerald-600"
+      : pct >= 50
+      ? "text-yellow-600"
+      : "text-red-600";
+
+  return (
+    <div className="flex items-center gap-2 min-w-[120px]">
+      <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className={`text-xs font-semibold whitespace-nowrap ${textColor}`}>
+        {pct}%
+      </span>
+    </div>
+  );
+};
+
 const AttendanceTracker = () => {
   // Get functions and data from context
   const {
@@ -41,6 +70,7 @@ const AttendanceTracker = () => {
     markStudentAbsent,
     getSessionAttendance,
     createAttendanceSession,
+    getStudentAttendanceRate,
   } = useCourse();
   const { courseID } = useParams();
   // Format date helpers
@@ -151,6 +181,24 @@ const AttendanceTracker = () => {
   };
 
   const attendancePct = calculateAttendancePercentage();
+
+  // Sort all session keys to find the previous session relative to current
+  const sortedSessionKeys = useMemo(() => {
+    return Object.keys(courseData.attendance?.sessions || {}).sort();
+  }, [courseData.attendance]);
+
+  // Get last session status for a student (from the session before the current one)
+  const getLastSessionStatus = (studentId) => {
+    const currentSessionKey = `${currentDate}_${currentTime}`;
+    // Find sessions before the current one
+    const previousKeys = sortedSessionKeys.filter(
+      (key) => key < currentSessionKey
+    );
+    if (previousKeys.length === 0) return null; // no previous session
+    const lastKey = previousKeys[previousKeys.length - 1];
+    const lastSession = courseData.attendance.sessions[lastKey] || [];
+    return lastSession.includes(studentId) ? "Present" : "Absent";
+  };
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-8">
@@ -300,58 +348,147 @@ const AttendanceTracker = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-tertiary/10">
-                <th className="py-4 px-6 text-left font-medium text-tertiary">
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
                   #
                 </th>
-                <th className="py-4 px-6 text-left font-medium text-tertiary">
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
                   Roll No.
                 </th>
-                <th className="py-4 px-6 text-left font-medium text-tertiary">
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
                   Name
                 </th>
-                <th className="py-4 px-6 text-center font-medium text-tertiary">
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
+                  Online Presence
+                </th>
+                <th className="py-4 px-4 text-center font-medium text-tertiary text-sm whitespace-nowrap">
                   Status
+                </th>
+                <th className="py-4 px-4 text-center font-medium text-tertiary text-sm whitespace-nowrap">
+                  Last Status
+                </th>
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
+                  Attendance %
+                </th>
+                <th className="py-4 px-4 text-center font-medium text-tertiary text-sm whitespace-nowrap">
+                  CA Assignment
+                </th>
+                <th className="py-4 px-4 text-left font-medium text-tertiary text-sm whitespace-nowrap">
+                  Mobile Number
                 </th>
               </tr>
             </thead>
             <tbody>
-              {courseData.students.map((student, index) => (
-                <tr
-                  key={student.id}
-                  className="border-b border-tertiary/10 hover:bg-emerald-50/50 transition-colors duration-200"
-                >
-                  <td className="py-4 px-6 text-primary">{index + 1}</td>
-                  <td className="py-4 px-6 text-primary font-medium">
-                    {student.rollNo || "\u2014"}
-                  </td>
-                  <td className="py-4 px-6 text-primary">{student.name}</td>
+              {courseData.students.map((student, index) => {
+                const lastStatus = getLastSessionStatus(student.id);
+                const attendanceRate = getStudentAttendanceRate
+                  ? getStudentAttendanceRate(student.id)
+                  : 0;
+                const onlinePresence =
+                  student.onlinePresence != null
+                    ? student.onlinePresence
+                    : null;
+                const caCompleted = student.caCompleted ?? null;
+                const caTotal = student.caTotal ?? null;
+                const mobile =
+                  student.mobile || student.phone || null;
 
-                  <td className="py-4 px-6">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => toggleAttendance(student.id)}
-                        className={`flex items-center space-x-2 py-2 px-4 rounded-full transition-all duration-300 ease-in-out ${
-                          isStudentPresent(student.id)
-                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm shadow-emerald-100"
-                            : "bg-red-50 text-red-500 hover:bg-red-100 shadow-sm shadow-red-100"
-                        }`}
-                      >
-                        {isStudentPresent(student.id) ? (
-                          <>
-                            <CheckCircle className="w-4 h-4" />
-                            <span>Present</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-4 h-4" />
-                            <span>Absent</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                return (
+                  <tr
+                    key={student.id}
+                    className="border-b border-tertiary/10 hover:bg-emerald-50/50 transition-colors duration-200"
+                  >
+                    {/* # */}
+                    <td className="py-4 px-4 text-primary text-sm">
+                      {index + 1}
+                    </td>
+
+                    {/* Roll No. */}
+                    <td className="py-4 px-4 text-primary font-medium text-sm whitespace-nowrap">
+                      {student.rollNo || "\u2014"}
+                    </td>
+
+                    {/* Name */}
+                    <td className="py-4 px-4 text-primary text-sm whitespace-nowrap">
+                      {student.name}
+                    </td>
+
+                    {/* Online Presence */}
+                    <td className="py-4 px-4 text-sm">
+                      {onlinePresence != null ? (
+                        <ProgressBar value={onlinePresence} />
+                      ) : (
+                        <span className="text-tertiary">\u2014</span>
+                      )}
+                    </td>
+
+                    {/* Status (toggle) */}
+                    <td className="py-4 px-4">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => toggleAttendance(student.id)}
+                          className={`flex items-center space-x-2 py-1.5 px-3 rounded-full transition-all duration-300 ease-in-out text-sm ${
+                            isStudentPresent(student.id)
+                              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm shadow-emerald-100"
+                              : "bg-red-50 text-red-500 hover:bg-red-100 shadow-sm shadow-red-100"
+                          }`}
+                        >
+                          {isStudentPresent(student.id) ? (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Present</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3.5 h-3.5" />
+                              <span>Absent</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </td>
+
+                    {/* Last Status */}
+                    <td className="py-4 px-4 text-center">
+                      {lastStatus === "Present" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                          Present
+                        </span>
+                      ) : lastStatus === "Absent" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-500 text-xs font-medium">
+                          Absent
+                        </span>
+                      ) : (
+                        <span className="text-tertiary text-sm">\u2014</span>
+                      )}
+                    </td>
+
+                    {/* Attendance % */}
+                    <td className="py-4 px-4 text-sm">
+                      <ProgressBar value={attendanceRate} />
+                    </td>
+
+                    {/* CA Assignment */}
+                    <td className="py-4 px-4 text-center text-sm whitespace-nowrap">
+                      {caCompleted != null && caTotal != null ? (
+                        <span className="text-primary font-medium">
+                          {caCompleted} out of {caTotal}
+                        </span>
+                      ) : (
+                        <span className="text-tertiary">\u2014</span>
+                      )}
+                    </td>
+
+                    {/* Mobile Number */}
+                    <td className="py-4 px-4 text-sm whitespace-nowrap">
+                      {mobile ? (
+                        <span className="text-primary">{mobile}</span>
+                      ) : (
+                        <span className="text-tertiary">XXXXXXXXXX</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
