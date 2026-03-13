@@ -34,67 +34,77 @@ const CARD_GRADIENTS = [
   { from: "#7e22ce", via: "#a855f7", to: "#c084fc" },   // Purple bright
 ];
 
-// ── Decorative SVG patterns – each course gets a unique combo ───────
-const PATTERNS = [
-  // Circles cluster
-  (seed) => (
-    <g opacity="0.15">
-      <circle cx={120 + (seed % 80)} cy={30 + (seed % 50)} r={60 + (seed % 30)} fill="white" />
-      <circle cx={280 + (seed % 60)} cy={70 + (seed % 40)} r={40 + (seed % 20)} fill="white" opacity="0.6" />
-      <circle cx={50 + (seed % 40)} cy={90 + (seed % 30)} r={25 + (seed % 15)} fill="white" opacity="0.4" />
-    </g>
-  ),
-  // Diagonal lines
-  (seed) => (
-    <g opacity="0.12" stroke="white" strokeWidth="2" fill="none">
-      <line x1={seed % 50} y1="0" x2={200 + (seed % 100)} y2="144" />
-      <line x1={80 + (seed % 50)} y1="0" x2={280 + (seed % 100)} y2="144" />
-      <line x1={160 + (seed % 50)} y1="0" x2={360 + (seed % 50)} y2="144" />
-      <circle cx={300 + (seed % 60)} cy={40 + (seed % 40)} r={50 + (seed % 25)} strokeWidth="1.5" />
-    </g>
-  ),
-  // Waves
-  (seed) => (
-    <g opacity="0.12" fill="white">
-      <path d={`M0,${90 + (seed % 20)} Q${100 + (seed % 60)},${60 + (seed % 30)} ${200 + (seed % 60)},${80 + (seed % 25)} T400,${70 + (seed % 30)} L400,144 L0,144 Z`} />
-      <circle cx={320 + (seed % 50)} cy={30 + (seed % 30)} r={35 + (seed % 20)} opacity="0.5" />
-    </g>
-  ),
-  // Geometric triangles
-  (seed) => (
-    <g opacity="0.1" fill="white">
-      <polygon points={`${300 + (seed % 50)},10 ${360 + (seed % 50)},80 ${240 + (seed % 50)},80`} />
-      <polygon points={`${80 + (seed % 40)},40 ${130 + (seed % 40)},100 ${30 + (seed % 40)},100`} opacity="0.6" />
-      <circle cx={200 + (seed % 80)} cy={60 + (seed % 30)} r={30 + (seed % 20)} opacity="0.4" />
-    </g>
-  ),
-  // Dots grid
-  (seed) => (
-    <g opacity="0.15" fill="white">
-      {[...Array(5)].map((_, i) => (
-        <React.Fragment key={i}>
-          {[...Array(3)].map((_, j) => (
-            <circle
-              key={`${i}-${j}`}
-              cx={60 + i * (60 + (seed % 15))}
-              cy={25 + j * (40 + (seed % 10))}
-              r={3 + (seed % 3)}
-            />
-          ))}
-        </React.Fragment>
-      ))}
-      <circle cx={320 + (seed % 40)} cy={50 + (seed % 30)} r={45 + (seed % 20)} opacity="0.3" />
-    </g>
-  ),
-  // Hexagon mesh
-  (seed) => (
-    <g opacity="0.1" stroke="white" strokeWidth="1.5" fill="none">
-      <polygon points={`${250 + (seed % 40)},20 ${290 + (seed % 40)},40 ${290 + (seed % 40)},80 ${250 + (seed % 40)},100 ${210 + (seed % 40)},80 ${210 + (seed % 40)},40`} />
-      <polygon points={`${100 + (seed % 30)},50 ${130 + (seed % 30)},65 ${130 + (seed % 30)},95 ${100 + (seed % 30)},110 ${70 + (seed % 30)},95 ${70 + (seed % 30)},65`} opacity="0.7" />
-      <circle cx={350 + (seed % 30)} cy={40 + (seed % 30)} r={30 + (seed % 15)} fill="white" opacity="0.3" />
-    </g>
-  ),
+// ── Subject-specific symbols rendered as SVG text/paths on banners ───
+// Each entry: keywords to match, array of unicode/text symbols to scatter
+const SUBJECT_SYMBOLS = [
+  { keywords: ["math", "algebra", "calculus", "statistics", "trigonometry", "arithmetic", "geometry", "linear algebra", "discrete", "probability", "numerical"],
+    symbols: ["∑", "π", "∫", "√", "∞", "Δ", "±", "≈", "∂", "θ", "λ", "∮"] },
+  { keywords: ["physics", "quantum", "thermodynamics", "optics", "mechanics", "electromagnetism", "relativity", "astrophysics", "nuclear"],
+    symbols: ["⚛", "Ψ", "Ω", "ℏ", "∇", "⊗", "λ", "μ", "∝", "⇌", "Δ", "E=mc²"] },
+  { keywords: ["chemistry", "organic", "inorganic", "biochem", "pharmaceutical", "chemical", "polymer"],
+    symbols: ["⚗", "⬡", "H₂O", "CO₂", "→", "⇌", "Δ", "mol", "pH", "∆H", "≡", "⊕"] },
+  { keywords: ["computer", "programming", "cs ", "software", "web dev", "database", "cyber", "python", "java", "javascript", "cloud", "devops", "networking", "dsa", "data science", "coding"],
+    symbols: ["</>", "{ }", "01", "λ", ">>", "&&", "||", "=>", "++", "#!", "/*", "[]"] },
+  { keywords: ["machine learning", "ml ", "m.l.", "ai ", "a.i.", "artificial intelligence", "deep learning", "nlp", "neural"],
+    symbols: ["🧠", "⊕", "∑wᵢ", "σ(x)", "∇L", "η", "⊗", "ŷ", "f(x)", "θ", "Δw", "GPU"] },
+  { keywords: ["biology", "botany", "zoology", "life science", "microbiology", "genetics", "ecology", "biotechnology", "bioinformatics"],
+    symbols: ["🧬", "🔬", "🌿", "⊕", "∞", "ATP", "DNA", "RNA", "♀", "♂", "μm", "pH"] },
+  { keywords: ["economics", "economy", "micro economics", "macro economics", "econometrics", "fiscal", "monetary"],
+    symbols: ["₹", "$", "€", "£", "📈", "∑", "GDP", "Δ%", "μ", "σ²", "∞", "S&D"] },
+  { keywords: ["history", "ancient", "medieval", "modern history", "civilization", "archaeology", "heritage", "renaissance"],
+    symbols: ["⏳", "🏛", "⚔", "📜", "†", "∞", "AD", "BC", "Ω", "☆", "⚓", "♛"] },
+  { keywords: ["literature", "english", "language", "linguistics", "poetry", "novel", "literary", "hindi", "sanskrit", "odia", "french"],
+    symbols: ["✍", "📖", "❝❞", "¶", "…", "—", "Aa", "ℬ", "ℛ", "λόγ", "∞", "§"] },
+  { keywords: ["law", "legal", "jurisprudence", "constitutional", "criminal law", "civil law", "judiciary"],
+    symbols: ["⚖", "§", "¶", "†", "©", "™", "℗", "®", "Art.", "IPC", "⊕", "∴"] },
+  { keywords: ["medicine", "anatomy", "physiology", "pathology", "pharmacology", "medical", "mbbs", "surgery", "clinical", "nursing"],
+    symbols: ["⚕", "♡", "Rx", "℞", "⊕", "μg", "mL", "IV", "DNA", "ECG", "∴", "☤"] },
+  { keywords: ["engineering", "mechanics", "electronics", "electrical", "civil eng", "mechanical eng", "structural", "robotics", "vlsi", "signal"],
+    symbols: ["⚙", "⊕", "Ω", "V=IR", "∫", "Δ", "∇", "AC", "DC", "Hz", "kN", "⏚"] },
+  { keywords: ["business", "management", "finance", "mba", "marketing", "accounting", "entrepreneurship", "commerce", "banking"],
+    symbols: ["📊", "₹", "$", "ROI", "%", "KPI", "B2B", "∑", "SWOT", "P&L", "€", "IPO"] },
+  { keywords: ["geography", "geospatial", "cartography", "climate", "topography", "gis ", "remote sensing", "oceanography"],
+    symbols: ["🌍", "🧭", "📍", "∠", "°N", "°E", "Δh", "km²", "∞", "≈", "GPS", "⊕"] },
+  { keywords: ["education", "pedagogy", "teaching", "curriculum", "b.ed", "learning theory"],
+    symbols: ["🎓", "📚", "✏", "📝", "∞", "A+", "Q&A", "IQ", "EQ", "∴", "⊕", "Δ"] },
+  { keywords: ["music", "vocal", "instrument", "rhythm", "melody", "classical music", "singing"],
+    symbols: ["♪", "♫", "♩", "♬", "𝄞", "♭", "♯", "𝄢", "∞", "BPM", "4/4", "Δ"] },
+  { keywords: ["art", "painting", "sculpture", "design", "drawing", "visual art", "fine art", "craft"],
+    symbols: ["🎨", "✦", "◆", "△", "○", "◐", "⬡", "✿", "∞", "φ", "◎", "★"] },
+  { keywords: ["psychology", "cognitive", "behavioral", "counseling", "mental health", "psychotherapy"],
+    symbols: ["Ψ", "🧠", "∞", "⊕", "Id", "Ego", "IQ", "EQ", "σ", "μ", "Δ", "∴"] },
+  { keywords: ["philosophy", "ethics", "metaphysics", "logic", "ontology", "epistemology"],
+    symbols: ["∴", "∵", "∞", "⊕", "∃", "∀", "¬", "→", "↔", "Ψ", "Ω", "φ"] },
+  { keywords: ["political", "polity", "governance", "public admin", "civics", "upsc", "ias", "international relations"],
+    symbols: ["⚖", "🏛", "☆", "§", "†", "∴", "IAS", "GS", "Art.", "PIL", "∞", "⊕"] },
+  { keywords: ["plumbing", "hvac", "mechanical system", "piping", "sanitary", "drainage"],
+    symbols: ["🔧", "⊕", "PSI", "GPM", "∅", "Δp", "≈", "m³", "∞", "⏚", "∇", "kPa"] },
+  { keywords: ["environmental", "sustainability", "ecology", "pollution", "green energy", "renewable"],
+    symbols: ["🌱", "♻", "CO₂", "∞", "⊕", "H₂O", "kWh", "Δ°C", "O₃", "ppm", "∇", "☀"] },
+  { keywords: ["astronomy", "space", "cosmos", "stellar", "planetary", "telescope"],
+    symbols: ["★", "☆", "☽", "☀", "∞", "AU", "ly", "Mpc", "Ω", "Δv", "⊕", "λ"] },
 ];
+
+// Fallback generic symbols for courses that don't match any subject
+const GENERIC_SYMBOLS = ["✦", "◆", "○", "△", "⊕", "∞", "★", "◎", "⬡", "⬢", "☆", "∴"];
+
+/** Match course text against keyword map → return matching symbols */
+function _matchSubjectSymbols(course) {
+  const searchText = ` ${[
+    course.title,
+    course.courseCode,
+    course.department,
+    course.program,
+    typeof course.aboutCourse === "string" ? course.aboutCourse.slice(0, 200) : "",
+  ].filter(Boolean).join(" ").toLowerCase()} `;
+
+  for (const entry of SUBJECT_SYMBOLS) {
+    for (const kw of entry.keywords) {
+      if (searchText.includes(kw)) return entry.symbols;
+    }
+  }
+  return GENERIC_SYMBOLS;
+}
 
 /** Stable hash for deterministic per-course selection */
 function _hash(str) {
@@ -108,29 +118,96 @@ function getUniqueBanner(course, index) {
   const key = (course._id || "") + (course.title || "") + index;
   const h = _hash(key);
   const grad = CARD_GRADIENTS[h % CARD_GRADIENTS.length];
-  const pattern = PATTERNS[(h >> 4) % PATTERNS.length];
-  return { grad, pattern, seed: h % 1000 };
+  const symbols = _matchSubjectSymbols(course);
+  return { grad, symbols, seed: h % 1000 };
 }
 
-/** Inline SVG banner – unique per course, no external image needed */
-const CourseBannerSVG = ({ grad, pattern, seed }) => (
-  <svg
-    viewBox="0 0 400 144"
-    preserveAspectRatio="xMidYMid slice"
-    className="absolute inset-0 w-full h-full"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <linearGradient id={`cg-${seed}`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor={grad.from} />
-        <stop offset="50%" stopColor={grad.via} />
-        <stop offset="100%" stopColor={grad.to} />
-      </linearGradient>
-    </defs>
-    <rect width="400" height="144" fill={`url(#cg-${seed})`} />
-    {pattern(seed)}
-  </svg>
-);
+/**
+ * Scatter subject symbols across the banner as semi-transparent text.
+ * Uses deterministic positions based on seed so they're stable per course.
+ */
+function _scatterPositions(seed, count) {
+  const positions = [];
+  // Golden-ratio-ish spacing for nice distribution
+  let x = (seed * 7) % 400;
+  let y = (seed * 3) % 100;
+  for (let i = 0; i < count; i++) {
+    x = (x + 137) % 380 + 10;            // Wrap within 10–390
+    y = ((y + 53 + (i * 17)) % 110) + 10; // Wrap within 10–120
+    const size = 14 + ((seed + i * 7) % 12);   // Font size 14–25
+    const opacity = 0.08 + ((seed + i * 11) % 10) / 100; // 0.08–0.17
+    const rotate = ((seed + i * 23) % 40) - 20;  // –20° to +20°
+    positions.push({ x, y, size, opacity, rotate });
+  }
+  return positions;
+}
+
+/** Inline SVG banner – unique gradient + subject symbols per course */
+const CourseBannerSVG = ({ grad, symbols, seed }) => {
+  // Pick 8 symbols from the pool using seed for determinism
+  const picked = [];
+  for (let i = 0; i < 8; i++) {
+    picked.push(symbols[(seed + i * 3) % symbols.length]);
+  }
+  const positions = _scatterPositions(seed, 8);
+
+  return (
+    <svg
+      viewBox="0 0 400 144"
+      preserveAspectRatio="xMidYMid slice"
+      className="absolute inset-0 w-full h-full"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id={`cg-${seed}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={grad.from} />
+          <stop offset="50%" stopColor={grad.via} />
+          <stop offset="100%" stopColor={grad.to} />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="144" fill={`url(#cg-${seed})`} />
+
+      {/* Decorative background circles for depth */}
+      <circle cx={320 + (seed % 60)} cy={40 + (seed % 40)} r={55 + (seed % 25)} fill="white" opacity="0.06" />
+      <circle cx={80 + (seed % 50)} cy={90 + (seed % 30)} r={40 + (seed % 20)} fill="white" opacity="0.05" />
+
+      {/* Subject-specific symbols scattered across the banner */}
+      {picked.map((sym, i) => (
+        <text
+          key={i}
+          x={positions[i].x}
+          y={positions[i].y}
+          fontSize={positions[i].size}
+          fill="white"
+          opacity={positions[i].opacity}
+          fontFamily="system-ui, sans-serif"
+          fontWeight="bold"
+          textAnchor="middle"
+          dominantBaseline="central"
+          transform={`rotate(${positions[i].rotate}, ${positions[i].x}, ${positions[i].y})`}
+        >
+          {sym}
+        </text>
+      ))}
+
+      {/* Large hero symbol — top-right, bigger & bolder */}
+      <text
+        x={340 + (seed % 40)}
+        y={50 + (seed % 30)}
+        fontSize="42"
+        fill="white"
+        opacity="0.12"
+        fontFamily="system-ui, sans-serif"
+        fontWeight="bold"
+        textAnchor="middle"
+        dominantBaseline="central"
+        transform={`rotate(${(seed % 30) - 15}, ${340 + (seed % 40)}, ${50 + (seed % 30)})`}
+      >
+        {symbols[seed % symbols.length]}
+      </text>
+    </svg>
+  );
+};
 
 const TeacherCourses = () => {
   const [coursesData, setCoursesData] = useState({
@@ -412,13 +489,13 @@ const TeacherCourses = () => {
                     course.assignmentId ||
                     `${course._id}-${course.batchId || "na"}-${course.semesterId || "na"}-${idx}`;
 
-                  const { grad, pattern, seed } = getUniqueBanner(course, idx);
+                  const { grad, symbols, seed } = getUniqueBanner(course, idx);
                   return (
                   <Link key={cardKey} to={linkTarget}>
                     <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
-                      {/* ── Unique SVG Banner ────────────────────── */}
+                      {/* ── Unique SVG Banner with Subject Symbols ── */}
                       <div className="relative h-36 overflow-hidden">
-                        <CourseBannerSVG grad={grad} pattern={pattern} seed={seed} />
+                        <CourseBannerSVG grad={grad} symbols={symbols} seed={seed} />
                         {/* Shimmer overlay on hover */}
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
                         {/* Bottom fade for text readability */}
