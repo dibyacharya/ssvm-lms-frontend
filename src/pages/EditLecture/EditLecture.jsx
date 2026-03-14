@@ -61,6 +61,7 @@ const VideoEditor = ({
   const [hoveredButton, setHoveredButton] = useState(null);
   const [videoError, setVideoError] = useState(false);
   const [outputFormat, setOutputFormat] = useState("mp4"); // Track actual video format
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (!videoUrl) return;
@@ -364,6 +365,14 @@ const VideoEditor = ({
       // Convert the Blob URL to a File object
       const response = await fetch(outputURL);
       const blob = await response.blob();
+
+      // Prevent uploading empty/corrupt videos (< 10KB is definitely broken)
+      if (blob.size < 10000) {
+        alert(`The edited video is too small (${blob.size} bytes) and likely corrupt. Please try editing again.`);
+        setProcessing(false);
+        return;
+      }
+
       const mimeType = outputFormat === "webm" ? "video/webm" : "video/mp4";
       const videoFile = new File([blob], `edited_video.${outputFormat}`, {
         type: mimeType,
@@ -413,22 +422,49 @@ const VideoEditor = ({
           <AlertTriangle size={48} className="mb-4 text-red-400" />
           <p className="text-lg font-medium text-gray-700">Video failed to load</p>
           <p className="text-sm mt-1 text-center max-w-md">
-            The video recording could not be loaded. The recording server may be unavailable or the video may have been removed.
+            The video recording is empty or corrupted. This usually happens when the class recording was too short or the upload failed during editing.
           </p>
-          <p className="text-xs mt-3 text-gray-400 break-all max-w-lg text-center">{videoUrl}</p>
+          <button
+            onClick={() => setShowVideoModal(false)}
+            className="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors text-sm"
+          >
+            Close Editor
+          </button>
         </div>
       )}
 
       {videoUrl && !videoError && (
         <div>
           <div className="flex flex-col items-center w-full mb-6">
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              controls
-              onError={() => setVideoError(true)}
-              className="w-full rounded-lg shadow-md bg-black aspect-video"
-            />
+            <div className="relative w-full group">
+              <video
+                ref={videoRef}
+                src={videoUrl}
+                controls
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+                onError={() => setVideoError(true)}
+                className="w-full rounded-lg shadow-md bg-black aspect-video"
+              />
+              {/* Centered play button overlay */}
+              {!isPlaying && (
+                <button
+                  onClick={() => {
+                    if (videoRef.current) {
+                      videoRef.current.play().catch(() => {});
+                    }
+                  }}
+                  className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors rounded-lg cursor-pointer"
+                >
+                  <div className="w-20 h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110">
+                    <svg className="w-10 h-10 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </button>
+              )}
+            </div>
             <div ref={sliderRef} className="w-full mt-6 mb-8"></div>
           </div>
 

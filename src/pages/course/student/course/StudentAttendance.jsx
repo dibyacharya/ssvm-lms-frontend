@@ -113,7 +113,9 @@ const StudentAttendance = () => {
   const { courseData } = useCourse();
   const { user } = useAuth();
 
-  const studentId = user?._id || user?.id || "";
+  // Use Student doc _id (from courseData.student.id) instead of User _id
+  // because attendance sessions store Student doc IDs
+  const studentId = courseData?.student?.id || user?._id || user?.id || "";
 
   // Compute attendance data for this student
   const { totalSessions, presentCount, absentCount, attendancePct, sessionList } =

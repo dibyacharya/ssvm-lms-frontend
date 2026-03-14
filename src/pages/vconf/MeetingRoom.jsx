@@ -94,139 +94,49 @@ const CustomVideoLayout = ({ meetingTitle }) => {
   const [pipPos, setPipPos] = useState(null);
   const dragState = useRef(null);
 
-  // Browser native PiP state — uses a canvas to render circular face
-  // When native PiP is showing, the in-page PiP is hidden (only ONE face visible at a time)
-  const nativePipVideoRef = useRef(null);   // hidden <video> element for PiP
-  const nativePipCanvasRef = useRef(null);  // canvas that renders the round face
-  const nativePipAnimRef = useRef(null);    // requestAnimationFrame ID
+  // Native browser PiP — floating window that persists across tab switches
   const nativePipActiveRef = useRef(false);
   const [nativePipShowing, setNativePipShowing] = useState(false);
 
-  // Render the camera feed into a circular canvas → request native PiP on that canvas stream
+  // Auto-activate native PiP when screen share starts (so face stays visible on tab switch)
   useEffect(() => {
-    const cleanupNativePip = () => {
+    if (!screenShareTrack || !isTrackReference(screenShareTrack)) {
+      // Screen share stopped — exit native PiP if active
       if (nativePipActiveRef.current && document.pictureInPictureElement) {
         document.exitPictureInPicture().catch(() => {});
+        nativePipActiveRef.current = false;
+        setNativePipShowing(false);
       }
-      if (nativePipAnimRef.current) {
-        cancelAnimationFrame(nativePipAnimRef.current);
-        nativePipAnimRef.current = null;
-      }
-      if (nativePipVideoRef.current) {
-        nativePipVideoRef.current.srcObject = null;
-        nativePipVideoRef.current.remove();
-        nativePipVideoRef.current = null;
-      }
-      if (nativePipCanvasRef.current) {
-        nativePipCanvasRef.current.remove();
-        nativePipCanvasRef.current = null;
-      }
-      nativePipActiveRef.current = false;
-      setNativePipShowing(false);
-    };
-
-    if (!screenShareTrack || !isTrackReference(screenShareTrack)) {
-      cleanupNativePip();
       return;
     }
-
-    // Screen share is active — try to launch circular canvas PiP for the sharer's camera
     if (!sharerCameraTrack || !isTrackReference(sharerCameraTrack)) return;
     if (!document.pictureInPictureEnabled) return;
 
-    // Wait for the VideoTrack component to render the <video> element in DOM
+    // Wait for VideoTrack to render the <video> element in DOM
     const timer = setTimeout(() => {
       const pipContainer = pipRef.current;
       if (!pipContainer) return;
-      const sourceVideoEl = pipContainer.querySelector('video');
-      if (!sourceVideoEl) return;
-
-      // Don't re-create if already active
+      const videoEl = pipContainer.querySelector('video');
+      if (!videoEl) return;
       if (nativePipActiveRef.current && document.pictureInPictureElement) return;
 
-      // Create a hidden canvas to render circular face
-      const size = 300; // canvas size (square)
-      let canvas = nativePipCanvasRef.current;
-      if (!canvas) {
-        canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        canvas.style.display = 'none';
-        document.body.appendChild(canvas);
-        nativePipCanvasRef.current = canvas;
-      }
-      const ctx = canvas.getContext('2d');
-
-      // Render loop: draw circular face on canvas
-      const drawCircularFrame = () => {
-        if (!nativePipCanvasRef.current) return;
-
-        // Clear with transparent black background
-        ctx.clearRect(0, 0, size, size);
-
-        // Outer glow / border
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(52, 211, 153, 0.7)'; // emerald border
-        ctx.fill();
-
-        // Clip to circle and draw video
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, size / 2 - 6, 0, Math.PI * 2);
-        ctx.clip();
-
-        try {
-          const vw = sourceVideoEl.videoWidth || size;
-          const vh = sourceVideoEl.videoHeight || size;
-          const innerSize = size - 12;
-          const scale = Math.max(innerSize / vw, innerSize / vh);
-          const sw = vw * scale;
-          const sh = vh * scale;
-          const sx = 6 + (innerSize - sw) / 2;
-          const sy = 6 + (innerSize - sh) / 2;
-          ctx.drawImage(sourceVideoEl, sx, sy, sw, sh);
-        } catch (e) { /* cross-origin or no data yet */ }
-
-        ctx.restore();
-        nativePipAnimRef.current = requestAnimationFrame(drawCircularFrame);
-      };
-
-      drawCircularFrame();
-
-      // Create a hidden <video> from the canvas stream and request PiP on it
-      const canvasStream = canvas.captureStream(30);
-      let pipVideo = nativePipVideoRef.current;
-      if (!pipVideo) {
-        pipVideo = document.createElement('video');
-        pipVideo.style.display = 'none';
-        pipVideo.playsInline = true;
-        pipVideo.muted = true;
-        document.body.appendChild(pipVideo);
-        nativePipVideoRef.current = pipVideo;
-      }
-
-      // Listen for PiP close event → show in-page PiP again
-      pipVideo.onleavepictureinpicture = () => {
+      videoEl.onleavepictureinpicture = () => {
         nativePipActiveRef.current = false;
         setNativePipShowing(false);
-        console.log("[PiP] Native PiP closed — showing in-page PiP");
+        console.log("[PiP] Native PiP window closed — showing in-page PiP");
       };
 
-      pipVideo.srcObject = canvasStream;
-      pipVideo.play().then(() => {
-        pipVideo.requestPictureInPicture()
-          .then(() => {
-            nativePipActiveRef.current = true;
-            setNativePipShowing(true); // hide in-page PiP
-            console.log("[PiP] Circular canvas PiP activated — in-page PiP hidden");
-          })
-          .catch((err) => {
-            console.warn("[PiP] Native PiP not available, using in-page PiP:", err.message);
-            setNativePipShowing(false);
-          });
-      }).catch(() => {});
-    }, 1000);
+      videoEl.requestPictureInPicture()
+        .then(() => {
+          nativePipActiveRef.current = true;
+          setNativePipShowing(true);
+          console.log("[PiP] Native PiP activated — hiding in-page PiP");
+        })
+        .catch((err) => {
+          console.warn("[PiP] Native PiP not available:", err.message);
+          setNativePipShowing(false);
+        });
+    }, 1200);
 
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -237,16 +147,6 @@ const CustomVideoLayout = ({ meetingTitle }) => {
     return () => {
       if (nativePipActiveRef.current && document.pictureInPictureElement) {
         document.exitPictureInPicture().catch(() => {});
-      }
-      if (nativePipAnimRef.current) {
-        cancelAnimationFrame(nativePipAnimRef.current);
-      }
-      if (nativePipVideoRef.current) {
-        nativePipVideoRef.current.srcObject = null;
-        nativePipVideoRef.current.remove();
-      }
-      if (nativePipCanvasRef.current) {
-        nativePipCanvasRef.current.remove();
       }
       nativePipActiveRef.current = false;
     };
@@ -317,13 +217,13 @@ const CustomVideoLayout = ({ meetingTitle }) => {
                 )}
               </div>
             )}
-            {/* Self camera PiP (round) - teacher sees their own face while sharing */}
-            {/* Hidden when native PiP is showing (only ONE face at a time) */}
+            {/* Self camera PiP (circle) - teacher sees their own face while sharing */}
+            {/* Hidden when native browser PiP is active (avoids "playing in picture-in-picture" placeholder) */}
             {sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
               <div
                 ref={pipRef}
                 onMouseDown={handlePipMouseDown}
-                className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30"
+                className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30 bg-black"
                 style={{
                   ...(pipPos
                     ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
@@ -345,17 +245,16 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           />
         )}
 
-        {/* PiP: Sharer's Webcam (bottom-right, draggable) - only for viewers */}
-        {/* Hidden when native PiP is showing (only ONE face at a time) */}
+        {/* PiP: Sharer's Webcam (circle, bottom-right, draggable) - only for viewers */}
         {!isLocalSharing && sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
           <div
             ref={pipRef}
             onMouseDown={handlePipMouseDown}
-            className="absolute z-20 w-52 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 cursor-grab active:cursor-grabbing hover:border-white/40 transition-all bg-slate-900"
+            className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30 bg-black"
             style={{
               ...(pipPos
-                ? { left: pipPos.x, top: pipPos.y, position: 'fixed', aspectRatio: '4/3' }
-                : { bottom: 24, right: 24, aspectRatio: '4/3' }),
+                ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
+                : { bottom: 24, right: 24 }),
               ...(nativePipShowing ? { opacity: 0, pointerEvents: 'none' } : {}),
             }}
           >
@@ -363,11 +262,6 @@ const CustomVideoLayout = ({ meetingTitle }) => {
               trackRef={sharerCameraTrack}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
-              <span className="text-white text-xs font-medium truncate block">
-                {sharerCameraTrack.participant?.name || 'Presenter'}
-              </span>
-            </div>
           </div>
         )}
 
@@ -692,7 +586,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
           // ─── Screen Share + PiP Layout ───
           // First video = screen share (full canvas), last small video = PiP face
           // Heuristic: the largest video is screen share, the one inside the PiP container is the face
-          const pipContainer = videoArea.querySelector('[class*="rounded-full"], [class*="rounded-2xl"]');
+          const pipContainer = videoArea.querySelector('[class*="rounded-full"]');
           let screenShareVideo = null;
           let pipVideo = null;
 
@@ -715,7 +609,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             } catch (e) { /* cross-origin */ }
           }
 
-          // Draw PiP face in bottom-right corner (circular clip)
+          // Draw PiP face in bottom-right corner (circular)
           if (pipVideo) {
             const pipSize = 160; // diameter of PiP circle
             const pipMargin = 24;
@@ -729,7 +623,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             // Draw circular border
             ctx.beginPath();
             ctx.arc(pipCenterX, pipCenterY, pipRadius + 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)'; // emerald-400/60
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)'; // emerald border
             ctx.fill();
 
             // Clip to circle and draw face
@@ -737,7 +631,6 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             ctx.arc(pipCenterX, pipCenterY, pipRadius, 0, Math.PI * 2);
             ctx.clip();
             try {
-              // Cover-fit the video into the circle area
               const vw = pipVideo.videoWidth || pipSize;
               const vh = pipVideo.videoHeight || pipSize;
               const scale = Math.max(pipSize / vw, pipSize / vh);
@@ -1958,7 +1851,18 @@ export default function MeetingRoom() {
                     View Meeting Report
                   </button>
                   <button
-                    onClick={() => window.close()}
+                    onClick={() => {
+                      // window.close() only works for JS-opened tabs; fall back to navigation
+                      try { window.close(); } catch (e) { /* ignore */ }
+                      // If still open after 200ms, navigate back or to home
+                      setTimeout(() => {
+                        if (window.history.length > 1) {
+                          window.history.back();
+                        } else {
+                          window.location.href = '/';
+                        }
+                      }, 200);
+                    }}
                     className="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium py-3 px-4 rounded-xl transition-colors"
                   >
                     Close Tab

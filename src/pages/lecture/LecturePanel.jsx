@@ -51,6 +51,9 @@ const getVideoComponent = (videoUrl) => {
       className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
       controls
       controlsList="nodownload"
+      onError={(e) => {
+        console.warn("Video load error:", e.target.error?.message);
+      }}
     >
       Your browser does not support the video tag.
     </video>
