@@ -948,14 +948,6 @@ const LectureCard = ({
             Edit Lecture Details
           </button>
 
-          <button
-            onClick={(e) => { e.stopPropagation(); onEditVideo(); }}
-            className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-rose-300 text-rose-600 hover:bg-rose-50 hover:border-rose-400 transition-all duration-200"
-          >
-            <Video className="mr-1 h-3 w-3 flex-shrink-0" />
-            Edit Video
-          </button>
-
           {hasReport && (
             <button
               onClick={(e) => { e.stopPropagation(); onReport(); }}
