@@ -529,6 +529,49 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   const audioDestRef = useRef(null);
   const connectedAudioTrackIdsRef = useRef(new Set()); // Track which audio sources are already connected
 
+  // Cleanup on component unmount — prevents resource leaks if user navigates away mid-recording
+  useEffect(() => {
+    return () => {
+      if (canvasAnimFrameRef.current) {
+        cancelAnimationFrame(canvasAnimFrameRef.current);
+        canvasAnimFrameRef.current = null;
+      }
+      if (canvasIntervalRef.current) {
+        clearInterval(canvasIntervalRef.current);
+        canvasIntervalRef.current = null;
+      }
+      if (canvasStreamRef.current) {
+        canvasStreamRef.current.getTracks().forEach(track => track.stop());
+        canvasStreamRef.current = null;
+      }
+      // Clean up hidden video elements
+      document.querySelectorAll('video[data-recording-hidden]').forEach(v => {
+        if (v._cleanupVisibility) v._cleanupVisibility();
+        v.srcObject = null;
+        v.parentNode?.removeChild(v);
+      });
+      if (hiddenScreenShareVideoRef.current) {
+        if (hiddenScreenShareVideoRef.current._cleanupVisibility) hiddenScreenShareVideoRef.current._cleanupVisibility();
+        if (hiddenScreenShareVideoRef.current.parentNode) hiddenScreenShareVideoRef.current.parentNode.removeChild(hiddenScreenShareVideoRef.current);
+        hiddenScreenShareVideoRef.current.srcObject = null;
+        hiddenScreenShareVideoRef.current = null;
+      }
+      if (hiddenCameraVideoRef.current) {
+        if (hiddenCameraVideoRef.current._cleanupVisibility) hiddenCameraVideoRef.current._cleanupVisibility();
+        if (hiddenCameraVideoRef.current.parentNode) hiddenCameraVideoRef.current.parentNode.removeChild(hiddenCameraVideoRef.current);
+        hiddenCameraVideoRef.current.srcObject = null;
+        hiddenCameraVideoRef.current = null;
+      }
+      // Close AudioContext
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
+        audioDestRef.current = null;
+      }
+      connectedAudioTrackIdsRef.current = new Set();
+    };
+  }, []);
+
   const setupMediaRecorder = (stream) => {
     let mimeOptions = 'video/webm;codecs=vp8,opus';
     if (!MediaRecorder.isTypeSupported(mimeOptions)) {
