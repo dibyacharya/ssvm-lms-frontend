@@ -35,16 +35,11 @@ const STATUS_TABS = [
   { key: "closed", label: "Closed", apiValue: "Closed" },
 ];
 
-const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
-const HELP_TYPE_OPTIONS = ["Academic", "Technical"];
-
 const DEFAULT_FORM = {
   title: "",
   description: "",
-  helpType: "",
   queryCategory: "",
   querySubCategory: "",
-  priority: "Medium",
   files: [],
 };
 
@@ -354,12 +349,11 @@ const HelpdeskSection = () => {
     if (
       !createForm.title.trim() ||
       !createForm.description.trim() ||
-      !createForm.helpType.trim() ||
       !createForm.queryCategory.trim() ||
       !createForm.querySubCategory.trim()
     ) {
       toast.error(
-        "Help type, title, description, query category and sub-category are required."
+        "Title, description, query category and sub-category are required."
       );
       return;
     }
@@ -367,11 +361,9 @@ const HelpdeskSection = () => {
     const formData = new FormData();
     formData.append("title", createForm.title.trim());
     formData.append("description", createForm.description.trim());
-    formData.append("helpType", createForm.helpType.trim());
     formData.append("queryCategory", createForm.queryCategory.trim());
     formData.append("querySubCategory", createForm.querySubCategory.trim());
     formData.append("category", createForm.queryCategory.trim());
-    formData.append("priority", createForm.priority || "Medium");
     createForm.files.forEach((file) => {
       formData.append("files", file);
     });
@@ -585,8 +577,6 @@ const HelpdeskSection = () => {
                       <tr className="text-left text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         <th className="px-3 py-2">Ticket</th>
                         <th className="px-3 py-2">Category / Sub-category</th>
-                        <th className="px-3 py-2">Help Type</th>
-                        <th className="px-3 py-2">Priority</th>
                         <th className="px-3 py-2">Status</th>
                         <th className="px-3 py-2">Escalation</th>
                         <th className="px-3 py-2">Last Update</th>
@@ -605,16 +595,6 @@ const HelpdeskSection = () => {
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               {ticket.querySubCategory || "-"}
                             </div>
-                          </td>
-                          <td className="px-3 py-3 text-sm">
-                            <span
-                              className={`px-2.5 py-1 rounded-full text-xs font-semibold ${helpTypeBadgeClass(ticket.helpType)}`}
-                            >
-                              {ticket.helpType || "Academic"}
-                            </span>
-                          </td>
-                          <td className={`px-3 py-3 text-sm font-medium ${priorityClass(ticket.priority)}`}>
-                            {ticket.priority}
                           </td>
                           <td className="px-3 py-3 text-sm">
                             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(ticket.status)}`}>
@@ -704,25 +684,6 @@ const HelpdeskSection = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Help Type</label>
-                  <select
-                    value={createForm.helpType}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({ ...prev, helpType: event.target.value }))
-                    }
-                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    required
-                  >
-                    <option value="">Select help type</option>
-                    {HELP_TYPE_OPTIONS.map((helpType) => (
-                      <option key={helpType} value={helpType}>
-                        {helpType}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Query Category</label>
                   <select
                     value={createForm.queryCategory}
@@ -770,21 +731,6 @@ const HelpdeskSection = () => {
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
-                  <select
-                    value={createForm.priority}
-                    onChange={(event) => setCreateForm((prev) => ({ ...prev, priority: event.target.value }))}
-                    className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {PRIORITY_OPTIONS.map((priority) => (
-                      <option key={priority} value={priority}>
-                        {priority}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               <div>
@@ -802,17 +748,40 @@ const HelpdeskSection = () => {
 
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Attachments (optional)</label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      files: Array.from(event.target.files || []),
-                    }))
-                  }
-                  className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 dark:file:bg-gray-600 file:text-gray-700 dark:file:text-gray-300"
-                />
+                {createForm.files.length > 0 && (
+                  <div className="mt-2 space-y-1.5">
+                    {createForm.files.map((file, idx) => (
+                      <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">{file.name}</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+                        <button
+                          type="button"
+                          onClick={() => setCreateForm((prev) => ({ ...prev, files: prev.files.filter((_, i) => i !== idx) }))}
+                          className="p-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <label className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary dark:hover:text-primary cursor-pointer transition-colors">
+                  <Plus className="h-4 w-4" />
+                  {createForm.files.length > 0 ? "Add More Files" : "Choose Files"}
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      const newFiles = Array.from(event.target.files || []);
+                      if (newFiles.length > 0) {
+                        setCreateForm((prev) => ({ ...prev, files: [...prev.files, ...newFiles] }));
+                      }
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
               </div>
 
               <div className="flex justify-end gap-2 pt-1">
@@ -859,16 +828,8 @@ const HelpdeskSection = () => {
               <div className="p-5 space-y-6">
                 <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-semibold ${helpTypeBadgeClass(selectedTicket.helpType)}`}
-                    >
-                      {selectedTicket.helpType || "Academic"}
-                    </span>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(selectedTicket.status)}`}>
                       {selectedTicket.status}
-                    </span>
-                    <span className={`text-sm font-semibold ${priorityClass(selectedTicket.priority)}`}>
-                      {selectedTicket.priority}
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       {selectedTicket.queryCategory || selectedTicket.category}

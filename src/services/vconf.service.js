@@ -93,6 +93,11 @@ export const getVconfAttendance = async (meetingId) => {
   return res.data;
 };
 
+export const getStudentTimeAttendance = async (courseId) => {
+  const res = await api.get(`/vconf/courses/${courseId}/student-attendance`);
+  return res.data;
+};
+
 // ─── Persistent Chat ───
 
 export const flushVconfChat = async (meetingId, messages) => {

@@ -48,6 +48,7 @@ const VideoEditor = ({
   lectureId,
   courseId,
   lectureReviewed,
+  viewMode = false, // When true, shows video player only (no trim/edit tools)
 }) => {
   const videoRef = useRef(null);
   const sliderRef = useRef(null);
@@ -72,7 +73,7 @@ const VideoEditor = ({
   }, [videoUrl]);
 
   useEffect(() => {
-    if (!videoLoaded || !videoUrl) return;
+    if (!videoLoaded || !videoUrl || viewMode) return;
 
     const video = videoRef.current;
     const slider = sliderRef.current;
@@ -206,22 +207,30 @@ const VideoEditor = ({
         throw new Error("Downloaded video is empty. The recording may be unavailable.");
       }
 
-      // Detect format from Content-Type header, URL patterns, or file magic bytes
+      // Detect format using MAGIC BYTES first (most reliable), then Content-Type fallback
+      // NEVER use URL patterns — /stream/ proxy doesn't indicate format
       const bytes = new Uint8Array(videoData);
       const isWebMByMagic = bytes.length >= 4 && bytes[0] === 0x1A && bytes[1] === 0x45 && bytes[2] === 0xDF && bytes[3] === 0xA3;
-      const isWebM =
-        detectedContentType.includes("webm") ||
-        isWebMByMagic ||
-        videoUrl.includes("/recording/video") ||
-        videoUrl.includes(".webm") ||
-        videoUrl.includes("/stream/");
+      const isMp4ByMagic = bytes.length >= 8 && (
+        // ftyp box: bytes 4-7 are "ftyp"
+        (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70)
+      );
+
+      let isWebM;
+      if (isWebMByMagic || isMp4ByMagic) {
+        // Trust magic bytes over everything else
+        isWebM = isWebMByMagic;
+      } else {
+        // Fallback to Content-Type header
+        isWebM = detectedContentType.includes("webm");
+      }
 
       const ext = isWebM ? "webm" : "mp4";
       const mimeType = isWebM ? "video/webm" : "video/mp4";
       const inputFile = `input.${ext}`;
       setOutputFormat(ext);
 
-      console.log(`[VideoEditor] Format: ${ext}, Content-Type: ${detectedContentType}, Size: ${videoData.byteLength} bytes, Magic: ${isWebMByMagic ? 'WebM' : 'other'}`);
+      console.log(`[VideoEditor] Format: ${ext}, Content-Type: ${detectedContentType}, Size: ${videoData.byteLength} bytes, Magic: ${isWebMByMagic ? 'WebM' : isMp4ByMagic ? 'MP4' : 'unknown'}`);
 
       await ffmpeg.writeFile(inputFile, bytes);
       setProgress(10);
@@ -254,25 +263,24 @@ const VideoEditor = ({
         return;
       }
 
-      // Extract each keep-segment using stream copy (same container, fast)
+      // Extract each keep-segment using stream copy (fast, low memory).
+      // Stream copy is safe because the canvas recording is now single-track with proper frames.
+      // Re-encoding with libvpx in WASM causes "memory access out of bounds" on larger videos.
       let segmentFiles = [];
       for (let i = 0; i < segments.length; i++) {
         const [segStart, segEnd] = segments[i];
         const outputSegment = `segment_${i}.${ext}`;
 
-        await ffmpeg.exec([
-          "-i",
-          inputFile,
-          "-ss",
-          `${segStart}`,
-          "-to",
-          `${segEnd}`,
-          "-c",
-          "copy",
-          "-avoid_negative_ts",
-          "make_zero",
+        // Use -ss BEFORE -i for fast keyframe-based seeking, then stream copy
+        const execArgs = [
+          "-ss", `${segStart}`,
+          "-i", inputFile,
+          "-t", `${segEnd - segStart}`,
+          "-c", "copy",
+          "-avoid_negative_ts", "make_zero",
           outputSegment,
-        ]);
+        ];
+        await ffmpeg.exec(execArgs);
 
         segmentFiles.push(outputSegment);
         setProgress(10 + Math.round(((i + 1) / segments.length) * 60));
@@ -290,17 +298,14 @@ const VideoEditor = ({
           new TextEncoder().encode(listContent)
         );
 
-        await ffmpeg.exec([
-          "-f",
-          "concat",
-          "-safe",
-          "0",
-          "-i",
-          fileList,
-          "-c",
-          "copy",
+        const mergeArgs = [
+          "-f", "concat",
+          "-safe", "0",
+          "-i", fileList,
+          "-c", "copy",
           finalOutput,
-        ]);
+        ];
+        await ffmpeg.exec(mergeArgs);
       } else {
         finalOutput = segmentFiles[0];
       }
@@ -373,6 +378,8 @@ const VideoEditor = ({
         return;
       }
 
+      console.log(`[VideoEditor] Uploading edited video: format=${outputFormat}, size=${blob.size} bytes (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+
       const mimeType = outputFormat === "webm" ? "video/webm" : "video/mp4";
       const videoFile = new File([blob], `edited_video.${outputFormat}`, {
         type: mimeType,
@@ -382,11 +389,14 @@ const VideoEditor = ({
       const lectureData = new FormData();
       lectureData.append("video", videoFile);
       lectureData.append("isReviewed", true);
-      // Call the updateLecture function
-      await updateLecture(courseId, lectureId, lectureData);
 
-      // Close the modal after successful upload
+      // Call the updateLecture function
+      const result = await updateLecture(courseId, lectureId, lectureData);
+      console.log(`[VideoEditor] Upload result:`, result);
+
+      // Close the modal and reload to show the updated video
       setShowVideoModal(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting edited video:", error);
       alert("Failed to upload the edited video. Please try again.");
@@ -399,7 +409,7 @@ const VideoEditor = ({
     <div className="w-11/12 max-w-6xl mx-auto p-6 h-[85vh] rounded-xl bg-white shadow-xl overflow-y-auto relative">
       <div className="flex justify-between items-center border-b-2 border-primary pb-4 mb-6">
         <h2 className="text-2xl font-semibold text-secondary">
-          Professional Video Editor
+          {viewMode ? "Video Player" : "Professional Video Editor"}
         </h2>
         <button
           onClick={() => setShowVideoModal(false)}
@@ -465,115 +475,119 @@ const VideoEditor = ({
                 </button>
               )}
             </div>
-            <div ref={sliderRef} className="w-full mt-6 mb-8"></div>
+            {!viewMode && <div ref={sliderRef} className="w-full mt-6 mb-8"></div>}
           </div>
 
-          <div className="flex justify-center gap-4 mt-4">
-            <button
-              onClick={addTrimSection}
-              onMouseEnter={() => setHoveredButton("add")}
-              onMouseLeave={() => setHoveredButton(null)}
-              className={`flex items-center gap-2 bg-primary text-white py-3 px-4 rounded-md shadow-sm transition-all duration-200 ${
-                hoveredButton === "add"
-                  ? "transform -translate-y-1 shadow-md"
-                  : ""
-              }`}
-            >
-              <Scissors size={18} />
-              Add Section to Remove
-            </button>
+          {!viewMode && (
+            <>
+              <div className="flex justify-center gap-4 mt-4">
+                <button
+                  onClick={addTrimSection}
+                  onMouseEnter={() => setHoveredButton("add")}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  className={`flex items-center gap-2 bg-primary text-white py-3 px-4 rounded-md shadow-sm transition-all duration-200 ${
+                    hoveredButton === "add"
+                      ? "transform -translate-y-1 shadow-md"
+                      : ""
+                  }`}
+                >
+                  <Scissors size={18} />
+                  Add Section to Remove
+                </button>
 
-            <button
-              onClick={resetEditor}
-              onMouseEnter={() => setHoveredButton("reset")}
-              onMouseLeave={() => setHoveredButton(null)}
-              className={`flex items-center gap-2 bg-white text-tertiary border border-tertiary py-3 px-4 rounded-md transition-all duration-200 ${
-                hoveredButton === "reset"
-                  ? "transform -translate-y-1 shadow-sm"
-                  : ""
-              }`}
-              disabled={processing}
-            >
-              <RotateCcw size={18} />
-              Reset
-            </button>
-          </div>
+                <button
+                  onClick={resetEditor}
+                  onMouseEnter={() => setHoveredButton("reset")}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  className={`flex items-center gap-2 bg-white text-tertiary border border-tertiary py-3 px-4 rounded-md transition-all duration-200 ${
+                    hoveredButton === "reset"
+                      ? "transform -translate-y-1 shadow-sm"
+                      : ""
+                  }`}
+                  disabled={processing}
+                >
+                  <RotateCcw size={18} />
+                  Reset
+                </button>
+              </div>
 
-          {removeRanges.length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-5 mt-6 mb-6 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-medium text-secondary mb-4">
-                Sections to Remove:
-              </h3>
-              <div className="space-y-3">
-                {removeRanges.map(([start, end], index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center p-3 bg-white rounded-md border-l-4 border-primary shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => jumpToRange(start, end)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-primary" />
-                      <span className="text-secondary">
-                        {formatTime(start)} - {formatTime(end)}
-                        <span className="text-sm text-tertiary ml-2">
-                          (Duration: {formatTime(end - start)})
-                        </span>
-                      </span>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSection(index);
-                      }}
-                      className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                      aria-label="Remove section"
-                    >
-                      <X size={14} />
-                    </button>
+              {removeRanges.length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-5 mt-6 mb-6 border border-gray-100 shadow-sm">
+                  <h3 className="text-lg font-medium text-secondary mb-4">
+                    Sections to Remove:
+                  </h3>
+                  <div className="space-y-3">
+                    {removeRanges.map(([start, end], index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-3 bg-white rounded-md border-l-4 border-primary shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => jumpToRange(start, end)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} className="text-primary" />
+                          <span className="text-secondary">
+                            {formatTime(start)} - {formatTime(end)}
+                            <span className="text-sm text-tertiary ml-2">
+                              (Duration: {formatTime(end - start)})
+                            </span>
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeSection(index);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          aria-label="Remove section"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {processing ? (
-            <div className="text-center py-5">
-              <p className="text-secondary mb-2">
-                Processing Video... {progress}%
-              </p>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center mt-6">
-              <button
-                onClick={trimVideo}
-                disabled={processing || removeRanges.length === 0}
-                onMouseEnter={() => setHoveredButton("trim")}
-                onMouseLeave={() => setHoveredButton(null)}
-                className={`inline-flex items-center gap-2 bg-primary text-white py-3 px-6 rounded-md text-lg font-medium transition-all duration-200 ${
-                  processing || removeRanges.length === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : hoveredButton === "trim"
-                    ? "transform -translate-y-1 shadow-md"
-                    : "shadow-sm"
-                }`}
-              >
-                <Scissors size={20} />
-                {removeRanges.length === 0
-                  ? "Select Sections to Remove"
-                  : "Trim & Finalize Video"}
-              </button>
-            </div>
+              {processing ? (
+                <div className="text-center py-5">
+                  <p className="text-secondary mb-2">
+                    Processing Video... {progress}%
+                  </p>
+                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center mt-6">
+                  <button
+                    onClick={trimVideo}
+                    disabled={processing || removeRanges.length === 0}
+                    onMouseEnter={() => setHoveredButton("trim")}
+                    onMouseLeave={() => setHoveredButton(null)}
+                    className={`inline-flex items-center gap-2 bg-primary text-white py-3 px-6 rounded-md text-lg font-medium transition-all duration-200 ${
+                      processing || removeRanges.length === 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : hoveredButton === "trim"
+                        ? "transform -translate-y-1 shadow-md"
+                        : "shadow-sm"
+                    }`}
+                  >
+                    <Scissors size={20} />
+                    {removeRanges.length === 0
+                      ? "Select Sections to Remove"
+                      : "Trim & Finalize Video"}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
 
-      {outputURL && !processing && (
+      {!viewMode && outputURL && !processing && (
         <div className="mt-8 pt-6 border-t-2 border-primary">
           <h3 className="text-xl font-medium text-secondary mb-4">
             Your Edited Video:

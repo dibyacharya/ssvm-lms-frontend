@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import profileService from "../../services/profile.service";
 import StudentProfileView from "../../components/profile/StudentProfileView";
 import TeacherProfileView from "../../components/profile/TeacherProfileView";
+import EIDCard from "../../components/shared/EIDCard";
 import { getPeriodLabel } from "../../utils/periodLabel";
 import {
   STUDENT_CANONICAL_FIELDS,
@@ -597,6 +598,22 @@ export default function Profile() {
             saveError={saveError}
           />
         ) : (
+          <>
+          {/* e-ID Card for Online Program students */}
+          {profileData?.linked?.program?.modeOfDelivery
+            ?.toLowerCase()
+            .includes("online") && (
+            <div className="mb-6">
+              <EIDCard
+                name={profileData.user?.name || ""}
+                program={profileData.academicSummary?.program || ""}
+                programDuration={profileData.linked?.program?.duration || ""}
+                enrollmentNo={profileData.academicSummary?.enrollmentNo || ""}
+                admissionBatch={profileData.academicSummary?.batch || ""}
+                photoUrl={profilePhotoUrl || ""}
+              />
+            </div>
+          )}
           <StudentProfileView
             headerFields={headerFields}
             profilePhotoUrl={profilePhotoUrl}
@@ -619,6 +636,7 @@ export default function Profile() {
             toGpaDisplay={toGpaDisplay}
             periodLabel={periodLabel}
           />
+          </>
         )}
 
         <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs text-gray-500 shadow-sm">

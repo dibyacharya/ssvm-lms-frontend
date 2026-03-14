@@ -217,26 +217,6 @@ const CustomVideoLayout = ({ meetingTitle }) => {
                 )}
               </div>
             )}
-            {/* Self camera PiP (circle) - teacher sees their own face while sharing */}
-            {/* Hidden when native browser PiP is active (avoids "playing in picture-in-picture" placeholder) */}
-            {sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
-              <div
-                ref={pipRef}
-                onMouseDown={handlePipMouseDown}
-                className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30 bg-black"
-                style={{
-                  ...(pipPos
-                    ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
-                    : { bottom: 24, right: 24 }),
-                  ...(nativePipShowing ? { opacity: 0, pointerEvents: 'none' } : {}),
-                }}
-              >
-                <VideoTrack
-                  trackRef={sharerCameraTrack}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-            )}
           </div>
         ) : (
           <VideoTrack
@@ -245,12 +225,12 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           />
         )}
 
-        {/* PiP: Sharer's Webcam (circle, bottom-right, draggable) - only for viewers */}
-        {!isLocalSharing && sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
+        {/* PiP: Sharer's Webcam (circle, bottom-right, draggable) - visible to everyone including the sharer */}
+        {sharerCameraTrack && isTrackReference(sharerCameraTrack) && (
           <div
             ref={pipRef}
             onMouseDown={handlePipMouseDown}
-            className="absolute z-20 w-36 h-36 rounded-full overflow-hidden shadow-2xl border-3 border-emerald-400/60 cursor-grab active:cursor-grabbing hover:border-emerald-400 transition-all ring-2 ring-black/30 bg-black"
+            className="absolute z-20 w-36 h-36 rounded-full overflow-hidden border-2 border-emerald-400/60 shadow-2xl bg-black cursor-grab active:cursor-grabbing transition-all"
             style={{
               ...(pipPos
                 ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
@@ -265,8 +245,8 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           </div>
         )}
 
-        {/* Other participants thumbnails (top-right strip) - only for viewers */}
-        {!isLocalSharing && otherCameraTracks.length > 0 && (
+        {/* Other participants thumbnails (top-right strip) */}
+        {otherCameraTracks.length > 0 && (
           <div className="absolute top-3 right-3 z-10 flex gap-2 flex-wrap max-w-[50%]">
             {otherCameraTracks.slice(0, 6).map((t) =>
               isTrackReference(t) ? (
@@ -466,10 +446,88 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording]);
 
+  // Manage hidden video elements for canvas recording.
+  // This is the SOLE owner of creating/destroying hiddenScreenShareVideoRef & hiddenCameraVideoRef.
+  // renderFrame only READS from these refs — never creates/destroys them.
+  const createRecordingVideo = (track, label) => {
+    const vid = document.createElement('video');
+    vid.srcObject = new MediaStream([track]);
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.autoplay = true;
+    vid.setAttribute('data-recording-hidden', label);
+    vid.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:320px;height:240px;opacity:0.01;pointer-events:none;z-index:-1;';
+    document.body.appendChild(vid);
+    vid.play().catch(() => {});
+    track.addEventListener('unmute', () => vid.play().catch(() => {}));
+    const onVis = () => { if (!document.hidden && vid.paused) vid.play().catch(() => {}); };
+    document.addEventListener('visibilitychange', onVis);
+    vid._cleanupVisibility = () => document.removeEventListener('visibilitychange', onVis);
+    console.log(`[Recording] useEffect: created hidden video for ${label} (readyState: ${vid.readyState})`);
+    return vid;
+  };
+  const destroyRecordingVideo = (ref) => {
+    const vid = ref.current;
+    if (!vid) return;
+    if (vid._cleanupVisibility) vid._cleanupVisibility();
+    if (vid.parentNode) vid.parentNode.removeChild(vid);
+    vid.srcObject = null;
+    ref.current = null;
+  };
+
+  useEffect(() => {
+    if (!isRecording || !localParticipant) return;
+
+    // ── Screen Share track ──
+    const screenSharePub = localParticipant.getTrackPublication(Track.Source.ScreenShare);
+    const ssMediaTrack = screenSharePub?.track?.mediaStreamTrack;
+    if (ssMediaTrack) {
+      const existingId = hiddenScreenShareVideoRef.current?.srcObject?.getVideoTracks()[0]?.id;
+      if (!hiddenScreenShareVideoRef.current || existingId !== ssMediaTrack.id) {
+        destroyRecordingVideo(hiddenScreenShareVideoRef);
+        hiddenScreenShareVideoRef.current = createRecordingVideo(ssMediaTrack, 'ScreenShare');
+      }
+      // Also dynamically add screen share audio to the AudioContext mixer
+      const ssAudioPub = localParticipant.getTrackPublication(Track.Source.ScreenShareAudio);
+      if (ssAudioPub?.track?.mediaStreamTrack && audioContextRef.current && audioDestRef.current) {
+        const trackId = ssAudioPub.track.mediaStreamTrack.id;
+        if (!connectedAudioTrackIdsRef.current.has(trackId)) {
+          try {
+            const src = audioContextRef.current.createMediaStreamSource(new MediaStream([ssAudioPub.track.mediaStreamTrack]));
+            src.connect(audioDestRef.current);
+            connectedAudioTrackIdsRef.current.add(trackId);
+            console.log("[Recording] Dynamically added screen share audio to mixer");
+          } catch (e) { /* already connected */ }
+        }
+      }
+    } else {
+      destroyRecordingVideo(hiddenScreenShareVideoRef);
+    }
+
+    // ── Camera track ──
+    const cameraPub = localParticipant.getTrackPublication(Track.Source.Camera);
+    const camMediaTrack = cameraPub?.track?.mediaStreamTrack;
+    if (camMediaTrack) {
+      const existingCamId = hiddenCameraVideoRef.current?.srcObject?.getVideoTracks()[0]?.id;
+      if (!hiddenCameraVideoRef.current || existingCamId !== camMediaTrack.id) {
+        destroyRecordingVideo(hiddenCameraVideoRef);
+        hiddenCameraVideoRef.current = createRecordingVideo(camMediaTrack, 'Camera');
+      }
+    } else {
+      destroyRecordingVideo(hiddenCameraVideoRef);
+    }
+  });
+
   // Canvas-based recording: captures all participants via a canvas element
   const canvasRef = useRef(null);
   const canvasStreamRef = useRef(null);
   const canvasAnimFrameRef = useRef(null);
+  const canvasIntervalRef = useRef(null); // setInterval fallback for when rAF is throttled
+  const hiddenScreenShareVideoRef = useRef(null);
+  const hiddenCameraVideoRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const audioDestRef = useRef(null);
+  const connectedAudioTrackIdsRef = useRef(new Set()); // Track which audio sources are already connected
 
   const setupMediaRecorder = (stream) => {
     let mimeOptions = 'video/webm;codecs=vp8,opus';
@@ -486,10 +544,14 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     };
 
     mediaRecorder.onstop = async () => {
-      // Stop canvas rendering loop
+      // Stop canvas rendering loop (both rAF and setInterval)
       if (canvasAnimFrameRef.current) {
         cancelAnimationFrame(canvasAnimFrameRef.current);
         canvasAnimFrameRef.current = null;
+      }
+      if (canvasIntervalRef.current) {
+        clearInterval(canvasIntervalRef.current);
+        canvasIntervalRef.current = null;
       }
       // Stop canvas stream tracks
       if (canvasStreamRef.current) {
@@ -500,6 +562,29 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       if (recordingStreamRef.current) {
         recordingStreamRef.current.getTracks().forEach(track => track.stop());
         recordingStreamRef.current = null;
+      }
+      // Clean up hidden video elements (remove from DOM + release streams + event listeners)
+      const cleanupHiddenVid = (vid) => {
+        if (!vid) return;
+        if (vid._cleanupVisibility) vid._cleanupVisibility();
+        if (vid.parentNode) vid.parentNode.removeChild(vid);
+        vid.srcObject = null;
+      };
+      cleanupHiddenVid(hiddenScreenShareVideoRef.current);
+      hiddenScreenShareVideoRef.current = null;
+      cleanupHiddenVid(hiddenCameraVideoRef.current);
+      hiddenCameraVideoRef.current = null;
+      // Also clean up any leftover hidden videos from DOM
+      document.querySelectorAll('video[data-recording-hidden]').forEach(v => {
+        if (v._cleanupVisibility) v._cleanupVisibility();
+        v.srcObject = null;
+        v.parentNode?.removeChild(v);
+      });
+      // Close AudioContext used for audio mixing
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
+        audioDestRef.current = null;
       }
 
       if (!recordingIntendedStopRef.current) {
@@ -547,8 +632,9 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     try {
       recordingIntendedStopRef.current = false;
 
-      // Strategy: Use a canvas to capture the video area DOM element
-      // This captures ALL participants (teacher + students + screen shares)
+      // Strategy: Use a canvas to capture video tracks directly from LiveKit
+      // When teacher shares screen, their DOM shows "You are sharing your screen" text,
+      // so we must grab the ScreenShare track directly from LiveKit instead of the DOM.
       const videoArea = document.querySelector('[data-recording-target="true"]') ||
                         document.querySelector('.lk-grid-layout') ||
                         document.querySelector('[data-lk-room]');
@@ -565,53 +651,57 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       canvasRef.current = canvas;
       const ctx = canvas.getContext('2d');
 
-      // Find all video elements in the video area
-      // Detects screen-share PiP mode and renders accordingly
+      // Create hidden video elements for screen share & camera tracks from LiveKit.
+      // Uses the component-level createRecordingVideo() function (also used by the useEffect).
+      const screenSharePub = localParticipant?.getTrackPublication(Track.Source.ScreenShare);
+      const cameraPub = localParticipant?.getTrackPublication(Track.Source.Camera);
+
+      if (screenSharePub?.track?.mediaStreamTrack) {
+        hiddenScreenShareVideoRef.current = createRecordingVideo(screenSharePub.track.mediaStreamTrack, 'ScreenShare');
+      }
+
+      if (cameraPub?.track?.mediaStreamTrack) {
+        hiddenCameraVideoRef.current = createRecordingVideo(cameraPub.track.mediaStreamTrack, 'Camera');
+      }
+
+      // renderFrame — draws all video sources onto the canvas each frame
+      // IMPORTANT: This function ONLY reads from hiddenScreenShareVideoRef / hiddenCameraVideoRef
+      // and draws to canvas. It does NOT create/destroy video elements — that's the useEffect's job.
       const renderFrame = () => {
         if (!canvasRef.current) return;
         ctx.fillStyle = '#1e293b'; // slate-800 background
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Check if we're in screen share + PiP mode
+        // Just resume paused videos — don't recreate or destroy them
+        const ssVid = hiddenScreenShareVideoRef.current;
+        if (ssVid && ssVid.paused) ssVid.play().catch(() => {});
+        const camVid = hiddenCameraVideoRef.current;
+        if (camVid && camVid.paused) camVid.play().catch(() => {});
+
+        // Check if local teacher is screen sharing (hidden video available via ref)
+        const hiddenScreenShareVideo = ssVid;
+        const hiddenCameraVideo = camVid;
+        // If the hidden video ref exists, try to draw — even if readyState is low.
+        // drawImage will silently produce nothing if video has no frame yet, which is fine.
+        const hasActiveScreenShare = !!hiddenScreenShareVideo;
+
+        // Also check DOM for viewer-side screen share (remote participant sharing)
         const isScreenShareMode = videoArea.hasAttribute('data-screen-share-active');
-        const videos = videoArea.querySelectorAll('video');
+        const domVideos = videoArea.querySelectorAll('video');
 
-        if (videos.length === 0) {
-          // No videos — draw a "No video" placeholder
-          ctx.fillStyle = '#475569';
-          ctx.font = '24px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('Recording in progress...', canvas.width / 2, canvas.height / 2);
-        } else if (isScreenShareMode && videos.length >= 2) {
-          // ─── Screen Share + PiP Layout ───
-          // First video = screen share (full canvas), last small video = PiP face
-          // Heuristic: the largest video is screen share, the one inside the PiP container is the face
-          const pipContainer = videoArea.querySelector('[class*="rounded-full"]');
-          let screenShareVideo = null;
-          let pipVideo = null;
-
-          if (pipContainer) {
-            pipVideo = pipContainer.querySelector('video');
+        if (hasActiveScreenShare) {
+          // ─── Teacher is Screen Sharing ───
+          // Draw screen share track directly (full canvas)
+          try {
+            ctx.drawImage(hiddenScreenShareVideo, 0, 0, canvas.width, canvas.height);
+          } catch (e) {
+            // drawImage can fail if video is not ready — force play and try again next frame
+            hiddenScreenShareVideo.play().catch(() => {});
           }
 
-          // The screen share video is the one NOT inside the PiP container
-          for (const v of videos) {
-            if (v !== pipVideo) {
-              screenShareVideo = v;
-              break;
-            }
-          }
-
-          // Draw screen share full canvas
-          if (screenShareVideo) {
-            try {
-              ctx.drawImage(screenShareVideo, 0, 0, canvas.width, canvas.height);
-            } catch (e) { /* cross-origin */ }
-          }
-
-          // Draw PiP face in bottom-right corner (circular)
-          if (pipVideo) {
-            const pipSize = 160; // diameter of PiP circle
+          // Draw camera PiP in bottom-right corner (circular)
+          if (hiddenCameraVideo) {
+            const pipSize = 160;
             const pipMargin = 24;
             const pipX = canvas.width - pipSize - pipMargin;
             const pipY = canvas.height - pipSize - pipMargin;
@@ -620,13 +710,61 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             const pipRadius = pipSize / 2;
 
             ctx.save();
-            // Draw circular border
             ctx.beginPath();
             ctx.arc(pipCenterX, pipCenterY, pipRadius + 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)'; // emerald border
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)';
             ctx.fill();
+            ctx.beginPath();
+            ctx.arc(pipCenterX, pipCenterY, pipRadius, 0, Math.PI * 2);
+            ctx.clip();
+            try {
+              const vw = hiddenCameraVideo.videoWidth || pipSize;
+              const vh = hiddenCameraVideo.videoHeight || pipSize;
+              const scale = Math.max(pipSize / vw, pipSize / vh);
+              const sw = vw * scale;
+              const sh = vh * scale;
+              const sx = pipX + (pipSize - sw) / 2;
+              const sy = pipY + (pipSize - sh) / 2;
+              ctx.drawImage(hiddenCameraVideo, sx, sy, sw, sh);
+            } catch (e) { /* */ }
+            ctx.restore();
+          }
+        } else if (isScreenShareMode && domVideos.length >= 2) {
+          // ─── Remote Screen Share (viewer sees it in DOM) ───
+          const pipContainer = videoArea.querySelector('[class*="rounded-full"]');
+          let screenShareVideo = null;
+          let pipVideo = null;
 
-            // Clip to circle and draw face
+          if (pipContainer) {
+            pipVideo = pipContainer.querySelector('video');
+          }
+          for (const v of domVideos) {
+            if (v !== pipVideo) {
+              screenShareVideo = v;
+              break;
+            }
+          }
+
+          if (screenShareVideo) {
+            try {
+              ctx.drawImage(screenShareVideo, 0, 0, canvas.width, canvas.height);
+            } catch (e) { /* cross-origin */ }
+          }
+
+          if (pipVideo) {
+            const pipSize = 160;
+            const pipMargin = 24;
+            const pipX = canvas.width - pipSize - pipMargin;
+            const pipY = canvas.height - pipSize - pipMargin;
+            const pipCenterX = pipX + pipSize / 2;
+            const pipCenterY = pipY + pipSize / 2;
+            const pipRadius = pipSize / 2;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pipCenterX, pipCenterY, pipRadius + 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.6)';
+            ctx.fill();
             ctx.beginPath();
             ctx.arc(pipCenterX, pipCenterY, pipRadius, 0, Math.PI * 2);
             ctx.clip();
@@ -642,18 +780,23 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             } catch (e) { /* cross-origin */ }
             ctx.restore();
           }
-        } else if (videos.length === 1) {
-          // Single video — full canvas
+        } else if (domVideos.length === 0 && !hasActiveScreenShare) {
+          // No videos at all
+          ctx.fillStyle = '#475569';
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Recording in progress...', canvas.width / 2, canvas.height / 2);
+        } else if (domVideos.length === 1) {
           try {
-            ctx.drawImage(videos[0], 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(domVideos[0], 0, 0, canvas.width, canvas.height);
           } catch (e) { /* cross-origin or no data */ }
         } else {
           // Grid layout for multiple videos (no screen share)
-          const cols = Math.ceil(Math.sqrt(videos.length));
-          const rows = Math.ceil(videos.length / cols);
+          const cols = Math.ceil(Math.sqrt(domVideos.length));
+          const rows = Math.ceil(domVideos.length / cols);
           const cellW = canvas.width / cols;
           const cellH = canvas.height / rows;
-          videos.forEach((video, i) => {
+          domVideos.forEach((video, i) => {
             const col = i % cols;
             const row = Math.floor(i / cols);
             try {
@@ -667,42 +810,89 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
       renderFrame();
 
+      // ALSO use setInterval as a FALLBACK — requestAnimationFrame gets throttled/paused
+      // when the tab loses focus (e.g. clicking Chrome's "Hide" button on sharing bar,
+      // switching tabs, fullscreening shared content). setInterval keeps running.
+      canvasIntervalRef.current = setInterval(() => {
+        if (!canvasRef.current) return;
+        renderFrame();
+
+        // Check for new remote participant audio elements (DOM-based, no stale closure issue)
+        if (audioContextRef.current && audioDestRef.current) {
+          document.querySelectorAll('audio[data-lk-source]').forEach(el => {
+            if (el.srcObject) {
+              el.srcObject.getAudioTracks().forEach(t => {
+                if (!connectedAudioTrackIdsRef.current.has(t.id)) {
+                  try {
+                    const src = audioContextRef.current.createMediaStreamSource(new MediaStream([t]));
+                    src.connect(audioDestRef.current);
+                    connectedAudioTrackIdsRef.current.add(t.id);
+                    console.log("[Recording] Interval: added new remote audio source");
+                  } catch (e) { /* already connected */ }
+                }
+              });
+            }
+          });
+        }
+      }, 100); // 10fps fallback — enough to prevent freeze
+
       // Get canvas stream at 15fps
       const canvasStream = canvas.captureStream(15);
       canvasStreamRef.current = canvasStream;
 
-      // Also capture audio from all participants
-      const audioTracks = [];
-      // Teacher's mic
+      // ── Audio capture: Use AudioContext to MIX all sources into one stream ──
+      // This ensures mic + screen share audio + remote participants all get recorded.
+      const audioCtx = new AudioContext();
+      const dest = audioCtx.createMediaStreamDestination();
+      let audioSourceCount = 0;
+
+      // 1. Teacher's microphone
       const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
       if (audioPublication?.track?.mediaStreamTrack) {
-        audioTracks.push(audioPublication.track.mediaStreamTrack);
+        try {
+          const micSource = audioCtx.createMediaStreamSource(new MediaStream([audioPublication.track.mediaStreamTrack]));
+          micSource.connect(dest);
+          audioSourceCount++;
+          console.log("[Recording] Audio: added teacher mic");
+        } catch (e) { console.warn("[Recording] Audio: mic capture failed:", e); }
       }
-      // Remote participants' audio — get from all <audio> elements in the room
+
+      // 2. Screen share audio (system audio from shared tab/window)
+      const screenShareAudioPub = localParticipant?.getTrackPublication(Track.Source.ScreenShareAudio);
+      if (screenShareAudioPub?.track?.mediaStreamTrack) {
+        try {
+          const ssAudioSource = audioCtx.createMediaStreamSource(new MediaStream([screenShareAudioPub.track.mediaStreamTrack]));
+          ssAudioSource.connect(dest);
+          audioSourceCount++;
+          console.log("[Recording] Audio: added screen share audio (system audio)");
+        } catch (e) { console.warn("[Recording] Audio: screen share audio capture failed:", e); }
+      }
+
+      // 3. Remote participants' audio — from DOM <audio> elements
       const audioElements = document.querySelectorAll('audio[data-lk-source]');
       audioElements.forEach(el => {
         if (el.srcObject) {
-          el.srcObject.getAudioTracks().forEach(t => audioTracks.push(t));
+          try {
+            const remoteSource = audioCtx.createMediaStreamSource(el.srcObject);
+            remoteSource.connect(dest);
+            audioSourceCount++;
+          } catch (e) { /* already connected or cross-origin */ }
         }
       });
 
-      // If no audio from DOM, try AudioContext to capture all room audio
-      if (audioTracks.length === 0) {
-        try {
-          const audioCtx = new AudioContext();
-          const dest = audioCtx.createMediaStreamDestination();
-          // Capture teacher's mic directly if available
-          if (audioPublication?.track?.mediaStreamTrack) {
-            const source = audioCtx.createMediaStreamSource(
-              new MediaStream([audioPublication.track.mediaStreamTrack])
-            );
-            source.connect(dest);
-          }
-          audioTracks.push(...dest.stream.getAudioTracks());
-        } catch (e) {
-          console.warn("[Recording] Could not capture audio:", e);
-        }
-      }
+      console.log(`[Recording] Audio: ${audioSourceCount} sources mixed via AudioContext`);
+      const audioTracks = dest.stream.getAudioTracks();
+
+      // Store AudioContext ref for cleanup and for dynamically adding screen share audio later
+      audioContextRef.current = audioCtx;
+      audioDestRef.current = dest;
+      connectedAudioTrackIdsRef.current = new Set();
+      // Track already-connected audio source IDs to avoid duplicates
+      if (audioPublication?.track?.mediaStreamTrack) connectedAudioTrackIdsRef.current.add(audioPublication.track.mediaStreamTrack.id);
+      if (screenShareAudioPub?.track?.mediaStreamTrack) connectedAudioTrackIdsRef.current.add(screenShareAudioPub.track.mediaStreamTrack.id);
+      audioElements.forEach(el => {
+        el.srcObject?.getAudioTracks().forEach(t => connectedAudioTrackIdsRef.current.add(t.id));
+      });
 
       // Combine canvas video + audio tracks
       const combinedStream = new MediaStream([
@@ -733,12 +923,21 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     try {
       recordingIntendedStopRef.current = false;
 
-      const videoPublication = localParticipant?.getTrackPublication(Track.Source.Camera);
+      // Prefer screen share track over camera if teacher is sharing
+      const screenSharePub = localParticipant?.getTrackPublication(Track.Source.ScreenShare);
+      const videoPublication = screenSharePub || localParticipant?.getTrackPublication(Track.Source.Camera);
       const audioPublication = localParticipant?.getTrackPublication(Track.Source.Microphone);
 
       const tracks = [];
       if (videoPublication?.track?.mediaStreamTrack) {
         tracks.push(videoPublication.track.mediaStreamTrack);
+      }
+      // Also include camera if screen share is the primary video
+      if (screenSharePub?.track?.mediaStreamTrack) {
+        const cameraPub = localParticipant?.getTrackPublication(Track.Source.Camera);
+        if (cameraPub?.track?.mediaStreamTrack) {
+          tracks.push(cameraPub.track.mediaStreamTrack);
+        }
       }
       if (audioPublication?.track?.mediaStreamTrack) {
         tracks.push(audioPublication.track.mediaStreamTrack);
@@ -1063,6 +1262,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     }
     try {
       await localParticipant.setScreenShareEnabled(!isScreenShareEnabled, {
+        audio: true, // Capture system audio (works for Chrome tab sharing)
         surfaceSwitching: 'include',
         selfBrowserSurface: 'exclude',
         monitorTypeSurfaces: 'exclude',

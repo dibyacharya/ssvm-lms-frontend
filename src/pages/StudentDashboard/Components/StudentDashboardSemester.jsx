@@ -24,9 +24,11 @@ import {
   Target,
 } from "lucide-react";
 import { getAllStudentCourses } from "../../../services/course.service";
+import { getMyProfile } from "../../../services/profile.service";
 import LoadingSpinner from "../../../utils/LoadingAnimation";
 import { getPeriodLabel } from "../../../utils/periodLabel";
 import DashboardBanner from "./DashboardBanner";
+import EIDCard from "../../../components/shared/EIDCard";
 
 import DashboardSemesterContent from "./DashBoardSemContent";
 
@@ -49,6 +51,18 @@ export default function DashboardSemester({ setActiveSection }) {
   const [defaultExpanded, setDefaultExpanded] = useState([]);
   const [periodLabel, setPeriodLabel] = useState(getPeriodLabel());
   const [coursesData, setCoursesData] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+
+  // Fetch profile for e-ID card (online program students)
+  useEffect(() => {
+    getMyProfile()
+      .then((data) => setProfileData(data))
+      .catch(() => {});
+  }, []);
+
+  // Check if student is in an online program
+  const isOnlineProgram =
+    profileData?.linked?.program?.modeOfDelivery?.toLowerCase().includes("online") || false;
 
   // Time-of-day greeting
   const timeGreeting = useMemo(() => {
@@ -187,6 +201,18 @@ export default function DashboardSemester({ setActiveSection }) {
           </div>
         }
       />
+
+      {/* e-ID Card for Online Program Students */}
+      {isOnlineProgram && profileData && (
+        <EIDCard
+          name={profileData.user?.name || ""}
+          program={profileData.academicSummary?.program || ""}
+          programDuration={profileData.linked?.program?.duration || ""}
+          enrollmentNo={profileData.academicSummary?.enrollmentNo || ""}
+          admissionBatch={profileData.academicSummary?.batch || ""}
+          photoUrl={profileData.profilePhotoUrl || ""}
+        />
+      )}
 
       {/* Notification Dropdown */}
       {showNotification && (

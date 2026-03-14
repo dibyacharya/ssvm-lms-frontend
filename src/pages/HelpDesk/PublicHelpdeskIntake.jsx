@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { createPublicTicket, getTicketTaxonomy } from "../../services/ticket.service";
 
-const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
-
 const DEFAULT_FORM = {
   name: "",
   email: "",
@@ -11,7 +9,6 @@ const DEFAULT_FORM = {
   queryCategory: "",
   querySubCategory: "",
   description: "",
-  priority: "Medium",
   captchaToken: "",
   files: [],
 };
@@ -74,7 +71,6 @@ export default function PublicHelpdeskIntake() {
     payload.append("queryCategory", form.queryCategory.trim());
     payload.append("querySubCategory", form.querySubCategory.trim());
     payload.append("description", form.description.trim());
-    payload.append("priority", form.priority || "Medium");
     if (form.captchaToken.trim()) {
       payload.append("captchaToken", form.captchaToken.trim());
     }
@@ -150,22 +146,6 @@ export default function PublicHelpdeskIntake() {
                   className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
                   required
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Priority</label>
-                <select
-                  value={form.priority}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, priority: event.target.value }))
-                  }
-                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2"
-                >
-                  {PRIORITY_OPTIONS.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Query Category *</label>

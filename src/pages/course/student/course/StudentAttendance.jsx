@@ -1,12 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { useCourse } from "../../../../context/CourseContext";
-import { useAuth } from "../../../../context/AuthContext";
+import { getStudentTimeAttendance } from "../../../../services/vconf.service";
 import {
   ClipboardCheck,
   Calendar,
   CheckCircle,
   XCircle,
   TrendingUp,
+  Clock,
+  Video,
+  Loader2,
 } from "lucide-react";
 import CoursePageBanner from "../../../../components/shared/CoursePageBanner";
 
@@ -107,73 +111,122 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
   </div>
 );
 
+/* ─────────── Percentage Badge ─────────── */
+const PctBadge = ({ pct }) => {
+  if (pct >= 75) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+        <CheckCircle className="w-3.5 h-3.5" />
+        {pct}%
+      </span>
+    );
+  }
+  if (pct >= 50) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+        <Clock className="w-3.5 h-3.5" />
+        {pct}%
+      </span>
+    );
+  }
+  if (pct > 0) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold border border-orange-200">
+        <Clock className="w-3.5 h-3.5" />
+        {pct}%
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 text-red-500 text-xs font-semibold border border-red-200">
+      <XCircle className="w-3.5 h-3.5" />
+      Absent
+    </span>
+  );
+};
+
+/* ─────────── Format Helpers ─────────── */
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "—";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+const formatTime = (timeStr) => {
+  if (!timeStr) return "";
+  const [h, m] = timeStr.split(":");
+  const hour = parseInt(h, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${m} ${ampm}`;
+};
+
 /* ═══════════════════════════════════════════════════════════════════ */
 
 const StudentAttendance = () => {
   const { courseData } = useCourse();
-  const { user } = useAuth();
+  const { courseID } = useParams();
 
-  // Use Student doc _id (from courseData.student.id) instead of User _id
-  // because attendance sessions store Student doc IDs
-  const studentId = courseData?.student?.id || user?._id || user?.id || "";
+  const [loading, setLoading] = useState(true);
+  const [attendanceData, setAttendanceData] = useState(null);
 
-  // Compute attendance data for this student
-  const { totalSessions, presentCount, absentCount, attendancePct, sessionList } =
-    useMemo(() => {
-      const attendanceSessions = courseData?.attendance?.sessions || {};
-      const sessionKeys = Object.keys(attendanceSessions).sort();
-      const total = sessionKeys.length;
-      let present = 0;
-      const list = [];
+  // Fetch time-based attendance from the dedicated API
+  useEffect(() => {
+    // Prefer courseData._id (ObjectId) over URL param (which may be a slug/shortCode)
+    const cid = courseData?._id || courseID;
+    if (!cid) return;
 
-      for (const key of sessionKeys) {
-        const attendees = attendanceSessions[key] || [];
-        const isPresent = attendees.includes(studentId);
-        if (isPresent) present++;
+    setLoading(true);
+    getStudentTimeAttendance(cid)
+      .then((data) => setAttendanceData(data))
+      .catch((err) => {
+        console.error("Failed to fetch time-based attendance:", err);
+        setAttendanceData(null);
+      })
+      .finally(() => setLoading(false));
+  }, [courseID, courseData?._id]);
 
-        // Parse session key "YYYY-MM-DD_HH:mm"
-        const [datePart, timePart] = key.split("_");
-        list.push({
-          key,
-          date: datePart,
-          time: timePart || "",
-          isPresent,
-        });
-      }
+  // Derived stats
+  const sessions = attendanceData?.sessions || [];
+  const overallPct = attendanceData?.overallPct || 0;
+  const totalSessions = attendanceData?.totalSessions || 0;
+  const presentCount = sessions.filter((s) => s.attendancePct > 0).length;
+  const absentCount = totalSessions - presentCount;
 
-      const pct = total > 0 ? Math.round((present / total) * 100) : 0;
-      return {
-        totalSessions: total,
-        presentCount: present,
-        absentCount: total - present,
-        attendancePct: pct,
-        sessionList: list.reverse(), // Most recent first
-      };
-    }, [courseData, studentId]);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "—";
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("en-IN", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatTime = (timeStr) => {
-    if (!timeStr) return "";
-    const [h, m] = timeStr.split(":");
-    const hour = parseInt(h, 10);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${m} ${ampm}`;
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <CoursePageBanner
+          icon={ClipboardCheck}
+          title="My Attendance"
+          subtitle="View your attendance records for this course"
+          gradient="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"
+        />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <span className="ml-3 text-gray-500">Loading attendance...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-6">
@@ -213,26 +266,26 @@ const StudentAttendance = () => {
         />
         <StatCard
           icon={TrendingUp}
-          label="Attendance Rate"
-          value={`${attendancePct}%`}
+          label="Overall Rate"
+          value={`${overallPct}%`}
           color={
-            attendancePct >= 75
+            overallPct >= 75
               ? "bg-emerald-500"
-              : attendancePct >= 50
+              : overallPct >= 50
               ? "bg-amber-500"
               : "bg-red-500"
           }
           bgColor={
-            attendancePct >= 75
+            overallPct >= 75
               ? "bg-emerald-50/80"
-              : attendancePct >= 50
+              : overallPct >= 50
               ? "bg-amber-50/80"
               : "bg-red-50/80"
           }
           borderColor={
-            attendancePct >= 75
+            overallPct >= 75
               ? "border-emerald-100"
-              : attendancePct >= 50
+              : overallPct >= 50
               ? "border-amber-100"
               : "border-red-100"
           }
@@ -247,7 +300,7 @@ const StudentAttendance = () => {
           gradient="bg-gradient-to-r from-emerald-500 to-green-600"
         />
         <div className="p-6 flex flex-col md:flex-row items-center justify-center gap-8">
-          <DonutChart percentage={attendancePct} />
+          <DonutChart percentage={overallPct} />
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
@@ -261,7 +314,7 @@ const StudentAttendance = () => {
               <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />
               <span className="text-gray-700 font-medium">Total: {totalSessions} sessions</span>
             </div>
-            {attendancePct < 75 && totalSessions > 0 && (
+            {overallPct < 75 && totalSessions > 0 && (
               <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
                 ⚠️ Your attendance is below 75%. Please ensure regular attendance.
               </div>
@@ -278,7 +331,7 @@ const StudentAttendance = () => {
           gradient="bg-gradient-to-r from-sky-500 to-blue-600"
           count={totalSessions}
         />
-        {sessionList.length === 0 ? (
+        {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6">
             <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
               <Calendar className="w-8 h-8 text-gray-300" />
@@ -303,20 +356,26 @@ const StudentAttendance = () => {
                     Time
                   </th>
                   <th className="py-3.5 px-4 text-center font-semibold text-gray-400 text-xs uppercase tracking-wider">
-                    Status
+                    Type
+                  </th>
+                  <th className="py-3.5 px-4 text-center font-semibold text-gray-400 text-xs uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="py-3.5 px-4 text-center font-semibold text-gray-400 text-xs uppercase tracking-wider">
+                    Attendance
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {sessionList.map((session, index) => (
+                {sessions.map((session, index) => (
                   <tr
-                    key={session.key}
+                    key={session.sessionKey}
                     className={`transition-all duration-200 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                     } hover:bg-gray-50`}
                   >
                     <td className="py-3.5 px-4 text-gray-400 text-sm font-medium">
-                      {sessionList.length - index}
+                      {sessions.length - index}
                     </td>
                     <td className="py-3.5 px-4 text-sm text-gray-800 font-medium whitespace-nowrap">
                       {formatDate(session.date)}
@@ -326,17 +385,32 @@ const StudentAttendance = () => {
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex justify-center">
-                        {session.isPresent ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            Present
+                        {session.type === "vconf" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
+                            <Video className="w-3 h-3" />
+                            Online
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 text-red-500 text-xs font-semibold border border-red-200">
-                            <XCircle className="w-3.5 h-3.5" />
-                            Absent
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-500 text-xs font-medium">
+                            <ClipboardCheck className="w-3 h-3" />
+                            Manual
                           </span>
                         )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-center text-sm text-gray-600">
+                      {session.type === "vconf" && session.meetingDurationSeconds > 0 ? (
+                        <span>
+                          {formatDuration(session.studentDurationSeconds)}{" "}
+                          <span className="text-gray-400">/ {formatDuration(session.meetingDurationSeconds)}</span>
+                        </span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex justify-center">
+                        <PctBadge pct={session.attendancePct} />
                       </div>
                     </td>
                   </tr>

@@ -15,6 +15,7 @@ import {
   Save,
   Trash2,
   BarChart3,
+  Scissors,
 } from "lucide-react";
 import MeetingReport from "../../../vconf/components/MeetingReport";
 import VideoEditor from "../../../EditLecture/EditLecture";
@@ -41,6 +42,7 @@ const LectureReview = () => {
   // Modal states
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoViewMode, setVideoViewMode] = useState(true); // true = view only, false = edit mode
   const [showMOMModal, setShowMOMModal] = useState(false);
   const [showHandoutsModal, setShowHandoutsModal] = useState(false);
   const [currentLecture, setCurrentLecture] = useState(null);
@@ -118,8 +120,9 @@ const LectureReview = () => {
     setShowDetailsModal(true);
   };
 
-  const openVideoModal = (lecture) => {
+  const openVideoModal = (lecture, isViewMode = true) => {
     setCurrentLecture(lecture);
+    setVideoViewMode(isViewMode);
     setShowVideoModal(true);
   };
 
@@ -289,7 +292,11 @@ const LectureReview = () => {
       <div className="space-y-6">
         {/* UPDATED: Changed course.modules to course.syllabus.modules */}
         {course.syllabus.modules.map((module) => {
-          const hasLectures = module.lectures && module.lectures.length > 0;
+          // Only count lectures that actually have a recording (videoUrl or recordingUrl)
+          const recordedLectures = (module.lectures || []).filter(
+            (l) => !deletedLectures.has(l._id) && (l.videoUrl || l.recordingUrl)
+          );
+          const hasLectures = recordedLectures.length > 0;
           if (!hasLectures) return null;
 
           return (
@@ -316,8 +323,8 @@ const LectureReview = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
-                        {module.lectures.length}{" "}
-                        {module.lectures.length === 1 ? "lecture" : "lectures"}
+                        {recordedLectures.length}{" "}
+                        {recordedLectures.length === 1 ? "lecture" : "lectures"}
                       </span>
                       <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center transition-transform duration-300">
                         {expandedModules[module._id] ? (
@@ -334,7 +341,7 @@ const LectureReview = () => {
               {expandedModules[module._id] && (
                 <div className="p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {module.lectures.filter((l) => !deletedLectures.has(l._id)).map((lecture, index) => (
+                    {recordedLectures.map((lecture, index) => (
                       <LectureCard
                         key={lecture._id}
                         lecture={lecture}
@@ -345,14 +352,14 @@ const LectureReview = () => {
                         }
                         onReview={() => handleMarkAsReviewed(lecture._id)}
                         onEditDetails={() => openDetailsModal(lecture)}
-                        onEditVideo={() => openVideoModal(lecture)}
+                        onEditVideo={() => openVideoModal(lecture, false)}
                         onMOM={() => openMOMModal(lecture)}
                         onHandouts={() => openHandoutsModal()}
                         onReport={() => openReportModal(lecture)}
                         hasReport={!!lecture.vconfMeetingId}
                         onDelete={() => handleDeleteLecture(lecture._id)}
                         isDeleting={deletingLectureId === lecture._id}
-                        onCardClick={() => openVideoModal(lecture)}
+                        onCardClick={() => openVideoModal(lecture, true)}
                         onReportIssue={() => setShowIssueForm(lecture._id)}
                         showIssueForm={showIssueForm === lecture._id}
                         issueText={issueText}
@@ -518,6 +525,7 @@ const LectureReview = () => {
               courseId={courseID}
               lectureId={currentLecture._id}
               lectureReviewed={currentLecture.isReviewed}
+              viewMode={videoViewMode}
             />
           </div>
         </div>
@@ -939,13 +947,21 @@ const LectureCard = ({
           )}
         </div>
 
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-1.5">
+        <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-1.5 flex-wrap">
           <button
             onClick={(e) => { e.stopPropagation(); onEditDetails(); }}
             className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
           >
             <Edit className="mr-1 h-3 w-3 flex-shrink-0" />
-            Edit Lecture Details
+            Edit Details
+          </button>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); onEditVideo(); }}
+            className="px-2 py-1 flex items-center text-xs whitespace-nowrap rounded-md border border-rose-300 text-rose-600 hover:bg-rose-50 hover:border-rose-400 transition-all duration-200"
+          >
+            <Scissors className="mr-1 h-3 w-3 flex-shrink-0" />
+            Edit Video
           </button>
 
           {hasReport && (

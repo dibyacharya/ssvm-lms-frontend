@@ -5,7 +5,6 @@ import {
   Users,
   Video,
   Bell,
-  Calendar,
   Home,
   Sunrise,
   Sun,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { getAllCourses } from "../../../../services/course.service";
-import ScheduleCalendar from "./ScheduleCalendar";
 
 const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
   <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
@@ -94,25 +92,6 @@ const TeacherDashboard2 = () => {
     return dashboardData.courses.reduce(
       (sum, course) => sum + (course.meetingsNext7DaysCount || 0),
       0
-    );
-  }, [dashboardData?.courses]);
-
-  // Today's meetings for schedule/calendar, flattened across courses
-  const todayEvents = useMemo(() => {
-    if (!dashboardData?.courses) return [];
-
-    return dashboardData.courses.flatMap((course) =>
-      (course.todayMeetings || []).map((m) => ({
-        _id: m.meetingId,
-        start: m.start,
-        end: m.end,
-        subject: m.title,
-        roomNumber: m.roomNumber,
-        link: m.link,
-        color: m.color,
-        courseTitle: course.title,
-        courseCode: course.courseCode,
-      }))
     );
   }, [dashboardData?.courses]);
 
@@ -255,18 +234,7 @@ const TeacherDashboard2 = () => {
         </div>
       </div>
 
-      {/* Schedule Calendar wrapped in card with SectionHeader */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
-        <SectionHeader
-          icon={Calendar}
-          title="Today's Schedule"
-          gradient="bg-gradient-to-r from-sky-500 to-blue-600 rounded-t-2xl"
-          count={todayEvents.length || null}
-        />
-        <div className="p-6">
-          <ScheduleCalendar events={todayEvents} />
-        </div>
-      </div>
+      {/* Schedule Calendar section removed */}
     </div>
   );
 };
