@@ -63,7 +63,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
   const { localParticipant } = useLocalParticipant();
   const tracks = useTracks(
     [
-      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.Camera, withPlaceholder: false },
       { source: Track.Source.ScreenShare, withPlaceholder: false },
     ],
     { onlySubscribed: false }
@@ -1251,7 +1251,10 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       };
 
       recognition.onerror = (event) => {
-        console.warn("Speech Recognition Error:", event.error);
+        // 'no-speech' fires continuously during silence — don't spam the console
+        if (event.error !== 'no-speech') {
+          console.warn("Speech Recognition Error:", event.error);
+        }
         if (event.error === 'not-allowed') {
           // fatal, we don't try to restart
           recognition.stoppedByError = true;
@@ -2183,16 +2186,13 @@ export default function MeetingRoom() {
                   </button>
                   <button
                     onClick={() => {
-                      // window.close() only works for JS-opened tabs; fall back to navigation
-                      try { window.close(); } catch (e) { /* ignore */ }
-                      // If still open after 200ms, navigate back or to home
-                      setTimeout(() => {
-                        if (window.history.length > 1) {
-                          window.history.back();
-                        } else {
-                          window.location.href = '/';
-                        }
-                      }, 200);
+                      // Navigate back or to dashboard — window.close() only works
+                      // for JS-opened popups and logs a warning otherwise.
+                      if (window.history.length > 1) {
+                        window.history.back();
+                      } else {
+                        window.location.href = '/';
+                      }
                     }}
                     className="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium py-3 px-4 rounded-xl transition-colors"
                   >
