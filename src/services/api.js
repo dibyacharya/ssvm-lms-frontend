@@ -50,6 +50,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Skip redirect when the caller explicitly opts out (e.g. AuthContext
+      // profile refresh on page load — it handles 401 gracefully on its own)
+      if (error.config?._skipAuthRedirect) {
+        return Promise.reject(error);
+      }
+
       const requestUrl = String(error.config?.url || "");
       const isAuthRequest = /\/auth\/(login|register)\b/.test(requestUrl);
       const isOnLoginPage =

@@ -1,7 +1,9 @@
 import api from "./api";
 
-export const getMyProfile = async () => {
-  const response = await api.get("/me/profile");
+export const getMyProfile = async ({ skipAuthRedirect = false } = {}) => {
+  const response = await api.get("/me/profile", {
+    _skipAuthRedirect: skipAuthRedirect,
+  });
   return response.data;
 };
 
