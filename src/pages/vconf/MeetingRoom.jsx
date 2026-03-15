@@ -2017,7 +2017,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                     recordingIntendedStopRef.current = true;
 
                     const uploadPromise = new Promise((resolve) => {
-                      const timeout = setTimeout(resolve, 10000); // 10s timeout
+                      const timeout = setTimeout(resolve, 120000); // 2min timeout for Azure uploads
                       const oldOnStop = mediaRecorderRef.current.onstop;
                       mediaRecorderRef.current.onstop = async (e) => {
                         clearTimeout(timeout);

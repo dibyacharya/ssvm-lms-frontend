@@ -63,7 +63,12 @@ export const uploadVconfRecording = async (meetingId, blob) => {
   const res = await api.post(
     `/vconf/meetings/${meetingId}/recording/upload`,
     blob,
-    { headers: { "Content-Type": "application/octet-stream" } }
+    {
+      headers: { "Content-Type": "application/octet-stream" },
+      timeout: 300000, // 5 min — recordings can be large on Azure
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    }
   );
   return res.data;
 };
@@ -75,8 +80,10 @@ export const deleteVconfRecording = async (meetingId) => {
 
 export const getVconfRecordingStream = (meetingId) => {
   // Returns URL for <video src="..."> — stream is piped by backend
+  // Append token as query param since <video> elements cannot send Authorization headers
   const baseURL = api.defaults.baseURL || "";
-  return `${baseURL}/vconf/meetings/${meetingId}/recording/stream`;
+  const token = localStorage.getItem("token") || "";
+  return `${baseURL}/vconf/meetings/${meetingId}/recording/stream?token=${encodeURIComponent(token)}`;
 };
 
 // ─── Transcript (stub — AI features removed) ───

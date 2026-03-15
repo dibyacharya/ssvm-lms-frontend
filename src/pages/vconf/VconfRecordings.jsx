@@ -4,7 +4,7 @@ import {
   Calendar, Users, Video, Search, Filter, PlayCircle, FileText, Download, Trash2
 } from 'lucide-react';
 import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
-import { getVconfMeetings, deleteVconfRecording } from '../../services/vconf.service';
+import { getVconfMeetings, deleteVconfRecording, getVconfRecordingStream } from '../../services/vconf.service';
 import { useAuth } from '../../context/AuthContext';
 
 function VconfRecordings() {
@@ -124,9 +124,14 @@ function VconfRecordings() {
                   >
                     <FileText size={18} />
                   </button>
-                  <button className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Download">
+                  <a
+                    href={`${getVconfRecordingStream(rec.id)}&download=1`}
+                    download={`recording-${rec.id}.webm`}
+                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors inline-flex"
+                    title="Download"
+                  >
                     <Download size={18} />
-                  </button>
+                  </a>
                 </div>
 
                 <div className="flex items-center space-x-2">
