@@ -46,6 +46,9 @@ api.interceptors.request.use(
 );
 
 // Response interceptor
+// Guard: prevent multiple concurrent 401s from all triggering redirect
+let isRedirecting401 = false;
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -61,7 +64,8 @@ api.interceptors.response.use(
       const isOnLoginPage =
         typeof window !== "undefined" && window.location.pathname === "/login";
 
-      if (!isAuthRequest && !isOnLoginPage) {
+      if (!isAuthRequest && !isOnLoginPage && !isRedirecting401) {
+        isRedirecting401 = true;
         // Save the current path so Login can redirect back after re-auth
         const currentPath = window.location.pathname + window.location.search;
         if (currentPath && currentPath !== "/" && currentPath !== "/login") {

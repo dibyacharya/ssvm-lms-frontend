@@ -6,7 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -64,14 +64,37 @@ const App = () => {
     </AuthProvider>
   );
 };
+// Auth-aware catch-all: logged-in → dashboard, not logged-in → login
+const AuthRedirect = () => {
+  const { user } = useAuth();
+  if (user) {
+    const dashPath = user.role === "admin" ? "/admin"
+      : user.role === "teacher" ? "/teacher/dashboard"
+      : "/student/dashboard";
+    return <Navigate to={dashPath} replace />;
+  }
+  return <Navigate to="/login" replace />;
+};
+
 const Layout = () => {
   const location = useLocation();
+  const { user, loading } = useAuth();
   const hideNavbarRoutes = [
     "/login",
     "/register",
     "/forgot-password",
     "/reset-password",
   ];
+
+  // If loading AND no cached user (first visit / after logout), show spinner
+  // to prevent route evaluation before auth is resolved.
+  if (loading && !user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -249,7 +272,8 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<AuthRedirect />} />
+          <Route path="*" element={<AuthRedirect />} />
         </Routes>
       </main>
     </div>
