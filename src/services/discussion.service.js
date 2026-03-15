@@ -45,8 +45,7 @@ const DiscussionService = {
       formData.append("attachments", file);
     });
 
-    const response = await api.post("/discussion/teacher", formData, {
-    });
+    const response = await api.post("/discussion/teacher", formData);
     return response.data;
   },
 
@@ -107,8 +106,7 @@ const DiscussionService = {
       formData.append("attachments", file);
     });
 
-    const response = await api.put(`/discussion/${discussionId}`, formData, {
-    });
+    const response = await api.put(`/discussion/${discussionId}`, formData);
     return response.data;
   },
 
