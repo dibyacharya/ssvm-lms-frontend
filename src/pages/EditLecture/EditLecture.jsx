@@ -64,16 +64,22 @@ const VideoEditor = ({
   const [outputFormat, setOutputFormat] = useState("mp4"); // Track actual video format
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoUrl, setVideoUrl] = useState(videoUrlProp);
+  // proxyUrl is the same-origin backend URL — used by fetch() for trimming
+  // (Azure blob URLs fail fetch() due to CORS, but work fine as <video> src)
+  const [proxyUrl, setProxyUrl] = useState(videoUrlProp);
 
-  // Resolve Azure stream URLs to direct blob URLs for playback
+  // Resolve Azure stream URLs to direct blob URLs for <video> playback
   useEffect(() => {
     if (!videoUrlProp) return;
-    // blob: and /uploads/ URLs work directly
+    // blob: and /uploads/ URLs work directly (no proxy needed)
     if (videoUrlProp.startsWith("blob:") || videoUrlProp.startsWith("/uploads/")) {
       setVideoUrl(videoUrlProp);
+      setProxyUrl(videoUrlProp);
       return;
     }
-    // If the URL is a stream proxy, resolve it to the direct Azure URL
+    // Keep the proxy URL for fetch() (same-origin, no CORS issues)
+    setProxyUrl(videoUrlProp);
+    // If the URL is a stream proxy, resolve it to the direct Azure URL for <video>
     if (videoUrlProp.includes("/api/lectures/stream/")) {
       const resolveUrl = async () => {
         try {
@@ -82,10 +88,10 @@ const VideoEditor = ({
             const data = await resp.json();
             setVideoUrl(data.url);
           } else {
-            setVideoUrl(videoUrlProp); // fallback
+            setVideoUrl(videoUrlProp); // fallback to proxy
           }
         } catch {
-          setVideoUrl(videoUrlProp); // fallback
+          setVideoUrl(videoUrlProp); // fallback to proxy
         }
       };
       resolveUrl();
@@ -214,22 +220,16 @@ const VideoEditor = ({
       let videoData;
       let detectedContentType = "";
 
-      if (videoUrl.startsWith("blob:")) {
-        const response = await fetch(videoUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch blob: ${response.statusText}`);
-        }
-        detectedContentType = response.headers.get("content-type") || "";
-        videoData = await response.arrayBuffer();
-      } else {
-        // Use fetch directly (works with proxy URL and CORS)
-        const response = await fetch(videoUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
-        }
-        detectedContentType = response.headers.get("content-type") || "";
-        videoData = await response.arrayBuffer();
+      // Use proxyUrl for fetch() — it's the same-origin backend proxy URL.
+      // Direct Azure blob URLs fail fetch() due to CORS, but proxyUrl is
+      // always same-origin (/api/lectures/stream/...) so no CORS issues.
+      const fetchUrl = videoUrl.startsWith("blob:") ? videoUrl : proxyUrl;
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
       }
+      detectedContentType = response.headers.get("content-type") || "";
+      videoData = await response.arrayBuffer();
 
       if (!videoData || videoData.byteLength === 0) {
         throw new Error("Downloaded video is empty. The recording may be unavailable.");
