@@ -638,12 +638,19 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   };
 
   const setupMediaRecorder = (stream) => {
-    let mimeOptions = 'video/webm;codecs=vp8,opus';
+    // Prefer VP9 for better quality-per-bit; fall back to VP8, then plain webm
+    let mimeOptions = 'video/webm;codecs=vp9,opus';
+    if (!MediaRecorder.isTypeSupported(mimeOptions)) {
+      mimeOptions = 'video/webm;codecs=vp8,opus';
+    }
     if (!MediaRecorder.isTypeSupported(mimeOptions)) {
       mimeOptions = 'video/webm';
     }
 
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: mimeOptions });
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: mimeOptions,
+      videoBitsPerSecond: 2_500_000, // 2.5 Mbps — smooth 720p recording
+    });
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -797,10 +804,10 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         hiddenCameraVideoRef.current = createRecordingVideo(cameraPub.track.mediaStreamTrack, 'Camera');
       }
 
-      // renderFrame — draws all video sources onto the canvas each frame
+      // drawCanvas — draws all video sources onto the canvas (pure drawing, no scheduling)
       // IMPORTANT: This function ONLY reads from hiddenScreenShareVideoRef / hiddenCameraVideoRef
       // and draws to canvas. It does NOT create/destroy video elements — that's the useEffect's job.
-      const renderFrame = () => {
+      const drawCanvas = () => {
         if (!canvasRef.current) return;
         ctx.fillStyle = '#1e293b'; // slate-800 background
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -938,17 +945,23 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
           });
         }
 
-        canvasAnimFrameRef.current = requestAnimationFrame(renderFrame);
       };
 
-      renderFrame();
+      // renderLoop — the rAF loop that schedules itself. drawCanvas is pure drawing,
+      // renderLoop adds the scheduling. setInterval calls drawCanvas directly (no rAF).
+      const renderLoop = () => {
+        drawCanvas();
+        canvasAnimFrameRef.current = requestAnimationFrame(renderLoop);
+      };
+
+      renderLoop();
 
       // ALSO use setInterval as a FALLBACK — requestAnimationFrame gets throttled/paused
       // when the tab loses focus (e.g. clicking Chrome's "Hide" button on sharing bar,
       // switching tabs, fullscreening shared content). setInterval keeps running.
       canvasIntervalRef.current = setInterval(() => {
         if (!canvasRef.current) return;
-        renderFrame();
+        drawCanvas(); // Direct draw — does NOT schedule rAF (avoids frame stacking)
 
         // Check for new remote participant audio elements (DOM-based, no stale closure issue)
         if (audioContextRef.current && audioDestRef.current) {
@@ -967,10 +980,10 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             }
           });
         }
-      }, 100); // 10fps fallback — enough to prevent freeze
+      }, 200); // 5fps fallback — keeps recording alive when tab is in background
 
-      // Get canvas stream at 15fps
-      const canvasStream = canvas.captureStream(15);
+      // Get canvas stream at 24fps for smooth playback
+      const canvasStream = canvas.captureStream(24);
       canvasStreamRef.current = canvasStream;
 
       // ── Audio capture: Use AudioContext to MIX all sources into one stream ──
