@@ -71,8 +71,16 @@ const Login = () => {
       
       if (response.data) {
         login(response.data);
-        let redirectPath = "";
-        if (response.data.user.role === "admin") {
+
+        // If the user was redirected here from an expired session, send them
+        // back to the page they were on — otherwise go to role-default dashboard.
+        const savedPath = localStorage.getItem("redirectAfterLogin");
+        localStorage.removeItem("redirectAfterLogin");
+
+        let redirectPath;
+        if (savedPath && savedPath !== "/" && savedPath !== "/login") {
+          redirectPath = savedPath;
+        } else if (response.data.user.role === "admin") {
           redirectPath = "/admin";
         } else {
           redirectPath =

@@ -62,6 +62,11 @@ api.interceptors.response.use(
         typeof window !== "undefined" && window.location.pathname === "/login";
 
       if (!isAuthRequest && !isOnLoginPage) {
+        // Save the current path so Login can redirect back after re-auth
+        const currentPath = window.location.pathname + window.location.search;
+        if (currentPath && currentPath !== "/" && currentPath !== "/login") {
+          localStorage.setItem("redirectAfterLogin", currentPath);
+        }
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         window.location.href = "/login";
