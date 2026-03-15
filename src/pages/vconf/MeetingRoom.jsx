@@ -528,10 +528,15 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   const audioContextRef = useRef(null);
   const audioDestRef = useRef(null);
   const connectedAudioTrackIdsRef = useRef(new Set()); // Track which audio sources are already connected
+  const audioCtxKeepAliveRef = useRef(null); // Interval to resume AudioContext if suspended
 
   // Cleanup on component unmount — prevents resource leaks if user navigates away mid-recording
   useEffect(() => {
     return () => {
+      if (audioCtxKeepAliveRef.current) {
+        clearInterval(audioCtxKeepAliveRef.current);
+        audioCtxKeepAliveRef.current = null;
+      }
       if (canvasAnimFrameRef.current) {
         cancelAnimationFrame(canvasAnimFrameRef.current);
         canvasAnimFrameRef.current = null;
@@ -587,6 +592,11 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     };
 
     mediaRecorder.onstop = async () => {
+      // Stop AudioContext keep-alive interval
+      if (audioCtxKeepAliveRef.current) {
+        clearInterval(audioCtxKeepAliveRef.current);
+        audioCtxKeepAliveRef.current = null;
+      }
       // Stop canvas rendering loop (both rAF and setInterval)
       if (canvasAnimFrameRef.current) {
         cancelAnimationFrame(canvasAnimFrameRef.current);
@@ -663,6 +673,11 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       recordedChunks.current = [];
       setIsRecording(false);
       setIsRecordingPaused(false);
+    };
+
+    mediaRecorder.onerror = (event) => {
+      console.error("[Recording] MediaRecorder error:", event.error?.name, event.error?.message);
+      // Don't stop recording for non-fatal errors
     };
 
     mediaRecorderRef.current = mediaRecorder;
@@ -942,6 +957,25 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         ...canvasStream.getVideoTracks(),
         ...audioTracks,
       ]);
+
+      // Monitor all tracks for unexpected 'ended' events (e.g. getDisplayMedia interrupting audio)
+      combinedStream.getTracks().forEach(track => {
+        track.addEventListener('ended', () => {
+          console.warn(`[Recording] Track ended unexpectedly: ${track.kind} (${track.label || track.id})`);
+          // If this was an audio track and recording is still active, try to keep going
+          // The MediaRecorder might stop — our onstop handler will detect recordingIntendedStopRef
+        });
+      });
+
+      // Keep AudioContext alive — getDisplayMedia can suspend it on some browsers
+      const keepAudioCtxAlive = setInterval(() => {
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          console.log("[Recording] AudioContext suspended, resuming...");
+          audioContextRef.current.resume().catch(() => {});
+        }
+      }, 1000);
+      // Store for cleanup
+      audioCtxKeepAliveRef.current = keepAudioCtxAlive;
 
       recordingStreamRef.current = null; // We manage canvas stream separately
       setupMediaRecorder(combinedStream);
@@ -1308,10 +1342,16 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         audio: true, // Capture system audio (works for Chrome tab sharing)
         surfaceSwitching: 'include',
         selfBrowserSurface: 'exclude',
-        monitorTypeSurfaces: 'exclude',
         systemAudio: 'include',
         preferCurrentTab: false,
       });
+      // After getDisplayMedia completes, resume AudioContext if it got suspended.
+      // Some browsers suspend the AudioContext when getDisplayMedia is called,
+      // which kills the audio track in the recording stream and stops MediaRecorder.
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        console.log("[Recording] AudioContext suspended after screen share toggle, resuming...");
+        audioContextRef.current.resume().catch(() => {});
+      }
       setMediaError("");
     } catch (e) {
       console.error("[MeetingRoom] Screen share error:", e);
@@ -1439,6 +1479,22 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
               <p className="text-sm font-bold">Click to Enable Audio</p>
               <p className="text-[10px] text-amber-100 mt-0.5">Browser blocked autoplay for remote users.</p>
             </div>
+          </div>
+        )}
+
+        {/* In-app "Stop Sharing" banner — lets the teacher stop screen share without
+            needing Chrome's native notification bar. Chrome's "Hide" button only hides
+            the native bar; this banner stays visible so there's always a way to stop. */}
+        {isScreenShareEnabled && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-blue-600 text-white px-5 py-2.5 rounded-xl shadow-lg flex items-center space-x-3 backdrop-blur-sm border border-blue-400/30 animate-in slide-in-from-top-4">
+            <Monitor size={16} className="text-blue-200 shrink-0" />
+            <span className="text-sm font-medium whitespace-nowrap">You are sharing your screen</span>
+            <button
+              onClick={toggleScreenShare}
+              className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+            >
+              Stop Sharing
+            </button>
           </div>
         )}
 
