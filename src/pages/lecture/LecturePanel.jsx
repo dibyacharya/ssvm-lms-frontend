@@ -34,12 +34,13 @@ const keyTakeaways = [
 ];
 
 // Resolve video URL — blob: URLs work directly; everything else goes through streaming proxy
-const resolveVideoUrl = (lecture) => {
+const resolveVideoUrl = (lecture, forDownload = false) => {
   const raw = lecture?.videoUrl || lecture?.recordingUrl;
   if (!raw) return null;
   if (raw.startsWith("blob:")) return raw;
   const backendUrl = window.RUNTIME_CONFIG?.BACKEND_URL || "http://localhost:5000";
-  return `${backendUrl}/api/lectures/stream/${lecture._id}`;
+  const base = `${backendUrl}/api/lectures/stream/${lecture._id}`;
+  return forDownload ? `${base}?download=1` : base;
 };
 
 // Helper function to convert video URLs to embed URLs (if needed)
@@ -50,7 +51,8 @@ const getVideoComponent = (videoUrl) => {
       src={videoUrl}
       className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
       controls
-      controlsList="nodownload"
+      controlsList="nodownload noplaybackrate"
+      disablePictureInPicture
       onError={(e) => {
         console.warn("Video load error:", e.target.error?.message);
       }}
@@ -314,7 +316,7 @@ export default function LecturePanel() {
                       {/* Download Button */}
                       <div className="flex justify-end mt-3">
                         <a
-                          href={resolveVideoUrl(selectedLecture)}
+                          href={resolveVideoUrl(selectedLecture, true)}
                           download={`${selectedLecture.title || "recording"}.mp4`}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
                         >
@@ -502,7 +504,7 @@ export default function LecturePanel() {
                       {/* Download Button */}
                       <div className="flex justify-end mt-3">
                         <a
-                          href={resolveVideoUrl(selectedLecture)}
+                          href={resolveVideoUrl(selectedLecture, true)}
                           download={`${selectedLecture.title || "recording"}.mp4`}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
                         >

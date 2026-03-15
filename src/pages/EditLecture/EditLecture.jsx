@@ -468,6 +468,8 @@ const VideoEditor = ({
                 ref={videoRef}
                 src={videoUrl}
                 controls
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
@@ -613,6 +615,8 @@ const VideoEditor = ({
             <video
               src={outputURL}
               controls
+              disablePictureInPicture
+              controlsList="nodownload noplaybackrate"
               className="w-full rounded-lg shadow-md bg-black aspect-video"
             />
             <div className="flex justify-center gap-4 mt-6">
