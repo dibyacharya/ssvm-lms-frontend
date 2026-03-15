@@ -33,22 +33,90 @@ const keyTakeaways = [
   "Understanding market fundamentals is crucial before making any investment decisions in the stock market.",
 ];
 
-// Resolve video URL — blob: URLs work directly; everything else goes through streaming proxy
+// Build the stream endpoint base URL for a lecture
+const getStreamBase = (lecture) => {
+  const backendUrl = window.RUNTIME_CONFIG?.BACKEND_URL || "http://localhost:5000";
+  return `${backendUrl}/api/lectures/stream/${lecture._id}`;
+};
+
+// Download URL — goes through backend proxy with Content-Disposition: attachment
 const resolveVideoUrl = (lecture, forDownload = false) => {
   const raw = lecture?.videoUrl || lecture?.recordingUrl;
   if (!raw) return null;
   if (raw.startsWith("blob:")) return raw;
-  const backendUrl = window.RUNTIME_CONFIG?.BACKEND_URL || "http://localhost:5000";
-  const base = `${backendUrl}/api/lectures/stream/${lecture._id}`;
+  const base = getStreamBase(lecture);
   return forDownload ? `${base}?download=1` : base;
 };
 
-// Helper function to convert video URLs to embed URLs (if needed)
-const getVideoComponent = (videoUrl) => {
+// VideoPlayer component — resolves the Azure blob URL on mount and plays directly
+const VideoPlayer = ({ lecture }) => {
+  const [videoSrc, setVideoSrc] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const resolve = async () => {
+      const raw = lecture?.videoUrl || lecture?.recordingUrl;
+      if (!raw) { setLoading(false); return; }
+
+      // blob: URLs work directly (e.g. from in-browser recording)
+      if (raw.startsWith("blob:")) {
+        setVideoSrc(raw);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Ask backend for the direct Azure blob URL (with SAS token)
+        const base = getStreamBase(lecture);
+        const token = localStorage.getItem("token");
+        const resp = await fetch(`${base}?resolve=1`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!resp.ok) {
+          const body = await resp.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${resp.status}`);
+        }
+        const data = await resp.json();
+        if (!cancelled) {
+          setVideoSrc(data.url);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to resolve video URL:", err);
+        if (!cancelled) {
+          setError(err.message || "Failed to load video");
+          setLoading(false);
+        }
+      }
+    };
+    resolve();
+    return () => { cancelled = true; };
+  }, [lecture?._id, lecture?.videoUrl, lecture?.recordingUrl]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
+        <div className="text-white text-sm">Loading video...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
+        <div className="text-red-400 text-sm text-center px-4">{error}</div>
+      </div>
+    );
+  }
+
+  if (!videoSrc) return null;
+
   return (
     <video
-      key={videoUrl}
-      src={videoUrl}
+      key={videoSrc}
+      src={videoSrc}
       className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
       controls
       controlsList="nodownload noplaybackrate"
@@ -311,7 +379,7 @@ export default function LecturePanel() {
                   {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
                     <div className="mb-6">
                       <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
-                        {getVideoComponent(resolveVideoUrl(selectedLecture))}
+                        <VideoPlayer lecture={selectedLecture} />
                       </div>
                       {/* Download Button */}
                       <div className="flex justify-end mt-3">
@@ -499,7 +567,7 @@ export default function LecturePanel() {
                   {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
                     <div className="mb-6">
                       <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
-                        {getVideoComponent(resolveVideoUrl(selectedLecture))}
+                        <VideoPlayer lecture={selectedLecture} />
                       </div>
                       {/* Download Button */}
                       <div className="flex justify-end mt-3">

@@ -43,7 +43,7 @@ const customizeSlider = () => {
 };
 
 const VideoEditor = ({
-  videoUrl,
+  videoUrl: videoUrlProp,
   setShowVideoModal,
   lectureId,
   courseId,
@@ -63,6 +63,34 @@ const VideoEditor = ({
   const [videoError, setVideoError] = useState(false);
   const [outputFormat, setOutputFormat] = useState("mp4"); // Track actual video format
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(videoUrlProp);
+
+  // Resolve Azure stream URLs to direct blob URLs for playback
+  useEffect(() => {
+    if (!videoUrlProp) return;
+    // blob: and /uploads/ URLs work directly
+    if (videoUrlProp.startsWith("blob:") || videoUrlProp.startsWith("/uploads/")) {
+      setVideoUrl(videoUrlProp);
+      return;
+    }
+    // If the URL is a stream proxy, resolve it to the direct Azure URL
+    if (videoUrlProp.includes("/api/lectures/stream/")) {
+      const resolveUrl = async () => {
+        try {
+          const resp = await fetch(`${videoUrlProp}?resolve=1`);
+          if (resp.ok) {
+            const data = await resp.json();
+            setVideoUrl(data.url);
+          } else {
+            setVideoUrl(videoUrlProp); // fallback
+          }
+        } catch {
+          setVideoUrl(videoUrlProp); // fallback
+        }
+      };
+      resolveUrl();
+    }
+  }, [videoUrlProp]);
 
   useEffect(() => {
     if (!videoUrl) return;
