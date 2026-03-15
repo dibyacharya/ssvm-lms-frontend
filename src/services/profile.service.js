@@ -23,11 +23,7 @@ export const uploadMyProfilePhoto = async (file, updateReason = "") => {
   if (updateReason) {
     formData.append("updateReason", updateReason);
   }
-  const response = await api.post("/me/profile/photo", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await api.post("/me/profile/photo", formData);
   return response.data;
 };
 

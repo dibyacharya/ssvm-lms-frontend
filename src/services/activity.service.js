@@ -8,22 +8,10 @@ export const getAllCourseActivities = async ({ courseID }) => {
 
 export const createActivity = async (courseID, formData) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
-    // Make sure API is imported
     const response = await api.post(
       `/activity/courses/${courseID}/activities`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      formData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error creating activity:", error);
@@ -34,7 +22,7 @@ export const createActivity = async (courseID, formData) => {
 // Delete an activity by ID
 export const deleteActivity = async (activityID) => {
   try {
-    const response = await api.delete(`activity/activities/${activityID}`);
+    const response = await api.delete(`/activity/activities/${activityID}`);
     toast.success("Activity Deleted Successfully!");
     return response.data;
   } catch (error) {
@@ -46,21 +34,10 @@ export const deleteActivity = async (activityID) => {
 // Update an activity by ID
 export const updateActivity = async (activityID, formData) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.put(
-      `activity/activities/${activityID}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      `/activity/activities/${activityID}`,
+      formData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error updating activity:", error);
@@ -69,7 +46,7 @@ export const updateActivity = async (activityID, formData) => {
 };
 
 export const getActivityById = async ({ activityID }) => {
-  const response = await api.get(`activity/activities/${activityID}`);
+  const response = await api.get(`/activity/activities/${activityID}`);
   return response.data;
 };
 
@@ -80,10 +57,9 @@ export const updateActivityGrade = async (
 ) => {
   try {
     const response = await api.post(
-      `activity/activities/${activityId}/submissions/${submissionId}/grade`,
+      `/activity/activities/${activityId}/submissions/${submissionId}/grade`,
       gradeData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error updating grade:", error);
@@ -93,21 +69,10 @@ export const updateActivityGrade = async (
 
 export const submitActivity = async (activityID, formData) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.post(
-      `activity/activities/${activityID}/submit`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      `/activity/activities/${activityID}/submit`,
+      formData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error submitting activity:", error);

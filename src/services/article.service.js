@@ -35,10 +35,7 @@ export const addArticleToChapter = async (courseId, moduleId, chapterId, article
   try {
     const response = await api.post(
       `/articles/course/${courseId}/module/${moduleId}/chapter/${chapterId}/articles`,
-      articleData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+      articleData
     );
     return response.data;
   } catch (error) {
@@ -55,9 +52,7 @@ export const addArticleToChapter = async (courseId, moduleId, chapterId, article
  */
 export const updateArticle = async (articleId, articleData) => {
   try {
-    const response = await api.put(`/articles/articles/${articleId}`, articleData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await api.put(`/articles/articles/${articleId}`, articleData);
     return response.data;
   } catch (error) {
     console.error("Error updating article:", error.response?.data || error.message);

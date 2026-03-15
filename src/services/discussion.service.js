@@ -46,9 +46,6 @@ const DiscussionService = {
     });
 
     const response = await api.post("/discussion/teacher", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
     });
     return response.data;
   },
@@ -111,9 +108,6 @@ const DiscussionService = {
     });
 
     const response = await api.put(`/discussion/${discussionId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
     });
     return response.data;
   },

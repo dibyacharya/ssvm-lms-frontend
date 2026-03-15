@@ -41,11 +41,6 @@ export const updateModule = async (courseID, moduleID, moduleData) => {
 // Add content to module
 export const addModuleContent = async (courseID, moduleID, formData) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.post(
       `/syllabus/course/${courseID}/syllabus/module/${moduleID}/content`,
       formData
@@ -68,11 +63,6 @@ export const updateContentItem = async (
   formData
 ) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.put(
       `/syllabus/course/${courseID}/syllabus/module/${moduleID}/content/${contentType}/${contentID}`,
       formData

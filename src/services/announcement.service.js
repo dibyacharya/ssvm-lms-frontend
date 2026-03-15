@@ -12,21 +12,10 @@ export const getAllCourseAnnouncements = async ({ courseID }) => {
 // Create a new announcement
 export const createAnnouncement = async (courseID, formData) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.post(
       `/announcement/course/${courseID}/announcement`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      formData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error creating announcement:", error);
@@ -55,21 +44,10 @@ export const updateAnnouncement = async (
   formData
 ) => {
   try {
-    // For debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
     const response = await api.put(
       `/announcement/course/${courseID}/announcement/${announcementID}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      formData
     );
-
     return response.data;
   } catch (error) {
     console.error("Error updating announcement:", error);
