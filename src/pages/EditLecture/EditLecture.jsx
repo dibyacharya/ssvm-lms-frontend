@@ -83,7 +83,10 @@ const VideoEditor = ({
     if (videoUrlProp.includes("/api/lectures/stream/")) {
       const resolveUrl = async () => {
         try {
-          const resp = await fetch(`${videoUrlProp}?resolve=1`);
+          const token = localStorage.getItem("token");
+          const resp = await fetch(`${videoUrlProp}?resolve=1`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
           if (resp.ok) {
             const data = await resp.json();
             setVideoUrl(data.url);
@@ -224,7 +227,10 @@ const VideoEditor = ({
       // Direct Azure blob URLs fail fetch() due to CORS, but proxyUrl is
       // always same-origin (/api/lectures/stream/...) so no CORS issues.
       const fetchUrl = videoUrl.startsWith("blob:") ? videoUrl : proxyUrl;
-      const response = await fetch(fetchUrl);
+      const token = localStorage.getItem("token");
+      const response = await fetch(fetchUrl, {
+        headers: token && !fetchUrl.startsWith("blob:") ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch video: ${response.status} ${response.statusText}`);
       }
