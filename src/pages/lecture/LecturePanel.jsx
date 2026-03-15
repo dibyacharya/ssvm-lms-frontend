@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import AutoResizeTextbox from "./utils/searcbox";
 import { useCourse } from "../../context/CourseContext";
+import { useAuth } from "../../context/AuthContext";
 import CompactNotesApp from "./utils/NotesApp";
 // CoursePageBanner replaced with inline banner to match teacher portal style
 
@@ -239,6 +240,8 @@ export default function LecturePanel() {
   const [selectedLecture, setSelectedLecture] = useState(null);
   const { courseID } = useParams();
   const { courseData: course } = useCourse();
+  const { user } = useAuth();
+  const isTeacher = user?.role === "teacher";
   const [expandedModules, setExpandedModules] = useState({});
   const [focusMode, setFocusMode] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -411,17 +414,19 @@ export default function LecturePanel() {
                       <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
                         <VideoPlayer lecture={selectedLecture} />
                       </div>
-                      {/* Download Button */}
-                      <div className="flex justify-end mt-3">
-                        <a
-                          href={resolveVideoUrl(selectedLecture, true)}
-                          download={`${selectedLecture.title || "recording"}.mp4`}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
-                        >
-                          <Download size={16} />
-                          Download Recording
-                        </a>
-                      </div>
+                      {/* Download Button — teachers only */}
+                      {isTeacher && (
+                        <div className="flex justify-end mt-3">
+                          <a
+                            href={resolveVideoUrl(selectedLecture, true)}
+                            download={`${selectedLecture.title || "recording"}.mp4`}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                          >
+                            <Download size={16} />
+                            Download Recording
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -599,17 +604,19 @@ export default function LecturePanel() {
                       <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
                         <VideoPlayer lecture={selectedLecture} />
                       </div>
-                      {/* Download Button */}
-                      <div className="flex justify-end mt-3">
-                        <a
-                          href={resolveVideoUrl(selectedLecture, true)}
-                          download={`${selectedLecture.title || "recording"}.mp4`}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
-                        >
-                          <Download size={16} />
-                          Download Recording
-                        </a>
-                      </div>
+                      {/* Download Button — teachers only */}
+                      {isTeacher && (
+                        <div className="flex justify-end mt-3">
+                          <a
+                            href={resolveVideoUrl(selectedLecture, true)}
+                            download={`${selectedLecture.title || "recording"}.mp4`}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                          >
+                            <Download size={16} />
+                            Download Recording
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
 
