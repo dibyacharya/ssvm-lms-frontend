@@ -85,6 +85,8 @@ function VconfTranscriptViewer() {
           <video
             src={getVconfRecordingStream(id)}
             controls
+            disablePictureInPicture
+            controlsList="noplaybackrate"
             className="w-full h-full object-contain"
           >
             Your browser does not support the video tag.
@@ -99,10 +101,14 @@ function VconfTranscriptViewer() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200">
+            <a
+              href={`${getVconfRecordingStream(id)}&download=1`}
+              download={`recording-${id}.webm`}
+              className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200 no-underline"
+            >
               <Download size={16} className="mr-2" />
               Download
-            </button>
+            </a>
             <button className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200">
               <Share2 size={16} className="mr-2" />
               Share
