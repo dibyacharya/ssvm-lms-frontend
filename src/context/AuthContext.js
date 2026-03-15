@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from "react";
 import { getMyProfile } from "../services/profile.service";
+import { markHydrationComplete } from "../services/api";
 
 const AuthContext = createContext({});
 
@@ -75,6 +76,9 @@ export const AuthProvider = ({ children }) => {
         console.warn("AuthContext: Failed to refresh user from backend", error?.message);
       } finally {
         setLoading(false);
+        // Signal the 401 interceptor that hydration is done.
+        // From this point on, any 401 should trigger a proper redirect.
+        markHydrationComplete();
       }
     };
 

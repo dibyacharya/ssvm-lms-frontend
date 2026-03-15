@@ -49,6 +49,19 @@ api.interceptors.request.use(
 // Guard: prevent multiple concurrent 401s from all triggering redirect
 let isRedirecting401 = false;
 
+// Hydration guard: On page refresh, dashboard components fire API calls
+// immediately. If the backend is cold-starting or the token just expired,
+// those calls return 401 BEFORE AuthContext.refreshUserFromBackend finishes.
+// Without this guard, the interceptor nukes localStorage and redirects to
+// /login — even though the user has a valid cached session.
+// We suppress 401 redirects for 8 seconds after app load (covers cold start).
+let isHydrating = true;
+setTimeout(() => { isHydrating = false; }, 8000);
+
+// Called by AuthContext once profile refresh completes (success or fail).
+// After that, any real 401 should trigger a redirect as usual.
+export const markHydrationComplete = () => { isHydrating = false; };
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -56,6 +69,12 @@ api.interceptors.response.use(
       // Skip redirect when the caller explicitly opts out (e.g. AuthContext
       // profile refresh on page load — it handles 401 gracefully on its own)
       if (error.config?._skipAuthRedirect) {
+        return Promise.reject(error);
+      }
+
+      // During hydration window, don't redirect — let stale cache render
+      // while AuthContext re-validates the session in the background.
+      if (isHydrating) {
         return Promise.reject(error);
       }
 
