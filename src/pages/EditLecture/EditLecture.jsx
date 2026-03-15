@@ -378,7 +378,8 @@ const VideoEditor = ({
         return;
       }
 
-      console.log(`[VideoEditor] Uploading edited video: format=${outputFormat}, size=${blob.size} bytes (${(blob.size / 1024 / 1024).toFixed(2)} MB)`);
+      const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+      console.log(`[VideoEditor] Uploading edited video: format=${outputFormat}, size=${blob.size} bytes (${sizeMB} MB)`);
 
       const mimeType = outputFormat === "webm" ? "video/webm" : "video/mp4";
       const videoFile = new File([blob], `edited_video.${outputFormat}`, {
@@ -390,8 +391,11 @@ const VideoEditor = ({
       lectureData.append("video", videoFile);
       lectureData.append("isReviewed", true);
 
-      // Call the updateLecture function
-      const result = await updateLecture(courseId, lectureId, lectureData);
+      // Call the updateLecture function with upload progress
+      setProgress(0);
+      const result = await updateLecture(courseId, lectureId, lectureData, (pct) => {
+        setProgress(pct);
+      });
       console.log(`[VideoEditor] Upload result:`, result);
 
       // Close the modal and reload to show the updated video
@@ -399,7 +403,20 @@ const VideoEditor = ({
       window.location.reload();
     } catch (error) {
       console.error("Error submitting edited video:", error);
-      alert("Failed to upload the edited video. Please try again.");
+      console.error("[VideoEditor] Response status:", error?.response?.status, "Response data:", error?.response?.data);
+      const status = error?.response?.status;
+      const serverMsg = error?.response?.data?.error || error?.response?.data?.message || error?.response?.data?.details;
+      let userMsg = "Failed to upload the edited video. Please try again.";
+      if (status === 413) {
+        userMsg = "Video file is too large for upload. Try trimming a shorter section.";
+      } else if (status === 408 || error?.code === "ECONNABORTED") {
+        userMsg = "Upload timed out. The video may be too large. Try trimming a shorter section.";
+      } else if (serverMsg) {
+        userMsg = `Upload failed: ${serverMsg}`;
+      } else if (!navigator.onLine) {
+        userMsg = "No internet connection. Please check your network and try again.";
+      }
+      alert(userMsg);
     } finally {
       setProcessing(false);
     }
@@ -613,7 +630,7 @@ const VideoEditor = ({
                 }`}
               >
                 <Upload size={18} />
-                {processing ? "Uploading..." : "Save and Update Lecture"}
+                {processing ? `Uploading... ${progress}%` : "Save and Update Lecture"}
               </button>
               <a
                 href={outputURL}

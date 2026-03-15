@@ -5,7 +5,7 @@ export const getAllLectures = async (courseId) => {
   return response.data;
 };
 
-export const updateLecture = async (courseId, lectureId, lectureData) => {
+export const updateLecture = async (courseId, lectureId, lectureData, onProgress) => {
   try {
     const response = await api.put(
       `/lectures/${courseId}/lectures/${lectureId}`,
@@ -13,7 +13,10 @@ export const updateLecture = async (courseId, lectureId, lectureData) => {
       {
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 300000,
+        timeout: 600000, // 10 minutes for large video uploads on Azure
+        onUploadProgress: onProgress
+          ? (e) => onProgress(Math.round((e.loaded * 100) / (e.total || e.loaded)))
+          : undefined,
       }
     );
     return response.data;
