@@ -94,63 +94,8 @@ const CustomVideoLayout = ({ meetingTitle }) => {
   const [pipPos, setPipPos] = useState(null);
   const dragState = useRef(null);
 
-  // Native browser PiP — floating window that persists across tab switches
-  const nativePipActiveRef = useRef(false);
-  const [nativePipShowing, setNativePipShowing] = useState(false);
-
-  // Auto-activate native PiP when screen share starts (so face stays visible on tab switch)
-  useEffect(() => {
-    if (!screenShareTrack || !isTrackReference(screenShareTrack)) {
-      // Screen share stopped — exit native PiP if active
-      if (nativePipActiveRef.current && document.pictureInPictureElement) {
-        document.exitPictureInPicture().catch(() => {});
-        nativePipActiveRef.current = false;
-        setNativePipShowing(false);
-      }
-      return;
-    }
-    if (!sharerCameraTrack || !isTrackReference(sharerCameraTrack)) return;
-    if (!document.pictureInPictureEnabled) return;
-
-    // Wait for VideoTrack to render the <video> element in DOM
-    const timer = setTimeout(() => {
-      const pipContainer = pipRef.current;
-      if (!pipContainer) return;
-      const videoEl = pipContainer.querySelector('video');
-      if (!videoEl) return;
-      if (nativePipActiveRef.current && document.pictureInPictureElement) return;
-
-      videoEl.onleavepictureinpicture = () => {
-        nativePipActiveRef.current = false;
-        setNativePipShowing(false);
-        console.log("[PiP] Native PiP window closed — showing in-page PiP");
-      };
-
-      videoEl.requestPictureInPicture()
-        .then(() => {
-          nativePipActiveRef.current = true;
-          setNativePipShowing(true);
-          console.log("[PiP] Native PiP activated — hiding in-page PiP");
-        })
-        .catch((err) => {
-          console.warn("[PiP] Native PiP not available:", err.message);
-          setNativePipShowing(false);
-        });
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!screenShareTrack, !!sharerCameraTrack]);
-
-  // Cleanup native PiP on unmount
-  useEffect(() => {
-    return () => {
-      if (nativePipActiveRef.current && document.pictureInPictureElement) {
-        document.exitPictureInPicture().catch(() => {});
-      }
-      nativePipActiveRef.current = false;
-    };
-  }, []);
+  // NOTE: Native browser PiP removed — it showed a duplicate rectangular window
+  // alongside the in-page circular PiP. Only the circular overlay is used now.
 
   const handlePipMouseDown = (e) => {
     if (!pipRef.current) return;
@@ -235,7 +180,6 @@ const CustomVideoLayout = ({ meetingTitle }) => {
               ...(pipPos
                 ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
                 : { bottom: 24, right: 24 }),
-              ...(nativePipShowing ? { opacity: 0, pointerEvents: 'none' } : {}),
             }}
           >
             <VideoTrack
