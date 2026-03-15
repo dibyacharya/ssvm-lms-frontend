@@ -48,11 +48,12 @@ const resolveVideoUrl = (lecture, forDownload = false) => {
   return forDownload ? `${base}?download=1` : base;
 };
 
-// VideoPlayer component — resolves the Azure blob URL on mount and plays directly
+// VideoPlayer component — tries Azure direct URL first, falls back to backend proxy
 const VideoPlayer = ({ lecture }) => {
   const [videoSrc, setVideoSrc] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [usingProxy, setUsingProxy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,9 +68,10 @@ const VideoPlayer = ({ lecture }) => {
         return;
       }
 
+      const base = getStreamBase(lecture);
+
       try {
-        // Ask backend for the direct Azure blob URL (with SAS token)
-        const base = getStreamBase(lecture);
+        // Try 1: Ask backend for the direct Azure blob URL (with SAS token)
         const token = localStorage.getItem("token");
         const resp = await fetch(`${base}?resolve=1`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -79,14 +81,16 @@ const VideoPlayer = ({ lecture }) => {
           throw new Error(body.error || `HTTP ${resp.status}`);
         }
         const data = await resp.json();
-        if (!cancelled) {
+        if (!cancelled && data.url) {
           setVideoSrc(data.url);
           setLoading(false);
         }
       } catch (err) {
-        console.error("Failed to resolve video URL:", err);
+        console.warn("Direct Azure URL failed, falling back to proxy:", err.message);
+        // Try 2: Fall back to backend proxy (same-origin, no CORS issues)
         if (!cancelled) {
-          setError(err.message || "Failed to load video");
+          setVideoSrc(base); // The backend stream endpoint itself (proxies from Azure)
+          setUsingProxy(true);
           setLoading(false);
         }
       }
@@ -113,18 +117,44 @@ const VideoPlayer = ({ lecture }) => {
 
   if (!videoSrc) return null;
 
+  // Determine MIME type from URL for the <source> hint
+  const guessType = (url) => {
+    if (!url) return "video/webm";
+    const lower = url.split("?")[0].toLowerCase();
+    if (lower.endsWith(".mp4")) return "video/mp4";
+    return "video/webm";
+  };
+
+  // If the direct Azure URL fails in the <video> element, fall back to proxy
+  const handleVideoError = (e) => {
+    const code = e.target.error?.code;
+    const msg = e.target.error?.message || "Unknown error";
+    console.error(`Video error [code=${code}]: ${msg}, src=${videoSrc?.substring(0, 80)}`);
+
+    // If we were using the direct Azure URL, fall back to backend proxy
+    if (!usingProxy) {
+      console.warn("Direct Azure URL failed in <video>, falling back to backend proxy...");
+      const base = getStreamBase(lecture);
+      setVideoSrc(base);
+      setUsingProxy(true);
+      setError(null); // Clear error — let the proxy attempt play
+    } else {
+      setError(`Video playback failed (code ${code}): ${msg}`);
+    }
+  };
+
   return (
     <video
       key={videoSrc}
-      src={videoSrc}
       className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
       controls
       controlsList="nodownload noplaybackrate"
       disablePictureInPicture
-      onError={(e) => {
-        console.warn("Video load error:", e.target.error?.message);
-      }}
+      playsInline
+      preload="auto"
+      onError={handleVideoError}
     >
+      <source src={videoSrc} type={guessType(videoSrc)} />
       Your browser does not support the video tag.
     </video>
   );
