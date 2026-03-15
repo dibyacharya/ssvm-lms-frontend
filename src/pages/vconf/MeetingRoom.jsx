@@ -531,51 +531,111 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   const audioCtxKeepAliveRef = useRef(null); // Interval to resume AudioContext if suspended
 
   // Cleanup on component unmount — prevents resource leaks if user navigates away mid-recording
+  // Cleanup on component unmount — use fullRecordingCleanup
   useEffect(() => {
     return () => {
-      if (audioCtxKeepAliveRef.current) {
-        clearInterval(audioCtxKeepAliveRef.current);
-        audioCtxKeepAliveRef.current = null;
-      }
-      if (canvasAnimFrameRef.current) {
-        cancelAnimationFrame(canvasAnimFrameRef.current);
-        canvasAnimFrameRef.current = null;
-      }
-      if (canvasIntervalRef.current) {
-        clearInterval(canvasIntervalRef.current);
-        canvasIntervalRef.current = null;
-      }
-      if (canvasStreamRef.current) {
-        canvasStreamRef.current.getTracks().forEach(track => track.stop());
-        canvasStreamRef.current = null;
-      }
-      // Clean up hidden video elements
-      document.querySelectorAll('video[data-recording-hidden]').forEach(v => {
-        if (v._cleanupVisibility) v._cleanupVisibility();
-        v.srcObject = null;
-        v.parentNode?.removeChild(v);
-      });
-      if (hiddenScreenShareVideoRef.current) {
-        if (hiddenScreenShareVideoRef.current._cleanupVisibility) hiddenScreenShareVideoRef.current._cleanupVisibility();
-        if (hiddenScreenShareVideoRef.current.parentNode) hiddenScreenShareVideoRef.current.parentNode.removeChild(hiddenScreenShareVideoRef.current);
-        hiddenScreenShareVideoRef.current.srcObject = null;
-        hiddenScreenShareVideoRef.current = null;
-      }
-      if (hiddenCameraVideoRef.current) {
-        if (hiddenCameraVideoRef.current._cleanupVisibility) hiddenCameraVideoRef.current._cleanupVisibility();
-        if (hiddenCameraVideoRef.current.parentNode) hiddenCameraVideoRef.current.parentNode.removeChild(hiddenCameraVideoRef.current);
-        hiddenCameraVideoRef.current.srcObject = null;
-        hiddenCameraVideoRef.current = null;
-      }
-      // Close AudioContext
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {});
-        audioContextRef.current = null;
-        audioDestRef.current = null;
-      }
-      connectedAudioTrackIdsRef.current = new Set();
+      fullRecordingCleanup();
     };
   }, []);
+
+  // Full cleanup helper — destroys all recording resources (canvas, intervals, audio, hidden videos)
+  const fullRecordingCleanup = () => {
+    if (audioCtxKeepAliveRef.current) {
+      clearInterval(audioCtxKeepAliveRef.current);
+      audioCtxKeepAliveRef.current = null;
+    }
+    if (canvasAnimFrameRef.current) {
+      cancelAnimationFrame(canvasAnimFrameRef.current);
+      canvasAnimFrameRef.current = null;
+    }
+    if (canvasIntervalRef.current) {
+      clearInterval(canvasIntervalRef.current);
+      canvasIntervalRef.current = null;
+    }
+    if (canvasStreamRef.current) {
+      canvasStreamRef.current.getTracks().forEach(track => track.stop());
+      canvasStreamRef.current = null;
+    }
+    if (recordingStreamRef.current) {
+      recordingStreamRef.current.getTracks().forEach(track => track.stop());
+      recordingStreamRef.current = null;
+    }
+    const cleanupHiddenVid = (vid) => {
+      if (!vid) return;
+      if (vid._cleanupVisibility) vid._cleanupVisibility();
+      if (vid.parentNode) vid.parentNode.removeChild(vid);
+      vid.srcObject = null;
+    };
+    cleanupHiddenVid(hiddenScreenShareVideoRef.current);
+    hiddenScreenShareVideoRef.current = null;
+    cleanupHiddenVid(hiddenCameraVideoRef.current);
+    hiddenCameraVideoRef.current = null;
+    document.querySelectorAll('video[data-recording-hidden]').forEach(v => {
+      if (v._cleanupVisibility) v._cleanupVisibility();
+      v.srcObject = null;
+      v.parentNode?.removeChild(v);
+    });
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+      audioDestRef.current = null;
+    }
+    canvasRef.current = null;
+    connectedAudioTrackIdsRef.current = new Set();
+  };
+
+  // Recreate ONLY the audio setup — used when auto-restarting after unexpected stop.
+  // Canvas + intervals stay alive because the canvas video track is fine.
+  const recreateAudioSetup = () => {
+    // Close old AudioContext if still around
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+    }
+    const audioCtx = new AudioContext();
+    const dest = audioCtx.createMediaStreamDestination();
+    let count = 0;
+
+    // Teacher's mic
+    const micPub = localParticipant?.getTrackPublication(Track.Source.Microphone);
+    if (micPub?.track?.mediaStreamTrack) {
+      try {
+        const src = audioCtx.createMediaStreamSource(new MediaStream([micPub.track.mediaStreamTrack]));
+        src.connect(dest);
+        count++;
+      } catch (e) { /* */ }
+    }
+    // Screen share audio
+    const ssaPub = localParticipant?.getTrackPublication(Track.Source.ScreenShareAudio);
+    if (ssaPub?.track?.mediaStreamTrack) {
+      try {
+        const src = audioCtx.createMediaStreamSource(new MediaStream([ssaPub.track.mediaStreamTrack]));
+        src.connect(dest);
+        count++;
+      } catch (e) { /* */ }
+    }
+    // Remote participant audio from DOM
+    document.querySelectorAll('audio[data-lk-source]').forEach(el => {
+      if (el.srcObject) {
+        try {
+          const src = audioCtx.createMediaStreamSource(el.srcObject);
+          src.connect(dest);
+          count++;
+        } catch (e) { /* */ }
+      }
+    });
+
+    audioContextRef.current = audioCtx;
+    audioDestRef.current = dest;
+    connectedAudioTrackIdsRef.current = new Set();
+    if (micPub?.track?.mediaStreamTrack) connectedAudioTrackIdsRef.current.add(micPub.track.mediaStreamTrack.id);
+    if (ssaPub?.track?.mediaStreamTrack) connectedAudioTrackIdsRef.current.add(ssaPub.track.mediaStreamTrack.id);
+    document.querySelectorAll('audio[data-lk-source]').forEach(el => {
+      el.srcObject?.getAudioTracks().forEach(t => connectedAudioTrackIdsRef.current.add(t.id));
+    });
+
+    console.log(`[Recording] Recreated AudioContext with ${count} sources`);
+    return dest.stream.getAudioTracks();
+  };
 
   const setupMediaRecorder = (stream) => {
     let mimeOptions = 'video/webm;codecs=vp8,opus';
@@ -592,61 +652,77 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     };
 
     mediaRecorder.onstop = async () => {
-      // Stop AudioContext keep-alive interval
-      if (audioCtxKeepAliveRef.current) {
-        clearInterval(audioCtxKeepAliveRef.current);
-        audioCtxKeepAliveRef.current = null;
-      }
-      // Stop canvas rendering loop (both rAF and setInterval)
-      if (canvasAnimFrameRef.current) {
-        cancelAnimationFrame(canvasAnimFrameRef.current);
-        canvasAnimFrameRef.current = null;
-      }
-      if (canvasIntervalRef.current) {
-        clearInterval(canvasIntervalRef.current);
-        canvasIntervalRef.current = null;
-      }
-      // Stop canvas stream tracks
-      if (canvasStreamRef.current) {
-        canvasStreamRef.current.getTracks().forEach(track => track.stop());
-        canvasStreamRef.current = null;
-      }
-      // Only stop tracks if we own the stream (fallback getUserMedia), NOT LiveKit tracks
-      if (recordingStreamRef.current) {
-        recordingStreamRef.current.getTracks().forEach(track => track.stop());
-        recordingStreamRef.current = null;
-      }
-      // Clean up hidden video elements (remove from DOM + release streams + event listeners)
-      const cleanupHiddenVid = (vid) => {
-        if (!vid) return;
-        if (vid._cleanupVisibility) vid._cleanupVisibility();
-        if (vid.parentNode) vid.parentNode.removeChild(vid);
-        vid.srcObject = null;
-      };
-      cleanupHiddenVid(hiddenScreenShareVideoRef.current);
-      hiddenScreenShareVideoRef.current = null;
-      cleanupHiddenVid(hiddenCameraVideoRef.current);
-      hiddenCameraVideoRef.current = null;
-      // Also clean up any leftover hidden videos from DOM
-      document.querySelectorAll('video[data-recording-hidden]').forEach(v => {
-        if (v._cleanupVisibility) v._cleanupVisibility();
-        v.srcObject = null;
-        v.parentNode?.removeChild(v);
-      });
-      // Close AudioContext used for audio mixing
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {});
-        audioContextRef.current = null;
-        audioDestRef.current = null;
-      }
-
+      // ═══ UNEXPECTED STOP — auto-restart recording ═══
+      // On some browsers (Chrome on Azure), getDisplayMedia() for screen sharing
+      // kills the AudioContext destination track, which causes MediaRecorder to stop.
+      // Instead of giving up, we auto-restart: keep existing chunks, recreate audio,
+      // create a new MediaRecorder with the same canvas video track + fresh audio.
       if (!recordingIntendedStopRef.current) {
-        console.warn("[Recording] Stopped unexpectedly. Recording Interrupted!");
-        setMediaError("Recording Interrupted! Please End Class to save.");
-        setIsRecording(false);
-        setIsRecordingPaused(false);
+        console.warn("[Recording] Stopped unexpectedly — AUTO-RESTARTING in 500ms...");
+        setMediaError("Recording auto-recovering...");
+        setTimeout(() => setMediaError(""), 2000);
+
+        // Close only the dead AudioContext — canvas + intervals are still alive
+        if (audioCtxKeepAliveRef.current) {
+          clearInterval(audioCtxKeepAliveRef.current);
+          audioCtxKeepAliveRef.current = null;
+        }
+        if (audioContextRef.current) {
+          audioContextRef.current.close().catch(() => {});
+          audioContextRef.current = null;
+          audioDestRef.current = null;
+        }
+
+        // Auto-restart after a brief delay to let getDisplayMedia settle
+        setTimeout(() => {
+          try {
+            if (recordingIntendedStopRef.current) return; // User stopped while we were waiting
+
+            // Canvas stream should still be alive
+            if (!canvasStreamRef.current || canvasStreamRef.current.getVideoTracks().length === 0) {
+              // Canvas stream is also dead — do a full restart
+              console.log("[Recording] Canvas stream also dead — full restart");
+              fullRecordingCleanup();
+              recordingStartedRef.current = false;
+              startLocalRecording();
+              return;
+            }
+
+            // Recreate audio and build new combined stream
+            const freshAudioTracks = recreateAudioSetup();
+            const newStream = new MediaStream([
+              ...canvasStreamRef.current.getVideoTracks(),
+              ...freshAudioTracks,
+            ]);
+
+            // Monitor new tracks
+            newStream.getTracks().forEach(track => {
+              track.addEventListener('ended', () => {
+                console.warn(`[Recording] Track ended: ${track.kind} (${track.label || track.id})`);
+              });
+            });
+
+            // Restart AudioContext keep-alive
+            audioCtxKeepAliveRef.current = setInterval(() => {
+              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+                audioContextRef.current.resume().catch(() => {});
+              }
+            }, 1000);
+
+            // Create new MediaRecorder (keeps existing chunks!)
+            setupMediaRecorder(newStream);
+            console.log("[Recording] Auto-restarted successfully — chunks preserved");
+          } catch (e) {
+            console.error("[Recording] Auto-restart failed:", e);
+            setMediaError("Recording interrupted. End Class to save what was captured.");
+            setTimeout(() => setMediaError(""), 5000);
+          }
+        }, 500);
         return;
       }
+
+      // ═══ INTENDED STOP — clean up and upload ═══
+      fullRecordingCleanup();
 
       const blob = new Blob(recordedChunks.current, { type: 'video/webm' });
       console.log(`[Recording] Final blob size: ${(blob.size / 1024 / 1024).toFixed(2)} MB`);
@@ -677,7 +753,6 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
     mediaRecorder.onerror = (event) => {
       console.error("[Recording] MediaRecorder error:", event.error?.name, event.error?.message);
-      // Don't stop recording for non-fatal errors
     };
 
     mediaRecorderRef.current = mediaRecorder;
