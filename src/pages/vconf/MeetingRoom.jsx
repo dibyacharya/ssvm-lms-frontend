@@ -189,35 +189,8 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           </div>
         )}
 
-        {/* Other participants thumbnails (top-right strip) */}
-        {otherCameraTracks.length > 0 && (
-          <div className="absolute top-3 right-3 z-10 flex gap-2 flex-wrap max-w-[50%]">
-            {otherCameraTracks.slice(0, 6).map((t) =>
-              isTrackReference(t) ? (
-                <div
-                  key={t.participant?.identity || Math.random()}
-                  className="w-28 rounded-lg overflow-hidden border border-white/10 shadow-lg bg-slate-800 relative"
-                  style={{ aspectRatio: '16/9' }}
-                >
-                  <VideoTrack trackRef={t} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 py-0.5">
-                    <span className="text-white text-[10px] font-medium truncate block">
-                      {t.participant?.name || ''}
-                    </span>
-                  </div>
-                </div>
-              ) : null
-            )}
-            {otherCameraTracks.length > 6 && (
-              <div
-                className="w-28 rounded-lg bg-slate-800/80 border border-white/10 flex items-center justify-center"
-                style={{ aspectRatio: '16/9' }}
-              >
-                <span className="text-white text-xs font-medium">+{otherCameraTracks.length - 6} more</span>
-              </div>
-            )}
-          </div>
-        )}
+        {/* NOTE: Rectangular participant thumbnails removed per user request —
+             only the circular PiP camera overlay (above) is shown during screen share */}
 
         {/* Course label at bottom center */}
         {meetingTitle && (

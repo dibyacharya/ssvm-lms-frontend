@@ -124,14 +124,16 @@ function VconfRecordings() {
                   >
                     <FileText size={18} />
                   </button>
-                  <a
-                    href={`${getVconfRecordingStream(rec.id)}&download=1`}
-                    download={`recording-${rec.id}.webm`}
-                    className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors inline-flex"
-                    title="Download"
-                  >
-                    <Download size={18} />
-                  </a>
+                  {user?.role === 'teacher' && (
+                    <a
+                      href={`${getVconfRecordingStream(rec.id)}&download=1`}
+                      download={`recording-${rec.id}.webm`}
+                      className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors inline-flex"
+                      title="Download"
+                    >
+                      <Download size={18} />
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-2">

@@ -10,10 +10,12 @@ import {
   getVconfAttendance,
   getVconfRecordingStream
 } from '../../services/vconf.service';
+import { useAuth } from '../../context/AuthContext';
 
 function VconfTranscriptViewer() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('transcript');
   const [transcriptData, setTranscriptData] = useState([]);
@@ -86,7 +88,7 @@ function VconfTranscriptViewer() {
             src={getVconfRecordingStream(id)}
             controls
             disablePictureInPicture
-            controlsList="noplaybackrate"
+            controlsList="nodownload noplaybackrate"
             className="w-full h-full object-contain"
           >
             Your browser does not support the video tag.
@@ -101,14 +103,16 @@ function VconfTranscriptViewer() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a
-              href={`${getVconfRecordingStream(id)}&download=1`}
-              download={`recording-${id}.webm`}
-              className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200 no-underline"
-            >
-              <Download size={16} className="mr-2" />
-              Download
-            </a>
+            {user?.role === 'teacher' && (
+              <a
+                href={`${getVconfRecordingStream(id)}&download=1`}
+                download={`recording-${id}.webm`}
+                className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200 no-underline"
+              >
+                <Download size={16} className="mr-2" />
+                Download
+              </a>
+            )}
             <button className="flex items-center px-4 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 text-sm font-medium transition-colors border border-slate-200">
               <Share2 size={16} className="mr-2" />
               Share

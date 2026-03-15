@@ -24,6 +24,7 @@ const TeacherAssignmentGrading = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('answers'); // 'answers' or 'file'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [error, setError] = useState(null);
   // Fetch assignment and submissions
   const fetchData = useCallback(async () => {
     if (!assignmentId) {
