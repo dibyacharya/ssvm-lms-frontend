@@ -8,11 +8,19 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  const [loading, setLoading] = useState(true);
+  // loading is ONLY true when we have NO cached user (first visit / after logout).
+  // If localStorage has a user, render immediately — don't block on network.
+  const [loading, setLoading] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+    // Only block render if there's no cached user at all
+    return !storedUser || !storedToken;
+  });
   const hasRefreshed = useRef(false);
 
-  // Refresh user data from backend on app mount
-  // This ensures admin-made changes (name, program, batch, etc.) propagate immediately
+  // Refresh user data from backend on app mount (NON-BLOCKING)
+  // This ensures admin-made changes (name, program, batch, etc.) propagate,
+  // but the page renders immediately with cached localStorage data.
   useEffect(() => {
     const refreshUserFromBackend = async () => {
       const token = localStorage.getItem("token");
@@ -30,7 +38,6 @@ export const AuthProvider = ({ children }) => {
         const profileData = await getMyProfile({ skipAuthRedirect: true });
         if (profileData) {
           setUser((prevUser) => {
-            const academicSummary = profileData.academicSummary || {};
             const userCore = profileData.user || {};
             const teacherProfile = profileData.teacherProfile || {};
 
