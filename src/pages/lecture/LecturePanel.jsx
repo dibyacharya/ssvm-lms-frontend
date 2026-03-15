@@ -184,7 +184,7 @@ const TranscriptViewer = ({ lecture, onClose }) => {
           <div className="flex items-center gap-2">
             <FileText size={20} className="text-accent1" />
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              Transcript: {lecture.title}
+              Transcript: {displayTitle(lecture.title)}
             </h3>
           </div>
           <button
@@ -245,6 +245,13 @@ export default function LecturePanel() {
   const [expandedModules, setExpandedModules] = useState({});
   const [focusMode, setFocusMode] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+
+  // Display helper: swap courseCode with courseName in titles for display only.
+  // The stored data keeps courseCode (unique identifier) — this is purely visual.
+  const displayTitle = (title) => {
+    if (!title || !course?.courseCode || !course?.title) return title;
+    return title.replace(course.courseCode, course.title);
+  };
 
   useEffect(() => {
     // Set first lecture of first module as selected
@@ -546,7 +553,7 @@ export default function LecturePanel() {
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-medium text-sm">
-                                  {lecture.lectureOrder}. {lecture.title}
+                                  {lecture.lectureOrder}. {displayTitle(lecture.title)}
                                 </h3>
                                 <div className="flex items-center gap-1 mt-1">
                                   <p
@@ -585,7 +592,7 @@ export default function LecturePanel() {
                 <div>
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                      {selectedLecture.title}
+                      {displayTitle(selectedLecture.title)}
                     </h2>
                     <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center">
@@ -696,7 +703,7 @@ export default function LecturePanel() {
                 <div className="mt-2">
                   <div className="flex items-center text-sm text-accent1 dark:text-accent1 mb-1">
                     <div className="w-2 h-2 bg-accent1 rounded-full mr-2"></div>
-                    Context: {selectedLecture?.title || "Tree Traversal Methods"}
+                    Context: {displayTitle(selectedLecture?.title) || "Tree Traversal Methods"}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Timestamp: 5:23 • Confidence: 95%
@@ -712,7 +719,7 @@ export default function LecturePanel() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                        Hello! I'm here to help you understand {selectedLecture?.title || "the topic at hand."}. What would you like to know?
+                        Hello! I'm here to help you understand {displayTitle(selectedLecture?.title) || "the topic at hand."}. What would you like to know?
                       </p>
                     </div>
                   </div>
