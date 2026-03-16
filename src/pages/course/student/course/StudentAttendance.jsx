@@ -402,7 +402,7 @@ const StudentAttendance = () => {
                       {session.type === "vconf" && session.meetingDurationSeconds > 0 ? (
                         <span>
                           {formatDuration(session.studentDurationSeconds)}{" "}
-                          <span className="text-gray-400">/ {formatDuration(session.meetingDurationSeconds)}</span>
+                          <span className="text-gray-400">/ {formatDuration(session.scheduledDurationSeconds || session.meetingDurationSeconds)}</span>
                         </span>
                       ) : (
                         <span className="text-gray-300">—</span>

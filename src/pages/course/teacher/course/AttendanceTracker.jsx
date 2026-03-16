@@ -14,9 +14,12 @@ import {
   Phone,
   BookOpen,
   Wifi,
+  Trash2,
 } from "lucide-react";
 import SaveButton from "../../../../utils/CourseSaveButton";
 import { useParams } from "react-router-dom";
+import { deleteAttendanceSession } from "../../../../services/vconf.service";
+import toast from "react-hot-toast";
 import {
   getCourseBannerProps,
   scatterPositions,
@@ -192,6 +195,7 @@ const AttendanceTracker = () => {
     getSessionAttendance,
     createAttendanceSession,
     getStudentAttendanceRate,
+    removeAttendanceSession,
   } = useCourse();
   const { courseID } = useParams();
 
@@ -499,16 +503,7 @@ const AttendanceTracker = () => {
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Previous Sessions
                   </label>
-                  <select
-                    className="w-full p-3 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-200 shadow-sm text-gray-800 font-medium text-sm"
-                    value={`${currentDate}_${currentTime}`}
-                    onChange={(e) => {
-                      const [date, time] = e.target.value.split("_");
-                      if (date) setCurrentDate(date);
-                      if (time) setCurrentTime(time);
-                    }}
-                  >
-                    <option value="">Select a session...</option>
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                     {Object.keys(attendanceSessions)
                       .sort()
                       .reverse()
@@ -518,13 +513,52 @@ const AttendanceTracker = () => {
                         const label = t
                           ? `${d} at ${t} (${count} present)`
                           : `${d} (${count} present)`;
+                        const isSelected = `${currentDate}_${currentTime}` === key;
                         return (
-                          <option key={key} value={key}>
-                            {label}
-                          </option>
+                          <div
+                            key={key}
+                            className={`flex items-center justify-between px-3 py-2 hover:bg-sky-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
+                              isSelected ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-700"
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              className="flex-1 text-left text-sm"
+                              onClick={() => {
+                                if (d) setCurrentDate(d);
+                                if (t) setCurrentTime(t);
+                              }}
+                            >
+                              {label}
+                            </button>
+                            <button
+                              type="button"
+                              title="Remove this session"
+                              className="ml-2 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!window.confirm(`Remove session "${label}"? This will delete attendance data for this session.`)) return;
+                                try {
+                                  await deleteAttendanceSession(courseID, key);
+                                  removeAttendanceSession(d, t);
+                                  toast.success("Session removed");
+                                  // If we deleted the currently-viewed session, reset to today
+                                  if (isSelected) {
+                                    setCurrentDate(new Date().toISOString().split("T")[0]);
+                                    setCurrentTime(new Date().toTimeString().slice(0, 5));
+                                  }
+                                } catch (err) {
+                                  console.error("Failed to remove session:", err);
+                                  toast.error("Failed to remove session");
+                                }
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         );
                       })}
-                  </select>
+                  </div>
                 </div>
               )}
             </div>

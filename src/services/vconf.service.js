@@ -105,6 +105,11 @@ export const getStudentTimeAttendance = async (courseId) => {
   return res.data;
 };
 
+export const deleteAttendanceSession = async (courseId, sessionKey) => {
+  const res = await api.delete(`/vconf/courses/${courseId}/attendance/${encodeURIComponent(sessionKey)}`);
+  return res.data;
+};
+
 // ─── Persistent Chat ───
 
 export const flushVconfChat = async (meetingId, messages) => {
