@@ -357,6 +357,7 @@ const LectureReview = () => {
                           lecture.isReviewed ||
                           reviewedLectures.has(lecture._id)
                         }
+                        displayTitle={displayTitle}
                         onReview={() => handleMarkAsReviewed(lecture._id)}
                         onEditDetails={() => openDetailsModal(lecture)}
                         onEditVideo={() => openVideoModal(lecture, false)}
@@ -873,6 +874,7 @@ const LectureCard = ({
   lecture,
   index,
   isReviewed,
+  displayTitle,
   onReview,
   onEditDetails,
   onEditVideo,

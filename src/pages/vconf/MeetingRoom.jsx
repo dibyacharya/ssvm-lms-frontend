@@ -315,6 +315,15 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       // If CLASS_ENDED was already received via DataChannel, classEnded is already 'ended'
       if (classEndedByTeacherRef.current) return;
 
+      // Reset recording flag so auto-start re-triggers on reconnect.
+      // recordedChunks (useRef) persists — new chunks will accumulate with existing ones,
+      // producing a seamless merged recording on final upload.
+      if (user?.role === 'teacher' && recordingStartedRef.current) {
+        console.log("[Recording] Teacher disconnected — resetting recordingStartedRef for reconnect continuity");
+        recordingStartedRef.current = false;
+        // Don't clear recordedChunks — we want to merge with previous recording data
+      }
+
       // For students: check meeting status API to determine if teacher ended the class
       if (user?.role !== 'teacher') {
         getVconfMeeting(activeMeetingId)
@@ -604,11 +613,12 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
             // Canvas stream should still be alive
             if (!canvasStreamRef.current || canvasStreamRef.current.getVideoTracks().length === 0) {
-              // Canvas stream is also dead — do a full restart
-              console.log("[Recording] Canvas stream also dead — full restart");
+              // Canvas stream is also dead — clean up and let the reconnect auto-start effect handle it
+              console.log("[Recording] Canvas stream also dead — cleaning up, will auto-restart on reconnect");
               fullRecordingCleanup();
               recordingStartedRef.current = false;
-              startLocalRecording();
+              // Don't call startLocalRecording() here — room may be disconnected.
+              // The auto-start useEffect will trigger when connectionState becomes 'connected' again.
               return;
             }
 
