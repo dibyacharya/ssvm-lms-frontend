@@ -175,7 +175,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           <div
             ref={pipRef}
             onMouseDown={handlePipMouseDown}
-            className="absolute z-20 w-36 h-36 rounded-full overflow-hidden border-2 border-emerald-400/60 shadow-2xl bg-black cursor-grab active:cursor-grabbing transition-all"
+            className="absolute z-20 w-60 h-60 rounded-full overflow-hidden border-2 border-emerald-400/60 shadow-2xl bg-black cursor-grab active:cursor-grabbing transition-all"
             style={{
               ...(pipPos
                 ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
@@ -758,7 +758,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
           // Draw camera PiP in bottom-right corner (circular)
           if (hiddenCameraVideo) {
-            const pipSize = 160;
+            const pipSize = 240;
             const pipMargin = 24;
             const pipX = canvas.width - pipSize - pipMargin;
             const pipY = canvas.height - pipSize - pipMargin;
@@ -809,7 +809,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
           }
 
           if (pipVideo) {
-            const pipSize = 160;
+            const pipSize = 240;
             const pipMargin = 24;
             const pipX = canvas.width - pipSize - pipMargin;
             const pipY = canvas.height - pipSize - pipMargin;

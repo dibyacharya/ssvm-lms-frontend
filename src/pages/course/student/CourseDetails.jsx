@@ -36,9 +36,18 @@ import ProfileDropdown from "../../../utils/ProfileDropDown";
 import AllAnnouncements from "./course/AllAnnouncements";
 
 const CourseDetails = () => {
-  const [selectedOption, setSelectedOption] = useState("Home");
-  const [openDropdown, setOpenDropdown] = useState(null);
   const { courseID } = useParams();
+
+  // Persist selected tab in localStorage so it survives page refresh
+  const getStoredSection = (courseId) => {
+    if (!courseId) return "Home";
+    const storageKey = `student_course_${courseId}_selectedSection`;
+    const stored = localStorage.getItem(storageKey);
+    return stored || "Home";
+  };
+
+  const [selectedOption, setSelectedOption] = useState(() => getStoredSection(courseID));
+  const [openDropdown, setOpenDropdown] = useState(null);
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { courseData: course, setCourseData } = useCourse();
@@ -73,6 +82,14 @@ const CourseDetails = () => {
       ],
     },
   };
+
+  // Save selectedOption to localStorage whenever it changes
+  useEffect(() => {
+    if (courseID && selectedOption) {
+      const storageKey = `student_course_${courseID}_selectedSection`;
+      localStorage.setItem(storageKey, selectedOption);
+    }
+  }, [selectedOption, courseID]);
 
   // Get meetings data
   const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
