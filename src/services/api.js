@@ -49,18 +49,22 @@ api.interceptors.request.use(
 // Guard: prevent multiple concurrent 401s from all triggering redirect
 let isRedirecting401 = false;
 
-// Hydration guard: On page refresh, dashboard components fire API calls
-// immediately. If the backend is cold-starting or the token just expired,
-// those calls return 401 BEFORE AuthContext.refreshUserFromBackend finishes.
-// Without this guard, the interceptor nukes localStorage and redirects to
-// /login — even though the user has a valid cached session.
-// We suppress 401 redirects for 8 seconds after app load (covers cold start).
-let isHydrating = true;
-setTimeout(() => { isHydrating = false; }, 8000);
-
-// Called by AuthContext once profile refresh completes (success or fail).
-// After that, any real 401 should trigger a redirect as usual.
-export const markHydrationComplete = () => { isHydrating = false; };
+// ─── Hydration guard ───
+// On page refresh, dashboard components fire API calls immediately.
+// With Azure Container Apps (min_replicas=0), cold start can take 30+ seconds.
+// During this time, some API calls may fail with 401/timeout before the backend
+// is ready. Without this guard, the interceptor would nuke localStorage and
+// redirect to /login — even though the user has a valid session.
+//
+// Strategy:
+// - For the first 30 seconds after page load, the interceptor does NOT redirect
+//   on 401. It just rejects the promise so the component can handle it.
+// - AuthContext's profile refresh determines if the token is genuinely expired.
+//   If profile returns 401, AuthContext calls logout() → user becomes null →
+//   PrivateRoute redirects to /login via React navigation.
+// - After 30 seconds, any 401 triggers a redirect as usual (mid-session expiry).
+const PAGE_LOAD_TIME = Date.now();
+const HYDRATION_WINDOW_MS = 30000; // 30 seconds — covers Azure cold start
 
 api.interceptors.response.use(
   (response) => response,
@@ -72,9 +76,10 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // During hydration window, don't redirect — let stale cache render
-      // while AuthContext re-validates the session in the background.
-      if (isHydrating) {
+      // During hydration window, don't redirect — let AuthContext handle it.
+      // AuthContext's profile refresh will determine if the token is truly expired.
+      if (Date.now() - PAGE_LOAD_TIME < HYDRATION_WINDOW_MS) {
+        if (DEBUG_AUTH) console.log("[AUTH] 401 suppressed during hydration window");
         return Promise.reject(error);
       }
 

@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from "react";
 import { getMyProfile } from "../services/profile.service";
-import { markHydrationComplete } from "../services/api";
 
 const AuthContext = createContext({});
 
@@ -34,8 +33,7 @@ export const AuthProvider = ({ children }) => {
         // skipAuthRedirect: true — on page refresh, if the backend is slow
         // (cold start) or the token just expired, we don't want the 401
         // interceptor to nuke localStorage and redirect to /login.  We handle
-        // the failure gracefully here instead: the stale localStorage user
-        // stays in state so the page renders where the user was.
+        // the failure gracefully here instead.
         const profileData = await getMyProfile({ skipAuthRedirect: true });
         if (profileData) {
           setUser((prevUser) => {
@@ -70,15 +68,22 @@ export const AuthProvider = ({ children }) => {
           });
         }
       } catch (error) {
-        // If token is expired or invalid, don't crash — user stays on the
-        // current page with stale data.  The next real API call will trigger
-        // a proper 401 redirect via the interceptor.
-        console.warn("AuthContext: Failed to refresh user from backend", error?.message);
+        // If token is expired (401), explicitly logout — PrivateRoute will
+        // redirect to /login via React navigation. This is the ONLY place
+        // that should trigger a login redirect during page refresh.
+        if (error.response?.status === 401) {
+          console.warn("AuthContext: Token expired — logging out");
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          setUser(null);
+        } else {
+          // Network error, 500, timeout, etc. — keep cached user.
+          // The page renders with stale data, which is better than
+          // a false redirect. The user can still navigate.
+          console.warn("AuthContext: Failed to refresh user from backend (non-auth error)", error?.message);
+        }
       } finally {
         setLoading(false);
-        // Signal the 401 interceptor that hydration is done.
-        // From this point on, any 401 should trigger a proper redirect.
-        markHydrationComplete();
       }
     };
 
@@ -121,7 +126,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const profileData = await getMyProfile();
       if (profileData) {
-        const academicSummary = profileData.academicSummary || {};
         const userCore = profileData.user || {};
         const teacherProfile = profileData.teacherProfile || {};
 

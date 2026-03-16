@@ -33,6 +33,13 @@ import {
 const LectureReview = () => {
   const { courseID } = useParams();
   const { courseData: course } = useCourse();
+  // Display helper: swap courseCode with courseName in titles for display only.
+  // The stored data keeps courseCode (unique identifier) — this is purely visual.
+  const displayTitle = (title) => {
+    if (!title || !course?.courseCode || !course?.title) return title;
+    return title.replace(course.courseCode, course.title);
+  };
+
   const [reviewedLectures, setReviewedLectures] = useState(new Set());
   const [showIssueForm, setShowIssueForm] = useState(null);
   const [issueText, setIssueText] = useState("");
@@ -924,7 +931,7 @@ const LectureCard = ({
         </div>
 
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
-          {lecture.title}
+          {displayTitle(lecture.title)}
         </h3>
         <p className="text-gray-600 mb-2 line-clamp-2">
           {lecture.content || "No description available."}
