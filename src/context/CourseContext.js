@@ -444,7 +444,14 @@ export const CourseProvider = ({ children }) => {
   };
 
   // Create a new attendance session for a specific date and time
+  // Validates that the session date+time is not in the future
   const createAttendanceSession = (date, time) => {
+    // Block future sessions
+    const sessionDateTime = new Date(`${date}T${time}`);
+    if (sessionDateTime > new Date()) {
+      return; // Silently reject future sessions
+    }
+
     const sessionKey = `${date}_${time}`;
 
     setCourseData((prev) => {
@@ -555,19 +562,28 @@ export const CourseProvider = ({ children }) => {
   };
 
   // Get attendance rate for a specific student
+  // Only counts past sessions that have at least one student marked (non-empty)
   const getStudentAttendanceRate = (studentId) => {
-    const sessions = Object.values(courseData.attendance.sessions);
-    const totalSessions = sessions.length;
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const nowTimeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const nowKey = `${todayStr}_${nowTimeStr}`;
 
-    if (totalSessions === 0) {
-      return 0;
-    }
+    const entries = Object.entries(courseData.attendance.sessions);
+    // Filter: only past sessions with at least one student
+    const validEntries = entries.filter(([key, students]) => {
+      if (key > nowKey) return false; // Future session
+      if (!Array.isArray(students) || students.length === 0) return false; // Empty session
+      return true;
+    });
 
-    const attendedSessions = sessions.filter((session) =>
-      session.includes(studentId)
+    if (validEntries.length === 0) return 0;
+
+    const attendedCount = validEntries.filter(([, students]) =>
+      students.includes(studentId)
     ).length;
 
-    return (attendedSessions / totalSessions) * 100;
+    return (attendedCount / validEntries.length) * 100;
   };
 
   // Mark sessions as saved (called after successful backend save)

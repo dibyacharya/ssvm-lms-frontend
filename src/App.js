@@ -36,12 +36,25 @@ const ITS = React.lazy(() => import("./pages/Its/Its.jsx"));
 const StudentAssignmentSectionCourse = React.lazy(() => import("./pages/Assignment/ShowAssignmentCourse.jsx"));
 const PublicHelpdeskIntake = React.lazy(() => import("./pages/HelpDesk/PublicHelpdeskIntake.jsx"));
 const Profile = React.lazy(() => import("./pages/Profile/Profile.jsx"));
+const FeeGateWrapper = React.lazy(() => import("./components/fees/FeeGateWrapper"));
 
 // ─── VConf pages (LiveKit only loads when needed) ───
 const VconfMeetingRoom = React.lazy(() => import("./pages/vconf/MeetingRoom"));
 const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
 const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
 const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
+
+// ─── Exam pages ───
+const ExamInterface = React.lazy(() => import("./pages/Exam/student/ExamInterface"));
+const ExamLobby = React.lazy(() => import("./pages/Exam/student/ExamLobby"));
+const ExamResult = React.lazy(() => import("./pages/Exam/student/ExamResult"));
+const TeacherExamList = React.lazy(() => import("./pages/Exam/teacher/ExamList"));
+const CreateExam = React.lazy(() => import("./pages/Exam/teacher/CreateExam"));
+const ExamDetail = React.lazy(() => import("./pages/Exam/teacher/ExamDetail"));
+const ExamGrading = React.lazy(() => import("./pages/Exam/teacher/ExamGrading"));
+const LiveProctoringDashboard = React.lazy(() => import("./pages/Exam/teacher/LiveProctoringDashboard"));
+const ProctoringReport = React.lazy(() => import("./pages/Exam/teacher/ProctoringReport"));
+const QuestionBankManager = React.lazy(() => import("./pages/Exam/teacher/QuestionBankManager"));
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -172,7 +185,9 @@ const Layout = () => {
             path="/student/dashboard"
             element={
               <PrivateRoute roles={["student"]}>
-                <StudentDashboard />
+                <FeeGateWrapper>
+                  <StudentDashboard />
+                </FeeGateWrapper>
               </PrivateRoute>
             }
           />
@@ -234,6 +249,90 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
+          {/* ─── Exam Routes (Student) ─── */}
+          <Route
+            path="/exam/:examId/lobby"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <ExamLobby />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/exam/:examId/take"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <ExamInterface />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/exam/:examId/result"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <ExamResult />
+              </PrivateRoute>
+            }
+          />
+
+          {/* ─── Exam Routes (Teacher) ─── */}
+          <Route
+            path="/teacher/exams/:courseId"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <TeacherExamList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/exam/create/:courseId"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <CreateExam />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/exam/:examId"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <ExamDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/exam/:examId/grade"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <ExamGrading />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/exam/:examId/live"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <LiveProctoringDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/exam/:examId/proctoring/:studentId"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <ProctoringReport />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/question-bank/:courseId"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <QuestionBankManager />
+              </PrivateRoute>
+            }
+          />
+
           {/* ─── VConf Routes ─── */}
           <Route
             path="/vconf/meeting/:id"

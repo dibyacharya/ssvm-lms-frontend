@@ -11,10 +11,10 @@ import Dashboard2 from "./Components/StudentDashboardSemester";
 import StudentDashBoardSidebar from "./Components/Sidebar";
 import DashboardSemester from "./Components/StudentDashboardSemester";
 import Courseware from "./Components/Courseware";
-import SwayamKanbanBoard from "./Components/ToDoList";
 import { useUtilityContext } from "../../context/UtilityContext";
-import StudentStatsSection from "./Components/StudentStatsSection";
 import Timetable from "../../components/timetable/Timetable.jsx";
+import FeesDashboard from "./Components/FeesDashboard";
+import ExamList from "../Exam/student/ExamList";
 
 const LiveClassSection = () => {
   const navigate = useNavigate();
@@ -74,11 +74,11 @@ const Dashboard = () => {
         )}
 
 
-        {activeSection === "MyStats" && <StudentStatsSection />}
         {activeSection === "Assignment" && <AssignmentList />}
         {activeSection === "Courseware" && <Courseware />}
         {activeSection === "Timetable" && <Timetable />}
-        {activeSection === "ToDo" && <SwayamKanbanBoard />}
+        {activeSection === "Fees" && <FeesDashboard />}
+        {activeSection === "Exams" && <ExamList />}
       </div>
     </div>
   );

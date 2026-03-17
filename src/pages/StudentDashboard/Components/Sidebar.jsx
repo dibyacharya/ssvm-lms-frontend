@@ -2,11 +2,11 @@ import React from "react";
 import {
   FaTachometerAlt,
   FaBook,
-  FaCalendarCheck,
   FaCalendarAlt,
-  FaTasks,
   FaUserGraduate,
   FaSignOutAlt,
+  FaCreditCard,
+  FaFileAlt,
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
@@ -41,14 +41,14 @@ const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
       icon: <FaCalendarAlt />,
     },
     {
-      id: "MyStats",
-      label: "My Stats",
-      icon: <FaCalendarCheck />,
+      id: "Fees",
+      label: "Fees & Payments",
+      icon: <FaCreditCard />,
     },
     {
-      id: "ToDo",
-      label: "Todo Section",
-      icon: <FaTasks />,
+      id: "Exams",
+      label: "Examinations",
+      icon: <FaFileAlt />,
     },
   ];
 

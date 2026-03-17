@@ -33,11 +33,18 @@ function calculateAttendance(studentId, coursesData) {
       sessionDates: [],
     };
 
-    // --- FIX STARTS HERE ---
     // Process attendance only if it exists for the course
     if (attendance && typeof attendance === 'object') {
-      // Count only non-empty sessions
+      // Build current timestamp key for comparison (filter out future sessions)
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const nowTimeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const nowKey = `${todayStr}_${nowTimeStr}`;
+
+      // Count only non-empty, past sessions
       Object.entries(attendance).forEach(([sessionKey, students]) => {
+        // Skip future sessions
+        if (sessionKey > nowKey) return;
         // The 'students' array can be null or not an array, so check it
         if (Array.isArray(students) && students.length > 0) {
           // This is a valid session with at least one student present
@@ -65,7 +72,6 @@ function calculateAttendance(studentId, coursesData) {
         ).toFixed(2);
       }
     }
-    // --- FIX ENDS HERE ---
   });
 
   // Calculate overall attendance percentage

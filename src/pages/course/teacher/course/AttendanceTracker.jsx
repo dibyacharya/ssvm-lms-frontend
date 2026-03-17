@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useCourse } from "../../../../context/CourseContext";
 import {
   Calendar,
@@ -193,7 +193,6 @@ const AttendanceTracker = () => {
     markStudentPresent,
     markStudentAbsent,
     getSessionAttendance,
-    createAttendanceSession,
     getStudentAttendanceRate,
     removeAttendanceSession,
   } = useCourse();
@@ -212,53 +211,27 @@ const AttendanceTracker = () => {
     [seed]
   );
 
-  const formatDateForInput = (dateString) => {
-    if (dateString.includes("/")) {
-      const [day, month, year] = dateString.split("/");
-      return `${year}-${month}-${day}`;
-    }
-    return dateString;
-  };
-
-  const getCurrentDate = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  };
-  const getCurrentTime = () => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  };
-
-  // Auto-select the most recent existing session (from vconf auto-attendance) for today,
-  // otherwise default to current date/time
+  // Auto-select the most recent existing session
   const [currentDate, setCurrentDate] = useState(() => {
-    const today = getCurrentDate();
     const sessions = courseData?.attendance?.sessions || {};
-    const todaySessions = Object.keys(sessions)
-      .filter((k) => k.startsWith(today))
-      .sort();
-    if (todaySessions.length > 0) {
-      const lastSession = todaySessions[todaySessions.length - 1];
-      return lastSession.split("_")[0] || today;
+    const allKeys = Object.keys(sessions).sort();
+    if (allKeys.length > 0) {
+      const latestKey = allKeys[allKeys.length - 1];
+      return latestKey.split("_")[0] || "";
     }
-    return today;
+    return "";
   });
   const [currentTime, setCurrentTime] = useState(() => {
-    const today = getCurrentDate();
     const sessions = courseData?.attendance?.sessions || {};
-    const todaySessions = Object.keys(sessions)
-      .filter((k) => k.startsWith(today))
-      .sort();
-    if (todaySessions.length > 0) {
-      const lastSession = todaySessions[todaySessions.length - 1];
-      return lastSession.split("_")[1] || getCurrentTime();
+    const allKeys = Object.keys(sessions).sort();
+    if (allKeys.length > 0) {
+      const latestKey = allKeys[allKeys.length - 1];
+      return latestKey.split("_")[1] || "";
     }
-    return getCurrentTime();
+    return "";
   });
 
-  useEffect(() => {
-    createAttendanceSession(currentDate, currentTime);
-  }, [currentDate, currentTime, createAttendanceSession]);
+  // No auto-create — sessions only come from vconf (live class) or backend
 
   const allPresent = useMemo(() => {
     if (students.length === 0) return false;
@@ -278,15 +251,6 @@ const AttendanceTracker = () => {
   const isStudentPresent = (studentId) => {
     const currentAttendance = getSessionAttendance(currentDate, currentTime);
     return currentAttendance.includes(studentId);
-  };
-
-  const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    if (newDate) setCurrentDate(newDate);
-  };
-  const handleTimeChange = (e) => {
-    const newTime = e.target.value;
-    if (newTime) setCurrentTime(newTime);
   };
 
   const toggleAllAttendance = () => {
@@ -465,102 +429,94 @@ const AttendanceTracker = () => {
 
         <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Date & Time inputs */}
+            {/* Session selector — only completed sessions from vconf/scheduled classes */}
             <div className="lg:col-span-1 space-y-4">
+              {/* Session dropdown */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Session Date
+                  Select Session
                 </label>
-                <div className="flex items-center p-3.5 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100 transition-all duration-200 shadow-sm">
-                  <Calendar className="w-5 h-5 text-sky-500 mr-3 flex-shrink-0" />
-                  <input
-                    type="date"
-                    value={formatDateForInput(currentDate)}
-                    onChange={handleDateChange}
-                    className="w-full bg-transparent focus:outline-none text-gray-800 font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Session Time
-                </label>
-                <div className="flex items-center p-3.5 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100 transition-all duration-200 shadow-sm">
-                  <Clock className="w-5 h-5 text-sky-500 mr-3 flex-shrink-0" />
-                  <input
-                    type="time"
-                    value={currentTime}
-                    onChange={handleTimeChange}
-                    className="w-full bg-transparent focus:outline-none text-gray-800 font-medium"
-                  />
-                </div>
-              </div>
-
-              {/* Quick-select existing sessions (from live classes) */}
-              {Object.keys(attendanceSessions).length > 0 && (
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Previous Sessions
-                  </label>
-                  <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-                    {Object.keys(attendanceSessions)
-                      .sort()
-                      .reverse()
-                      .map((key) => {
-                        const [d, t] = key.split("_");
-                        const count = (attendanceSessions[key] || []).length;
-                        const label = t
-                          ? `${d} at ${t} (${count} present)`
-                          : `${d} (${count} present)`;
-                        const isSelected = `${currentDate}_${currentTime}` === key;
-                        return (
-                          <div
-                            key={key}
-                            className={`flex items-center justify-between px-3 py-2 hover:bg-sky-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
-                              isSelected ? "bg-sky-50 text-sky-700 font-semibold" : "text-gray-700"
-                            }`}
-                          >
-                            <button
-                              type="button"
-                              className="flex-1 text-left text-sm"
-                              onClick={() => {
-                                if (d) setCurrentDate(d);
-                                if (t) setCurrentTime(t);
-                              }}
-                            >
+                {Object.keys(attendanceSessions).length > 0 ? (
+                  <>
+                    <select
+                      value={`${currentDate}_${currentTime}`}
+                      onChange={(e) => {
+                        const [d, t] = e.target.value.split("_");
+                        if (d) setCurrentDate(d);
+                        if (t) setCurrentTime(t);
+                      }}
+                      className="w-full p-3.5 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-200 shadow-sm text-gray-800 font-medium text-sm appearance-none cursor-pointer"
+                    >
+                      {Object.keys(attendanceSessions)
+                        .sort()
+                        .reverse()
+                        .map((key) => {
+                          const [d, t] = key.split("_");
+                          const count = (attendanceSessions[key] || []).length;
+                          const label = t
+                            ? `${d}  |  ${t}  —  ${count} present`
+                            : `${d}  —  ${count} present`;
+                          return (
+                            <option key={key} value={key}>
                               {label}
-                            </button>
-                            <button
-                              type="button"
-                              title="Remove this session"
-                              className="ml-2 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                if (!window.confirm(`Remove session "${label}"? This will delete attendance data for this session.`)) return;
-                                try {
-                                  await deleteAttendanceSession(courseID, key);
-                                  removeAttendanceSession(d, t);
-                                  toast.success("Session removed");
-                                  // If we deleted the currently-viewed session, reset to today
-                                  if (isSelected) {
-                                    setCurrentDate(new Date().toISOString().split("T")[0]);
-                                    setCurrentTime(new Date().toTimeString().slice(0, 5));
-                                  }
-                                } catch (err) {
-                                  console.error("Failed to remove session:", err);
-                                  toast.error("Failed to remove session");
-                                }
-                              }}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        );
-                      })}
+                            </option>
+                          );
+                        })}
+                    </select>
+
+                    {/* Selected session info */}
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div className="flex items-center p-3 rounded-xl border border-gray-100 bg-gray-50">
+                        <Calendar className="w-4 h-4 text-sky-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm font-medium">{currentDate}</span>
+                      </div>
+                      <div className="flex items-center p-3 rounded-xl border border-gray-100 bg-gray-50">
+                        <Clock className="w-4 h-4 text-sky-500 mr-2 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm font-medium">{currentTime}</span>
+                      </div>
+                    </div>
+
+                    {/* Delete selected session */}
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-red-100 text-red-500 text-xs font-semibold hover:bg-red-50 transition-colors"
+                      onClick={async () => {
+                        const key = `${currentDate}_${currentTime}`;
+                        const count = (attendanceSessions[key] || []).length;
+                        if (!window.confirm(`Remove session "${currentDate} at ${currentTime}" (${count} present)? This will delete attendance data.`)) return;
+                        try {
+                          await deleteAttendanceSession(courseID, key);
+                          removeAttendanceSession(currentDate, currentTime);
+                          toast.success("Session removed");
+                          const remaining = Object.keys(attendanceSessions).filter((k) => k !== key).sort();
+                          if (remaining.length > 0) {
+                            const latest = remaining[remaining.length - 1];
+                            setCurrentDate(latest.split("_")[0]);
+                            setCurrentTime(latest.split("_")[1] || "");
+                          } else {
+                            setCurrentDate("");
+                            setCurrentTime("");
+                          }
+                        } catch (err) {
+                          console.error("Failed to remove session:", err);
+                          toast.error("Failed to remove session");
+                        }
+                      }}
+                    >
+                      <Trash2 size={12} />
+                      Remove This Session
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50">
+                    <ClipboardCheck className="w-8 h-8 text-gray-300 mb-2" />
+                    <p className="text-sm font-medium text-gray-500 text-center">No sessions yet</p>
+                    <p className="text-xs text-gray-400 text-center mt-1">
+                      Sessions are created automatically when a live class ends
+                    </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Donut Chart */}

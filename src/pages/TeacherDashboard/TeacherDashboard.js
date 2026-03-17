@@ -5,6 +5,7 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaCalendarAlt,
+  FaFileAlt,
 } from "react-icons/fa";
 
 import TeacherCourses from "./Components/TeacherCourses";
@@ -16,6 +17,7 @@ import { useUtilityContext } from "../../context/UtilityContext.js";
 import { HelpCircle, Settings, Video } from "lucide-react";
 import { IoMdAnalytics } from "react-icons/io";
 import TeacherAnalyticsDashboard from "./TeacherAnalyticsDashboard.jsx";
+import ExamDashboard from "../Exam/teacher/ExamDashboard";
 import useLiveClassAlert from "../../hooks/useLiveClassAlert";
 
 const TeacherDashboard = () => {
@@ -50,6 +52,11 @@ const TeacherDashboard = () => {
       id: "Analytics",
       label: "Analytics",
       icon: <IoMdAnalytics />,
+    },
+    {
+      id: "Exams",
+      label: "Examinations",
+      icon: <FaFileAlt />,
     },
   ];
 
@@ -221,6 +228,7 @@ const TeacherDashboard = () => {
           {activeSection === "myCourses" && <TeacherCourses />}
           {activeSection === "Timetable" && <Timetable />}
           {activeSection === "Analytics" && <TeacherAnalyticsDashboard />}
+          {activeSection === "Exams" && <ExamDashboard />}
         </div>
       </div>
     </div>
