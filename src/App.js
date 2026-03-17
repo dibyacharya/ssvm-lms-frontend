@@ -51,6 +51,7 @@ const PaymentStatus = React.lazy(() => import("./pages/PaymentStatus"));
 const ExamInterface = React.lazy(() => import("./pages/Exam/student/ExamInterface"));
 const ExamLobby = React.lazy(() => import("./pages/Exam/student/ExamLobby"));
 const ExamResult = React.lazy(() => import("./pages/Exam/student/ExamResult"));
+const ExamRegistration = React.lazy(() => import("./pages/Exam/student/ExamRegistration"));
 const TeacherExamList = React.lazy(() => import("./pages/Exam/teacher/ExamList"));
 const CreateExam = React.lazy(() => import("./pages/Exam/teacher/CreateExam"));
 const ExamDetail = React.lazy(() => import("./pages/Exam/teacher/ExamDetail"));
@@ -252,6 +253,16 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
+          {/* ─── Exam Registration (Student) ─── */}
+          <Route
+            path="/exam-registration"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <ExamRegistration />
+              </PrivateRoute>
+            }
+          />
+
           {/* ─── Exam Routes (Student) ─── */}
           <Route
             path="/exam/:examId/lobby"
