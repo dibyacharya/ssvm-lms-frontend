@@ -44,6 +44,9 @@ const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
 const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
 const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
 
+// ─── Payment Status page ───
+const PaymentStatus = React.lazy(() => import("./pages/PaymentStatus"));
+
 // ─── Exam pages ───
 const ExamInterface = React.lazy(() => import("./pages/Exam/student/ExamInterface"));
 const ExamLobby = React.lazy(() => import("./pages/Exam/student/ExamLobby"));
@@ -363,6 +366,15 @@ const Layout = () => {
             element={
               <PrivateRoute roles={["teacher", "student"]}>
                 <VconfTranscriptViewer />
+              </PrivateRoute>
+            }
+          />
+          {/* ─── Payment Status (Student) ─── */}
+          <Route
+            path="/payment-status"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <PaymentStatus />
               </PrivateRoute>
             }
           />

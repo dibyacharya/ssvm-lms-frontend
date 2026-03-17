@@ -7,13 +7,11 @@ import {
   FaExclamationTriangle,
   FaGraduationCap,
   FaInfoCircle,
-  FaUniversity,
-  FaCopy,
-  FaCheck,
   FaTimes,
-  FaQrcode,
+  FaSpinner,
+  FaShieldAlt,
 } from 'react-icons/fa';
-import { getMyFees, getReceipt } from '../../../services/fee.service';
+import { getMyFees, getReceipt, initiatePayment } from '../../../services/fee.service';
 import FeeProgressRing from '../../../components/fees/FeeProgressRing';
 import FeeTimelineCard from '../../../components/fees/FeeTimelineCard';
 import FeeReceiptModal from '../../../components/fees/FeeReceiptModal';
@@ -61,25 +59,46 @@ const STAT_CARDS = [
   },
 ];
 
-// Payment info modal component
+// CCAvenue Payment Modal
 const PaymentModal = ({ record, onClose, formatCurrency }) => {
-  const [copied, setCopied] = useState('');
-
-  const paymentDetails = {
-    bankName: 'State Bank of India',
-    accountName: 'KIIT Extension School',
-    accountNumber: '39876543210',
-    ifscCode: 'SBIN0001234',
-    upiId: 'kiitfees@sbi',
-  };
-
-  const handleCopy = (text, field) => {
-    navigator.clipboard.writeText(text);
-    setCopied(field);
-    setTimeout(() => setCopied(''), 2000);
-  };
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
 
   const totalDue = (record.totalAmount || 0) + (record.lateFeeAmount || 0);
+
+  const handlePayViaCCAvenue = async () => {
+    setPaymentLoading(true);
+    setPaymentError(null);
+    try {
+      const data = await initiatePayment(record._id);
+
+      // Create a hidden form and auto-submit to CCAvenue
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.ccavenueUrl;
+      form.style.display = 'none';
+
+      const encField = document.createElement('input');
+      encField.type = 'hidden';
+      encField.name = 'encRequest';
+      encField.value = data.encryptedData;
+      form.appendChild(encField);
+
+      const accessField = document.createElement('input');
+      accessField.type = 'hidden';
+      accessField.name = 'access_code';
+      accessField.value = data.accessCode;
+      form.appendChild(accessField);
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      const errMsg =
+        err.response?.data?.error || 'Failed to initiate payment. Please try again.';
+      setPaymentError(errMsg);
+      setPaymentLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -93,12 +112,13 @@ const PaymentModal = ({ record, onClose, formatCurrency }) => {
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-2xl p-5 text-white relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/70 hover:text-white"
+            disabled={paymentLoading}
+            className="absolute top-4 right-4 text-white/70 hover:text-white disabled:opacity-50"
           >
             <FaTimes />
           </button>
           <h3 className="text-lg font-bold">Pay {record.periodLabel}</h3>
-          <p className="text-white/70 text-sm mt-1">Complete payment using the details below</p>
+          <p className="text-white/70 text-sm mt-1">Secure payment via CCAvenue</p>
           <div className="mt-3 bg-white/20 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between">
             <span className="text-sm text-white/80">Amount Due</span>
             <span className="text-xl font-bold">{formatCurrency(totalDue)}</span>
@@ -106,62 +126,75 @@ const PaymentModal = ({ record, onClose, formatCurrency }) => {
         </div>
 
         <div className="p-5 space-y-4">
-          {/* UPI Section */}
-          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <FaQrcode className="text-purple-600" />
-              <h4 className="font-semibold text-purple-800 dark:text-purple-300 text-sm">Pay via UPI</h4>
-            </div>
-            <div className="flex items-center justify-between bg-white dark:bg-gray-700 rounded-lg px-3 py-2">
-              <span className="text-sm font-mono text-gray-800 dark:text-gray-200">{paymentDetails.upiId}</span>
-              <button
-                onClick={() => handleCopy(paymentDetails.upiId, 'upi')}
-                className="text-purple-600 hover:text-purple-700 ml-2"
-              >
-                {copied === 'upi' ? <FaCheck className="text-emerald-500" /> : <FaCopy />}
-              </button>
-            </div>
-          </div>
-
-          {/* Bank Transfer Section */}
+          {/* Payment Methods Info */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <FaUniversity className="text-blue-600" />
-              <h4 className="font-semibold text-blue-800 dark:text-blue-300 text-sm">Bank Transfer (NEFT/RTGS)</h4>
-            </div>
-            <div className="space-y-2">
-              {[
-                { label: 'Bank', value: paymentDetails.bankName, key: 'bank' },
-                { label: 'A/C Name', value: paymentDetails.accountName, key: 'name' },
-                { label: 'A/C Number', value: paymentDetails.accountNumber, key: 'acc' },
-                { label: 'IFSC Code', value: paymentDetails.ifscCode, key: 'ifsc' },
-              ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between bg-white dark:bg-gray-700 rounded-lg px-3 py-2">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-gray-400">{item.label}</span>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{item.value}</p>
-                  </div>
-                  <button
-                    onClick={() => handleCopy(item.value, item.key)}
-                    className="text-blue-600 hover:text-blue-700 ml-2"
-                  >
-                    {copied === item.key ? <FaCheck className="text-emerald-500" /> : <FaCopy className="text-xs" />}
-                  </button>
-                </div>
-              ))}
+            <h4 className="font-semibold text-blue-800 dark:text-blue-300 text-sm mb-2">
+              Accepted Payment Methods
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-xs text-blue-700 dark:text-blue-400">
+              <span>• Credit Card</span>
+              <span>• Debit Card</span>
+              <span>• Net Banking</span>
+              <span>• UPI</span>
+              <span>• Mobile Wallets</span>
+              <span>• EMI Options</span>
             </div>
           </div>
 
-          {/* Important Note */}
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-              <strong>Important:</strong> After payment, share the transaction ID / screenshot with the accounts department.
-              Your payment will be verified and marked as paid within 24-48 hours.
-            </p>
+          {/* Fee Breakdown */}
+          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 space-y-2">
+            {record.amounts?.map((a, i) => (
+              <div key={i} className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">{a.label}</span>
+                <span className="text-gray-900 dark:text-white font-medium">{formatCurrency(a.amount)}</span>
+              </div>
+            ))}
+            {record.lateFeeAmount > 0 && (
+              <div className="flex justify-between text-sm border-t border-red-100 dark:border-red-500/20 pt-2">
+                <span className="text-red-500">Late Fee</span>
+                <span className="text-red-500 font-medium">{formatCurrency(record.lateFeeAmount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm font-bold border-t border-gray-200 dark:border-gray-700 pt-2">
+              <span className="text-gray-900 dark:text-white">Total Payable</span>
+              <span className="text-gray-900 dark:text-white">{formatCurrency(totalDue)}</span>
+            </div>
+          </div>
+
+          {/* Error message */}
+          {paymentError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-3">
+              <p className="text-xs text-red-700 dark:text-red-300">{paymentError}</p>
+            </div>
+          )}
+
+          {/* Pay Button */}
+          <button
+            onClick={handlePayViaCCAvenue}
+            disabled={paymentLoading}
+            className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-sm hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {paymentLoading ? (
+              <>
+                <FaSpinner className="animate-spin" />
+                Redirecting to CCAvenue...
+              </>
+            ) : (
+              <>
+                <FaShieldAlt />
+                Pay {formatCurrency(totalDue)} Securely
+              </>
+            )}
+          </button>
+
+          {/* Security note */}
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-500">
+            <FaShieldAlt />
+            <span>Secured by CCAvenue | 256-bit SSL Encryption</span>
           </div>
 
           {/* Contact */}
-          <div className="text-center text-xs text-gray-400 pt-2">
+          <div className="text-center text-xs text-gray-400 pt-1">
             For queries: <span className="text-indigo-600 dark:text-indigo-400 font-medium">accounts@kiit.ac.in</span> |
             <span className="text-indigo-600 dark:text-indigo-400 font-medium"> +91 674-2725-113</span>
           </div>

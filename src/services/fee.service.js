@@ -19,3 +19,13 @@ export const getLockStatus = async () => {
   const response = await api.get('/fees/lock-status');
   return response.data;
 };
+
+export const initiatePayment = async (recordId) => {
+  const response = await api.post('/fees/payment/initiate', { recordId });
+  return response.data;
+};
+
+export const getPaymentStatus = async (recordId) => {
+  const response = await api.get(`/fees/payment/status/${recordId}`);
+  return response.data;
+};
