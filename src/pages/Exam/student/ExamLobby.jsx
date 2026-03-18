@@ -15,7 +15,9 @@ const ExamLobby = () => {
   const [cameraError, setCameraError] = useState('');
   const [starting, setStarting] = useState(false);
   const [canStart, setCanStart] = useState(false);
-  const [countdown, setCountdown] = useState(null);
+  const [vmBlocked, setVmBlocked] = useState(false);
+  const [vmDetails, setVmDetails] = useState('');
+  const [earphoneWarning, setEarphoneWarning] = useState('');
   const streamRef = useRef(null);
 
   useEffect(() => {
@@ -42,6 +44,30 @@ const ExamLobby = () => {
       // Setup camera if proctoring enabled
       if (data.exam?.proctoring?.enabled) {
         await setupCamera();
+
+        // VM detection pre-check
+        if (data.exam.proctoring.vmDetection) {
+          try {
+            const { detectVM } = await import('../../../utils/proctoring/vmDetector');
+            const vmResult = await detectVM();
+            if (vmResult.isVM) {
+              setVmBlocked(true);
+              setVmDetails(vmResult.details.join(', '));
+              setCanStart(false);
+            }
+          } catch { /* silent */ }
+        }
+
+        // Earphone pre-check
+        if (data.exam.proctoring.earphoneDetection) {
+          try {
+            const { checkDevices } = await import('../../../utils/proctoring/earphoneDetector');
+            const devResult = await checkDevices();
+            if (devResult.hasHeadphones) {
+              setEarphoneWarning(`Please remove: ${devResult.devices.join(', ')}`);
+            }
+          } catch { /* silent */ }
+        }
       } else {
         setCameraReady(true);
       }
@@ -178,6 +204,29 @@ const ExamLobby = () => {
                 </div>
               )}
 
+              {/* VM Blocked */}
+              {vmBlocked && (
+                <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 text-center">
+                  <FaExclamationTriangle className="text-red-500 text-3xl mx-auto mb-2" />
+                  <p className="text-red-700 font-bold text-sm">Virtual Machine Detected</p>
+                  <p className="text-red-600 text-xs mt-1">
+                    Proctored exams cannot be taken on virtual machines. Please use a physical computer.
+                  </p>
+                  {vmDetails && <p className="text-red-400 text-[10px] mt-2">{vmDetails}</p>}
+                </div>
+              )}
+
+              {/* Earphone Warning */}
+              {earphoneWarning && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-3">
+                  <FaExclamationTriangle className="text-amber-500 text-lg flex-shrink-0" />
+                  <div>
+                    <p className="text-amber-800 font-semibold text-xs">Earphones/Headphones Detected</p>
+                    <p className="text-amber-700 text-[11px]">{earphoneWarning}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
                 <p className="font-semibold mb-1">Proctoring Rules:</p>
                 <ul className="list-disc list-inside space-y-0.5">
@@ -185,7 +234,13 @@ const ExamLobby = () => {
                   {exam.proctoring.tabSwitchDetection && <li>Do not switch tabs or windows</li>}
                   {exam.proctoring.copyPasteDetection && <li>Copy/paste is disabled</li>}
                   {exam.proctoring.fullScreenEnforcement && <li>Exam runs in fullscreen mode</li>}
-                  <li>Max {exam.proctoring.maxWarnings} warnings before auto-submit</li>
+                  {exam.proctoring.livenessDetection && <li>Liveness check — blink naturally, photos not allowed</li>}
+                  {exam.proctoring.gazeTracking && <li>Keep looking at the screen — gaze is monitored</li>}
+                  {exam.proctoring.objectDetection && <li>No phones, books, or other devices near you</li>}
+                  {exam.proctoring.earphoneDetection && <li>Earphones and headphones are not allowed</li>}
+                  {exam.proctoring.devToolsDetection && <li>Developer tools must not be opened</li>}
+                  {exam.proctoring.newPagePrevention && <li>Opening new tabs or windows is blocked</li>}
+                  <li>Max {exam.proctoring.maxWarnings || 3} warnings before auto-submit</li>
                 </ul>
               </div>
             </div>
@@ -196,9 +251,9 @@ const ExamLobby = () => {
             {canStart ? (
               <button
                 onClick={handleStart}
-                disabled={starting || (exam.proctoring?.enabled && !cameraReady)}
+                disabled={starting || vmBlocked || (exam.proctoring?.enabled && !cameraReady)}
                 className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold transition-all ${
-                  starting || (exam.proctoring?.enabled && !cameraReady)
+                  starting || vmBlocked || (exam.proctoring?.enabled && !cameraReady)
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
                 }`}
