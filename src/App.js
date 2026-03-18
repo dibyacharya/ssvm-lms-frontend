@@ -61,6 +61,7 @@ const ProctoringReport = React.lazy(() => import("./pages/Exam/teacher/Proctorin
 const QuestionBankManager = React.lazy(() => import("./pages/Exam/teacher/QuestionBankManager"));
 const SemesterResults = React.lazy(() => import("./pages/Exam/student/SemesterResults"));
 const MyCertificates = React.lazy(() => import("./pages/Exam/student/MyCertificates"));
+const ApplyCertificate = React.lazy(() => import("./pages/Exam/student/ApplyCertificate"));
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -281,6 +282,16 @@ const Layout = () => {
             element={
               <PrivateRoute roles={["student"]}>
                 <MyCertificates />
+              </PrivateRoute>
+            }
+          />
+
+          {/* ─── Apply for Certificate (Student) ─── */}
+          <Route
+            path="/apply-certificate"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <ApplyCertificate />
               </PrivateRoute>
             }
           />
