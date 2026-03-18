@@ -53,69 +53,70 @@ const StudentProfileView = ({
           gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-t-2xl"
         />
 
-        <div className="grid gap-5 p-5 lg:grid-cols-[1.6fr_0.9fr]">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {headerFields.map((field) => (
-              <div key={field.label} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  {field.label}
-                </div>
-                <div className="mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">
-                  {toDisplay(field.value)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-            <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Profile Photo</div>
-            <div className="mb-4 flex justify-center">
+        <div className="px-5 pt-3 pb-4">
+          {/* Profile photo only — compact, centered */}
+          <div className="flex justify-center mb-3">
+            <div className="relative">
               {profilePhotoUrl && !photoError ? (
                 <img
                   src={profilePhotoUrl}
                   alt="Profile"
-                  className="h-36 w-36 rounded-full border border-gray-200 dark:border-gray-600 object-cover"
+                  style={{ objectPosition: 'center 20%' }}
+                  className="h-20 w-20 rounded-full border-2 border-white dark:border-gray-600 object-cover shadow-md ring-2 ring-gray-200 dark:ring-gray-700"
                   onError={() => setPhotoError(true)}
                 />
               ) : (
-                <div className="flex h-36 w-36 items-center justify-center rounded-full border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-500 dark:text-gray-400">
-                  No Photo
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-2xl font-bold text-white shadow-md ring-2 ring-gray-200 dark:ring-gray-700">
+                  {headerFields.find(f => f.label === 'NAME')?.value?.charAt?.(0)?.toUpperCase() || 'U'}
                 </div>
               )}
-            </div>
-
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={onPhotoUpload}
-            />
-
-            <div className="flex flex-wrap gap-2">
+              {/* Camera button — bottom right */}
               <button
                 type="button"
                 onClick={() => photoInputRef?.current?.click()}
                 disabled={photoBusy}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 disabled:opacity-60"
+                className="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-600 shadow flex items-center justify-center hover:bg-gray-50 disabled:opacity-60 transition-colors"
               >
                 {photoBusy ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500" />
                 ) : (
-                  <Camera className="h-4 w-4" />
+                  <Camera className="h-3.5 w-3.5 text-gray-600" />
                 )}
-                Upload
               </button>
-              <button
-                type="button"
-                onClick={onPhotoDelete}
-                disabled={photoBusy || !profilePhotoUrl}
-                className="inline-flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-700 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 disabled:opacity-60"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
+              {/* Delete button — bottom left, only when photo exists */}
+              {profilePhotoUrl && !photoError && (
+                <button
+                  type="button"
+                  onClick={onPhotoDelete}
+                  disabled={photoBusy || !profilePhotoUrl}
+                  className="absolute -bottom-0.5 -left-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-600 shadow flex items-center justify-center hover:bg-red-50 disabled:opacity-60 transition-colors"
+                  title="Delete photo"
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                </button>
+              )}
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={onPhotoUpload}
+              />
             </div>
+          </div>
+
+          {/* Details grid — full width, 3 columns */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {headerFields.filter(f => f.label !== 'NAME').map((field) => (
+              <div key={field.label} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  {field.label}
+                </div>
+                <div className="mt-0.5 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                  {toDisplay(field.value)}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

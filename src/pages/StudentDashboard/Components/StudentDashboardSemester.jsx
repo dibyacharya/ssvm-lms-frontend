@@ -29,6 +29,7 @@ import LoadingSpinner from "../../../utils/LoadingAnimation";
 import { getPeriodLabel } from "../../../utils/periodLabel";
 import DashboardBanner from "./DashboardBanner";
 import EIDCard from "../../../components/shared/EIDCard";
+import TodaysClasses from "../../../components/dashboard/TodaysClasses";
 
 import DashboardSemesterContent from "./DashBoardSemContent";
 
@@ -213,6 +214,9 @@ export default function DashboardSemester({ setActiveSection }) {
           photoUrl={profileData.profilePhotoUrl || ""}
         />
       )}
+
+      {/* Today's Classes */}
+      <TodaysClasses />
 
       {/* Notification Dropdown */}
       {showNotification && (

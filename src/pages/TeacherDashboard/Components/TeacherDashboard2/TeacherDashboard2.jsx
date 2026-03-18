@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { getAllCourses } from "../../../../services/course.service";
+import TodaysClasses from "../../../../components/dashboard/TodaysClasses";
 
 const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
   <div className={`relative overflow-hidden px-6 py-4 ${gradient}`}>
@@ -234,7 +235,8 @@ const TeacherDashboard2 = () => {
         </div>
       </div>
 
-      {/* Schedule Calendar section removed */}
+      {/* Today's Classes */}
+      <TodaysClasses />
     </div>
   );
 };

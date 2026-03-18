@@ -62,6 +62,10 @@ const QuestionBankManager = React.lazy(() => import("./pages/Exam/teacher/Questi
 const SemesterResults = React.lazy(() => import("./pages/Exam/student/SemesterResults"));
 const MyCertificates = React.lazy(() => import("./pages/Exam/student/MyCertificates"));
 const ApplyCertificate = React.lazy(() => import("./pages/Exam/student/ApplyCertificate"));
+// ─── Account Settings pages ───
+const TeacherAccountSettings = React.lazy(() => import("./pages/TeacherDashboard/Components/TeacherProfile/TeacherAccountSettings"));
+const StudentAccountSettings = React.lazy(() => import("./pages/StudentDashboard/Components/StudentAccountSettings"));
+
 const App = () => {
    useEffect(() => {
   const theme = localStorage.getItem("theme") || "light";
@@ -207,10 +211,26 @@ const Layout = () => {
             }
           />
           <Route
+            path="/teacher/profile/account"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <TeacherAccountSettings />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/teacher/profile/:teacherID"
             element={
               <PrivateRoute roles={["teacher"]}>
                 <TeacherProfileSection />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student/profile/account"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <StudentAccountSettings />
               </PrivateRoute>
             }
           />
