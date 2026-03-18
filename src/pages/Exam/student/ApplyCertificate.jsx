@@ -235,7 +235,7 @@ const ApplyCertificate = () => {
                 <div className={`h-2 bg-gradient-to-r ${TYPE_COLORS[ct.type] || "from-gray-400 to-gray-500"}`} />
                 <div className="p-5">
                   <h3 className="font-semibold text-gray-800 mb-1">
-                    {TYPE_LABELS[ct.type] || ct.type}
+                    {ct.label || TYPE_LABELS[ct.type] || ct.type}
                   </h3>
                   <p className="text-xs text-gray-500 mb-3">
                     Processing: ~{ct.processingDays || 7} days
@@ -288,7 +288,7 @@ const ApplyCertificate = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-gray-800">
-                          {TYPE_LABELS[app.certificateType] || app.certificateType}
+                          {app.certificateLabel || TYPE_LABELS[app.certificateType] || app.certificateType}
                         </h3>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
                           {st.label}
@@ -347,7 +347,7 @@ const ApplyCertificate = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-lg font-bold text-white">
-                    Apply for {TYPE_LABELS[selectedType.type] || selectedType.type}
+                    Apply for {selectedType.label || TYPE_LABELS[selectedType.type] || selectedType.type}
                   </h2>
                   <p className="text-white/80 text-sm mt-1">
                     Processing time: ~{selectedType.processingDays || 7} days
@@ -468,7 +468,7 @@ const ApplyCertificate = () => {
                   {paymentApp.feeCurrency === "USD" ? "$" : "₹"}{paymentApp.totalFee}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  for {TYPE_LABELS[paymentApp.certificateType] || paymentApp.certificateType}
+                  for {paymentApp.certificateLabel || TYPE_LABELS[paymentApp.certificateType] || paymentApp.certificateType}
                 </p>
               </div>
 
@@ -528,7 +528,7 @@ const ApplyCertificate = () => {
                 </div>
                 <div>
                   <span className="text-gray-500">Type</span>
-                  <p className="font-medium">{TYPE_LABELS[detailApp.certificateType] || detailApp.certificateType}</p>
+                  <p className="font-medium">{detailApp.certificateLabel || TYPE_LABELS[detailApp.certificateType] || detailApp.certificateType}</p>
                 </div>
                 <div>
                   <span className="text-gray-500">Status</span>

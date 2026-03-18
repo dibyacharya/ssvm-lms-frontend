@@ -3,7 +3,7 @@ import {
   Mic, MicOff, Video, VideoOff, Monitor, PhoneOff,
   MessageSquare, Users, Hand, X, Wifi, WifiOff, Pause, Play, Disc,
   Send, ArrowUpRight, CheckCircle2, RefreshCw,
-  BarChart3, HelpCircle, Subtitles
+  BarChart3, HelpCircle, Subtitles, Sparkles, AudioLines
 } from 'lucide-react';
 import ChatPanel from './components/ChatPanel';
 import PollPanel from './components/PollPanel';
@@ -42,6 +42,7 @@ import {
   isTrackReference,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
+import { BackgroundBlur, VirtualBackground } from '@livekit/track-processors';
 import '@livekit/components-styles';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -251,6 +252,11 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
   const recordingStartedRef = useRef(false);
   const recordingIntendedStopRef = useRef(false);
   const recordingStreamRef = useRef(null);
+
+  // ─── Background & Noise Filter State ───
+  const [bgMode, setBgMode] = useState('none'); // 'none' | 'blur' | 'white'
+  const [noiseFilter, setNoiseFilter] = useState(false);
+  const bgProcessorRef = useRef(null);
 
   // ─── Phase 1 Feature Hooks ───
 
@@ -1378,6 +1384,77 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
     }
   };
 
+  // ─── Background Blur / White Toggle ───
+  const toggleBackground = async (mode) => {
+    if (!localParticipant) return;
+    try {
+      const cameraPub = localParticipant.getTrackPublication(Track.Source.Camera);
+      const cameraTrack = cameraPub?.track;
+      if (!cameraTrack) {
+        setMediaError("Camera must be on to apply background effect");
+        setTimeout(() => setMediaError(""), 3000);
+        return;
+      }
+
+      // Remove existing processor
+      if (bgProcessorRef.current) {
+        await cameraTrack.stopProcessor();
+        bgProcessorRef.current = null;
+      }
+
+      if (mode === bgMode || mode === 'none') {
+        // Toggling off
+        setBgMode('none');
+        return;
+      }
+
+      let processor;
+      if (mode === 'blur') {
+        processor = BackgroundBlur(10);
+      } else if (mode === 'white') {
+        // White background using a 1x1 white pixel as virtual background
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, 1, 1);
+        const whiteImage = canvas.toDataURL('image/png');
+        processor = VirtualBackground(whiteImage);
+      }
+
+      if (processor) {
+        await cameraTrack.setProcessor(processor);
+        bgProcessorRef.current = processor;
+        setBgMode(mode);
+      }
+    } catch (e) {
+      console.error("[MeetingRoom] Background effect error:", e);
+      setMediaError(`Background effect error: ${e.message}`);
+      setTimeout(() => setMediaError(""), 5000);
+    }
+  };
+
+  // ─── Noise Suppression Toggle ───
+  const toggleNoiseFilter = async () => {
+    if (!localParticipant) return;
+    try {
+      const newState = !noiseFilter;
+      // Re-enable mic with noise suppression constraints
+      await localParticipant.setMicrophoneEnabled(false);
+      await localParticipant.setMicrophoneEnabled(true, {
+        noiseSuppression: newState,
+        autoGainControl: newState,
+        echoCancellation: true,
+      });
+      setNoiseFilter(newState);
+    } catch (e) {
+      console.error("[MeetingRoom] Noise filter error:", e);
+      setMediaError(`Noise filter error: ${e.message}`);
+      setTimeout(() => setMediaError(""), 5000);
+    }
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -1909,6 +1986,50 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             label="Share"
             variant="secondary"
           />
+
+          <div className="h-8 w-px bg-slate-700 mx-2"></div>
+
+          {/* Background Blur */}
+          <button
+            onClick={() => toggleBackground('blur')}
+            className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
+              bgMode === 'blur'
+                ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            )}
+            title="Background Blur"
+          >
+            <Sparkles size={20} />
+            <span className="text-[9px] mt-0.5 font-medium">Blur</span>
+          </button>
+
+          {/* White Background */}
+          <button
+            onClick={() => toggleBackground('white')}
+            className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
+              bgMode === 'white'
+                ? 'bg-white/20 text-white ring-1 ring-white/50'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            )}
+            title="White Background"
+          >
+            <div className="w-5 h-5 rounded border-2 border-current bg-white/20" />
+            <span className="text-[9px] mt-0.5 font-medium">White</span>
+          </button>
+
+          {/* Noise Filter */}
+          <button
+            onClick={toggleNoiseFilter}
+            className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
+              noiseFilter
+                ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/50'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            )}
+            title="Noise Suppression"
+          >
+            <AudioLines size={20} />
+            <span className="text-[9px] mt-0.5 font-medium">Denoise</span>
+          </button>
 
           {user?.role === 'student' && (
             <ControlButton

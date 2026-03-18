@@ -103,7 +103,7 @@ export default function MyCertificates() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {TYPE_LABELS[cert.type] || cert.type}
+                      {TYPE_LABELS[cert.type] || cert.type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || cert.type}
                     </h3>
                     <p className="text-xs text-gray-500 font-mono mt-1">{cert.serialNumber}</p>
                   </div>
@@ -135,7 +135,7 @@ export default function MyCertificates() {
             <div className={`p-6 bg-gradient-to-r ${TYPE_COLORS[selectedCert.type] || "from-gray-400 to-gray-600"} text-white`}>
               <div className="text-center">
                 <FaAward className="mx-auto text-4xl mb-2 opacity-80" />
-                <h2 className="text-2xl font-bold">{TYPE_LABELS[selectedCert.type]}</h2>
+                <h2 className="text-2xl font-bold">{TYPE_LABELS[selectedCert.type] || selectedCert.type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</h2>
                 <p className="text-sm opacity-80 mt-1 font-mono">{selectedCert.serialNumber}</p>
               </div>
             </div>
