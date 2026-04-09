@@ -1,49 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/api";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import toast from "react-hot-toast";
-
-// Carousel images
-const carouselImages = [
-  "/image3.jpg",
-  "/image4.jpg",
-  "/image5.jpg"
-];
 
 const Login = () => {
   const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
   const { login } = useAuth();
   const identifierHasEmail = (formData.identifier || "").includes("@");
   const emailLoginBlockedMessage =
     "Email login is not allowed. Use Roll No / Enrolment No / Employee ID.";
-
-  // Preload images
-  useEffect(() => {
-    carouselImages.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, []);
-
-  // Auto-advance carousel
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % carouselImages.length;
-        return nextIndex;
-      });
-    }, 3000); // Change image every 3 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,23 +28,18 @@ const Login = () => {
       toast.error(emailLoginBlockedMessage);
       return;
     }
-    if (identifier.length < 3) {
+    if (identifier.length < 1) {
       toast.error("Enter your User ID");
       return;
     }
     setLoading(true);
     setError("");
     try {
-      const response = await authService.login(
-        identifier,
-        formData.password
-      );
-      
+      const response = await authService.login(identifier, formData.password);
+
       if (response.data) {
         login(response.data);
 
-        // If the user was redirected here from an expired session, send them
-        // back to the page they were on — otherwise go to role-default dashboard.
         const savedPath = localStorage.getItem("redirectAfterLogin");
         localStorage.removeItem("redirectAfterLogin");
 
@@ -107,155 +73,153 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col lg:flex-row font-sans">
-      {/* Left side - Image and Welcome Text */}
-      <div className="relative hidden lg:flex w-full lg:w-1/2 items-end justify-center p-12 bg-gradient-to-r from-green-700 to-green-700 bg-cover bg-center overflow-hidden">
-        {/* Carousel Images */}
-        {carouselImages.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt={`Carousel ${index + 1}`}
-            className="absolute inset-0 object-cover w-full h-full transition-opacity duration-1000 ease-in-out"
-            style={{
-              opacity: index === currentImageIndex ? 0.4 : 0,
-              zIndex: 0
-            }}
-            onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/1000x1200/111827/ffffff?text=Campus'; }}
-          />
-        ))}
-         <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="absolute z-10 text-white top-5 left-10 "
-        >
-          <img src="/logo_full.png" alt="" className="h-12" />
-        
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 text-white top-[-50%] left-[-10%]"
-        >
-          <h2 className="text-4xl font-bold leading-tight mb-3 ">
-            Empowering Minds, <br /> One Login at a Time.
-          </h2>
-          <p className="text-lg text-gray-100">
-            Welcome to the future of learning with KiiT X eLearning.
+    <div
+      className="min-h-screen w-screen flex items-center justify-center font-sans"
+      style={{ backgroundColor: "#F8FAFC" }}
+    >
+      {/* Clean centered card */}
+      <div className="w-full max-w-md mx-4 bg-white rounded-lg shadow-lg border border-gray-200 p-8 sm:p-10">
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "#1E293B" }}>
+            SSVM LMS
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "#94A3B8" }}>
+            Welcome Back
           </p>
-          <div className="mt-2 flex gap-2">
-          <div className="h-4 w-4  bg-white rounded-full"></div>
-          <div className="h-4 w-4  bg-white rounded-full"></div>
-           <div className="h-4 w-8  bg-white rounded-full"></div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
-        <div className="w-full max-w-md">
-          <div className="text-left mb-10">
-            <h1 className="text-4xl font-bold text-gray-800">
-              KiiT X eLearning
-            </h1>
-            <p className="text-gray-500 mt-2">Welcome back! Please sign in to your account.</p>
-          </div>
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="identifier"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                User ID
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                  <Mail
-                    className="h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
-                </span>
-                <input
-                  id="identifier"
-                  type="text"
-                  autoComplete="username"
-                  required
-                  className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
-                  placeholder="Enter User ID"
-                  value={formData.identifier}
-                  onChange={(e) =>
-                    setFormData({ ...formData, identifier: e.target.value })
-                  }
-                />
-              </div>
-              {identifierHasEmail && (
-                <p className="text-xs text-red-600 mt-1">{emailLoginBlockedMessage}</p>
-              )}
-            </div>
-
-            <div>
-              <div className="flex justify-between items-baseline">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Password
-                </label>
-                <Link to="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-500">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                  <Lock
-                    className="h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
-                </span>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  className="block w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || identifierHasEmail}
-              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white transition-all duration-300 ease-in-out transform hover:scale-105 ${
-                loading || identifierHasEmail
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-              }`}
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
         </div>
+
+        {/* Error banner */}
+        {error && (
+          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* User ID */}
+          <div>
+            <label
+              htmlFor="identifier"
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: "#475569" }}
+            >
+              User ID
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Mail className="w-4 h-4" style={{ color: "#94A3B8" }} />
+              </div>
+              <input
+                id="identifier"
+                type="text"
+                name="identifier"
+                placeholder="Roll No / Enrolment No / Employee ID"
+                value={formData.identifier}
+                onChange={(e) =>
+                  setFormData({ ...formData, identifier: e.target.value })
+                }
+                required
+                autoComplete="username"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                style={{ color: "#1E293B" }}
+              />
+            </div>
+            {identifierHasEmail && (
+              <p className="mt-1 text-xs text-red-500">{emailLoginBlockedMessage}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: "#475569" }}
+            >
+              Password
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Lock className="w-4 h-4" style={{ color: "#94A3B8" }} />
+              </div>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                required
+                autoComplete="current-password"
+                className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+                style={{ color: "#1E293B" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-gray-600 transition-colors"
+                style={{ color: "#94A3B8" }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Forgot password */}
+          <div className="flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || identifierHasEmail}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(135deg, #3B82F6, #2563EB)",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading && !identifierHasEmail) {
+                e.currentTarget.style.background = "linear-gradient(135deg, #2563EB, #DC2626)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "linear-gradient(135deg, #3B82F6, #2563EB)";
+            }}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn size={18} />
+                Sign In
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Register link */}
+        <p className="mt-6 text-center text-sm" style={{ color: "#94A3B8" }}>
+          Don&apos;t have an account?{" "}
+          <Link
+            to="/register"
+            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            Register
+          </Link>
+        </p>
       </div>
     </div>
   );
