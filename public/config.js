@@ -1,11 +1,5 @@
-// Default runtime config for local development.
-// In production the container startup script should overwrite this file.
 window.RUNTIME_CONFIG = {
-  BACKEND_URL: "http://localhost:5000",
-  CHATBOT_URL: "http://localhost:5000/api/chat",
-  QGEN_URL: "http://localhost:5000/api/generate-questions",
-  DEBUG_AUTH: true
+  BACKEND_URL: "https://ssvm-lms-backend.onrender.com",
+  DEBUG_AUTH: false
 };
-
-// Helpful log so you can verify config is loaded in the browser console
 console.info("RUNTIME_CONFIG:", window.RUNTIME_CONFIG);
