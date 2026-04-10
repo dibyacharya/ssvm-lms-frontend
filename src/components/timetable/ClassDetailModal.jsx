@@ -47,7 +47,7 @@ const STATUS_CONFIG = {
     label: "Live Now",
     icon: <CheckCircle2 className="w-3.5 h-3.5" />,
     classes:
-      "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800",
+      "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800",
     pulse: true,
   },
   starting_soon: {
@@ -68,14 +68,14 @@ const STATUS_CONFIG = {
     label: "Ended",
     icon: <AlertCircle className="w-3.5 h-3.5" />,
     classes:
-      "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-600",
+      "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-300",
     pulse: false,
   },
   cancelled: {
     label: "Cancelled",
     icon: <Ban className="w-3.5 h-3.5" />,
     classes:
-      "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800",
+      "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-600 border border-red-200 dark:border-red-800",
     pulse: false,
   },
 };
@@ -153,12 +153,12 @@ const ClassDetailModal = ({ entry, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-gray-50/20 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="relative bg-white dark:bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Colored header */}
         <div className={`px-5 py-3 ${color.bg} border-b ${color.border}`}>
           <div className="flex items-start justify-between">
@@ -176,8 +176,8 @@ const ClassDetailModal = ({ entry, onClose }) => {
                 >
                   {statusConfig.pulse && (
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                     </span>
                   )}
                   {statusConfig.icon}
@@ -188,7 +188,7 @@ const ClassDetailModal = ({ entry, onClose }) => {
                 className={`text-base font-semibold mt-1 ${
                   classStatus === "cancelled"
                     ? "line-through text-gray-500"
-                    : "text-gray-900 dark:text-white"
+                    : "text-gray-900 dark:text-gray-900"
                 }`}
               >
                 {entry.courseTitle}
@@ -214,7 +214,7 @@ const ClassDetailModal = ({ entry, onClose }) => {
               <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                 {startTime} – {endTime}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Time</p>
@@ -224,11 +224,11 @@ const ClassDetailModal = ({ entry, onClose }) => {
           {/* Teacher */}
           {entry.teacherName && (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-                <User className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+              <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                   {entry.teacherName}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -240,11 +240,11 @@ const ClassDetailModal = ({ entry, onClose }) => {
 
           {/* Mode */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+            <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
               {getModeIcon()}
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                 {getModeLabel()}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Mode</p>
@@ -254,11 +254,11 @@ const ClassDetailModal = ({ entry, onClose }) => {
           {/* Room */}
           {entry.roomNumber && (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
-                <MapPin className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+              <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-orange-900/30 flex items-center justify-center">
+                <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                   {entry.roomNumber}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -277,7 +277,7 @@ const ClassDetailModal = ({ entry, onClose }) => {
                   href={entry.vconfJoinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent1 hover:bg-accent1/90 text-white rounded-lg font-medium text-sm transition-colors shadow-sm"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent1 hover:bg-accent1/90 text-gray-900 rounded-lg font-medium text-sm transition-colors shadow-sm"
                 >
                   <Video className="w-4 h-4" />
                   {classStatus === "live"

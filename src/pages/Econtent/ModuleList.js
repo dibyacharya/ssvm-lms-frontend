@@ -109,16 +109,16 @@ const ModuleList = ({
                     <div className="flex items-center">
                       <div className="w-6 h-6 mr-2">
                         {file.fileType === "pdf" ? (
-                          <div className="bg-red-500 text-white text-xs flex items-center justify-center w-6 h-6 rounded">
+                          <div className="bg-red-500 text-gray-900 text-xs flex items-center justify-center w-6 h-6 rounded">
                             PDF
                           </div>
                         ) : file.fileType === "ppt" ||
                           file.fileType === "pptx" ? (
-                          <div className="bg-orange-500 text-white text-xs flex items-center justify-center w-6 h-6 rounded">
+                          <div className="bg-blue-500 text-gray-900 text-xs flex items-center justify-center w-6 h-6 rounded">
                             PPT
                           </div>
                         ) : (
-                          <div className="bg-gray-500 text-white text-xs flex items-center justify-center w-6 h-6 rounded">
+                          <div className="bg-gray-500 text-gray-900 text-xs flex items-center justify-center w-6 h-6 rounded">
                             DOC
                           </div>
                         )}

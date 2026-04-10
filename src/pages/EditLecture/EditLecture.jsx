@@ -472,7 +472,7 @@ const VideoEditor = ({
 
       {!videoUrl && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-          <AlertTriangle size={48} className="mb-4 text-amber-400" />
+          <AlertTriangle size={48} className="mb-4 text-amber-600" />
           <p className="text-lg font-medium text-gray-700">No video available</p>
           <p className="text-sm mt-1">This lecture does not have a video attached yet.</p>
         </div>
@@ -480,7 +480,7 @@ const VideoEditor = ({
 
       {videoUrl && videoError && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-          <AlertTriangle size={48} className="mb-4 text-red-400" />
+          <AlertTriangle size={48} className="mb-4 text-red-600" />
           <p className="text-lg font-medium text-gray-700">Video failed to load</p>
           <p className="text-sm mt-1 text-center max-w-md">
             The video recording is empty or corrupted. This usually happens when the class recording was too short or the upload failed during editing.
@@ -518,7 +518,7 @@ const VideoEditor = ({
                       videoRef.current.play().catch(() => {});
                     }
                   }}
-                  className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors rounded-lg cursor-pointer"
+                  className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-gray-50/15 transition-colors rounded-lg cursor-pointer"
                 >
                   <div className="w-20 h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110">
                     <svg className="w-10 h-10 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -538,7 +538,7 @@ const VideoEditor = ({
                   onClick={addTrimSection}
                   onMouseEnter={() => setHoveredButton("add")}
                   onMouseLeave={() => setHoveredButton(null)}
-                  className={`flex items-center gap-2 bg-primary text-white py-3 px-4 rounded-md shadow-sm transition-all duration-200 ${
+                  className={`flex items-center gap-2 bg-primary text-gray-900 py-3 px-4 rounded-md shadow-sm transition-all duration-200 ${
                     hoveredButton === "add"
                       ? "transform -translate-y-1 shadow-md"
                       : ""
@@ -590,7 +590,7 @@ const VideoEditor = ({
                             e.stopPropagation();
                             removeSection(index);
                           }}
-                          className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          className="w-7 h-7 flex items-center justify-center bg-red-500 text-gray-900 rounded-full hover:bg-red-600 transition-colors"
                           aria-label="Remove section"
                         >
                           <X size={14} />
@@ -620,7 +620,7 @@ const VideoEditor = ({
                     disabled={processing || removeRanges.length === 0}
                     onMouseEnter={() => setHoveredButton("trim")}
                     onMouseLeave={() => setHoveredButton(null)}
-                    className={`inline-flex items-center gap-2 bg-primary text-white py-3 px-6 rounded-md text-lg font-medium transition-all duration-200 ${
+                    className={`inline-flex items-center gap-2 bg-primary text-gray-900 py-3 px-6 rounded-md text-lg font-medium transition-all duration-200 ${
                       processing || removeRanges.length === 0
                         ? "opacity-50 cursor-not-allowed"
                         : hoveredButton === "trim"
@@ -659,7 +659,7 @@ const VideoEditor = ({
                 disabled={processing}
                 onMouseEnter={() => setHoveredButton("save")}
                 onMouseLeave={() => setHoveredButton(null)}
-                className={`flex items-center gap-2 bg-primary text-white py-3 px-5 rounded-md transition-all duration-200 ${
+                className={`flex items-center gap-2 bg-primary text-gray-900 py-3 px-5 rounded-md transition-all duration-200 ${
                   processing
                     ? "opacity-50 cursor-not-allowed"
                     : hoveredButton === "save"
@@ -695,7 +695,7 @@ const VideoEditor = ({
       <div className="flex justify-end mt-6">
         <button
           onClick={() => setShowVideoModal(false)}
-          className="px-4 py-2 bg-secondary hover:bg-gray-800 text-white rounded-md transition-colors"
+          className="px-4 py-2 bg-secondary hover:bg-white text-gray-900 rounded-md transition-colors"
         >
           Done
         </button>

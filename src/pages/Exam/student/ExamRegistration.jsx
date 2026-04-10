@@ -12,11 +12,11 @@ import {
 import { getStudentAllExams } from "../../../services/exam.service";
 
 const STATUS_STYLES = {
-  registered: { bg: "bg-blue-100", text: "text-blue-700", label: "Registered" },
-  confirmed: { bg: "bg-green-100", text: "text-green-700", label: "Confirmed" },
-  rejected: { bg: "bg-red-100", text: "text-red-700", label: "Rejected" },
-  withdrawn: { bg: "bg-gray-100", text: "text-gray-600", label: "Withdrawn" },
-  debarred: { bg: "bg-red-200", text: "text-red-800", label: "Debarred" },
+  registered: { bg: "bg-primary-50", text: "text-primary-600", label: "Registered" },
+  confirmed: { bg: "bg-primary-50", text: "text-primary-600", label: "Confirmed" },
+  rejected: { bg: "bg-red-50", text: "text-red-600", label: "Rejected" },
+  withdrawn: { bg: "bg-gray-100", text: "text-gray-500", label: "Withdrawn" },
+  debarred: { bg: "bg-red-900/40", text: "text-red-600", label: "Debarred" },
 };
 
 const ExamRegistration = () => {
@@ -109,7 +109,7 @@ const ExamRegistration = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <FaSpinner className="animate-spin text-3xl text-indigo-600" />
+        <FaSpinner className="animate-spin text-3xl text-primary-600" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ const ExamRegistration = () => {
     <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-gray-100">
+        <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-gray-50">
           <FaArrowLeft className="text-gray-600" />
         </button>
         <div>
@@ -138,7 +138,7 @@ const ExamRegistration = () => {
             onClick={() => setActiveTab(key)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 ${
               activeTab === key
-                ? "border-indigo-600 text-indigo-700"
+                ? "border-primary-500 text-primary-600"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -147,16 +147,16 @@ const ExamRegistration = () => {
         ))}
       </div>
 
-      {/* ═══ My Registrations ═══ */}
+      {/* My Registrations */}
       {activeTab === "registrations" && (
         <div className="space-y-4">
           {registrations.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-              <FaClipboardList className="text-4xl text-gray-300 mx-auto mb-3" />
+            <div className="text-center py-16 bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200">
+              <FaClipboardList className="text-4xl text-gray-400 mx-auto mb-3" />
               <p className="text-gray-500">No exam registrations yet</p>
               <button
                 onClick={() => setActiveTab("register")}
-                className="mt-3 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="mt-3 px-4 py-2 text-sm bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-lg hover:from-primary-700 hover:to-primary-600"
               >
                 Register for an Exam
               </button>
@@ -165,7 +165,7 @@ const ExamRegistration = () => {
             registrations.map((reg) => {
               const st = STATUS_STYLES[reg.status] || STATUS_STYLES.registered;
               return (
-                <div key={reg._id} className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+                <div key={reg._id} className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-5 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900 text-lg">{reg.exam?.title || "Exam"}</h3>
@@ -190,17 +190,17 @@ const ExamRegistration = () => {
 
                   {/* Eligibility Info */}
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className={`flex items-center gap-1 ${reg.eligibility?.feesPaid ? "text-green-700" : "text-red-600"}`}>
+                    <span className={`flex items-center gap-1 ${reg.eligibility?.feesPaid ? "text-primary-600" : "text-red-600"}`}>
                       {reg.eligibility?.feesPaid ? <FaCheckCircle /> : <FaTimesCircle />} Fees
                     </span>
-                    <span className={`flex items-center gap-1 ${reg.eligibility?.attendanceMet ? "text-green-700" : "text-red-600"}`}>
+                    <span className={`flex items-center gap-1 ${reg.eligibility?.attendanceMet ? "text-primary-600" : "text-red-600"}`}>
                       {reg.eligibility?.attendanceMet ? <FaCheckCircle /> : <FaTimesCircle />} Attendance ({reg.eligibility?.attendancePercentage || 0}%)
                     </span>
                   </div>
 
                   {/* Rejection reason */}
                   {reg.status === "rejected" && reg.rejectionReason && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                    <div className="bg-red-50 border border-red-500/20 rounded-lg p-3 text-sm text-red-600">
                       <FaExclamationTriangle className="inline mr-1" /> {reg.rejectionReason}
                     </div>
                   )}
@@ -210,7 +210,7 @@ const ExamRegistration = () => {
                     {reg.admitCardIssued && (
                       <button
                         onClick={() => handleViewAdmitCard(reg._id)}
-                        className="flex items-center gap-1.5 px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-lg hover:from-primary-700 hover:to-primary-600"
                       >
                         <FaIdCard /> View Admit Card
                       </button>
@@ -218,7 +218,7 @@ const ExamRegistration = () => {
                     {["registered"].includes(reg.status) && !reg.admitCardIssued && (
                       <button
                         onClick={() => handleWithdraw(reg._id)}
-                        className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-50"
                       >
                         <FaUndo /> Withdraw
                       </button>
@@ -231,26 +231,26 @@ const ExamRegistration = () => {
         </div>
       )}
 
-      {/* ═══ Register for Exam ═══ */}
+      {/* Register for Exam */}
       {activeTab === "register" && (
         <div className="space-y-4">
           {/* Open registration periods */}
           {periods.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-800">Open Registration Periods</h2>
+              <h2 className="text-lg font-semibold text-gray-700">Open Registration Periods</h2>
               {periods.map((p) => (
-                <div key={p._id} className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <h3 className="font-semibold text-blue-800">{p.title}</h3>
-                  <p className="text-sm text-blue-600">
+                <div key={p._id} className="bg-primary-900/20 border border-primary-500/20 rounded-xl p-4">
+                  <h3 className="font-semibold text-primary-600">{p.title}</h3>
+                  <p className="text-sm text-primary-600">
                     {formatDate(p.registrationStartDate)} — {formatDate(p.registrationEndDate)}
                   </p>
                   {p.instructions && (
-                    <p className="text-sm text-blue-700 mt-1">{p.instructions}</p>
+                    <p className="text-sm text-primary-600/80 mt-1">{p.instructions}</p>
                   )}
                   {p.courses?.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {p.courses.map((c) => (
-                        <span key={c._id} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                        <span key={c._id} className="px-2 py-0.5 bg-primary-900/40 text-primary-600 rounded text-xs">
                           {c.code}
                         </span>
                       ))}
@@ -262,16 +262,16 @@ const ExamRegistration = () => {
           )}
 
           {/* Available Exams */}
-          <h2 className="text-lg font-semibold text-gray-800">Available Exams</h2>
+          <h2 className="text-lg font-semibold text-gray-700">Available Exams</h2>
           {availableExams.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-              <FaCalendarAlt className="text-3xl text-gray-300 mx-auto mb-2" />
+            <div className="text-center py-12 bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200">
+              <FaCalendarAlt className="text-3xl text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500 text-sm">No exams available for registration</p>
             </div>
           ) : (
             <div className="space-y-3">
               {availableExams.map((exam) => (
-                <div key={exam._id} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
+                <div key={exam._id} className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-5 flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900">{exam.title}</h3>
                     <p className="text-sm text-gray-500">
@@ -281,7 +281,7 @@ const ExamRegistration = () => {
                   <button
                     onClick={() => handleRegister(exam._id)}
                     disabled={registerLoading === exam._id}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-lg hover:from-primary-700 hover:to-primary-600 disabled:opacity-50"
                   >
                     {registerLoading === exam._id ? (
                       <FaSpinner className="animate-spin" />
@@ -297,14 +297,14 @@ const ExamRegistration = () => {
         </div>
       )}
 
-      {/* ═══ Admit Card Modal ═══ */}
+      {/* Admit Card Modal */}
       {showAdmitCard && admitCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden print:shadow-none print:rounded-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50/20 p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-card border border-gray-200 max-w-lg w-full overflow-hidden print:shadow-none print:rounded-none">
             {/* Admit Card Header */}
-            <div className="bg-indigo-700 text-white p-6 text-center print:bg-indigo-700">
+            <div className="bg-gradient-to-r from-primary-700 to-primary-600 text-gray-900 p-6 text-center print:bg-primary-700">
               <h2 className="text-xl font-bold">ADMIT CARD</h2>
-              <p className="text-indigo-200 text-sm mt-1">{admitCard.admitCardNumber}</p>
+              <p className="text-primary-200 text-sm mt-1">{admitCard.admitCardNumber}</p>
             </div>
 
             <div className="p-6 space-y-4">
@@ -319,11 +319,11 @@ const ExamRegistration = () => {
                 </div>
                 <div>
                   <span className="text-gray-500 block text-xs">Program</span>
-                  <span className="font-medium text-gray-800">{admitCard.programName || "-"}</span>
+                  <span className="font-medium text-gray-700">{admitCard.programName || "-"}</span>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-xs">Batch</span>
-                  <span className="font-medium text-gray-800">{admitCard.batchName || "-"}</span>
+                  <span className="font-medium text-gray-700">{admitCard.batchName || "-"}</span>
                 </div>
               </div>
 
@@ -336,15 +336,15 @@ const ExamRegistration = () => {
                 </div>
                 <div>
                   <span className="text-gray-500 block text-xs">Course</span>
-                  <span className="font-medium text-gray-800">{admitCard.courseCode} - {admitCard.courseName}</span>
+                  <span className="font-medium text-gray-700">{admitCard.courseCode} - {admitCard.courseName}</span>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-xs">Date & Time</span>
-                  <span className="font-medium text-gray-800">{formatDateTime(admitCard.examDate)}</span>
+                  <span className="font-medium text-gray-700">{formatDateTime(admitCard.examDate)}</span>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-xs">Duration</span>
-                  <span className="font-medium text-gray-800">{admitCard.duration} min</span>
+                  <span className="font-medium text-gray-700">{admitCard.duration} min</span>
                 </div>
               </div>
 
@@ -355,26 +355,26 @@ const ExamRegistration = () => {
                     {admitCard.seatNumber && (
                       <div>
                         <span className="text-gray-500 block text-xs">Seat No</span>
-                        <span className="font-bold text-lg text-indigo-700">{admitCard.seatNumber}</span>
+                        <span className="font-bold text-lg text-primary-600">{admitCard.seatNumber}</span>
                       </div>
                     )}
                     {admitCard.examCenter && (
                       <div>
                         <span className="text-gray-500 block text-xs">Center</span>
-                        <span className="font-medium text-gray-800">{admitCard.examCenter}</span>
+                        <span className="font-medium text-gray-700">{admitCard.examCenter}</span>
                       </div>
                     )}
                     {admitCard.examRoom && (
                       <div>
                         <span className="text-gray-500 block text-xs">Room</span>
-                        <span className="font-medium text-gray-800">{admitCard.examRoom}</span>
+                        <span className="font-medium text-gray-700">{admitCard.examRoom}</span>
                       </div>
                     )}
                   </div>
                 </>
               )}
 
-              <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-500 text-center">
+              <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-500 text-center">
                 Issued on: {formatDate(admitCard.issuedAt)}
               </div>
             </div>
@@ -383,13 +383,13 @@ const ExamRegistration = () => {
             <div className="flex justify-end gap-3 p-4 border-t border-gray-200 print:hidden">
               <button
                 onClick={() => setShowAdmitCard(false)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-50"
               >
                 Close
               </button>
               <button
                 onClick={handlePrintAdmitCard}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-lg hover:from-primary-700 hover:to-primary-600"
               >
                 <FaDownload /> Print / Download
               </button>
@@ -401,7 +401,7 @@ const ExamRegistration = () => {
       {/* Toast */}
       {toast && (
         <div className={`fixed bottom-4 right-4 z-50 rounded-lg border px-4 py-3 text-sm shadow-lg ${
-          toast.type === "success" ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"
+          toast.type === "success" ? "border-primary-500/20 bg-primary-900/40 text-primary-600" : "border-red-500/20 bg-red-900/40 text-red-600"
         }`}>
           {toast.message}
         </div>

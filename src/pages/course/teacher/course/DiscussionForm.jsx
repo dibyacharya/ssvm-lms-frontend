@@ -25,12 +25,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
       )}
     </div>
   </div>
@@ -384,7 +384,7 @@ let response;
       onClick={onClick}
     >
       {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full" />
+        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" />
       )}
       {icon}
       <span className="ml-1">{label}</span>
@@ -406,7 +406,7 @@ let response;
     const getButtonClass = () => {
       switch (variant) {
         case "primary":
-          return "bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg";
+          return "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-gray-900 shadow-md hover:shadow-lg";
         case "outline":
           return "border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm hover:shadow";
         case "link":
@@ -461,7 +461,7 @@ let response;
       <div className="flex justify-between">
         <div>
           <div className="flex items-center mb-2">
-            <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+            <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 text-gray-900 flex items-center justify-center text-xs font-bold">
               {discussion.author.name.split(" ")[0].charAt(0)}
             </div>
             <div>
@@ -519,7 +519,7 @@ let response;
     <div key={comment._id} className={`mb-4 ${level > 0 ? "ml-12" : ""}`}>
       <div className={`p-4 rounded-xl bg-white hover:bg-gray-50/50 transition-all duration-200 ${level > 0 ? "border-l-4 border-teal-300 border-t border-r border-b border-t-gray-100 border-r-gray-100 border-b-gray-100" : "border border-gray-100"}`}>
         <div className="flex items-center mb-3">
-          <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+          <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 text-gray-900 flex items-center justify-center text-xs font-bold">
             {comment.author.name.split(" ")[0].charAt(0)}
           </div>
           <div>
@@ -586,7 +586,7 @@ let response;
           <div className="p-4 rounded-xl border border-gray-100 bg-white border-l-4 border-l-amber-400">
             <form onSubmit={(e) => handleAddReply(e, comment._id)}>
               <div className="flex">
-                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-xs font-bold">
+                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-blue-500 text-gray-900 flex items-center justify-center text-xs font-bold">
                   {"@"}
                 </div>
                 <div className="flex-grow">
@@ -736,11 +736,11 @@ let response;
         </Button>
 
         <div className="mb-6 rounded-xl border border-gray-100 shadow-sm bg-white overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500" />
+          <div className="h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600" />
           <div className="p-6">
             <div className="flex justify-between mb-4">
               <div className="flex items-center">
-                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 text-gray-900 flex items-center justify-center text-xs font-bold">
                   {selectedDiscussion.author.name.split(" ")[0].charAt(0)}
                 </div>
                 <div>
@@ -815,11 +815,11 @@ let response;
 
           {/* Add comment form */}
           <div className="mt-6 rounded-xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-            <div className="h-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400" />
+            <div className="h-1 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500" />
             <div className="p-4">
               <form onSubmit={handleAddComment}>
                 <div className="flex">
-                  <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                  <div className="m-4 p-4 w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-gray-900 flex items-center justify-center text-xs font-bold">
                     {"@"}
                   </div>
                   <div className="flex-grow">
@@ -908,7 +908,7 @@ let response;
         <SectionHeader
           icon={FileText}
           title="Create New Discussion"
-          gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+          gradient="bg-gradient-to-r from-amber-500 to-blue-500"
         />
 
         <div className="p-6">
@@ -1121,10 +1121,10 @@ let response;
         icon={MessageSquare}
         title="Discussion Forums"
         subtitle="Engage with peers and instructors"
-        gradient="bg-gradient-to-r from-teal-500 via-emerald-500 to-green-500"
+        gradient="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400"
         rightContent={
           discussions.length > 0 && (
-            <span className="px-3 py-1.5 text-sm font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+            <span className="px-3 py-1.5 text-sm font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
               {discussions.length}
             </span>
           )

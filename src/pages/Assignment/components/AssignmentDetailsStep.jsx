@@ -88,7 +88,7 @@ const AssignmentDetailsStep = ({
                   <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Assignment Title
                   </label>
-                  <div className="w-full p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg flex items-center gap-2">
+                  <div className="w-full p-3 bg-gradient-to-r from-blue-50 to-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
                     <Lock className="w-4 h-4 text-blue-400 flex-shrink-0" />
                     <span className="font-semibold text-blue-800">{autoTitle}</span>
                   </div>
@@ -165,7 +165,7 @@ const AssignmentDetailsStep = ({
           {courseOutcomes.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <Award className="w-4 h-4 text-purple-500" />
+                <Award className="w-4 h-4 text-blue-500" />
                 Course Outcomes
               </h3>
               <div className="space-y-2">
@@ -177,8 +177,8 @@ const AssignmentDetailsStep = ({
                     ? outcome
                     : (outcome.description || outcome.outcome || outcome.text || String(outcome.code || ''));
                   return (
-                    <div key={index} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-purple-50/50 border border-purple-100">
-                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-bold flex-shrink-0 mt-0.5">
+                    <div key={index} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-blue-50/50 border border-blue-100">
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold flex-shrink-0 mt-0.5">
                         {code}
                       </span>
                       <span className="text-sm text-gray-700">{desc}</span>
@@ -219,7 +219,7 @@ const AssignmentDetailsStep = ({
                 <label className={`block text-sm font-medium mb-1.5 ${isUngraded ? 'text-gray-400' : 'text-gray-600'}`}>
                   Total Points
                   {isCAMode && configuredMarks && (
-                    <span className="ml-2 text-xs text-green-600 font-normal bg-green-50 px-2 py-0.5 rounded-full">
+                    <span className="ml-2 text-xs text-blue-600 font-normal bg-blue-50 px-2 py-0.5 rounded-full">
                       Auto-set from plan: {configuredMarks}
                     </span>
                   )}

@@ -79,7 +79,7 @@ const PostPreview = ({ post, onEdit, onBackToList }) => {
       <div className="mt-6 flex space-x-4">
         <button
           onClick={onEdit}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="flex items-center bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           <PenLine className="w-4 h-4 mr-2" />
           Edit Post

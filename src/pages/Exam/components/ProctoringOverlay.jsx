@@ -24,7 +24,7 @@ const ProctoringOverlay = ({ streamRef, faceDetected = true, violationCount = 0,
   }, [streamRef?.current]);
 
   const borderColor = !cameraOk ? 'border-gray-500' :
-    faceDetected ? 'border-emerald-500' : 'border-red-500';
+    faceDetected ? 'border-blue-500' : 'border-red-500';
 
   return (
     <div className="fixed bottom-4 right-4 z-40">
@@ -41,16 +41,16 @@ const ProctoringOverlay = ({ streamRef, faceDetected = true, violationCount = 0,
         {/* Status indicator */}
         <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
           {cameraOk ? (
-            <div className="flex items-center gap-1 bg-black/50 rounded-full px-1.5 py-0.5">
-              <div className={`w-2 h-2 rounded-full ${faceDetected ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
-              <span className="text-[8px] text-white font-medium">
+            <div className="flex items-center gap-1 bg-gray-50/20 rounded-full px-1.5 py-0.5">
+              <div className={`w-2 h-2 rounded-full ${faceDetected ? 'bg-blue-500' : 'bg-red-500 animate-pulse'}`} />
+              <span className="text-[8px] text-gray-900 font-medium">
                 {faceDetected ? 'OK' : 'No Face'}
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 bg-black/50 rounded-full px-1.5 py-0.5">
-              <FaVideoSlash className="text-[8px] text-red-400" />
-              <span className="text-[8px] text-red-400">No Camera</span>
+            <div className="flex items-center gap-1 bg-gray-50/20 rounded-full px-1.5 py-0.5">
+              <FaVideoSlash className="text-[8px] text-red-600" />
+              <span className="text-[8px] text-red-600">No Camera</span>
             </div>
           )}
         </div>
@@ -58,7 +58,7 @@ const ProctoringOverlay = ({ streamRef, faceDetected = true, violationCount = 0,
         {/* Violation counter */}
         {violationCount > 0 && (
           <div className="absolute bottom-1.5 right-1.5 bg-red-500/90 rounded-full px-1.5 py-0.5">
-            <span className="text-[8px] text-white font-bold">{violationCount}/{maxWarnings}</span>
+            <span className="text-[8px] text-gray-900 font-bold">{violationCount}/{maxWarnings}</span>
           </div>
         )}
       </div>

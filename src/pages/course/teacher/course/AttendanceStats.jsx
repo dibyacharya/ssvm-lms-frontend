@@ -20,12 +20,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
       )}
     </div>
   </div>
@@ -87,17 +87,17 @@ const AttendanceStats = () => {
   return (
     <div className="max-w-[1600px] mx-auto space-y-8">
       {/* Header Section - Gradient Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 shadow-lg">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
         <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/5 rounded-full" />
         <div className="relative z-10 px-8 py-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <FileSpreadsheet className="w-7 h-7 text-white" />
+              <FileSpreadsheet className="w-7 h-7 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                 Attendance Status Sheet
               </h1>
               <p className="text-blue-100 mt-1">
@@ -124,10 +124,10 @@ const AttendanceStats = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-emerald-500">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 border-t-blue-500">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
-              <Users className="w-6 h-6 text-emerald-500" />
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-500" />
             </div>
             <div>
               <h3 className="text-tertiary font-medium">Total Students</h3>
@@ -177,7 +177,7 @@ const AttendanceStats = () => {
           <SectionHeader
             icon={FileSpreadsheet}
             title="Attendance Records"
-            gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+            gradient="bg-gradient-to-r from-blue-500 to-blue-600"
             count={sessionDates.length}
           />
 
@@ -294,7 +294,7 @@ const AttendanceStats = () => {
                       onClick={() => setCurrentPage(idx)}
                       className={`w-8 h-8 rounded-lg transition-all duration-200 ${
                         currentPage === idx
-                          ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-purple-200"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900 shadow-md shadow-blue-200"
                           : "text-tertiary hover:bg-gray-50"
                       }`}
                       aria-label={`Go to page ${idx + 1}`}
@@ -325,8 +325,8 @@ const AttendanceStats = () => {
       )}
 
       {/* Help Text */}
-      <div className="flex items-start p-5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border-l-4 border-indigo-500 mt-6">
-        <AlertCircle className="w-5 h-5 text-indigo-600 mt-0.5 mr-3 flex-shrink-0" />
+      <div className="flex items-start p-5 rounded-xl bg-gradient-to-r from-blue-50 to-blue-50 border-l-4 border-blue-500 mt-6">
+        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
         <div>
           <p className="text-primary font-medium mb-1">
             About Attendance Status

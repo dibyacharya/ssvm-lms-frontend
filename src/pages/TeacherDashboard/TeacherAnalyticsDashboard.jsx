@@ -274,9 +274,9 @@ const SectionHeader = ({ icon: Icon, title, gradient }) => (
     <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
     <div className="relative z-10 flex items-center gap-3">
       <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
-      <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
     </div>
   </div>
 );
@@ -343,9 +343,9 @@ const TeacherAnalyticsDashboard = () => {
   ];
 
   return (
-    <div className="max-w-[1600px] pt-12 relative -top-6 mx-auto space-y-8 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="max-w-[1600px] pt-12 relative -top-6 mx-auto space-y-8 p-6 bg-gray-50 dark:bg-gray-50 min-h-screen">
       {/* Header Section - Gradient Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-8 py-8 shadow-lg">
         {/* Decorative circles */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
@@ -354,13 +354,13 @@ const TeacherAnalyticsDashboard = () => {
 
         <div className="relative z-10 flex items-center gap-5">
           <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-            <BarChart2 className="w-7 h-7 text-white" />
+            <BarChart2 className="w-7 h-7 text-gray-900" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
               Course Analytics Dashboard
             </h1>
-            <p className="text-white/80 text-sm font-medium mt-1.5">
+            <p className="text-gray-900/80 text-sm font-medium mt-1.5">
               Data-driven insights to improve teaching and learning outcomes
             </p>
           </div>
@@ -368,7 +368,7 @@ const TeacherAnalyticsDashboard = () => {
       </div>
 
       {/* Navigation Tabs - Pill style */}
-      <div className="flex gap-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 p-2">
+      <div className="flex gap-2 bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 p-2">
         {tabs.map((tab) => {
           const TabIcon = tab.icon;
           return (
@@ -376,8 +376,8 @@ const TeacherAnalyticsDashboard = () => {
               key={tab.key}
               className={`flex items-center gap-2 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                 activeSection === tab.key
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
-                  : "text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900 shadow-md"
+                  : "text-tertiary dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-100"
               }`}
               onClick={() => setActiveSection(tab.key)}
             >
@@ -390,10 +390,10 @@ const TeacherAnalyticsDashboard = () => {
 
       {/* Student selection banner - visible when a student is selected */}
       {selectedStudent !== "class_average" && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-5 flex justify-between items-center border-l-4 border-l-emerald-500">
+        <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/20 p-5 flex justify-between items-center border-l-4 border-l-blue-500">
             <div>
-              <h2 className="text-xl font-bold text-primary dark:text-white">
+              <h2 className="text-xl font-bold text-primary dark:text-gray-900">
                 Viewing data for: {selectedStudent}
               </h2>
               <p className="text-tertiary dark:text-gray-400 text-sm mt-0.5">
@@ -403,7 +403,7 @@ const TeacherAnalyticsDashboard = () => {
             </div>
             <button
               onClick={() => setSelectedStudent("class_average")}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-gray-900 px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all"
             >
               Back to Class View
             </button>
@@ -419,76 +419,76 @@ const TeacherAnalyticsDashboard = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Daily Active Users */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Daily Active Users</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">134</h3>
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">134</h3>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+12%</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+12%</span>
                   <span className="mx-1">from last week</span>
                 </div>
               </div>
 
               {/* Avg Session Time */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Avg. Session Time</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">45 min</h3>
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">45 min</h3>
                   </div>
                   <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
                     <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+5 min</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+5 min</span>
                   <span className="mx-1">from last week</span>
                 </div>
               </div>
 
               {/* Content Completion */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-purple-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Content Completion</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">72%</h3>
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">72%</h3>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-amber-500 dark:text-amber-400 font-medium">-3%</span>
+                  <span className="text-amber-500 dark:text-amber-600 font-medium">-3%</span>
                   <span className="mx-1">from last week</span>
                 </div>
               </div>
 
               {/* Forum Engagement */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Forum Engagement</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">183</h3>
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">183</h3>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-50 flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-amber-600 dark:text-amber-600" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+23%</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+23%</span>
                   <span className="mx-1">from last week</span>
                 </div>
               </div>
             </div>
 
             {/* Weekly Active Users Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
               <SectionHeader
                 icon={Activity}
                 title={
@@ -496,7 +496,7 @@ const TeacherAnalyticsDashboard = () => {
                     ? "Weekly User Activity"
                     : `Weekly Activity - ${selectedStudent}`
                 }
-                gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+                gradient="bg-gradient-to-r from-blue-500 to-blue-700"
               />
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -534,11 +534,11 @@ const TeacherAnalyticsDashboard = () => {
             {/* Content Engagement Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Video Completion Rates */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={BookOpen}
                   title="Video Completion Rates"
-                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                  gradient="bg-gradient-to-r from-blue-500 to-blue-600"
                 />
                 <div className="p-6">
                   <ResponsiveContainer width="100%" height={300}>
@@ -559,11 +559,11 @@ const TeacherAnalyticsDashboard = () => {
               </div>
 
               {/* Resource Downloads */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={Download}
                   title="Resource Downloads"
-                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                  gradient="bg-gradient-to-r from-blue-500 to-blue-600"
                 />
                 <div className="p-6">
                   <ResponsiveContainer width="100%" height={300}>
@@ -581,7 +581,7 @@ const TeacherAnalyticsDashboard = () => {
             </div>
 
             {/* Forum Activity */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
               <SectionHeader
                 icon={MessageSquare}
                 title="Forum Activity Trends"
@@ -623,7 +623,7 @@ const TeacherAnalyticsDashboard = () => {
           <>
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">
@@ -631,7 +631,7 @@ const TeacherAnalyticsDashboard = () => {
                         ? "Class Average"
                         : "Student Average"}
                     </p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">
                       {selectedStudent === "class_average"
                         ? "78%"
                         : selectedStudent === "Emma Wilson"
@@ -641,21 +641,21 @@ const TeacherAnalyticsDashboard = () => {
                         : "63%"}
                     </h3>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
-                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-50 flex items-center justify-center">
+                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-600" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+2%</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+2%</span>
                   <span className="mx-1">from last assessment</span>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Pass Rate</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">
                       {selectedStudent === "class_average"
                         ? "91%"
                         : selectedStudent === "Emma Wilson"
@@ -665,21 +665,21 @@ const TeacherAnalyticsDashboard = () => {
                         : "75%"}
                     </h3>
                   </div>
-                  <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <Target className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-amber-500 dark:text-amber-400 font-medium">-1%</span>
+                  <span className="text-amber-500 dark:text-amber-600 font-medium">-1%</span>
                   <span className="mx-1">from last assessment</span>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-700 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 dark:border-gray-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-tertiary dark:text-gray-400 text-sm">Assignment Completion</p>
-                    <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">
+                    <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">
                       {selectedStudent === "class_average"
                         ? "85%"
                         : selectedStudent === "Emma Wilson"
@@ -694,7 +694,7 @@ const TeacherAnalyticsDashboard = () => {
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+5%</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+5%</span>
                   <span className="mx-1">from last week</span>
                 </div>
               </div>
@@ -702,7 +702,7 @@ const TeacherAnalyticsDashboard = () => {
 
             {/* Grade Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={BarChart2}
                   title={
@@ -710,7 +710,7 @@ const TeacherAnalyticsDashboard = () => {
                       ? "Grade Distribution"
                       : `${selectedStudent}'s Grades`
                   }
-                  gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+                  gradient="bg-gradient-to-r from-blue-500 to-blue-600"
                 />
                 <div className="p-6">
                   {selectedStudent === "class_average" ? (
@@ -763,11 +763,11 @@ const TeacherAnalyticsDashboard = () => {
               </div>
 
               {/* Assignment Submission Trends */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={FileText}
                   title="Assignment Submissions"
-                  gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+                  gradient="bg-gradient-to-r from-amber-500 to-blue-500"
                 />
                 <div className="p-6">
                   <ResponsiveContainer width="100%" height={300}>
@@ -802,7 +802,7 @@ const TeacherAnalyticsDashboard = () => {
             </div>
 
             {/* Quiz Performance */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
               <SectionHeader
                 icon={Award}
                 title={
@@ -871,7 +871,7 @@ const TeacherAnalyticsDashboard = () => {
         {activeSection === "predictive" && (
           <>
             {/* At-Risk Students */}
-            {/* <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+            {/* <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
               <SectionHeader
                 icon={AlertTriangle}
                 title="Students at Risk"
@@ -880,7 +880,7 @@ const TeacherAnalyticsDashboard = () => {
               <div className="p-6">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                    <thead className="bg-gray-50 dark:bg-white">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Student
@@ -905,27 +905,27 @@ const TeacherAnalyticsDashboard = () => {
                     <tbody className="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
                       {atRiskStudentsData.map((student) => (
                         <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-600">
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-white">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-gray-900">
                             {student.name}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 student.risk === "High"
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                                  ? "bg-red-100 dark:bg-red-50 text-red-800 dark:text-red-600"
                                   : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
                               }`}
                             >
                               {student.risk}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-600">
                             {student.lastLogin}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-600">
                             {student.completedAssignments}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-600">
                             {student.avgGrade}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -945,7 +945,7 @@ const TeacherAnalyticsDashboard = () => {
                   </table>
                 </div>
                 <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700">
-                  <h3 className="font-semibold flex items-center text-red-800 dark:text-red-300">
+                  <h3 className="font-semibold flex items-center text-red-800 dark:text-red-600">
                     <AlertTriangle className="w-5 h-5 mr-2" />
                     High Risk Alert
                   </h3>
@@ -960,7 +960,7 @@ const TeacherAnalyticsDashboard = () => {
 
             {/* Comparative Performance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={Target}
                   title={
@@ -968,7 +968,7 @@ const TeacherAnalyticsDashboard = () => {
                       ? "Student Performance Analysis"
                       : `${selectedStudent}'s Performance Analysis`
                   }
-                  gradient="bg-gradient-to-r from-violet-500 to-purple-600"
+                  gradient="bg-gradient-to-r from-blue-500 to-blue-600"
                 />
                 <div className="p-6">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1002,11 +1002,11 @@ const TeacherAnalyticsDashboard = () => {
               </div>
 
               {/* Completion Forecast */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
                 <SectionHeader
                   icon={TrendingUp}
                   title="Course Completion Forecast"
-                  gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+                  gradient="bg-gradient-to-r from-blue-500 to-blue-700"
                 />
                 <div className="p-6">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1046,7 +1046,7 @@ const TeacherAnalyticsDashboard = () => {
             </div>
 
             {/* Actionable Recommendations */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700 overflow-hidden">
+            <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200 overflow-hidden">
               <SectionHeader
                 icon={Lightbulb}
                 title={
@@ -1054,7 +1054,7 @@ const TeacherAnalyticsDashboard = () => {
                     ? "AI-Generated Recommendations"
                     : `Personalized Recommendations for ${selectedStudent}`
                 }
-                gradient="bg-gradient-to-r from-amber-500 to-orange-500"
+                gradient="bg-gradient-to-r from-amber-500 to-blue-500"
               />
               <div className="p-6 space-y-4">
                 {selectedStudent === "class_average" ? (
@@ -1070,22 +1070,22 @@ const TeacherAnalyticsDashboard = () => {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
-                      <h3 className="font-semibold text-purple-800 dark:text-purple-300">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Assignment Insight
                       </h3>
-                      <p className="text-purple-800 dark:text-purple-200 mt-1 text-sm">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         Assignment 4 has the highest late submission rate.
                         Consider extending the deadline or providing clearer
                         instructions.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                      <h3 className="font-semibold text-green-800 dark:text-green-300">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Content Improvement
                       </h3>
-                      <p className="text-green-800 dark:text-green-200 mt-1 text-sm">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         The "Study Guide" resource has fewer downloads than
                         other materials. Consider promoting this resource or
                         updating its content to better serve student needs.
@@ -1108,11 +1108,11 @@ const TeacherAnalyticsDashboard = () => {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
-                      <h3 className="font-semibold text-purple-800 dark:text-purple-300">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Learning Style Insight
                       </h3>
-                      <p className="text-purple-800 dark:text-purple-200 mt-1 text-sm">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         {selectedStudent === "Emma Wilson"
                           ? "Emma engages consistently with all content types. Her learning style indicates a preference for video content."
                           : selectedStudent === "Michael Chen"
@@ -1121,11 +1121,11 @@ const TeacherAnalyticsDashboard = () => {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                      <h3 className="font-semibold text-green-800 dark:text-green-300">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-300">
                         Next Steps
                       </h3>
-                      <p className="text-green-800 dark:text-green-200 mt-1 text-sm">
+                      <p className="text-blue-800 dark:text-blue-200 mt-1 text-sm">
                         {selectedStudent === "Emma Wilson"
                           ? "Provide Emma with advanced learning materials and consider having her mentor other students."
                           : selectedStudent === "Michael Chen"
@@ -1142,26 +1142,26 @@ const TeacherAnalyticsDashboard = () => {
       </div>
 
       {/* Export/Filter Controls */}
-      <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-700">
+      <div className="flex justify-between items-center bg-white dark:bg-white p-4 rounded-2xl shadow-sm border border-tertiary/10 dark:border-gray-200">
         <div className="flex flex-wrap gap-3">
-          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+          <select className="border border-tertiary/10 dark:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-700 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             <option>Current Cohort</option>
             <option>2024 Cohort</option>
             <option>2023 Cohort</option>
           </select>
-          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+          <select className="border border-tertiary/10 dark:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-700 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             <option>All Students</option>
             <option>At-Risk Students</option>
             <option>High Performers</option>
           </select>
-          <select className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+          <select className="border border-tertiary/10 dark:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-700 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             <option>Last 7 Days</option>
             <option>Last 30 Days</option>
             <option>Entire Course</option>
           </select>
           {/* Added: Student select dropdown */}
           <select
-            className="border border-tertiary/10 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-200 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+            className="border border-tertiary/10 dark:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-primary dark:text-gray-700 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             value={selectedStudent}
             onChange={(e) => setSelectedStudent(e.target.value)}
           >
@@ -1172,10 +1172,10 @@ const TeacherAnalyticsDashboard = () => {
           </select>
         </div>
         <div className="flex gap-2">
-          <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-primary dark:text-gray-200 font-semibold py-2.5 px-5 rounded-xl text-sm transition-colors">
+          <button className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-primary dark:text-gray-700 font-semibold py-2.5 px-5 rounded-xl text-sm transition-colors">
             Export CSV
           </button>
-          <button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-2.5 px-5 rounded-xl text-sm shadow-md transition-all">
+          <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-gray-900 font-semibold py-2.5 px-5 rounded-xl text-sm shadow-md transition-all">
             Generate Report
           </button>
         </div>

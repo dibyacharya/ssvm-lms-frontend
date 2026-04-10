@@ -8,12 +8,12 @@ import {
 import { getMyResults } from "../../../services/result.service";
 
 const GRADE_COLORS = {
-  O: "text-emerald-700 bg-emerald-50",
-  E: "text-green-700 bg-green-50",
+  O: "text-blue-700 bg-blue-50",
+  E: "text-blue-700 bg-blue-50",
   A: "text-blue-700 bg-blue-50",
-  B: "text-indigo-700 bg-indigo-50",
+  B: "text-blue-700 bg-blue-50",
   C: "text-amber-700 bg-amber-50",
-  D: "text-orange-700 bg-orange-50",
+  D: "text-blue-700 bg-blue-50",
   F: "text-red-700 bg-red-50",
 };
 
@@ -42,7 +42,7 @@ const SemesterResults = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <FaSpinner className="animate-spin text-3xl text-indigo-600" />
+        <FaSpinner className="animate-spin text-3xl text-blue-600" />
       </div>
     );
   }
@@ -62,7 +62,7 @@ const SemesterResults = () => {
 
       {results.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-          <FaGraduationCap className="text-4xl text-gray-300 mx-auto mb-3" />
+          <FaGraduationCap className="text-4xl text-gray-600 mx-auto mb-3" />
           <p className="text-gray-500">No published results available</p>
         </div>
       ) : (
@@ -76,8 +76,8 @@ const SemesterResults = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center">
-                      <FaGraduationCap className="text-2xl text-indigo-600" />
+                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <FaGraduationCap className="text-2xl text-blue-600" />
                     </div>
                     <div>
                       <h3 className="font-bold text-lg text-gray-900">
@@ -91,11 +91,11 @@ const SemesterResults = () => {
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-indigo-700">{result.sgpa}</p>
+                      <p className="text-3xl font-bold text-blue-700">{result.sgpa}</p>
                       <p className="text-xs text-gray-500">SGPA</p>
                     </div>
                     <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-sm text-green-700 font-medium">{result.totalCoursesPassed}P</span>
+                      <span className="text-sm text-blue-700 font-medium">{result.totalCoursesPassed}P</span>
                       <span className="text-sm text-red-600 font-medium">{result.totalCoursesFailed}F</span>
                     </div>
                     {expandedId === result._id ? (
@@ -112,25 +112,25 @@ const SemesterResults = () => {
                 <div className="border-t border-gray-100 p-5 space-y-4">
                   {/* Summary Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div className="bg-indigo-50 rounded-lg p-3 text-center">
+                    <div className="bg-blue-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">SGPA</p>
-                      <p className="text-xl font-bold text-indigo-700">{result.sgpa}</p>
+                      <p className="text-xl font-bold text-blue-700">{result.sgpa}</p>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">Overall %</p>
                       <p className="text-xl font-bold text-blue-700">{result.overallPercentage}%</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3 text-center">
+                    <div className="bg-blue-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">Credits</p>
-                      <p className="text-xl font-bold text-green-700">{result.totalCredits}</p>
+                      <p className="text-xl font-bold text-blue-700">{result.totalCredits}</p>
                     </div>
-                    <div className="bg-emerald-50 rounded-lg p-3 text-center">
+                    <div className="bg-blue-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">Credit Points</p>
-                      <p className="text-xl font-bold text-emerald-700">{result.totalCreditPoints}</p>
+                      <p className="text-xl font-bold text-blue-700">{result.totalCreditPoints}</p>
                     </div>
-                    <div className="bg-purple-50 rounded-lg p-3 text-center">
+                    <div className="bg-blue-50 rounded-lg p-3 text-center">
                       <p className="text-xs text-gray-500">Courses</p>
-                      <p className="text-xl font-bold text-purple-700">{result.totalCoursesAttempted}</p>
+                      <p className="text-xl font-bold text-blue-700">{result.totalCoursesAttempted}</p>
                     </div>
                   </div>
 
@@ -170,7 +170,7 @@ const SemesterResults = () => {
                             <td className="py-2.5 text-center font-medium">{cr.gradePoint}</td>
                             <td className="py-2.5 text-center">
                               {cr.status === "pass" ? (
-                                <FaCheckCircle className="text-green-600 inline" />
+                                <FaCheckCircle className="text-blue-600 inline" />
                               ) : cr.status === "fail" ? (
                                 <FaTimesCircle className="text-red-600 inline" />
                               ) : (
@@ -193,7 +193,7 @@ const SemesterResults = () => {
                   <div className="flex justify-end print:hidden">
                     <button
                       onClick={handlePrint}
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700"
                     >
                       <FaDownload /> Print Result
                     </button>

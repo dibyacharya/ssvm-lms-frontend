@@ -18,12 +18,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
           {count}
         </span>
       )}
@@ -97,15 +97,15 @@ const StudentTable = () => {
             <ChevronUp
               className={`w-4 h-4 ${
                 sortConfig.direction === "asc"
-                  ? "text-emerald-600"
-                  : "text-gray-300"
+                  ? "text-blue-600"
+                  : "text-gray-600"
               }`}
             />
             <ChevronDown
               className={`w-4 h-4 ${
                 sortConfig.direction === "desc"
-                  ? "text-emerald-600"
-                  : "text-gray-300"
+                  ? "text-blue-600"
+                  : "text-gray-600"
               }`}
             />
           </div>
@@ -117,18 +117,18 @@ const StudentTable = () => {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8">
       {/* ============ Hero Header ============ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 p-8 shadow-lg">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full" />
         <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-white/5 rounded-full" />
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
-              <Users className="w-7 h-7 text-white" />
+              <Users className="w-7 h-7 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Student List</h1>
-              <p className="text-emerald-100 mt-1 text-sm">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Student List</h1>
+              <p className="text-blue-100 mt-1 text-sm">
                 {data.length > 0
                   ? `${data.length} student${data.length !== 1 ? "s" : ""} enrolled in this course`
                   : "View and manage enrolled students"}
@@ -137,8 +137,8 @@ const StudentTable = () => {
           </div>
           {data.length > 0 && (
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl border border-white/20">
-              <GraduationCap className="w-4 h-4 text-white/80" />
-              <span className="text-white font-semibold text-sm">{data.length} Students</span>
+              <GraduationCap className="w-4 h-4 text-gray-900/80" />
+              <span className="text-gray-900 font-semibold text-sm">{data.length} Students</span>
             </div>
           )}
         </div>
@@ -149,7 +149,7 @@ const StudentTable = () => {
         <SectionHeader
           icon={GraduationCap}
           title="Enrolled Students"
-          gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-700"
           count={filteredData.length}
         />
 
@@ -162,7 +162,7 @@ const StudentTable = () => {
             <input
               type="text"
               placeholder="Search students by name, roll number, or email..."
-              className="pl-11 w-full p-2.5 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all duration-200 text-sm placeholder:text-gray-400"
+              className="pl-11 w-full p-2.5 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all duration-200 text-sm placeholder:text-gray-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -181,7 +181,7 @@ const StudentTable = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
                 {currentItems.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-emerald-50/50 transition-all duration-200">
+                  <tr key={item.id} className="hover:bg-blue-50/50 transition-all duration-200">
                     <td className="px-4 py-3.5 text-center text-sm text-gray-500 font-medium">{indexOfFirstItem + index + 1}</td>
                     <td className="px-4 py-3.5 text-sm font-semibold text-gray-700">{item.rollNo || "—"}</td>
                     <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{item.name}</td>
@@ -210,7 +210,7 @@ const StudentTable = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-gray-200 transition-all duration-200"
+                className="p-2 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-gray-200 transition-all duration-200"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -221,8 +221,8 @@ const StudentTable = () => {
                   onClick={() => setCurrentPage(page)}
                   className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     currentPage === page
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm shadow-emerald-200"
-                      : "border border-gray-200 text-gray-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-600"
+                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900 shadow-sm shadow-blue-200"
+                      : "border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
                   }`}
                 >
                   {page}
@@ -233,7 +233,7 @@ const StudentTable = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="p-2 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-gray-200 transition-all duration-200"
+                className="p-2 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-gray-200 transition-all duration-200"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

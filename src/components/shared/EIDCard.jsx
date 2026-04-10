@@ -3,7 +3,7 @@ import { User } from "lucide-react";
 
 /**
  * e-Identity Card component for Online Program students.
- * Matches KIIT eXtension School ID card design.
+ * Matches Student ID card design.
  */
 const EIDCard = ({
   name = "",
@@ -20,26 +20,26 @@ const EIDCard = ({
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="rounded-2xl overflow-hidden shadow-lg border-[3px] border-emerald-500 bg-white">
+      <div className="rounded-2xl overflow-hidden shadow-lg border-[3px] border-blue-500 bg-white">
         {/* ── Header: University Branding ── */}
-        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-green-500 px-5 py-3 text-center">
-          <h3 className="text-white text-[11px] font-bold tracking-wide uppercase">
-            Kalinga Institute of Industrial Technology
+        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-500 px-5 py-3 text-center">
+          <h3 className="text-gray-900 text-[11px] font-bold tracking-wide uppercase">
+            Learning Management System
           </h3>
-          <p className="text-emerald-100 text-[9px] mt-0.5">
+          <p className="text-blue-100 text-[9px] mt-0.5">
             Deemed to be University U/S 3 of UGC Act, 1956
           </p>
-          <p className="text-white text-xs font-semibold mt-1">
-            KIIT eXtension School
+          <p className="text-gray-900 text-xs font-semibold mt-1">
+            LMS Platform
           </p>
-          <p className="text-emerald-100 text-[9px]">
+          <p className="text-blue-100 text-[9px]">
             Centre for Distance and Online Education
           </p>
         </div>
 
         {/* ── Title Bar ── */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-1.5">
-          <h4 className="text-white text-sm font-bold text-center tracking-wide">
+          <h4 className="text-gray-900 text-sm font-bold text-center tracking-wide">
             IDENTITY CARD &ndash; Online Program
           </h4>
         </div>
@@ -59,7 +59,7 @@ const EIDCard = ({
 
           {/* Right: Photo */}
           <div className="flex-shrink-0">
-            <div className="w-[90px] h-[110px] rounded-lg border-2 border-emerald-300 overflow-hidden bg-emerald-50 flex items-center justify-center">
+            <div className="w-[90px] h-[110px] rounded-lg border-2 border-blue-300 overflow-hidden bg-blue-50 flex items-center justify-center">
               {photoUrl ? (
                 <img
                   src={photoUrl}
@@ -72,12 +72,12 @@ const EIDCard = ({
                 />
               ) : null}
               <div
-                className={`flex flex-col items-center justify-center text-emerald-300 ${
+                className={`flex flex-col items-center justify-center text-blue-300 ${
                   photoUrl ? "hidden" : ""
                 }`}
               >
                 <User className="w-10 h-10" />
-                <span className="text-[8px] mt-1 text-emerald-400">
+                <span className="text-[8px] mt-1 text-blue-400">
                   No Photo
                 </span>
               </div>

@@ -34,13 +34,13 @@ const SectionHeader = ({ icon: Icon, title, gradient, count, rightContent }) => 
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       <div className="flex items-center gap-3">
         {count != null && (
-          <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+          <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
         )}
         {rightContent}
       </div>
@@ -239,9 +239,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
 
   const getStatusStyle = (status) => {
     const styles = {
-      submitted: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:border-emerald-700",
+      submitted: "text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-700",
       in_progress: "text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-700",
-      not_started: "text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-300 dark:bg-gray-700/50 dark:border-gray-600",
+      not_started: "text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-600 dark:bg-gray-700/50 dark:border-gray-300",
     };
     return styles[status] || styles.not_started;
   };
@@ -271,10 +271,10 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
   // Combine loading states for the main loader
   if (loading || assignmentStatsLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-accent1 border-opacity-50 mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg">Loading...</p>
+          <p className="text-gray-600 dark:text-gray-600 text-lg">Loading...</p>
         </div>
       </div>
     );
@@ -293,9 +293,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       icon: BookOpen,
       count: coursesData?.user?.totalCourses || 0,
       description: "Active Courses",
-      borderColor: "border-t-emerald-500",
-      iconBg: "bg-emerald-50 dark:bg-emerald-900/30",
-      iconColor: "text-emerald-600 dark:text-emerald-400",
+      borderColor: "border-t-blue-500",
+      iconBg: "bg-blue-50 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       id: "Assignment",
@@ -313,9 +313,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       icon: Calendar,
       count: getThisWeekMeetings.length,
       description: "This Week",
-      borderColor: "border-t-purple-500",
-      iconBg: "bg-purple-50 dark:bg-purple-900/30",
-      iconColor: "text-purple-600 dark:text-purple-400",
+      borderColor: "border-t-blue-500",
+      iconBg: "bg-blue-50 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       id: "MyStats",
@@ -328,15 +328,15 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
         }%`,
       description: "Overall Rate",
       borderColor: "border-t-amber-500",
-      iconBg: "bg-amber-50 dark:bg-amber-900/30",
-      iconColor: "text-amber-600 dark:text-amber-400",
+      iconBg: "bg-amber-50 dark:bg-amber-50",
+      iconColor: "text-amber-600 dark:text-amber-600",
     },
   ];
 
   return (
-    <div className="p-6 space-y-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 space-y-8 bg-gray-50 dark:bg-gray-50 min-h-screen">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-8 py-8 shadow-lg">
         {/* Decorative circles */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
@@ -346,20 +346,20 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <Home className="w-7 h-7 text-white" />
+              <Home className="w-7 h-7 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                 {timeGreeting.text}
               </h1>
-              <p className="text-white/80 text-sm font-medium mt-1.5">
+              <p className="text-gray-900/80 text-sm font-medium mt-1.5">
                 Welcome to your dashboard. Here's your academic overview.
               </p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl">
-            <GreetingIcon className="w-5 h-5 text-white/90" />
-            <span className="text-white/90 text-sm font-medium">
+            <GreetingIcon className="w-5 h-5 text-gray-900/90" />
+            <span className="text-gray-900/90 text-sm font-medium">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </span>
           </div>
@@ -373,7 +373,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
           return (
             <div
               key={index}
-              className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 ${item.borderColor} hover:shadow-md transition-shadow cursor-pointer`}
+              className={`bg-white dark:bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-t-4 ${item.borderColor} hover:shadow-md transition-shadow cursor-pointer`}
               onClick={() => {
                 if (item.id === "Assignment") {
                   scrollToRecentAssignments();
@@ -385,7 +385,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-tertiary dark:text-gray-400 text-sm">{item.title}</p>
-                  <h3 className="text-3xl font-bold text-primary dark:text-white mt-1">{item.count}</h3>
+                  <h3 className="text-3xl font-bold text-primary dark:text-gray-900 mt-1">{item.count}</h3>
                 </div>
                 <div className={`w-12 h-12 rounded-full ${item.iconBg} flex items-center justify-center`}>
                   <CardIcon className={`w-6 h-6 ${item.iconColor}`} />
@@ -401,15 +401,15 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Courses Section */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+        <div className="lg:col-span-2 bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
           <SectionHeader
             icon={BookOpen}
             title="Recent Courses"
-            gradient="rounded-t-2xl bg-gradient-to-r from-sky-500 to-blue-600"
+            gradient="rounded-t-2xl bg-gradient-to-r from-blue-500 to-blue-700"
             count={coursesData.courses?.length || 0}
             rightContent={
               <button
-                className="flex items-center gap-1 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
+                className="flex items-center gap-1 text-xs font-bold text-gray-900 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
                 onClick={() => setActiveSection("Courseware")}
               >
                 View All <ChevronRight className="h-3.5 w-3.5" />
@@ -425,7 +425,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                   key={course._id}
                   to={`/student/course/${course._id}`}
                 >
-                  <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div className="group bg-white dark:bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
                     {/* SVG Banner with Subject Symbols */}
                     <div className="relative h-36 overflow-hidden">
                       <CourseBannerSVG grad={grad} symbols={symbols} seed={seed} />
@@ -435,10 +435,10 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       {/* Course title on banner */}
                       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-                        <h3 className="text-white font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
+                        <h3 className="text-gray-900 font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
                           {course.title}
                         </h3>
-                        <p className="text-white/80 text-xs mt-0.5 font-medium drop-shadow">
+                        <p className="text-gray-900/80 text-xs mt-0.5 font-medium drop-shadow">
                           {course.semester?.name || ""}
                         </p>
                       </div>
@@ -453,9 +453,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                       </p>
 
                       {/* Stats row */}
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-200">
                         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                          <Book className="h-3.5 w-3.5 text-emerald-500" />
+                          <Book className="h-3.5 w-3.5 text-blue-500" />
                           <span className="font-medium">{course.lectureCount || 0}</span>
                           <span>Lectures</span>
                         </div>
@@ -475,11 +475,11 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
         </div>
 
         {/* Assignment Summary Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden h-fit">
+        <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden h-fit">
           <SectionHeader
             icon={FileText}
             title="Assignment Summary"
-            gradient="rounded-t-2xl bg-gradient-to-r from-violet-500 to-purple-600"
+            gradient="rounded-t-2xl bg-gradient-to-r from-blue-500 to-blue-600"
           />
           <div className="p-6">
             <AssignmentStatusChart
@@ -492,7 +492,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       </div>
 
       {/* Upcoming Events Section - Now Dynamic */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+      <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
         <SectionHeader
           icon={Calendar}
           title="Upcoming Live Classes"
@@ -500,7 +500,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
           count={upcomingEvents.length}
           rightContent={
             <button
-              className="flex items-center gap-1 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
+              className="flex items-center gap-1 text-xs font-bold text-gray-900 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
               onClick={() => setActiveSection("LiveClass")}
             >
               View All <ChevronRight className="h-3.5 w-3.5" />
@@ -513,7 +513,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
               {upcomingEvents.map((event) => (
                 <div
                   key={event._id}
-                  className="group flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-accent1/60 dark:hover:border-blue-400/60 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
+                  className="group flex flex-col bg-white dark:bg-white rounded-lg border border-gray-100 dark:border-gray-200 hover:border-accent1/60 dark:hover:border-blue-400/60 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
                   onClick={() => window.open(event.link, '_blank')}
                 >
                   <div className="relative h-40" style={{ background: "linear-gradient(135deg, #1e293b, #334155)" }}>
@@ -525,9 +525,9 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-3 left-3 right-3">
-                      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-flex items-center">
+                      <div className="bg-white/90 dark:bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-flex items-center">
                         <Calendar className="h-3.5 w-3.5 text-primary dark:text-blue-400 mr-1.5" />
-                        <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                        <span className="text-xs font-medium text-gray-800 dark:text-gray-700">
                           {formatDate(event.start)} · {formatTime(event.start)}
                         </span>
                       </div>
@@ -535,7 +535,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                   </div>
 
                   <div className="p-4">
-                    <h3 className="text-base font-medium text-gray-800 dark:text-white group-hover:text-primary dark:group-hover:text-blue-400 transition-colors mb-1">
+                    <h3 className="text-base font-medium text-gray-800 dark:text-gray-900 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors mb-1">
                       {event.subject}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -543,7 +543,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                     </p>
                   </div>
 
-                  <div className="mt-auto border-t border-gray-100 dark:border-gray-700 p-3 flex items-center justify-between">
+                  <div className="mt-auto border-t border-gray-100 dark:border-gray-200 p-3 flex items-center justify-between">
                     <span className="text-xs font-medium text-accent1 dark:text-blue-400">
                       Join Class
                     </span>
@@ -554,7 +554,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <Calendar className="h-12 w-12 text-gray-600 dark:text-gray-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Upcoming Classes</h3>
               <p className="text-gray-400 dark:text-gray-500">New classes scheduled by your teachers will appear here.</p>
             </div>
@@ -563,11 +563,11 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
       </div>
 
       {/* Assignments Section - Now Dynamic */}
-      <div id="recent-assignments" className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+      <div id="recent-assignments" className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
         <SectionHeader
           icon={CheckSquare}
           title="Recent Assignments"
-          gradient="rounded-t-2xl bg-gradient-to-r from-amber-500 to-orange-500"
+          gradient="rounded-t-2xl bg-gradient-to-r from-amber-500 to-blue-500"
           count={recentAssignments.length}
         />
         <div className="p-6">
@@ -575,7 +575,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
             {recentAssignments.length > 0 ? (
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <tr className="border-b border-gray-100 dark:border-gray-200">
                     <th className="text-left py-3 px-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Assignment
                     </th>
@@ -596,7 +596,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                     return (
                       <tr
                         key={assignment._id}
-                        className="border-b border-gray-50 dark:border-gray-700 hover:bg-accent2/30 dark:hover:bg-gray-700/50 cursor-pointer"
+                        className="border-b border-gray-50 dark:border-gray-200 hover:bg-accent2/30 dark:hover:bg-gray-100/50 cursor-pointer"
                         onClick={() => handleAssignmentClick(assignment)}
                       >
                         <td className="py-3 px-4">
@@ -605,7 +605,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                               <CheckSquare className="h-4 w-4" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="font-medium text-gray-800 dark:text-white">
+                              <span className="font-medium text-gray-800 dark:text-gray-900">
                                 {assignment.title}
                               </span>
                               {assignment.description && (
@@ -622,7 +622,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
                         <td className="py-3 px-4">
                           <div className="flex items-center">
                             <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1.5" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="text-sm text-gray-600 dark:text-gray-600">
                               {assignment.dueDate ? formatDate(assignment.dueDate) : "No due date"}
                             </span>
                           </div>
@@ -641,7 +641,7 @@ const DashboardSemesterContent = ({ setActiveSection, semNumber }) => {
               </table>
             ) : (
               <div className="text-center py-8">
-                <CheckSquare className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <CheckSquare className="h-12 w-12 text-gray-600 dark:text-gray-600 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">No Assignments Yet</h3>
                 <p className="text-gray-400 dark:text-gray-500">Assignments will appear here when they are created.</p>
               </div>

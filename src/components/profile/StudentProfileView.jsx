@@ -8,9 +8,9 @@ const SectionHeader = ({ icon: Icon, title, gradient }) => (
     <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
     <div className="relative z-10 flex items-center gap-3">
       <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
-      <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
     </div>
   </div>
 );
@@ -46,11 +46,11 @@ const StudentProfileView = ({
 
   return (
     <>
-      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-gray-800 dark:shadow-lg">
+      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-white dark:shadow-lg">
         <SectionHeader
           icon={User}
           title="Student Profile"
-          gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 rounded-t-2xl"
+          gradient="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 rounded-t-2xl"
         />
 
         <div className="px-5 pt-3 pb-4">
@@ -62,11 +62,11 @@ const StudentProfileView = ({
                   src={profilePhotoUrl}
                   alt="Profile"
                   style={{ objectPosition: 'center 20%' }}
-                  className="h-20 w-20 rounded-full border-2 border-white dark:border-gray-600 object-cover shadow-md ring-2 ring-gray-200 dark:ring-gray-700"
+                  className="h-20 w-20 rounded-full border-2 border-white dark:border-gray-300 object-cover shadow-md ring-2 ring-gray-200 dark:ring-gray-700"
                   onError={() => setPhotoError(true)}
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-2xl font-bold text-white shadow-md ring-2 ring-gray-200 dark:ring-gray-700">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-500 text-2xl font-bold text-gray-900 shadow-md ring-2 ring-gray-200 dark:ring-gray-700">
                   {headerFields.find(f => f.label === 'NAME')?.value?.charAt?.(0)?.toUpperCase() || 'U'}
                 </div>
               )}
@@ -75,7 +75,7 @@ const StudentProfileView = ({
                 type="button"
                 onClick={() => photoInputRef?.current?.click()}
                 disabled={photoBusy}
-                className="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-600 shadow flex items-center justify-center hover:bg-gray-50 disabled:opacity-60 transition-colors"
+                className="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-300 shadow flex items-center justify-center hover:bg-gray-50 disabled:opacity-60 transition-colors"
               >
                 {photoBusy ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500" />
@@ -89,7 +89,7 @@ const StudentProfileView = ({
                   type="button"
                   onClick={onPhotoDelete}
                   disabled={photoBusy || !profilePhotoUrl}
-                  className="absolute -bottom-0.5 -left-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-600 shadow flex items-center justify-center hover:bg-red-50 disabled:opacity-60 transition-colors"
+                  className="absolute -bottom-0.5 -left-0.5 w-7 h-7 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-300 shadow flex items-center justify-center hover:bg-red-50 disabled:opacity-60 transition-colors"
                   title="Delete photo"
                 >
                   <Trash2 className="h-3.5 w-3.5 text-red-500" />
@@ -108,11 +108,11 @@ const StudentProfileView = ({
           {/* Details grid — full width, 3 columns */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {headerFields.filter(f => f.label !== 'NAME').map((field) => (
-              <div key={field.label} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+              <div key={field.label} className="rounded-lg border border-gray-200 dark:border-gray-200 bg-gray-50 dark:bg-white p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   {field.label}
                 </div>
-                <div className="mt-0.5 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                <div className="mt-0.5 text-sm font-medium text-gray-800 dark:text-gray-700 truncate">
                   {toDisplay(field.value)}
                 </div>
               </div>
@@ -121,15 +121,15 @@ const StudentProfileView = ({
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-gray-800 dark:shadow-lg">
+      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-white dark:shadow-lg">
         <SectionHeader
           icon={BarChart2}
           title="Program Progress"
-          gradient="bg-gradient-to-r from-violet-500 to-purple-600 rounded-t-2xl"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-2xl"
         />
 
         {programProgressError ? (
-          <div className="mx-5 mt-4 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
+          <div className="mx-5 mt-4 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-red-50 px-3 py-2 text-sm text-red-700 dark:text-red-600">
             {programProgressError}
           </div>
         ) : null}
@@ -137,15 +137,15 @@ const StudentProfileView = ({
         <div className="overflow-x-auto p-5">
           <table className="min-w-full border-collapse text-sm">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                <th className="w-10 border border-gray-200 dark:border-gray-600 px-3 py-2" />
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">{periodLabel}</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">Academic Year</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">Academic Season</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">Status</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">Credit</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">SGPA</th>
-                <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left font-semibold">CGPA</th>
+              <tr className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-600">
+                <th className="w-10 border border-gray-200 dark:border-gray-300 px-3 py-2" />
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">{periodLabel}</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">Academic Year</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">Academic Season</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">Status</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">Credit</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">SGPA</th>
+                <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left font-semibold">CGPA</th>
               </tr>
             </thead>
             <tbody>
@@ -156,61 +156,61 @@ const StudentProfileView = ({
                     <React.Fragment key={`semester-${semester.semesterNo}`}>
                       <tr
                         className={`cursor-pointer ${
-                          semester.hasBacklog ? "bg-red-50 dark:bg-red-900/20" : "bg-white dark:bg-gray-800"
-                        } hover:bg-gray-50 dark:hover:bg-gray-700`}
+                          semester.hasBacklog ? "bg-red-50 dark:bg-red-900/20" : "bg-white dark:bg-white"
+                        } hover:bg-gray-50 dark:hover:bg-gray-100`}
                         onClick={() => toggleSemester(semester.semesterNo)}
                       >
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-600 dark:text-gray-400">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-600 dark:text-gray-400">
                           {expanded ? (
                             <ChevronDown className="h-4 w-4" />
                           ) : (
                             <ChevronRight className="h-4 w-4" />
                           )}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toSemesterLabel(semester.semesterNo)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toDisplay(semester.academicYear)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toDisplay(semester.season)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toDisplay(semester.status)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toDisplay(semester.totalCredits)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toGpaDisplay(semester.sgpa)}
                         </td>
-                        <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                           {toGpaDisplay(semester.cgpa)}
                         </td>
                       </tr>
 
                       {expanded ? (
-                        <tr className="bg-gray-50 dark:bg-gray-750 dark:bg-gray-900/50">
-                          <td colSpan={8} className="border border-gray-200 dark:border-gray-600 px-3 py-3">
-                            <div className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <tr className="bg-gray-50 dark:bg-gray-750 dark:bg-gray-50/50">
+                          <td colSpan={8} className="border border-gray-200 dark:border-gray-300 px-3 py-3">
+                            <div className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-600">
                               {periodLabel} Course Progress
                             </div>
                             <div className="overflow-x-auto">
                               <table className="min-w-full border-collapse text-sm">
                                 <thead>
-                                  <tr className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Course Code</th>
-                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Course Name</th>
-                                    <th colSpan={4} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">CREDITS</th>
-                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Grade</th>
-                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-left">Backlog Status</th>
+                                  <tr className="bg-white dark:bg-white text-gray-700 dark:text-gray-600">
+                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left">Course Code</th>
+                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left">Course Name</th>
+                                    <th colSpan={4} className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center">CREDITS</th>
+                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left">Grade</th>
+                                    <th rowSpan={2} className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-left">Backlog Status</th>
                                   </tr>
-                                  <tr className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">L</th>
-                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">T</th>
-                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">P</th>
-                                    <th className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center">Cr</th>
+                                  <tr className="bg-white dark:bg-white text-gray-600 dark:text-gray-400">
+                                    <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center">L</th>
+                                    <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center">T</th>
+                                    <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center">P</th>
+                                    <th className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center">Cr</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -224,40 +224,40 @@ const StudentProfileView = ({
                                       return (
                                         <tr
                                           key={`${semester.semesterNo}-course-${idx}`}
-                                          className="bg-white dark:bg-gray-800"
+                                          className="bg-white dark:bg-white"
                                         >
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                                             {toDisplay(course?.courseCode)}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                                             {toDisplay(course?.courseName)}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center text-gray-800 dark:text-gray-700">
                                             {course?.lecture ?? 0}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center text-gray-800 dark:text-gray-700">
                                             {course?.tutorial ?? 0}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center text-gray-800 dark:text-gray-700">
                                             {course?.practical ?? 0}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-center font-semibold text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-center font-semibold text-gray-800 dark:text-gray-700">
                                             {toDisplay(course?.credit)}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                                             {toDisplay(course?.grade)}
                                           </td>
-                                          <td className="border border-gray-200 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">
+                                          <td className="border border-gray-200 dark:border-gray-300 px-3 py-2 text-gray-800 dark:text-gray-700">
                                             {backlog ? "Yes" : "No"}
                                           </td>
                                         </tr>
                                       );
                                     })
                                   ) : (
-                                    <tr className="bg-white dark:bg-gray-800">
+                                    <tr className="bg-white dark:bg-white">
                                       <td
                                         colSpan={8}
-                                        className="border border-gray-200 dark:border-gray-600 px-3 py-3 text-center text-gray-500 dark:text-gray-400"
+                                        className="border border-gray-200 dark:border-gray-300 px-3 py-3 text-center text-gray-500 dark:text-gray-400"
                                       >
                                         No course progress found for this {periodLabel.toLowerCase()}.
                                       </td>
@@ -273,8 +273,8 @@ const StudentProfileView = ({
                   );
                 })
               ) : (
-                <tr className="bg-white dark:bg-gray-800">
-                  <td colSpan={8} className="border border-gray-200 dark:border-gray-600 px-3 py-4 text-center text-gray-500 dark:text-gray-400">
+                <tr className="bg-white dark:bg-white">
+                  <td colSpan={8} className="border border-gray-200 dark:border-gray-300 px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                     No academic progress data available.
                   </td>
                 </tr>
@@ -284,22 +284,22 @@ const StudentProfileView = ({
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-gray-800 dark:shadow-lg">
+      <section className="bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden dark:bg-white dark:shadow-lg">
         <SectionHeader
           icon={FileText}
           title="Personal Details"
-          gradient="bg-gradient-to-r from-sky-500 to-blue-600 rounded-t-2xl"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-700 rounded-t-2xl"
         />
 
         {saveError ? (
-          <div className="mx-5 mt-4 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
+          <div className="mx-5 mt-4 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-red-50 px-3 py-2 text-sm text-red-700 dark:text-red-600">
             {saveError}
           </div>
         ) : null}
 
         <div className="space-y-5 p-5">
           {STUDENT_PROFILE_SECTIONS.map((section) => (
-            <div key={section.title} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
+            <div key={section.title} className="rounded-lg border border-gray-200 dark:border-gray-200 bg-gray-50 dark:bg-white p-4">
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
                 {section.title}
               </h3>
@@ -311,13 +311,13 @@ const StudentProfileView = ({
                   const canEdit = isFieldEditable(field);
 
                   return (
-                    <div key={field} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
+                    <div key={field} className="rounded-lg border border-gray-200 dark:border-gray-200 bg-white dark:bg-white p-3">
                       <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         {field}
                       </label>
 
                       {!editMode ? (
-                        <div className="text-sm text-gray-800 dark:text-gray-200">
+                        <div className="text-sm text-gray-800 dark:text-gray-700">
                           {showViewLink ? (
                             <a
                               href={value}
@@ -336,10 +336,10 @@ const StudentProfileView = ({
                           value={value}
                           onChange={(event) => setDraftValue(field, event.target.value)}
                           disabled={!canEdit}
-                          className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none ${
+                          className={`w-full rounded-lg border px-3 py-2 text-sm text-gray-800 dark:text-gray-700 focus:outline-none ${
                             canEdit
-                              ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-blue-400"
-                              : "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                              ? "border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 focus:border-blue-400"
+                              : "border-gray-200 dark:border-gray-200 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                           }`}
                           placeholder={`Enter ${field}`}
                         />

@@ -50,7 +50,7 @@ const LectureContent = () => {
         <h2 className="text-2xl font-semibold mb-4">Recorded Content</h2>
         <button
           onClick={() => setShowLecturePanel(true)} 
-          className="underline text-green-600 hover:text-green-700"
+          className="underline text-blue-600 hover:text-blue-700"
         >
           View All
         </button>
@@ -62,7 +62,7 @@ const LectureContent = () => {
               key={lecture._id}
               className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg"
             >
-              <Video className="h-6 w-6 text-green-600 mt-1" />
+              <Video className="h-6 w-6 text-blue-600 mt-1" />
               <div className="w-full flex justify-between">
                 <div>
                   <h3 className="font-medium text-gray-900">{lecture.title}</h3>
@@ -70,7 +70,7 @@ const LectureContent = () => {
                 </div>
                 <Link
                   to={`/lectures/${courseID}/${index}`}
-                  className="text-green-500 hover:text-green-600 inline-block mt-2"
+                  className="text-blue-500 hover:text-blue-600 inline-block mt-2"
                 >
                   Watch Video
                 </Link>

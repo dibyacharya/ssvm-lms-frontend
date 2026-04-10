@@ -127,9 +127,9 @@ export const formatTime = (dateValue) => {
  * Takes a string (courseCode) and returns a tailwind-friendly color config.
  */
 const COURSE_COLORS = [
-  { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-800 dark:text-blue-300", border: "border-blue-300 dark:border-blue-700", dot: "bg-blue-500" },
   { bg: "bg-purple-100 dark:bg-purple-900/40", text: "text-purple-800 dark:text-purple-300", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500" },
-  { bg: "bg-green-100 dark:bg-green-900/40", text: "text-green-800 dark:text-green-300", border: "border-green-300 dark:border-green-700", dot: "bg-green-500" },
+  { bg: "bg-purple-100 dark:bg-purple-900/40", text: "text-purple-800 dark:text-purple-300", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500" },
+  { bg: "bg-purple-100 dark:bg-purple-900/40", text: "text-purple-800 dark:text-purple-300", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500" },
   { bg: "bg-orange-100 dark:bg-orange-900/40", text: "text-orange-800 dark:text-orange-300", border: "border-orange-300 dark:border-orange-700", dot: "bg-orange-500" },
   { bg: "bg-pink-100 dark:bg-pink-900/40", text: "text-pink-800 dark:text-pink-300", border: "border-pink-300 dark:border-pink-700", dot: "bg-pink-500" },
   { bg: "bg-teal-100 dark:bg-teal-900/40", text: "text-teal-800 dark:text-teal-300", border: "border-teal-300 dark:border-teal-700", dot: "bg-teal-500" },

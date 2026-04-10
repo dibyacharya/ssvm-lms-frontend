@@ -25,12 +25,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
           {count}
         </span>
       )}
@@ -45,7 +45,7 @@ const StatCard = ({ icon: Icon, label, value, color, bgColor, borderColor }) => 
   >
     <div className="flex items-center gap-3">
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
       <div>
         <p className="text-2xl font-bold text-gray-800">{value}</p>
@@ -59,20 +59,20 @@ const StatCard = ({ icon: Icon, label, value, color, bgColor, borderColor }) => 
 const getGradeColor = (grade) => {
   if (!grade) return "text-gray-400";
   const g = grade.toUpperCase();
-  if (g === "O" || g === "E" || g === "A") return "text-emerald-600";
+  if (g === "O" || g === "E" || g === "A") return "text-blue-600";
   if (g === "B") return "text-blue-600";
   if (g === "C") return "text-amber-600";
-  if (g === "D") return "text-orange-600";
+  if (g === "D") return "text-blue-600";
   return "text-red-600";
 };
 
 const getGradeBg = (grade) => {
   if (!grade) return "bg-gray-50 border-gray-200";
   const g = grade.toUpperCase();
-  if (g === "O" || g === "E" || g === "A") return "bg-emerald-50 border-emerald-200";
+  if (g === "O" || g === "E" || g === "A") return "bg-blue-50 border-blue-200";
   if (g === "B") return "bg-blue-50 border-blue-200";
   if (g === "C") return "bg-amber-50 border-amber-200";
-  if (g === "D") return "bg-orange-50 border-orange-200";
+  if (g === "D") return "bg-blue-50 border-blue-200";
   return "bg-red-50 border-red-200";
 };
 
@@ -116,7 +116,7 @@ const StudentCourseGradebook = () => {
           icon={Award}
           title="Gradebook"
           subtitle="View your grades for this course"
-          gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+          gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-fuchsia-500"
         />
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
           <p className="text-red-500">{error}</p>
@@ -146,7 +146,7 @@ const StudentCourseGradebook = () => {
         icon={Award}
         title="My Gradebook"
         subtitle="View your assessment plan and grades for this course"
-        gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+        gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-fuchsia-500"
       />
 
       {/* Assessment Plan Weightage */}
@@ -155,7 +155,7 @@ const StudentCourseGradebook = () => {
           <SectionHeader
             icon={Target}
             title="Assessment Weightage"
-            gradient="bg-gradient-to-r from-blue-500 to-indigo-600"
+            gradient="bg-gradient-to-r from-blue-500 to-blue-600"
           />
           <div className="p-6">
             <div className="grid grid-cols-3 gap-6">
@@ -163,12 +163,12 @@ const StudentCourseGradebook = () => {
                 <p className="text-3xl font-bold text-blue-600">{apEndTerm}%</p>
                 <p className="text-xs text-gray-600 mt-1 font-medium">End Term Exam</p>
               </div>
-              <div className="text-center p-4 rounded-xl bg-purple-50 border border-purple-100">
-                <p className="text-3xl font-bold text-purple-600">{apMidTerm}%</p>
+              <div className="text-center p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <p className="text-3xl font-bold text-blue-600">{apMidTerm}%</p>
                 <p className="text-xs text-gray-600 mt-1 font-medium">Mid Term Exam</p>
               </div>
-              <div className="text-center p-4 rounded-xl bg-green-50 border border-green-100">
-                <p className="text-3xl font-bold text-green-600">{apCA}%</p>
+              <div className="text-center p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <p className="text-3xl font-bold text-blue-600">{apCA}%</p>
                 <p className="text-xs text-gray-600 mt-1 font-medium">Continuous Assessment</p>
               </div>
             </div>
@@ -182,7 +182,7 @@ const StudentCourseGradebook = () => {
           <SectionHeader
             icon={BarChart3}
             title="Continuous Assessment Categories"
-            gradient="bg-gradient-to-r from-fuchsia-500 to-purple-600"
+            gradient="bg-gradient-to-r from-fuchsia-500 to-blue-600"
             count={caCategories.length}
           />
           <div className="p-6">
@@ -220,11 +220,11 @@ const StudentCourseGradebook = () => {
           <SectionHeader
             icon={Award}
             title="Your Grades"
-            gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+            gradient="bg-gradient-to-r from-blue-500 to-blue-600"
           />
           <div className="flex flex-col items-center justify-center py-16 px-6">
             <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <FileText className="w-8 h-8 text-gray-300" />
+              <FileText className="w-8 h-8 text-gray-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-700 mb-1">Grades Not Published Yet</h3>
             <p className="text-gray-400 text-sm text-center max-w-md">
@@ -237,7 +237,7 @@ const StudentCourseGradebook = () => {
           <SectionHeader
             icon={Award}
             title="Your Grades"
-            gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+            gradient="bg-gradient-to-r from-blue-500 to-blue-600"
           />
           <div className="p-6 space-y-6">
             {/* Grade Cards */}
@@ -254,17 +254,17 @@ const StudentCourseGradebook = () => {
                 icon={FileText}
                 label="Mid Term"
                 value={midTerm != null ? midTerm : "—"}
-                color="bg-purple-500"
-                bgColor="bg-purple-50/80"
-                borderColor="border-purple-100"
+                color="bg-blue-500"
+                bgColor="bg-blue-50/80"
+                borderColor="border-blue-100"
               />
               <StatCard
                 icon={Calculator}
                 label="Continuous Assessment"
                 value={ca != null ? ca : "—"}
-                color="bg-green-500"
-                bgColor="bg-green-50/80"
-                borderColor="border-green-100"
+                color="bg-blue-500"
+                bgColor="bg-blue-50/80"
+                borderColor="border-blue-100"
               />
               <StatCard
                 icon={TrendingUp}

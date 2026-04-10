@@ -144,7 +144,7 @@ export default function AssignmentViewer() {
       <div className="w-80 h-[98%] border-r flex flex-col bg-white">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 w-full text-green-600 hover:text-green-900   p-2"
+          className="flex items-center space-x-2 w-full text-blue-600 hover:text-blue-900   p-2"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>Back</span>
@@ -176,8 +176,8 @@ export default function AssignmentViewer() {
             <button
               className={`${
                 sortBy === "turned-in"
-                  ? "text-green-600"
-                  : "hover:text-green-600"
+                  ? "text-blue-600"
+                  : "hover:text-blue-600"
               }`}
               onClick={() => setSortBy("turned-in")}
             >
@@ -200,7 +200,7 @@ export default function AssignmentViewer() {
               key={student.id}
               className={`flex items-center gap-3 p-3 cursor-pointer ${
                 selectedStudent?.id === student.id
-                  ? "bg-emerald-50"
+                  ? "bg-blue-50"
                   : "hover:bg-gray-50"
               }`}
               onClick={() => handleStudentSelect(student)}
@@ -208,7 +208,7 @@ export default function AssignmentViewer() {
               <div
                 className={`h-8 w-8 flex items-center justify-center ${
                   student.status === "Turned in"
-                    ? "bg-blue-100 text-green-600"
+                    ? "bg-blue-100 text-blue-600"
                     : "bg-gray-100 text-gray-600"
                 } rounded-full`}
               >
@@ -221,7 +221,7 @@ export default function AssignmentViewer() {
                 <div
                   className={`text-sm ${
                     student.status === "Turned in"
-                      ? "text-green-600"
+                      ? "text-blue-600"
                       : "text-red-500"
                   }`}
                 >
@@ -290,7 +290,7 @@ export default function AssignmentViewer() {
                     ).toLocaleString()}
                   </div>
 
-                  <div className="flex items-center gap-2 mt-2 text-emerald-600 text-sm  p-2 bg-emerald-100  rounded-lg">
+                  <div className="flex items-center gap-2 mt-2 text-blue-600 text-sm  p-2 bg-blue-100  rounded-lg">
                     <FileText className="h-4 w-4" />
                     <span>
                       {selectedStudent.submission.submissionFile
@@ -305,7 +305,7 @@ export default function AssignmentViewer() {
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
-                      className="border border-emerald-400 hover:border-emerald-600 p-1 rounded w-20 text-center"
+                      className="border border-blue-400 hover:border-blue-600 p-1 rounded w-20 text-center"
                       placeholder="0"
                       value={grade}
                       onChange={(e) => setGrade(e.target.value)}
@@ -322,16 +322,16 @@ export default function AssignmentViewer() {
                   <h3 className="font-medium mb-2">Report </h3>
                   <div className="flex flex-col gap-2">
                     <textarea
-                      className="border  border-emerald-400 p-2 rounded resize-none hover:border-emerald-600"
+                      className="border  border-blue-400 p-2 rounded resize-none hover:border-blue-600"
                       placeholder="Add private comment..."
                       rows={4}
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                     ></textarea>
                     <button
-                      className={`bg-emerald-600 px-3 py-1 rounded text-white hover:bg-emerald-700 self-end ${
+                      className={`bg-blue-600 px-3 py-1 rounded text-gray-900 hover:bg-blue-700 self-end ${
                         saveLoading
-                          ? "bg-emerald-600/50 cursor-not-allowed hover:bg-emerald-700/50"
+                          ? "bg-blue-600/50 cursor-not-allowed hover:bg-blue-700/50"
                           : ""
                       } `}
                       disabled={saveLoading}

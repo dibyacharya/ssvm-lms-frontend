@@ -111,66 +111,66 @@ const StudentHome = ({ setSelectedOption }) => {
   }, [courseID]);
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 p-6 bg-gray-50 dark:bg-gray-900">
+    <div className="max-w-[1600px] mx-auto space-y-8 p-6">
       {/* Header Banner */}
       <CoursePageBanner
         icon={Home}
         title="Home"
         subtitle={`Welcome back, ${user?.name || "Student"}`}
-        gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500"
+        gradient="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500"
       />
 
       {/* Quick Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Students Card (Static) */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg p-6 border border-tertiary/10 dark:border-gray-600">
+        <div className="glass-card rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-tertiary dark:text-gray-400 text-sm">Total Students</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">{courseData?.stats?.totalStudentsEnrolled}</h3>
+              <p className="text-gray-500 text-sm">Total Students</p>
+              <h3 className="text-3xl font-bold text-primary-600 mt-1">{courseData?.stats?.totalStudentsEnrolled}</h3>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
-              <Users className="w-6 h-6 text-primary dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+              <Users className="w-6 h-6 text-primary-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
-            {/* <span className="text-primary dark:text-blue-400 font-medium">5</span> */}
+          <div className="mt-4 flex items-center text-sm text-gray-500">
+            {/* <span className="text-primary-600 font-medium">5</span> */}
             <span className="mx-1">study buddies in this group</span>
           </div>
         </div>
         
         {/* Course Progress Card (Dynamic) */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg p-6 border border-tertiary/10 dark:border-gray-600">
+        <div className="glass-card rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-tertiary dark:text-gray-400 text-sm">Course Progress</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">
+              <p className="text-gray-500 text-sm">Course Progress</p>
+              <h3 className="text-3xl font-bold text-primary-600 mt-1">
                 {courseProgress}%
               </h3>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
-              <BarChart2 className="w-6 h-6 text-primary dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+              <BarChart2 className="w-6 h-6 text-primary-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+          <div className="mt-4 flex items-center text-sm text-gray-500">
             <span>{courseProgress === 0 ? "Course just started" : courseProgress === 100 ? "Course completed" : `${completedTopics} of ${totalTopics} topics covered`}</span>
           </div>
         </div>
 
         {/* Total Lectures Card (Dynamic) */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg p-6 border border-tertiary/10 dark:border-gray-600">
+        <div className="glass-card rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-tertiary dark:text-gray-400 text-sm">Total Lectures</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">
+              <p className="text-gray-500 text-sm">Total Lectures</p>
+              <h3 className="text-3xl font-bold text-primary-600 mt-1">
                 {totalLectures}
               </h3>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-primary dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+          <div className="mt-4 flex items-center text-sm text-gray-500">
             <span>
               Across {courseData?.syllabus?.modules?.length || 0} modules
             </span>
@@ -178,17 +178,17 @@ const StudentHome = ({ setSelectedOption }) => {
         </div>
 
         {/* Upcoming Events Card (Static) */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg p-6 border border-tertiary/10 dark:border-gray-600">
+        <div className="glass-card rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-tertiary dark:text-gray-400 text-sm">Upcoming</p>
-              <h3 className="text-3xl font-bold text-primary dark:text-blue-400 mt-1">0</h3>
+              <p className="text-gray-500 text-sm">Upcoming</p>
+              <h3 className="text-3xl font-bold text-primary-600 mt-1">0</h3>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-blue-500/20 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-primary dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-primary-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm text-tertiary dark:text-gray-400">
+          <div className="mt-4 flex items-center text-sm text-gray-500">
             <span>events this week</span>
           </div>
         </div>
@@ -199,16 +199,16 @@ const StudentHome = ({ setSelectedOption }) => {
         {/* Left Column (2/3 width) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Course Modules Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg border border-tertiary/10 dark:border-gray-600 overflow-hidden">
-            <div className="p-6 border-b border-tertiary/10 dark:border-gray-600 flex justify-between items-center">
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <BookOpen className="w-6 h-6 text-primary dark:text-blue-400" />
-                <h2 className="text-xl font-semibold text-primary dark:text-white">
+                <BookOpen className="w-6 h-6 text-primary-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
                   Course Modules
                 </h2>
               </div>
               <button
-                className="text-primary dark:text-blue-400 hover:text-primary/80 dark:hover:text-blue-300 text-sm font-medium flex items-center transition-colors"
+                className="text-primary-600 hover:text-primary-600 text-sm font-medium flex items-center transition-colors"
                 onClick={() => setSelectedOption("E-Learning")}
               >
                 View All Modules
@@ -223,7 +223,7 @@ const StudentHome = ({ setSelectedOption }) => {
                   return (
                     <div
                       key={module._id}
-                      className="group cursor-pointer rounded-xl overflow-hidden hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600"
+                      className="group cursor-pointer rounded-xl overflow-hidden hover:shadow-card transition-all duration-300 bg-white/70 backdrop-blur-xl border border-gray-200"
                       style={{ borderLeft: `4px solid ${modTheme.accentColor}` }}
                       onClick={() => {
                         setSelectedOption("E-Learning");
@@ -241,20 +241,20 @@ const StudentHome = ({ setSelectedOption }) => {
                         />
                         {/* Module number badge */}
                         <div
-                          className="absolute top-3 left-3 w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                          className="absolute top-3 left-3 w-9 h-9 rounded-lg flex items-center justify-center text-gray-900 text-sm font-bold shadow-lg"
                           style={{ backgroundColor: modTheme.accentColor }}
                         >
                           {index + 1}
                         </div>
                         {/* Lecture count badge */}
                         {module.lectureCount > 0 && (
-                          <div className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                            <Layers className="w-3 h-3 text-gray-600 dark:text-gray-300" />
-                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">{module.lectureCount} lectures</span>
+                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                            <Layers className="w-3 h-3 text-gray-600" />
+                            <span className="text-xs font-semibold text-gray-600">{module.lectureCount} lectures</span>
                           </div>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
-                          <h3 className="text-white font-semibold text-base leading-tight drop-shadow-sm">
+                          <h3 className="text-gray-900 font-semibold text-base leading-tight drop-shadow-sm">
                             {module.moduleTitle}
                           </h3>
                         </div>
@@ -266,7 +266,7 @@ const StudentHome = ({ setSelectedOption }) => {
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: modTheme.accentColor }}
                           />
-                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Module {index + 1}</span>
+                          <span className="text-xs font-medium text-gray-500">Module {index + 1}</span>
                         </div>
                         <span
                           className="text-sm font-semibold flex items-center gap-1 transition-all duration-200 group-hover:gap-2"
@@ -280,8 +280,8 @@ const StudentHome = ({ setSelectedOption }) => {
                   );
                 })
               ) : (
-                <div className="col-span-full text-center text-tertiary dark:text-gray-400 p-8">
-                  <Layers className="w-12 h-12 text-tertiary/30 dark:text-gray-600 mx-auto mb-3" />
+                <div className="col-span-full text-center text-gray-500 p-8">
+                  <Layers className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p>No course modules available.</p>
                 </div>
               )}
@@ -295,33 +295,33 @@ const StudentHome = ({ setSelectedOption }) => {
         {/* Right Column (1/3 width) */}
         <div className="space-y-8">
           {/* Announcements Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg border border-tertiary/10 dark:border-gray-600 overflow-hidden">
-            <div className="p-6 border-b border-tertiary/10 dark:border-gray-600 flex justify-between items-center">
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <Megaphone className="w-6 h-6 text-primary dark:text-blue-400" />
-                <h2 className="text-xl font-semibold text-primary dark:text-white">
+                <Megaphone className="w-6 h-6 text-primary-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
                   Announcements
                 </h2>
               </div>
             </div>
 
-            <div className="divide-y divide-tertiary/10 dark:divide-gray-600">
+            <div className="divide-y divide-gray-200">
               {loading ? (
-                <div className="p-6 text-center text-tertiary dark:text-gray-400">Loading...</div>
+                <div className="p-6 text-center text-gray-500">Loading...</div>
               ) : announcements.length === 0 ? (
-                <div className="p-6 text-center text-tertiary dark:text-gray-400">
+                <div className="p-6 text-center text-gray-500">
                   No announcements available.
                 </div>
               ) : (
                 announcements.map((announcement) => (
                   <div
                     key={announcement._id}
-                    className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="p-6 hover:bg-gray-50 transition-colors"
                   >
-                    <h3 className="font-medium text-primary dark:text-white">
+                    <h3 className="font-medium text-gray-900">
                       {announcement.title}
                     </h3>
-                    <div className="text-sm text-tertiary dark:text-gray-400 mt-1">
+                    <div className="text-sm text-gray-500 mt-1">
                       {new Date(announcement.publishDate).toLocaleDateString()}{" "}
                       {new Date(announcement.publishDate).toLocaleTimeString(
                         [],
@@ -338,7 +338,7 @@ const StudentHome = ({ setSelectedOption }) => {
                         className="mt-3 w-full h-[300px] object-cover rounded-lg"
                       />
                     )}
-                    <p className="mt-3 text-tertiary dark:text-gray-300 line-clamp-3">
+                    <p className="mt-3 text-gray-600 line-clamp-3">
                       {announcement.content}
                     </p>
                   </div>
@@ -346,9 +346,9 @@ const StudentHome = ({ setSelectedOption }) => {
               )}
             </div>
 
-            <div className="p-4 border-t border-tertiary/10 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+            <div className="p-4 border-t border-gray-200 bg-white/5">
               <button
-                className="w-full py-2 text-primary dark:text-blue-400 hover:text-primary/80 dark:hover:text-blue-300 text-sm font-medium flex items-center justify-center transition-colors"
+                className="w-full py-2 text-primary-600 hover:text-primary-600 text-sm font-medium flex items-center justify-center transition-colors"
                 onClick={() => {
                   setSelectedOption("Announcements");
                 }}
@@ -359,43 +359,43 @@ const StudentHome = ({ setSelectedOption }) => {
             </div>
           </div>
           {/* Calendar Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-lg border border-tertiary/10 dark:border-gray-600 overflow-hidden">
-            <div className="p-6 border-b border-tertiary/10 dark:border-gray-600 flex justify-between items-center">
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <Calendar className="w-6 h-6 text-primary dark:text-blue-400" />
-                <h2 className="text-xl font-semibold text-primary dark:text-white">
+                <Calendar className="w-6 h-6 text-primary-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
                   Upcoming Events
                 </h2>
               </div>
-              <div className="text-sm text-tertiary dark:text-gray-400 font-medium">
+              <div className="text-sm text-gray-500 font-medium">
                 {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </div>
             </div>
 
-            <div className="divide-y divide-tertiary/10 dark:divide-gray-600">
+            <div className="divide-y divide-gray-200">
               {upcomingEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-primary/10 dark:bg-blue-500/20 rounded-lg flex flex-col items-center justify-center">
-                      <span className="text-primary dark:text-blue-400 font-bold text-lg">
+                    <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex flex-col items-center justify-center">
+                      <span className="text-primary-600 font-bold text-lg">
                         {event.date.split(" ")[1].replace(",", "")}
                       </span>
-                      <span className="text-tertiary dark:text-gray-400 text-xs">
+                      <span className="text-gray-500 text-xs">
                         {event.date.split(" ")[0]}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-medium text-primary dark:text-white">
+                      <h3 className="font-medium text-gray-900">
                         {event.title}
                       </h3>
-                      <div className="flex items-center mt-1 text-sm text-tertiary dark:text-gray-400">
+                      <div className="flex items-center mt-1 text-sm text-gray-500">
                         <Clock className="w-3 h-3 mr-1" />
                         <span>{event.time}</span>
                       </div>
-                      <div className="mt-1 text-sm text-tertiary dark:text-gray-400">
+                      <div className="mt-1 text-sm text-gray-500">
                         {event.location}
                       </div>
                     </div>
@@ -406,13 +406,13 @@ const StudentHome = ({ setSelectedOption }) => {
 
             {upcomingEvents.length === 0 && (
               <div className="p-8 text-center">
-                <Clock className="w-12 h-12 text-tertiary/30 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-tertiary dark:text-gray-400">No upcoming events</p>
+                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">No upcoming events</p>
               </div>
             )}
 
-            <div className="p-4 border-t border-tertiary/10 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-              <button className="w-full py-2 text-primary dark:text-blue-400 hover:text-primary/80 dark:hover:text-blue-300 text-sm font-medium flex items-center justify-center transition-colors">
+            <div className="p-4 border-t border-gray-200 bg-white/5">
+              <button className="w-full py-2 text-primary-600 hover:text-primary-600 text-sm font-medium flex items-center justify-center transition-colors">
                 View Calendar
                 <ExternalLink className="w-4 h-4 ml-1" />
               </button>

@@ -114,7 +114,7 @@ const ExamLobby = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -132,12 +132,12 @@ const ExamLobby = () => {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-2xl w-full overflow-hidden"
+        className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-card border border-gray-200 max-w-2xl w-full overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 p-6 text-white">
+        <div className="bg-gradient-to-r from-primary-600 via-primary-600 to-primary-700 p-6 text-gray-900">
           <h1 className="text-xl font-bold">{exam.title}</h1>
-          <p className="text-indigo-200 text-sm mt-1">
+          <p className="text-primary-200 text-sm mt-1">
             {exam.examType?.replace('_', ' ').toUpperCase()} &middot; {exam.duration} minutes
           </p>
         </div>
@@ -145,22 +145,22 @@ const ExamLobby = () => {
         <div className="p-6 space-y-6">
           {/* Instructions */}
           {exam.instructions && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <h3 className="text-sm font-semibold text-amber-800 mb-2">Instructions</h3>
-              <p className="text-xs text-amber-700 whitespace-pre-wrap">{exam.instructions}</p>
+            <div className="bg-amber-50 border border-amber-500/20 rounded-xl p-4">
+              <h3 className="text-sm font-semibold text-amber-600 mb-2">Instructions</h3>
+              <p className="text-xs text-amber-200/80 whitespace-pre-wrap">{exam.instructions}</p>
             </div>
           )}
 
           {/* Exam details */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+            <div className="bg-gray-100 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-gray-500 text-xs mb-1">
                 <FaClock /> Duration
               </div>
               <p className="text-gray-900 font-semibold">{exam.duration} minutes</p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+            <div className="bg-gray-100 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-gray-500 text-xs mb-1">
                 <FaShieldAlt /> Questions
               </div>
               <p className="text-gray-900 font-semibold">
@@ -177,12 +177,12 @@ const ExamLobby = () => {
               </h3>
 
               {cameraError ? (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                  <FaExclamationTriangle className="text-red-500 text-2xl mx-auto mb-2" />
-                  <p className="text-red-700 text-sm">{cameraError}</p>
+                <div className="bg-red-50 border border-red-500/20 rounded-xl p-4 text-center">
+                  <FaExclamationTriangle className="text-red-600 text-2xl mx-auto mb-2" />
+                  <p className="text-red-600 text-sm">{cameraError}</p>
                   <button
                     onClick={setupCamera}
-                    className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700"
+                    className="mt-3 px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-xs font-medium hover:bg-red-700"
                   >
                     Try Again
                   </button>
@@ -197,7 +197,7 @@ const ExamLobby = () => {
                     className="w-full h-full object-cover"
                   />
                   {cameraReady && (
-                    <div className="absolute top-2 right-2 px-2 py-1 bg-emerald-500 text-white rounded-full text-[10px] font-medium">
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-primary-500 text-gray-900 rounded-full text-[10px] font-medium">
                       Camera Ready
                     </div>
                   )}
@@ -206,28 +206,28 @@ const ExamLobby = () => {
 
               {/* VM Blocked */}
               {vmBlocked && (
-                <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 text-center">
-                  <FaExclamationTriangle className="text-red-500 text-3xl mx-auto mb-2" />
-                  <p className="text-red-700 font-bold text-sm">Virtual Machine Detected</p>
+                <div className="bg-red-50 border-2 border-red-500/30 rounded-xl p-4 text-center">
+                  <FaExclamationTriangle className="text-red-600 text-3xl mx-auto mb-2" />
+                  <p className="text-red-600 font-bold text-sm">Virtual Machine Detected</p>
                   <p className="text-red-600 text-xs mt-1">
                     Proctored exams cannot be taken on virtual machines. Please use a physical computer.
                   </p>
-                  {vmDetails && <p className="text-red-400 text-[10px] mt-2">{vmDetails}</p>}
+                  {vmDetails && <p className="text-red-500 text-[10px] mt-2">{vmDetails}</p>}
                 </div>
               )}
 
               {/* Earphone Warning */}
               {earphoneWarning && (
-                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-3">
-                  <FaExclamationTriangle className="text-amber-500 text-lg flex-shrink-0" />
+                <div className="bg-amber-50 border border-amber-500/20 rounded-xl p-3 flex items-center gap-3">
+                  <FaExclamationTriangle className="text-amber-600 text-lg flex-shrink-0" />
                   <div>
-                    <p className="text-amber-800 font-semibold text-xs">Earphones/Headphones Detected</p>
-                    <p className="text-amber-700 text-[11px]">{earphoneWarning}</p>
+                    <p className="text-amber-600 font-semibold text-xs">Earphones/Headphones Detected</p>
+                    <p className="text-amber-200/80 text-[11px]">{earphoneWarning}</p>
                   </div>
                 </div>
               )}
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+              <div className="bg-primary-50 border border-primary-500/20 rounded-xl p-3 text-xs text-primary-600">
                 <p className="font-semibold mb-1">Proctoring Rules:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {exam.proctoring.faceDetection && <li>Keep your face visible at all times</li>}
@@ -254,8 +254,8 @@ const ExamLobby = () => {
                 disabled={starting || vmBlocked || (exam.proctoring?.enabled && !cameraReady)}
                 className={`flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold transition-all ${
                   starting || vmBlocked || (exam.proctoring?.enabled && !cameraReady)
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 hover:from-primary-700 hover:to-primary-600 shadow-lg shadow-primary-500/25'
                 }`}
               >
                 {starting ? (
@@ -271,7 +271,7 @@ const ExamLobby = () => {
               </button>
             ) : (
               <div className="text-center text-gray-500 text-sm">
-                <FaClock className="mx-auto text-2xl mb-2 text-gray-300" />
+                <FaClock className="mx-auto text-2xl mb-2 text-gray-400" />
                 <p>Exam is not available yet</p>
               </div>
             )}

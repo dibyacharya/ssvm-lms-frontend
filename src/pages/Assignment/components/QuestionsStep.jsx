@@ -755,7 +755,7 @@ const QuestionsStep = ({
                     onMouseLeave={() => setShowCreateTooltip(false)}
                     className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       questionsTab === 'create'
-                        ? 'bg-primary text-white'
+                        ? 'bg-primary text-gray-900'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
@@ -764,7 +764,7 @@ const QuestionsStep = ({
                   {/* Tooltip for Create Your Own Assignment */}
                   {showCreateTooltip && (
                     <div 
-                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                       onMouseEnter={() => setShowCreateTooltip(true)}
                       onMouseLeave={() => setShowCreateTooltip(false)}
                     >
@@ -782,7 +782,7 @@ const QuestionsStep = ({
                     onMouseLeave={() => setShowAttachmentTooltip(false)}
                     className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       questionsTab === 'attachments'
-                        ? 'bg-primary text-white'
+                        ? 'bg-primary text-gray-900'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
@@ -791,7 +791,7 @@ const QuestionsStep = ({
                   {/* Tooltip for Add Attachments */}
                   {showAttachmentTooltip && (
                     <div 
-                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                       onMouseEnter={() => setShowAttachmentTooltip(true)}
                       onMouseLeave={() => setShowAttachmentTooltip(false)}
                     >
@@ -816,7 +816,7 @@ const QuestionsStep = ({
                         onClick={() => setShowAddQuestionModal(true)}
                         onMouseEnter={() => setShowAddQuestionTooltip(true)}
                         onMouseLeave={() => setShowAddQuestionTooltip(false)}
-                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
+                        className="w-full px-6 py-3 bg-primary text-gray-900 rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
                       >
                         <Plus size={20} />
                         Add Question
@@ -824,7 +824,7 @@ const QuestionsStep = ({
                       {/* Tooltip for Add Question */}
                       {showAddQuestionTooltip && (
                         <div 
-                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                           onMouseEnter={() => setShowAddQuestionTooltip(true)}
                           onMouseLeave={() => setShowAddQuestionTooltip(false)}
                         >
@@ -840,7 +840,7 @@ const QuestionsStep = ({
                         onClick={() => setShowAIGenerationModal(true)}
                         onMouseEnter={() => setShowAIGenerateTooltip(true)}
                         onMouseLeave={() => setShowAIGenerateTooltip(false)}
-                        className="w-full px-6 py-3 bg-accent1 text-white rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
+                        className="w-full px-6 py-3 bg-accent1 text-gray-900 rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
                       >
                         <Sparkles size={20} />
                         Generate with AI
@@ -848,7 +848,7 @@ const QuestionsStep = ({
                       {/* Tooltip for Generate with AI */}
                       {showAIGenerateTooltip && (
                         <div 
-                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                           onMouseEnter={() => setShowAIGenerateTooltip(true)}
                           onMouseLeave={() => setShowAIGenerateTooltip(false)}
                         >
@@ -1007,7 +1007,7 @@ const QuestionsStep = ({
                             </button>
                             <button
                               onClick={handleSaveEdit}
-                              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2"
+                              className="px-4 py-2 bg-primary text-gray-900 rounded-lg hover:bg-primary/90 flex items-center gap-2"
                             >
                               <Save size={16} />
                               Save
@@ -1178,7 +1178,7 @@ const QuestionsStep = ({
                     }}
                     onMouseEnter={() => setShowUploadTooltip(true)}
                     onMouseLeave={() => setShowUploadTooltip(false)}
-                    className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
+                    className="w-full px-6 py-3 bg-primary text-gray-900 rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
                   >
                     <Upload size={20} />
                     Upload CSV/JSON
@@ -1186,7 +1186,7 @@ const QuestionsStep = ({
                   {/* Tooltip for Upload CSV/JSON */}
                   {showUploadTooltip && (
                     <div 
-                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                       onMouseEnter={() => setShowUploadTooltip(true)}
                       onMouseLeave={() => setShowUploadTooltip(false)}
                     >
@@ -1201,7 +1201,7 @@ const QuestionsStep = ({
                     onMouseEnter={() => setShowFormatTooltip(true)}
                     onMouseLeave={() => setShowFormatTooltip(false)}
                     onClick={() => setShowFormatTooltip(!showFormatTooltip)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-primary/70 hover:text-white transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-primary/70 hover:text-gray-900 transition-colors"
                     title="View file format help"
                   >
                     <HelpCircle size={18} />
@@ -1297,7 +1297,7 @@ const QuestionsStep = ({
                     onClick={() => setShowMCQGenerator(true)}
                     onMouseEnter={() => setShowMCQGeneratorTooltip(true)}
                     onMouseLeave={() => setShowMCQGeneratorTooltip(false)}
-                    className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
+                    className="w-full px-6 py-3 bg-primary text-gray-900 rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 font-medium"
                   >
                     <Sparkles size={20} />
                     MCQ Generator
@@ -1305,7 +1305,7 @@ const QuestionsStep = ({
                   {/* Tooltip for MCQ Generator */}
                   {showMCQGeneratorTooltip && (
                     <div 
-                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                       onMouseEnter={() => setShowMCQGeneratorTooltip(true)}
                       onMouseLeave={() => setShowMCQGeneratorTooltip(false)}
                     >
@@ -1321,7 +1321,7 @@ const QuestionsStep = ({
                     onClick={() => setShowAIGenerationModalMCQ(true)}
                     onMouseEnter={() => setShowAIGeneratorTooltip(true)}
                     onMouseLeave={() => setShowAIGeneratorTooltip(false)}
-                    className="w-full px-6 py-3 bg-accent1 text-white rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
+                    className="w-full px-6 py-3 bg-accent1 text-gray-900 rounded-lg hover:bg-accent1/90 flex items-center justify-center gap-2 font-medium"
                   >
                     <Sparkles size={20} />
                     AI Generator
@@ -1329,7 +1329,7 @@ const QuestionsStep = ({
                   {/* Tooltip for AI Generator */}
                   {showAIGeneratorTooltip && (
                     <div 
-                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg"
+                      className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-50 text-gray-900 text-xs rounded-lg py-2 px-3 shadow-lg"
                       onMouseEnter={() => setShowAIGeneratorTooltip(true)}
                       onMouseLeave={() => setShowAIGeneratorTooltip(false)}
                     >

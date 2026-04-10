@@ -167,7 +167,7 @@ export const events = [
     time: "8:00",
     image: "../ICSSR-1024x634.jpg",
     location: "Virtual",
-    link: "https://kiit.ac.in/event/two-day-international-conference-on-utilization-of-indigenous-knowledge-of-particularly-vulnerable-tribal-groups-for-an-inclusive-viksit-bharat/",
+    link: "https://ssvm.ac.in/event/two-day-international-conference-on-utilization-of-indigenous-knowledge-of-particularly-vulnerable-tribal-groups-for-an-inclusive-viksit-bharat/",
   },
   {
     id: 2,
@@ -177,7 +177,7 @@ export const events = [
     time: "16:00",
     image: "../icmr.jpeg",
     location: "Library Room 204",
-    link: "https://kiit.ac.in/event/5th-international-conference-on-management-research/",
+    link: "https://ssvm.ac.in/event/5th-international-conference-on-management-research/",
   },
 ];
 

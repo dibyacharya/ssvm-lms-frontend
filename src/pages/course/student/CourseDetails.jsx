@@ -191,16 +191,16 @@ const CourseDetails = () => {
       return (
         <button
           onClick={() => setSelectedOption(title)}
-          className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+          className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
             selectedOption === title
-              ? "text-accent1 dark:text-accent1"
-              : "text-gray-700 dark:text-gray-300"
+              ? "text-primary-600"
+              : "text-gray-600"
           }`}
         >
           {icon}
           <span>{title}</span>
           {selectedOption === title && (
-            <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+            <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-primary-500 rounded-full"></div>
           )}
         </button>
       );
@@ -213,10 +213,10 @@ const CourseDetails = () => {
       >
         <button
           onClick={() => toggleDropdown(menuKey)}
-          className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+          className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
             openDropdown === menuKey || isTabSelected
-              ? "bg-gray-100 dark:bg-gray-700 text-accent1 dark:text-accent1"
-              : "text-gray-700 dark:text-gray-300"
+              ? "bg-white/5 text-primary-600"
+              : "text-gray-600"
           }`}
         >
           {icon}
@@ -227,12 +227,12 @@ const CourseDetails = () => {
             }`}
           />
           {isTabSelected && (
-            <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+            <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-primary-500 rounded-full"></div>
           )}
         </button>
 
         {openDropdown === menuKey && (
-          <div className="absolute left-0 mt-1.5 w-fit min-w-[200px] max-w-[260px] bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600 p-1 z-50">
+          <div className="absolute left-0 mt-1.5 w-fit min-w-[200px] max-w-[260px] bg-white/90 backdrop-blur-xl rounded-md shadow-card border border-gray-200 p-1 z-50">
             <div className="flex flex-col gap-0.5">
               {items.map((item) => (
                 <button
@@ -243,15 +243,15 @@ const CourseDetails = () => {
                   }}
                   className={`flex h-9 w-full items-center gap-1.5 px-2 py-1 rounded transition-colors ${
                     selectedOption === item.label
-                      ? "bg-accent1/10 dark:bg-accent1/20 text-accent1 dark:text-accent1"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      ? "bg-primary-50 text-primary-600"
+                      : "hover:bg-gray-50 text-gray-600"
                   }`}
                 >
                   <div
                     className={`p-1 rounded flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4 ${
                       selectedOption === item.label
-                        ? "bg-accent1/20 dark:bg-accent1/30"
-                        : "bg-gray-100 dark:bg-gray-700"
+                        ? "bg-primary-100"
+                        : "bg-white/5"
                     }`}
                   >
                     {item.icon}
@@ -283,7 +283,7 @@ const CourseDetails = () => {
               icon={BookOpen}
               title="Course Syllabus"
               subtitle="Detailed syllabus and module breakdown"
-              gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-500"
+              gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-500"
             />
             <div className="p-10">
               <SyllabusAccordion course={course} />
@@ -308,7 +308,7 @@ const CourseDetails = () => {
         return <AllAnnouncements />;
       default:
         return (
-          <div className="text-gray-900 dark:text-white">
+          <div className="text-gray-900">
             Welcome to the Home Section
           </div>
         );
@@ -318,24 +318,24 @@ const CourseDetails = () => {
   if (loading) return <LoadingSpinner />;
   if (!course)
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-900 dark:text-white text-xl">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-900 text-xl">
           Course not found
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 bg-dot-grid">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-end items-center h-16">
             <div className="flex items-center space-x-4 relative z-[1000]">
               {/* Discussion Icon */}
               <abbr title="Discussion">
                 <button
-                  className="p-2 rounded-full hover:bg-primary/20 dark:hover:bg-blue-500/20 transition-colors text-primary/70 dark:text-blue-400/70 hover:text-primary dark:hover:text-blue-400"
+                  className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500 hover:text-primary-600"
                   onClick={() => setSelectedOption("Discussion")}
                 >
                   <VscCommentDiscussion size={20} />
@@ -344,7 +344,7 @@ const CourseDetails = () => {
               {/* Announcements Icon */}
               <abbr title="Announcements">
                 <button
-                  className="p-2 rounded-full hover:bg-primary/20 dark:hover:bg-blue-500/20 transition-colors text-primary/70 dark:text-blue-400/70 hover:text-primary dark:hover:text-blue-400"
+                  className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500 hover:text-primary-600"
                   onClick={() => setSelectedOption("Announcements")}
                 >
                   <TfiAnnouncement size={18} />
@@ -353,7 +353,7 @@ const CourseDetails = () => {
               <ProfileDropdown role={"student"} />
               <abbr title="Logout">
                 <button
-                  className="p-2 rounded-full hover:bg-red/40 dark:hover:bg-red-500/20 transition-colors text-red-600 dark:text-red-400"
+                  className="p-2 rounded-full hover:bg-red-500/20 transition-colors text-red-600"
                   onClick={() => handleLogout()}
                 >
                   <FaSignOutAlt size={22} />
@@ -469,10 +469,10 @@ const CourseDetails = () => {
               {/* Content overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between z-10">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-white drop-shadow-lg">
+                  <h1 className="text-3xl font-bold text-gray-900 drop-shadow-lg">
                     {course.title}
                   </h1>
-                  <p className="text-lg text-white/80 mt-1 drop-shadow">
+                  <p className="text-lg text-gray-900/80 mt-1 drop-shadow">
                     {course.teacher?.name}
                   </p>
                 </div>
@@ -480,7 +480,7 @@ const CourseDetails = () => {
                   <div className="ml-8">
                     <button
                       onClick={() => navigate(`/vconf/meeting/${liveMeeting._id}`)}
-                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors animate-pulse border border-green-400 no-underline shadow-lg cursor-pointer"
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-primary-600 text-gray-900 rounded-xl hover:bg-primary-700 transition-colors animate-pulse border border-primary-400 no-underline shadow-lg cursor-pointer"
                     >
                       <MdLiveTv />
                       {liveMeeting.status === "live" ? "Join Live Class" : "🔴 Class Starting Soon"}
@@ -490,7 +490,7 @@ const CourseDetails = () => {
                   <div className="ml-8">
                     <button
                       disabled
-                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl cursor-not-allowed border border-white/30 shadow-lg"
+                      className="flex justify-center items-center gap-2 text-sm px-5 py-2 bg-white/20 backdrop-blur-sm text-gray-900 rounded-xl cursor-not-allowed border border-white/30 shadow-lg"
                     >
                       <MdLiveTv />
                       No Live Class Now
@@ -504,12 +504,12 @@ const CourseDetails = () => {
       })()}
 
       {/* Navigation Bar — matches teacher portal */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm w-full border-b border-gray-200 dark:border-gray-700">
+      <nav className="bg-white/70 backdrop-blur-xl shadow-card w-full border-b border-gray-200">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-14">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center space-x-2 px-4 py-2 mr-6 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md transition-all"
+              className="flex items-center space-x-2 px-4 py-2 mr-6 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 hover:shadow-card transition-all"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Back</span>
@@ -518,16 +518,16 @@ const CourseDetails = () => {
               {/* Home Button */}
               <button
                 onClick={() => setSelectedOption("Home")}
-                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
                   selectedOption === "Home"
-                    ? "text-accent1 dark:text-accent1"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "text-primary-600"
+                    : "text-gray-600"
                 }`}
               >
                 <Home className="w-5 h-5" />
                 <span>Home</span>
                 {selectedOption === "Home" && (
-                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-primary-500 rounded-full"></div>
                 )}
               </button>
 
@@ -541,32 +541,32 @@ const CourseDetails = () => {
               {/* E-Learning Button */}
               <button
                 onClick={() => setSelectedOption("E-Learning")}
-                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
                   selectedOption === "E-Learning"
-                    ? "text-accent1 dark:text-accent1"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "text-primary-600"
+                    : "text-gray-600"
                 }`}
               >
                 <FileText className="w-5 h-5" />
                 <span>E-Learning</span>
                 {selectedOption === "E-Learning" && (
-                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-primary-500 rounded-full"></div>
                 )}
               </button>
 
               {/* Gradebook Button */}
               <button
                 onClick={() => setSelectedOption("Gradebook")}
-                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors ${
                   selectedOption === "Gradebook"
-                    ? "text-accent1 dark:text-accent1"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "text-primary-600"
+                    : "text-gray-600"
                 }`}
               >
                 <BarChart2 className="w-5 h-5" />
                 <span>Gradebook</span>
                 {selectedOption === "Gradebook" && (
-                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-accent1 dark:bg-accent1 rounded-full"></div>
+                  <div className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-full h-1 bg-primary-500 rounded-full"></div>
                 )}
               </button>
             </div>

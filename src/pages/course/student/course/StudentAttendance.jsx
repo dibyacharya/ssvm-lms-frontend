@@ -59,8 +59,8 @@ const DonutChart = ({ percentage, size = 140, strokeWidth = 12 }) => {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-gray-800">{percentage}%</span>
-        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+        <span className="text-3xl font-bold text-gray-900">{percentage}%</span>
+        <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
           Attendance
         </span>
       </div>
@@ -77,10 +77,10 @@ const StatCard = ({ icon: Icon, label, value, color, bgColor, borderColor }) => 
       <div
         className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}
       >
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
         <p className="text-xs text-gray-500 font-medium">{label}</p>
       </div>
     </div>
@@ -98,12 +98,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
           {count}
         </span>
       )}
@@ -115,7 +115,7 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
 const PctBadge = ({ pct }) => {
   if (pct >= 75) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-100 text-primary-600 text-xs font-semibold">
         <CheckCircle className="w-3.5 h-3.5" />
         {pct}%
       </span>
@@ -123,7 +123,7 @@ const PctBadge = ({ pct }) => {
   }
   if (pct >= 50) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-600 text-xs font-semibold">
         <Clock className="w-3.5 h-3.5" />
         {pct}%
       </span>
@@ -131,14 +131,14 @@ const PctBadge = ({ pct }) => {
   }
   if (pct > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold border border-orange-200">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/20 text-accent-600 text-xs font-semibold border border-blue-500/20">
         <Clock className="w-3.5 h-3.5" />
         {pct}%
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 text-red-500 text-xs font-semibold border border-red-200">
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/20 text-red-600 text-xs font-semibold border border-red-500/20">
       <XCircle className="w-3.5 h-3.5" />
       Absent
     </span>
@@ -218,7 +218,7 @@ const StudentAttendance = () => {
           icon={ClipboardCheck}
           title="My Attendance"
           subtitle="View your attendance records for this course"
-          gradient="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"
+          gradient="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700"
         />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
@@ -235,7 +235,7 @@ const StudentAttendance = () => {
         icon={ClipboardCheck}
         title="My Attendance"
         subtitle="View your attendance records for this course"
-        gradient="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"
+        gradient="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700"
       />
 
       {/* Stat Cards */}
@@ -244,25 +244,25 @@ const StudentAttendance = () => {
           icon={Calendar}
           label="Total Sessions"
           value={totalSessions}
-          color="bg-blue-500"
-          bgColor="bg-blue-50/80"
-          borderColor="border-blue-100"
+          color="bg-primary-500"
+          bgColor="bg-primary-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={CheckCircle}
           label="Present"
           value={presentCount}
-          color="bg-emerald-500"
-          bgColor="bg-emerald-50/80"
-          borderColor="border-emerald-100"
+          color="bg-primary-500"
+          bgColor="bg-primary-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={XCircle}
           label="Absent"
           value={absentCount}
           color="bg-red-500"
-          bgColor="bg-red-50/80"
-          borderColor="border-red-100"
+          bgColor="bg-red-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={TrendingUp}
@@ -270,52 +270,46 @@ const StudentAttendance = () => {
           value={`${overallPct}%`}
           color={
             overallPct >= 75
-              ? "bg-emerald-500"
+              ? "bg-primary-500"
               : overallPct >= 50
               ? "bg-amber-500"
               : "bg-red-500"
           }
           bgColor={
             overallPct >= 75
-              ? "bg-emerald-50/80"
+              ? "bg-primary-50"
               : overallPct >= 50
-              ? "bg-amber-50/80"
-              : "bg-red-50/80"
+              ? "bg-amber-50"
+              : "bg-red-50"
           }
-          borderColor={
-            overallPct >= 75
-              ? "border-emerald-100"
-              : overallPct >= 50
-              ? "border-amber-100"
-              : "border-red-100"
-          }
+          borderColor="border-gray-200"
         />
       </div>
 
       {/* Donut + Summary */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <SectionHeader
           icon={TrendingUp}
           title="Attendance Overview"
-          gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+          gradient="bg-gradient-to-r from-primary-600 to-primary-500"
         />
         <div className="p-6 flex flex-col md:flex-row items-center justify-center gap-8">
           <DonutChart percentage={overallPct} />
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" />
-              <span className="text-gray-700 font-medium">Present: {presentCount} sessions</span>
+              <span className="w-3 h-3 rounded-full bg-primary-500 inline-block" />
+              <span className="text-gray-600 font-medium">Present: {presentCount} sessions</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-              <span className="text-gray-700 font-medium">Absent: {absentCount} sessions</span>
+              <span className="text-gray-600 font-medium">Absent: {absentCount} sessions</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" />
-              <span className="text-gray-700 font-medium">Total: {totalSessions} sessions</span>
+              <span className="w-3 h-3 rounded-full bg-primary-500 inline-block" />
+              <span className="text-gray-600 font-medium">Total: {totalSessions} sessions</span>
             </div>
             {overallPct < 75 && totalSessions > 0 && (
-              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
+              <div className="mt-2 p-3 bg-red-50 border border-red-500/20 rounded-lg text-red-600 text-xs">
                 ⚠️ Your attendance is below 75%. Please ensure regular attendance.
               </div>
             )}
@@ -324,20 +318,20 @@ const StudentAttendance = () => {
       </div>
 
       {/* Session-wise Attendance Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <SectionHeader
           icon={Calendar}
           title="Session History"
-          gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+          gradient="bg-gradient-to-r from-primary-600 to-primary-500"
           count={totalSessions}
         />
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-gray-300" />
+            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+              <Calendar className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-bold text-gray-700 mb-1">No Sessions Yet</h3>
-            <p className="text-gray-400 text-sm text-center max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-1">No Sessions Yet</h3>
+            <p className="text-gray-500 text-sm text-center max-w-md">
               No attendance sessions have been recorded for this course yet.
             </p>
           </div>
@@ -345,7 +339,7 @@ const StudentAttendance = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-50/50">
+                <tr className="bg-white/5">
                   <th className="py-3.5 px-4 text-left font-semibold text-gray-400 text-xs uppercase tracking-wider">
                     #
                   </th>
@@ -366,46 +360,46 @@ const StudentAttendance = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 {sessions.map((session, index) => (
                   <tr
                     key={session.sessionKey}
                     className={`transition-all duration-200 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      index % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"
                     } hover:bg-gray-50`}
                   >
                     <td className="py-3.5 px-4 text-gray-400 text-sm font-medium">
                       {sessions.length - index}
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-gray-800 font-medium whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-sm text-gray-900 font-medium whitespace-nowrap">
                       {formatDate(session.date)}
                     </td>
-                    <td className="py-3.5 px-4 text-sm text-gray-600 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-sm text-gray-500 whitespace-nowrap">
                       {formatTime(session.time)}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex justify-center">
                         {session.type === "vconf" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary-50 text-primary-600 text-xs font-medium">
                             <Video className="w-3 h-3" />
                             Online
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-500 text-xs font-medium">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/5 text-gray-500 text-xs font-medium">
                             <ClipboardCheck className="w-3 h-3" />
                             Manual
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-center text-sm text-gray-600">
+                    <td className="py-3.5 px-4 text-center text-sm text-gray-500">
                       {session.type === "vconf" && session.meetingDurationSeconds > 0 ? (
                         <span>
                           {formatDuration(session.studentDurationSeconds)}{" "}
-                          <span className="text-gray-400">/ {formatDuration(session.scheduledDurationSeconds || session.meetingDurationSeconds)}</span>
+                          <span className="text-gray-400">/{formatDuration(session.scheduledDurationSeconds || session.meetingDurationSeconds)}</span>
                         </span>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-gray-400">—</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4">

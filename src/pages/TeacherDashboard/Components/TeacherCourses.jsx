@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { MonitorPlay, Search, ChevronDown, Calendar, BookOpen, Users, ClipboardList, GraduationCap } from "lucide-react";
+import { MonitorPlay, Search, ChevronDown, Calendar, BookOpen, Users, ClipboardList, GraduationCap, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAllCourses } from "../../../services/course.service";
-import { useMeetingsV2 } from "../../../context/MeetingV2Context"; // New meeting context
+import { useMeetingsV2 } from "../../../context/MeetingV2Context";
 import { resolveCourseTheme } from "../../../utils/courseThemeResolver";
 import { getPeriodLabel } from "../../../utils/periodLabel";
 import { getCourseBannerProps } from "../../../utils/courseBannerHelper";
@@ -19,7 +19,6 @@ const TeacherCourses = () => {
   const [filterSemester, setFilterSemester] = useState("All");
   const [filterYear, setFilterYear] = useState("All");
 
-  // 2. Get meetings data from the new context
   const { getMeetingsForCourse, fetchMeetingsForCourse } = useMeetingsV2();
 
   useEffect(() => {
@@ -36,11 +35,9 @@ const TeacherCourses = () => {
     fetchCourses();
   }, []);
 
-  // Pre-fetch meetings for all courses once when courses are loaded
   useEffect(() => {
     if (coursesData.courses && coursesData.courses.length > 0) {
       const uniqueCourseIds = [...new Set((coursesData?.courses || []).map(c => c._id).filter(Boolean))];
-      // Fire-and-forget: fetch meetings for all courses in parallel
       uniqueCourseIds.forEach(courseId => {
         fetchMeetingsForCourse(courseId).catch(() => {});
       });
@@ -58,13 +55,11 @@ const TeacherCourses = () => {
     const label = getPeriodLabel(periodType);
     const semNumber = course.semester?.semNumber;
 
-    // For non-semester period types, use the period name directly
     if (periodType !== "semester") {
       const season = semNumber ? `${label} ${semNumber}` : `${label}`;
       return { season, year: year.toString(), periodLabel: label };
     }
 
-    // Semester: use Spring/Fall convention
     let season = (month >= 0 && month <= 4) ? "Spring" : "Fall";
     return { season, year: year.toString(), periodLabel: label };
   };
@@ -96,19 +91,15 @@ const TeacherCourses = () => {
 
     return Object.values(semesterMap).sort((a, b) => {
       if (b.year !== a.year) return parseInt(b.year) - parseInt(a.year);
-      // Sort by season name for non-semester types
       return a.season.localeCompare(b.season);
     });
   };
 
-  // 3. Helper function to find a live meeting for any course within a semester
-  // NOTE: This only reads from already-loaded meetings; fetching happens in useEffect above
   const findLiveMeetingForSemester = (semesterCourses) => {
     if (!semesterCourses) return null;
 
     for (const course of semesterCourses) {
       if (!course?._id) continue;
-      // Only read from already-loaded meetings (no fetching here to avoid recursion)
       const courseMeetings = getMeetingsForCourse(course._id) || [];
       const liveMeeting = courseMeetings.find(
         (meeting) =>
@@ -142,16 +133,16 @@ const TeacherCourses = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 dark:border-emerald-400"></div>
+      <div className="flex justify-center items-center h-64 bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
-        <div className="text-red-500 dark:text-red-400 text-center p-8 bg-red-50 dark:bg-red-900/20 rounded-2xl mx-auto max-w-xl border border-red-200 dark:border-red-800 shadow-sm">
+      <div className="max-w-6xl mx-auto px-6 py-8 bg-gray-50">
+        <div className="text-red-600 text-center p-8 bg-red-50 rounded-lg mx-auto max-w-xl border border-red-200 shadow-sm">
           <h3 className="text-lg font-bold mb-2">Error Loading Courses</h3>
           <p>{error}</p>
         </div>
@@ -160,34 +151,36 @@ const TeacherCourses = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6 bg-gray-50 dark:bg-gray-900">
-      {/* Page Header Gradient Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
-        <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
-        <div className="absolute top-4 left-[40%] w-16 h-16 bg-white/5 rounded-full" />
-        <div className="relative z-10 flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-            <BookOpen className="w-7 h-7 text-white" />
+    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6 bg-gray-50">
+      {/* Clean Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>
+            My Courses
+          </h1>
+          <div className="flex items-center gap-1 mt-1 text-sm" style={{ color: "#94A3B8" }}>
+            <span>Home</span>
+            <ChevronRight className="w-3 h-3" />
+            <span style={{ color: "#475569" }}>My Courses</span>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">My Courses</h1>
-            <p className="text-white/80 text-sm font-medium mt-1.5">Manage and track your courses</p>
-          </div>
+          <p className="text-sm mt-1" style={{ color: "#94A3B8" }}>
+            Manage and track your courses
+          </p>
         </div>
       </div>
 
       {/* Search and Filter Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 p-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex flex-wrap gap-4 w-full justify-between items-center">
-          <div className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 w-full md:w-1/3">
-            <Search className="h-5 w-5 text-primary dark:text-primary/90 mr-2 flex-shrink-0" />
+          <div className="flex items-center bg-white border border-gray-300 rounded-lg px-4 py-2.5 w-full md:w-1/3 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-400 transition-all">
+            <Search className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: "#94A3B8" }} />
             <input
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-transparent outline-none w-full text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+              className="bg-transparent outline-none w-full text-sm placeholder-gray-400"
+              style={{ color: "#475569" }}
             />
           </div>
           <div className="flex gap-3">
@@ -195,7 +188,8 @@ const TeacherCourses = () => {
               <select
                 value={filterSemester}
                 onChange={(e) => setFilterSemester(e.target.value)}
-                className="appearance-none bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 text-gray-700 dark:text-gray-200 pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+                style={{ color: "#475569" }}
               >
                 <option value="All">All Periods</option>
                 {uniqueSeasons.map((season) => (
@@ -204,13 +198,14 @@ const TeacherCourses = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 pointer-events-none" style={{ color: "#94A3B8" }} />
             </div>
             <div className="relative w-fit">
               <select
                 value={filterYear}
                 onChange={(e) => setFilterYear(e.target.value)}
-                className="appearance-none bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-2.5 text-gray-700 dark:text-gray-200 pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm pr-9 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+                style={{ color: "#475569" }}
               >
                 <option value="All">All Years</option>
                 {uniqueYears.map((year) => (
@@ -219,34 +214,32 @@ const TeacherCourses = () => {
                   </option>
                 ))}
               </select>
-              <Calendar className="absolute right-2.5 top-3 h-4 w-4 text-gray-500 dark:text-gray-400 pointer-events-none" />
+              <Calendar className="absolute right-2.5 top-3 h-4 w-4 pointer-events-none" style={{ color: "#94A3B8" }} />
             </div>
           </div>
         </div>
       </div>
 
       {filteredCourses.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 p-12 text-center">
-          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No courses found</h3>
-          <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <h3 className="text-xl font-semibold mb-2" style={{ color: "#1E293B" }}>No courses found</h3>
+          <p style={{ color: "#94A3B8" }}>Try adjusting your search or filter criteria.</p>
         </div>
       ) : (
         filteredCourses.map((semester, index) => {
-          // 4. For each semester, check if there's a live meeting via backend status
           const activeMeeting = findLiveMeetingForSemester(semester.courses);
 
           return (
             <div key={semester.semesterId || index} className="mb-8">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-3">
-                  <span className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-700 px-5 py-2 rounded-full text-sm font-medium">
+                  <span className="bg-blue-50 text-blue-700 ring-1 ring-blue-200 px-5 py-2 rounded-full text-sm font-medium">
                     {semester.season}
                   </span>
-                  <span className="bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-700 px-5 py-2 rounded-full text-sm font-medium">
+                  <span className="bg-blue-50 text-blue-700 ring-1 ring-blue-200 px-5 py-2 rounded-full text-sm font-medium">
                     {semester.year}
                   </span>
                 </div>
-                {/* 5. DYNAMIC BUTTON - Uses only VConf URLs */}
                 {activeMeeting ? (
                   <a
                     href={activeMeeting.vconfHostUrl || activeMeeting.vconfJoinUrl || '#'}
@@ -258,7 +251,7 @@ const TeacherCourses = () => {
                         alert("Video conference room is not ready yet. Please try again in a moment.");
                       }
                     }}
-                    className="bg-green-600 dark:bg-green-500 text-white px-6 py-2 rounded-xl text-sm hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center gap-2 animate-pulse shadow-sm"
+                    className="bg-blue-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors flex items-center gap-2 animate-pulse shadow-sm"
                   >
                     <MonitorPlay className="h-5 w-5" />
                     Join Live
@@ -266,7 +259,7 @@ const TeacherCourses = () => {
                 ) : (
                   <button
                     disabled
-                    className="bg-gray-400 dark:bg-gray-600 text-white dark:text-gray-300 px-6 py-2 rounded-xl text-sm flex items-center gap-2 cursor-not-allowed"
+                    className="bg-gray-200 text-gray-500 px-6 py-2 rounded-lg text-sm flex items-center gap-2 cursor-not-allowed"
                   >
                     <MonitorPlay className="h-5 w-5" />
                     No Live Lecture
@@ -291,15 +284,12 @@ const TeacherCourses = () => {
                   const { grad, symbols, seed } = getCourseBannerProps(course, idx);
                   return (
                   <Link key={cardKey} to={linkTarget}>
-                    <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
-                      {/* ── Unique SVG Banner with Subject Symbols ── */}
+                    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                      {/* Unique SVG Banner with Subject Symbols */}
                       <div className="relative h-36 overflow-hidden">
                         <CourseBannerSVG grad={grad} symbols={symbols} seed={seed} />
-                        {/* Shimmer overlay on hover */}
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700 ease-in-out" />
-                        {/* Bottom fade for text readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                        {/* Course title on banner */}
                         <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
                           <h3 className="text-white font-bold text-base leading-tight drop-shadow-lg line-clamp-2">
                             {course.title}
@@ -308,30 +298,28 @@ const TeacherCourses = () => {
                             {course.cohortLabel || course.batchName || ""}
                           </p>
                         </div>
-                        {/* Student count badge */}
                         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/20 backdrop-blur-md text-white text-xs font-semibold pl-2 pr-2.5 py-1 rounded-full border border-white/30 shadow-lg">
                           <Users className="w-3 h-3" />
                           {course?.studentCount ?? 0}
                         </div>
                       </div>
 
-                      {/* ── Card Body ────────────────────────────── */}
+                      {/* Card Body */}
                       <div className="p-4 space-y-3">
-                        {/* Course code + description */}
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                        <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: "#94A3B8" }}>
                           {(course.aboutCourse || "").length > 90
                             ? `${course.aboutCourse.substring(0, 90)}...`
                             : course.aboutCourse || "No description available"}
                         </p>
 
-                        {/* Schedule */}
                         {course.schedule?.classDaysAndTimes?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5">
                             {course.schedule.classDaysAndTimes.slice(0, 3).map(
                               (schedule, sIdx) => (
                                 <span
                                   key={sIdx}
-                                  className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
+                                  className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-gray-100 font-medium"
+                                  style={{ color: "#475569" }}
                                 >
                                   <Calendar className="h-2.5 w-2.5 flex-shrink-0" />
                                   {schedule.day}
@@ -341,14 +329,13 @@ const TeacherCourses = () => {
                           </div>
                         )}
 
-                        {/* Stats row */}
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                            <MonitorPlay className="h-3.5 w-3.5 text-emerald-500" />
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center gap-1 text-xs" style={{ color: "#94A3B8" }}>
+                            <MonitorPlay className="h-3.5 w-3.5 text-blue-500" />
                             <span className="font-medium">{course.totalLectureCount || 0}</span>
                             <span>Lectures</span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1 text-xs" style={{ color: "#94A3B8" }}>
                             <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
                             <span className="font-medium">{course.assignments?.length || 0}</span>
                             <span>Assignments</span>

@@ -14,7 +14,7 @@ const PostList = ({
         <h2 className="text-lg font-medium">Your Posts</h2>
         <button
           onClick={onCreatePost}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="flex items-center bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           <Plus className="w-4 h-4 mr-2" />
           New Post
@@ -26,7 +26,7 @@ const PostList = ({
           <p className="text-gray-500 mb-4">You don't have any posts yet</p>
           <button
             onClick={onCreatePost}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            className="bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
           >
             Create Your First Post
           </button>

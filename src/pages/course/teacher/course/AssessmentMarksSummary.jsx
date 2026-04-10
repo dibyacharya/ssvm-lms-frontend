@@ -97,7 +97,7 @@ const AssessmentMarksSummary = () => {
                         {category.number} &times; {category.eachMarks} marks ({category.calculationMethod})
                       </div>
                       {category.linkedCount > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-green-600 mt-0.5">
+                        <div className="flex items-center gap-1 text-xs text-blue-600 mt-0.5">
                           <LinkIcon className="w-3 h-3" />
                           <span>{category.linkedCount} assignment(s) linked</span>
                         </div>
@@ -150,10 +150,10 @@ const AssessmentMarksSummary = () => {
             )}
 
             {totalMarks === 100 && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center">
-                  <Target className="w-5 h-5 text-green-600 mr-2" />
-                  <span className="text-green-800 text-sm font-medium">
+                  <Target className="w-5 h-5 text-blue-600 mr-2" />
+                  <span className="text-blue-800 text-sm font-medium">
                     Assessment plan is complete! All marks have been allocated.
                   </span>
                 </div>
@@ -162,7 +162,7 @@ const AssessmentMarksSummary = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-500 mb-4">No assessment plan created yet</p>
             <p className="text-sm text-gray-400">
               Go to Assessment &rarr; Continuous Assessment Plan to create your assessment plan

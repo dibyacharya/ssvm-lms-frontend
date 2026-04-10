@@ -198,10 +198,10 @@ const EContentViewer = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 items-center justify-center">
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 dark:border-emerald-400 border-t-transparent"></div>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">Loading course content...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
+          <p className="mt-2 text-gray-600">Loading course content...</p>
         </div>
       </div>
     );
@@ -210,16 +210,16 @@ const EContentViewer = () => {
   // Add an error state (place this after the loading check)
   if (error) {
     return (
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 items-center justify-center">
-        <div className="text-center max-w-md p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10">
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center max-w-md p-8 bg-white/70 backdrop-blur-xl rounded-2xl shadow-card-sm border border-gray-200">
+          <div className="w-14 h-14 rounded-2xl bg-red-900/20 flex items-center justify-center mx-auto mb-4">
             <span className="text-red-500 text-2xl">!</span>
           </div>
-          <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-white">Error</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
+          <h2 className="text-xl font-bold mb-2 text-gray-900">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 text-white rounded-xl hover:from-emerald-700 hover:via-teal-700 hover:to-cyan-600 transition-all font-medium shadow-sm"
+            className="px-5 py-2.5 bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-gray-900 rounded-xl hover:from-blue-800 hover:via-blue-700 hover:to-blue-600 transition-all font-medium shadow-sm"
           >
             Try Again
           </button>
@@ -229,29 +229,29 @@ const EContentViewer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium text-sm"
+          className="flex items-center gap-2 text-gray-500 hover:text-primary-600 transition-colors font-medium text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
         </button>
 
         {/* Header Section - Gradient Banner */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-6 shadow-lg">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-8 py-6 shadow-lg">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
           <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
           <div className="absolute top-4 left-[40%] w-16 h-16 bg-white/5 rounded-full" />
           <div className="relative z-10 flex items-center gap-5">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <BookOpen className="w-6 h-6 text-white" />
+              <BookOpen className="w-6 h-6 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">E-Learning Content</h1>
-              <p className="text-white/80 text-sm font-medium mt-1">Browse and manage course materials</p>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">E-Learning Content</h1>
+              <p className="text-gray-900/80 text-sm font-medium mt-1">Browse and manage course materials</p>
             </div>
           </div>
         </div>
@@ -261,28 +261,28 @@ const EContentViewer = () => {
           {/* Left Sidebar - Modules (hidden when viewing content) */}
           {!isViewingContent && (
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden sticky top-6">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-card-sm border border-gray-200 overflow-hidden sticky top-6">
               {/* Sidebar Section Header */}
-              <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-sky-500 to-blue-600">
+              <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-700">
                 <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
                 <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
                 <div className="relative z-10 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Layers className="w-5 h-5 text-white" />
+                    <Layers className="w-5 h-5 text-gray-900" />
                   </div>
-                  <h2 className="text-lg font-bold text-white tracking-tight">Modules</h2>
+                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Modules</h2>
                 </div>
               </div>
 
               {/* Module List */}
               <div className="overflow-y-auto max-h-[calc(100vh-320px)]">
                 {Object.keys(groupedModules).map((moduleNumber) => (
-                  <div key={moduleNumber} className="border-b border-tertiary/10 last:border-b-0">
+                  <div key={moduleNumber} className="border-b border-gray-200 last:border-b-0">
                     <div
                       className={`flex items-center px-5 py-3.5 cursor-pointer transition-colors ${
                         parseInt(moduleNumber) === activeModule
-                          ? "bg-sky-50 dark:bg-sky-900/20"
-                          : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                          ? "bg-primary-900/20"
+                          : "hover:bg-gray-50"
                       }`}
                       onClick={() => {
                         setActiveModule(parseInt(moduleNumber));
@@ -293,8 +293,8 @@ const EContentViewer = () => {
                       <span
                         className={`mr-2.5 ${
                           parseInt(moduleNumber) === activeModule
-                            ? "text-sky-600 dark:text-sky-400"
-                            : "text-gray-400 dark:text-gray-500"
+                            ? "text-primary-600"
+                            : "text-gray-400"
                         }`}
                       >
                         {parseInt(moduleNumber) === activeModule ? (
@@ -306,8 +306,8 @@ const EContentViewer = () => {
                       <span
                         className={`font-semibold text-sm ${
                           parseInt(moduleNumber) === activeModule
-                            ? "text-sky-600 dark:text-sky-400"
-                            : "text-gray-700 dark:text-gray-300"
+                            ? "text-primary-600"
+                            : "text-gray-600"
                         }`}
                       >
                         Module {moduleNumber}
@@ -321,8 +321,8 @@ const EContentViewer = () => {
                             <div
                               className={`flex items-center py-2.5 px-5 pl-10 cursor-pointer transition-colors text-sm ${
                                 activeTopic === module
-                                  ? "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400"
-                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                  ? "bg-primary-900/20 text-primary-600"
+                                  : "text-gray-500 hover:bg-gray-50"
                               }`}
                               onClick={() => {
                                 setActiveTopic(module);
@@ -342,8 +342,8 @@ const EContentViewer = () => {
                                       className={`cursor-pointer rounded-lg p-1.5 transition-colors ${
                                         activeFileType === "pdf" &&
                                         activeTopic === module
-                                          ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                                          : "text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                          ? "bg-red-50 text-red-600"
+                                          : "text-red-600 hover:bg-red-900/20"
                                       }`}
                                       onClick={(e) =>
                                         handleFileTypeClick(
@@ -367,8 +367,8 @@ const EContentViewer = () => {
                                       className={`cursor-pointer rounded-lg p-1.5 transition-colors ${
                                         activeFileType === "ppt" &&
                                         activeTopic === module
-                                          ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                                          : "text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                                          ? "bg-orange-900/30 text-blue-400"
+                                          : "text-blue-400 hover:bg-orange-900/20"
                                       }`}
                                       onClick={(e) =>
                                         handleFileTypeClick(
@@ -388,8 +388,8 @@ const EContentViewer = () => {
                                       className={`cursor-pointer rounded-lg p-1.5 transition-colors ${
                                         activeFileType === "link" &&
                                         activeTopic === module
-                                          ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                                          : "text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                          ? "bg-primary-50 text-primary-600"
+                                          : "text-blue-400 hover:bg-primary-900/20"
                                       }`}
                                       onClick={(e) =>
                                         handleFileTypeClick(
@@ -405,7 +405,7 @@ const EContentViewer = () => {
                                   )}
                                 {typeof module.link === "string" && (
                                   <div
-                                    className="cursor-pointer rounded-lg p-1.5 text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                    className="cursor-pointer rounded-lg p-1.5 text-blue-400 hover:bg-primary-900/20 transition-colors"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleLinkClick(module.link);
@@ -425,9 +425,9 @@ const EContentViewer = () => {
               </div>
 
               {/* Add Module Button */}
-              <div className="p-4 border-t border-tertiary/10 bg-gray-50/50 dark:bg-gray-700/30">
+              <div className="p-4 border-t border-gray-200 bg-white/30">
                 <button
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl hover:from-sky-600 hover:to-blue-700 transition-all font-medium text-sm shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-gray-900 rounded-xl hover:from-blue-600 hover:to-blue-800 transition-all font-medium text-sm shadow-sm"
                   onClick={() => setShowAddModuleModal(true)}
                 >
                   <Plus className="w-4 h-4" />
@@ -440,9 +440,9 @@ const EContentViewer = () => {
 
           {/* Main Content Area */}
           <div className={isViewingContent ? "lg:col-span-12" : "lg:col-span-9"}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-card-sm border border-gray-200 overflow-hidden">
               {/* Content Section Header */}
-              <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-violet-500 to-purple-600">
+              <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
                 <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
                 <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
                 <div className="relative z-10 flex items-center justify-between">
@@ -451,25 +451,25 @@ const EContentViewer = () => {
                       <>
                         <button
                           onClick={handleCloseViewer}
-                          className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                          className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-gray-900 hover:bg-white/30 transition-colors"
                           title="Back to files"
                         >
                           <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          {selectedFile ? <FileTextIcon className="w-5 h-5 text-white" /> : <LinkIcon className="w-5 h-5 text-white" />}
+                          {selectedFile ? <FileTextIcon className="w-5 h-5 text-gray-900" /> : <LinkIcon className="w-5 h-5 text-gray-900" />}
                         </div>
-                        <h2 className="text-lg font-bold text-white tracking-tight truncate max-w-md">
+                        <h2 className="text-lg font-bold text-gray-900 tracking-tight truncate max-w-md">
                           {selectedFile ? selectedFile.fileName : "Link Viewer"}
                         </h2>
                       </>
                     ) : (
                       <>
                         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <FolderOpen className="w-5 h-5 text-white" />
+                          <FolderOpen className="w-5 h-5 text-gray-900" />
                         </div>
                         <div>
-                          <h2 className="text-lg font-bold text-white tracking-tight">
+                          <h2 className="text-lg font-bold text-gray-900 tracking-tight">
                             {activeModule && `Module ${activeModule}`}
                             {activeTopic && ` / ${activeTopic.moduleTitle}`}
                             {activeFileType && ` / ${activeFileType.toUpperCase()}`}
@@ -484,14 +484,14 @@ const EContentViewer = () => {
                       <a
                         href={getFullUrl(selectedFile.fileUrl)}
                         download
-                        className="px-4 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/30 transition-colors"
+                        className="px-4 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm text-gray-900 text-sm font-medium hover:bg-white/30 transition-colors"
                       >
                         Download
                       </a>
                     )}
                     {!isViewingContent && activeTopic && (
                       <button
-                        className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                        className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-gray-900 hover:bg-white/30 transition-colors"
                         onClick={(e) => openEditModal(e)}
                         title="Edit module"
                       >
@@ -500,7 +500,7 @@ const EContentViewer = () => {
                     )}
                     {!isViewingContent && activeTopic && (
                       <button
-                        className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-400/40 transition-colors"
+                        className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-gray-900 hover:bg-red-400/40 transition-colors"
                         onClick={(e) => openDeleteModal(e)}
                         title="Delete module"
                       >
@@ -522,10 +522,10 @@ const EContentViewer = () => {
                       return canPreview ? (
                         <div className="relative w-full h-full" style={{ minHeight: "70vh" }}>
                           {isViewerLoading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10">
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                               <div className="text-center">
-                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-violet-500 dark:border-violet-400 border-t-transparent"></div>
-                                <p className="mt-2 text-gray-600 dark:text-gray-300">Loading document...</p>
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
+                                <p className="mt-2 text-gray-600">Loading document...</p>
                               </div>
                             </div>
                           )}
@@ -539,15 +539,15 @@ const EContentViewer = () => {
                           />
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-900" style={{ minHeight: "70vh" }}>
+                        <div className="flex flex-col items-center justify-center p-12 bg-gray-50" style={{ minHeight: "70vh" }}>
                           <div className="text-center max-w-md">
-                            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                              <FileTextIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                              <FileTextIcon className="w-8 h-8 text-gray-400" />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
                               {viewerFailed ? "Preview Failed to Load" : "Preview Not Available"}
                             </h3>
-                            <p className="text-gray-500 dark:text-gray-400 mb-6">
+                            <p className="text-gray-500 mb-6">
                               {viewerFailed
                                 ? "We couldn't load a preview for this file. This may be due to file permissions or network issues."
                                 : "We can't display a preview for this file type."}
@@ -556,14 +556,14 @@ const EContentViewer = () => {
                               <a
                                 href={getFullUrl(selectedFile.fileUrl)}
                                 download
-                                className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-sm"
+                                className="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-sm"
                               >
                                 Download File
                               </a>
                               {viewerFailed && (
                                 <button
                                   onClick={() => { setViewerFailed(false); setIsViewerLoading(true); }}
-                                  className="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+                                  className="inline-flex items-center justify-center px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                                 >
                                   Try Again
                                 </button>
@@ -576,10 +576,10 @@ const EContentViewer = () => {
                   ) : selectedLink ? (
                     <div className="relative w-full h-full" style={{ minHeight: "70vh" }}>
                       {isViewerLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                           <div className="text-center">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 dark:border-purple-400 border-t-transparent"></div>
-                            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading link...</p>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
+                            <p className="mt-2 text-gray-600">Loading link...</p>
                           </div>
                         </div>
                       )}
@@ -593,22 +593,22 @@ const EContentViewer = () => {
                         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                       />
                       {viewerFailed && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 bg-gray-50 dark:bg-gray-900">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 bg-gray-50">
                           <div className="text-center max-w-md">
-                            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                              <LinkIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                              <LinkIcon className="w-8 h-8 text-gray-400" />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
                               Unable to Load Link
                             </h3>
-                            <p className="text-gray-500 dark:text-gray-400 mb-6">
+                            <p className="text-gray-500 mb-6">
                               This link cannot be embedded due to the website's security settings.
                             </p>
                             <a
                               href={selectedLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-sm"
+                              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-sm"
                             >
                               <ExternalLinkIcon className="w-4 h-4" />
                               Open in New Tab
@@ -630,22 +630,22 @@ const EContentViewer = () => {
                       getFilesByType(activeTopic, "pdf").map((file, idx) => (
                         <div
                           key={`pdf-${idx}`}
-                          className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                          className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                           onClick={() => handleFileClick(file)}
                         >
-                          <div className="p-6 flex items-center justify-center bg-red-50/50 dark:bg-red-900/10">
+                          <div className="p-6 flex items-center justify-center bg-red-900/10">
                             <div className="text-red-500 group-hover:scale-110 transition-transform">
                               <FileTextIcon size={48} />
                             </div>
                           </div>
-                          <div className="p-4 border-t border-tertiary/10">
-                            <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mb-2">
+                          <div className="p-4 border-t border-gray-200">
+                            <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 mb-2">
                               PDF Document
                             </div>
-                            <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                               {file.fileName}
                             </h3>
-                            <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                            <div className="flex items-center text-gray-500 text-xs">
                               <span>
                                 {new Date(file.uploadDate).toLocaleDateString()}
                               </span>
@@ -660,22 +660,22 @@ const EContentViewer = () => {
                         .map((file, idx) => (
                           <div
                             key={`ppt-${idx}`}
-                            className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                            className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                             onClick={() => handleFileClick(file)}
                           >
-                            <div className="p-6 flex items-center justify-center bg-orange-50/50 dark:bg-orange-900/10">
-                              <div className="text-orange-500 group-hover:scale-110 transition-transform">
+                            <div className="p-6 flex items-center justify-center bg-orange-900/10">
+                              <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                 <PresentationIcon size={48} />
                               </div>
                             </div>
-                            <div className="p-4 border-t border-tertiary/10">
-                              <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mb-2">
+                            <div className="p-4 border-t border-gray-200">
+                              <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-900/30 text-blue-400 mb-2">
                                 Presentation
                               </div>
-                              <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                              <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                 {file.fileName}
                               </h3>
-                              <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                              <div className="flex items-center text-gray-500 text-xs">
                                 <span>
                                   {new Date(file.uploadDate).toLocaleDateString()}
                                 </span>
@@ -690,22 +690,22 @@ const EContentViewer = () => {
                         ? activeTopic.link.map((link, idx) => (
                             <div
                               key={`link-${idx}`}
-                              className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                              className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                               onClick={() => handleLinkClick(link)}
                             >
-                              <div className="p-6 flex items-center justify-center bg-purple-50/50 dark:bg-purple-900/10">
-                                <div className="text-purple-500 group-hover:scale-110 transition-transform">
+                              <div className="p-6 flex items-center justify-center bg-primary-900/10">
+                                <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                   <LinkIcon size={48} />
                                 </div>
                               </div>
-                              <div className="p-4 border-t border-tertiary/10">
-                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mb-2">
+                              <div className="p-4 border-t border-gray-200">
+                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600 mb-2">
                                   Web Link
                                 </div>
-                                <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                                <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                   {link.split("/").pop()}
                                 </h3>
-                                <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                                <div className="flex items-center text-gray-500 text-xs">
                                   <span>External Resource</span>
                                 </div>
                               </div>
@@ -713,24 +713,24 @@ const EContentViewer = () => {
                           ))
                         : typeof activeTopic.link === "string" && (
                             <div
-                              className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                              className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                               onClick={() => handleLinkClick(activeTopic.link)}
                             >
-                              <div className="p-6 flex items-center justify-center bg-purple-50/50 dark:bg-purple-900/10">
-                                <div className="text-purple-500 group-hover:scale-110 transition-transform">
+                              <div className="p-6 flex items-center justify-center bg-primary-900/10">
+                                <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                   <LinkIcon size={48} />
                                 </div>
                               </div>
-                              <div className="p-4 border-t border-tertiary/10">
-                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mb-2">
+                              <div className="p-4 border-t border-gray-200">
+                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600 mb-2">
                                   Web Link
                                 </div>
-                                <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                                <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                   {typeof activeTopic.link === "string"
                                     ? activeTopic.link.split("/").pop()
                                     : "Link"}
                                 </h3>
-                                <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                                <div className="flex items-center text-gray-500 text-xs">
                                   <span>External Resource</span>
                                 </div>
                               </div>
@@ -744,22 +744,22 @@ const EContentViewer = () => {
                       {getFilesByType(activeTopic, "pdf").map((file, idx) => (
                         <div
                           key={`pdf-${idx}`}
-                          className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                          className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                           onClick={() => handleFileClick(file)}
                         >
-                          <div className="p-6 flex items-center justify-center bg-red-50/50 dark:bg-red-900/10">
+                          <div className="p-6 flex items-center justify-center bg-red-900/10">
                             <div className="text-red-500 group-hover:scale-110 transition-transform">
                               <FileTextIcon size={48} />
                             </div>
                           </div>
-                          <div className="p-4 border-t border-tertiary/10">
-                            <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mb-2">
+                          <div className="p-4 border-t border-gray-200">
+                            <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 mb-2">
                               PDF Document
                             </div>
-                            <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                            <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                               {file.fileName}
                             </h3>
-                            <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                            <div className="flex items-center text-gray-500 text-xs">
                               <span>
                                 {new Date(file.uploadDate).toLocaleDateString()}
                               </span>
@@ -774,22 +774,22 @@ const EContentViewer = () => {
                         .map((file, idx) => (
                           <div
                             key={`ppt-${idx}`}
-                            className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                            className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                             onClick={() => handleFileClick(file)}
                           >
-                            <div className="p-6 flex items-center justify-center bg-orange-50/50 dark:bg-orange-900/10">
-                              <div className="text-orange-500 group-hover:scale-110 transition-transform">
+                            <div className="p-6 flex items-center justify-center bg-orange-900/10">
+                              <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                 <PresentationIcon size={48} />
                               </div>
                             </div>
-                            <div className="p-4 border-t border-tertiary/10">
-                              <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mb-2">
+                            <div className="p-4 border-t border-gray-200">
+                              <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-900/30 text-blue-400 mb-2">
                                 Presentation
                               </div>
-                              <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                              <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                 {file.fileName}
                               </h3>
-                              <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                              <div className="flex items-center text-gray-500 text-xs">
                                 <span>
                                   {new Date(file.uploadDate).toLocaleDateString()}
                                 </span>
@@ -803,22 +803,22 @@ const EContentViewer = () => {
                         ? activeTopic.link.map((link, idx) => (
                             <div
                               key={`link-${idx}`}
-                              className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                              className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                               onClick={() => handleLinkClick(link)}
                             >
-                              <div className="p-6 flex items-center justify-center bg-purple-50/50 dark:bg-purple-900/10">
-                                <div className="text-purple-500 group-hover:scale-110 transition-transform">
+                              <div className="p-6 flex items-center justify-center bg-primary-900/10">
+                                <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                   <LinkIcon size={48} />
                                 </div>
                               </div>
-                              <div className="p-4 border-t border-tertiary/10">
-                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mb-2">
+                              <div className="p-4 border-t border-gray-200">
+                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600 mb-2">
                                   Web Link
                                 </div>
-                                <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                                <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                   {link.split("/").pop()}
                                 </h3>
-                                <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                                <div className="flex items-center text-gray-500 text-xs">
                                   <span>External Resource</span>
                                 </div>
                               </div>
@@ -826,24 +826,24 @@ const EContentViewer = () => {
                           ))
                         : typeof activeTopic.link === "string" && (
                             <div
-                              className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                              className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                               onClick={() => handleLinkClick(activeTopic.link)}
                             >
-                              <div className="p-6 flex items-center justify-center bg-purple-50/50 dark:bg-purple-900/10">
-                                <div className="text-purple-500 group-hover:scale-110 transition-transform">
+                              <div className="p-6 flex items-center justify-center bg-primary-900/10">
+                                <div className="text-blue-500 group-hover:scale-110 transition-transform">
                                   <LinkIcon size={48} />
                                 </div>
                               </div>
-                              <div className="p-4 border-t border-tertiary/10">
-                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mb-2">
+                              <div className="p-4 border-t border-gray-200">
+                                <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600 mb-2">
                                   Web Link
                                 </div>
-                                <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                                <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                                   {typeof activeTopic.link === "string"
                                     ? activeTopic.link.split("/").pop()
                                     : "Link"}
                                 </h3>
-                                <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                                <div className="flex items-center text-gray-500 text-xs">
                                   <span>External Resource</span>
                                 </div>
                               </div>
@@ -856,22 +856,22 @@ const EContentViewer = () => {
                     groupedModules[activeModule]?.map((module, moduleIdx) => (
                       <div
                         key={`module-${moduleIdx}`}
-                        className="relative group overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-tertiary/10 hover:shadow-md transition-all cursor-pointer"
+                        className="relative group overflow-hidden bg-white/70 backdrop-blur-xl rounded-xl shadow-card-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer"
                         onClick={() => setActiveTopic(module)}
                       >
-                        <div className="p-6 flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10">
-                          <div className="text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                        <div className="p-6 flex items-center justify-center bg-gradient-to-br from-primary-900/10 to-primary-900/10">
+                          <div className="text-primary-600 group-hover:scale-110 transition-transform">
                             <BookIcon size={48} />
                           </div>
                         </div>
-                        <div className="p-4 border-t border-tertiary/10">
-                          <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-2">
+                        <div className="p-4 border-t border-gray-200">
+                          <div className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-600 mb-2">
                             Module {activeModule}
                           </div>
-                          <h3 className="font-semibold text-gray-800 dark:text-white text-sm mb-2 truncate">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
                             {module.moduleTitle || `Topic ${moduleIdx + 1}`}
                           </h3>
-                          <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
+                          <div className="flex items-center text-gray-500 text-xs">
                             <span>{module.files?.length || 0} files</span>
                             <span className="mx-2">•</span>
                             <span>
@@ -893,10 +893,10 @@ const EContentViewer = () => {
                     !groupedModules[activeModule] ||
                     groupedModules[activeModule].length === 0) && (
                     <div className="col-span-full text-center py-16">
-                      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                        <Layers className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                        <Layers className="w-8 h-8 text-gray-400" />
                       </div>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium">Select a module to view content</p>
+                      <p className="text-gray-500 font-medium">Select a module to view content</p>
                     </div>
                   )}
                 </div>

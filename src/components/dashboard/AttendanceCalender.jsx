@@ -138,10 +138,10 @@ const CalendarComponent = () => {
           </h2>
 
           <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-6 text-center">
-            <div className="p-6 rounded-xl shadow-md flex flex-col justify-center bg-gradient-to-br from-green-100 to-green-50">
+            <div className="p-6 rounded-xl shadow-md flex flex-col justify-center bg-gradient-to-br from-blue-100 to-blue-50">
               <p className="flex gap-2 justify-center ">
-                <CheckCircle size={36} className="text-green-600  mb-2" />
-                <p className="text-2xl font-bold text-green-700">
+                <CheckCircle size={36} className="text-blue-600  mb-2" />
+                <p className="text-2xl font-bold text-blue-700">
                   {analyticsData.attended}
                 </p>
               </p>

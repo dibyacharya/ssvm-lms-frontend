@@ -15,7 +15,7 @@ function timeAgo(date) {
 function StatusBadge({ status }) {
   if (status === 'answered') {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-green-400">
+      <span className="inline-flex items-center gap-1 text-xs text-blue-400">
         <Check className="w-3 h-3" />
         Answered
       </span>
@@ -30,8 +30,8 @@ function StatusBadge({ status }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-green-400">
-      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+    <span className="inline-flex items-center gap-1 text-xs text-blue-400">
+      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
       Open
     </span>
   );
@@ -67,7 +67,7 @@ function QuestionCard({
       exit={{ opacity: 0, y: -10 }}
       className={`rounded-lg p-3 transition-colors ${
         isHighlighted
-          ? 'border border-indigo-500 bg-slate-800/80 animate-pulse'
+          ? 'border border-blue-500 bg-slate-800/80 animate-pulse'
           : 'border border-slate-700 bg-slate-800/50'
       }`}
     >
@@ -92,7 +92,7 @@ function QuestionCard({
           onClick={() => upvote(question._id)}
           className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
             hasUpvoted
-              ? 'bg-indigo-600/30 text-indigo-300'
+              ? 'bg-blue-600/30 text-indigo-300'
               : 'bg-slate-700/60 text-slate-400 hover:text-indigo-300 hover:bg-slate-700'
           }`}
         >
@@ -105,7 +105,7 @@ function QuestionCard({
           <>
             <button
               onClick={() => setAnswering((prev) => !prev)}
-              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-slate-700/60 text-slate-400 hover:text-green-300 hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-slate-700/60 text-slate-400 hover:text-blue-300 hover:bg-slate-700 transition-colors"
             >
               <Check className="w-3.5 h-3.5" />
               Answer
@@ -123,7 +123,7 @@ function QuestionCard({
             </button>
             <button
               onClick={() => dismiss(question._id)}
-              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-slate-700/60 text-slate-400 hover:text-red-300 hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-slate-700/60 text-slate-400 hover:text-red-600 hover:bg-slate-700 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
               Dismiss
@@ -140,13 +140,13 @@ function QuestionCard({
             onChange={(e) => setAnswerText(e.target.value)}
             placeholder="Type your answer..."
             rows={3}
-            className="w-full rounded-md bg-slate-900 border border-slate-600 text-sm text-slate-100 placeholder-slate-500 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+            className="w-full rounded-md bg-slate-900 border border-slate-600 text-sm text-slate-100 placeholder-slate-500 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
           />
           <div className="flex items-center gap-2">
             <button
               onClick={handleSubmitAnswer}
               disabled={!answerText.trim()}
-              className="text-xs px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="text-xs px-3 py-1.5 rounded bg-blue-600 text-gray-900 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Submit
             </button>
@@ -168,7 +168,7 @@ function QuestionCard({
         <div className="mt-3 rounded-md bg-slate-900/60 border border-slate-700 p-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-xs font-semibold text-indigo-400">A:</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600/30 text-indigo-300 font-medium">
               Teacher
             </span>
           </div>
@@ -225,12 +225,12 @@ export default function QnAPanel({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Ask a question..."
-            className="flex-1 rounded-md bg-slate-800 border border-slate-600 text-sm text-slate-100 placeholder-slate-500 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="flex-1 rounded-md bg-slate-800 border border-slate-600 text-sm text-slate-100 placeholder-slate-500 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             type="submit"
             disabled={!text.trim()}
-            className="p-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-md bg-blue-600 text-gray-900 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -240,7 +240,7 @@ export default function QnAPanel({
             type="checkbox"
             checked={anonymous}
             onChange={(e) => setAnonymous(e.target.checked)}
-            className="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0"
+            className="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
           />
           <span className="text-xs text-slate-400">Ask anonymously</span>
         </label>

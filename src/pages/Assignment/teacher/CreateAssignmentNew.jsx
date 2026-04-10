@@ -309,7 +309,7 @@ const AssignmentCreator = ({
                   <div className="flex items-center gap-2">
                     <h1 className="text-xl font-bold text-gray-900">{headerTitle}</h1>
                     {isCAMode && configuredMarks && (
-                      <span className="px-2.5 py-0.5 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                      <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
                         {configuredMarks} marks
                       </span>
                     )}
@@ -328,13 +328,13 @@ const AssignmentCreator = ({
                         step.number === currentStep
                           ? 'bg-blue-100 text-blue-700'
                           : step.number < currentStep
-                          ? 'bg-green-100 text-green-700 cursor-pointer hover:bg-green-200'
+                          ? 'bg-blue-100 text-blue-700 cursor-pointer hover:bg-blue-200'
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       {step.title}
                     </button>
-                    {i < steps.length - 1 && <ChevronRight className="w-4 h-4 text-gray-300" />}
+                    {i < steps.length - 1 && <ChevronRight className="w-4 h-4 text-gray-600" />}
                   </React.Fragment>
                 ))}
               </div>
@@ -422,7 +422,7 @@ const AssignmentCreator = ({
               <button
                 onClick={handleNext}
                 disabled={currentStep === 1 && (!assignmentTitle || !selectedModule || !dueDate)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium shadow-sm"
+                className="px-6 py-3 bg-blue-600 text-gray-900 rounded-xl hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium shadow-sm"
               >
                 Next Step
                 <ChevronRight className="w-4 h-4" />

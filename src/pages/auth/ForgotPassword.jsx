@@ -75,7 +75,7 @@ const ForgotPassword = () => {
                     placeholder="Enter your email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -83,10 +83,10 @@ const ForgotPassword = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 rounded-lg text-white font-medium transition ${
+                className={`w-full py-3 rounded-lg text-gray-900 font-medium transition ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-emerald-600 hover:bg-emerald-700"
+                    : "bg-blue-600 hover:bg-blue-700"
                 }`}
               >
                 {loading ? "Sending OTP..." : "Send OTP"}
@@ -97,7 +97,7 @@ const ForgotPassword = () => {
               Remembered your password?{" "}
               <Link
                 to="/login"
-                className="text-emerald-600 hover:text-emerald-500"
+                className="text-blue-600 hover:text-blue-500"
               >
                 Back to login
               </Link>
@@ -106,8 +106,8 @@ const ForgotPassword = () => {
         ) : (
           <>
             <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
-                <CheckCircle className="h-7 w-7 text-emerald-600" />
+              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                <CheckCircle className="h-7 w-7 text-blue-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">
                 Check Your Email
@@ -129,7 +129,7 @@ const ForgotPassword = () => {
               <button
                 type="button"
                 onClick={handleContinueToReset}
-                className="w-full py-3 rounded-lg text-white font-medium transition bg-emerald-600 hover:bg-emerald-700"
+                className="w-full py-3 rounded-lg text-gray-900 font-medium transition bg-blue-600 hover:bg-blue-700"
               >
                 I received the OTP — Continue
               </button>
@@ -147,7 +147,7 @@ const ForgotPassword = () => {
               Remembered your password?{" "}
               <Link
                 to="/login"
-                className="text-emerald-600 hover:text-emerald-500"
+                className="text-blue-600 hover:text-blue-500"
               >
                 Back to login
               </Link>

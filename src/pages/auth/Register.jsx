@@ -52,7 +52,7 @@ const Register = () => {
     <div className="min-h-screen flex">
       {/* Left side - Gradient Background */}
       <div className="hidden lg:block lg:w-1/2 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600">
           <div className="absolute inset-0 bg-black opacity-20"></div>
           <img
             src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
@@ -61,7 +61,7 @@ const Register = () => {
           />
         </div>
         <div className="relative h-full flex items-center justify-center p-12">
-          <div className="text-white text-center">
+          <div className="text-gray-900 text-center">
             <h2 className="text-4xl font-bold mb-6">
               Begin Your Educational Journey
             </h2>
@@ -75,7 +75,7 @@ const Register = () => {
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="flex items-center justify-center mb-8 text-green-600">
+          <div className="flex items-center justify-center mb-8 text-blue-600">
             <img src={logo} alt="Logo" className="h-25 w-25" />
           </div>
 
@@ -105,7 +105,7 @@ const Register = () => {
                 <input
                   id="name"
                   type="text"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={(e) =>
@@ -131,7 +131,7 @@ const Register = () => {
                 <input
                   id="username"
                   type="text"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Choose a username"
                   value={formData.username}
                   onChange={(e) =>
@@ -157,7 +157,7 @@ const Register = () => {
                 <input
                   id="email"
                   type="email"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={(e) =>
@@ -183,7 +183,7 @@ const Register = () => {
                 <input
                   id="password"
                   type="password"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Create a password"
                   value={formData.password}
                   onChange={(e) =>
@@ -209,7 +209,7 @@ const Register = () => {
                 <input
                   id="confirmPassword"
                   type="password"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) =>
@@ -237,7 +237,7 @@ const Register = () => {
                 />
                 <select
                   id="role"
-                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={formData.role}
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
@@ -253,7 +253,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 disabled:opacity-50"
+              className="w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-gray-900 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-50"
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>
@@ -263,7 +263,7 @@ const Register = () => {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium text-green-600 hover:text-green-500"
+              className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in
             </Link>

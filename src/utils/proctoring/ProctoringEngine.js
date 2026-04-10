@@ -21,6 +21,7 @@ import copyPasteDetector from './copyPasteDetector';
 import fullScreenManager from './fullScreenManager';
 import { captureFrame } from './screenshotCapture';
 import violationManager from './violationManager';
+import lockdownManager from './lockdownManager';
 import * as examService from '../../services/exam.service';
 
 class ProctoringEngine {
@@ -42,6 +43,9 @@ class ProctoringEngine {
     this.faceDetectionInterval = null;
     this.screenshotInterval = null;
     this.running = false;
+
+    // Lockdown cleanup reference
+    this._lockdownCleanup = null;
 
     // Advanced detector references
     this._livenessDetector = null;
@@ -258,6 +262,15 @@ class ProctoringEngine {
       }
     }
 
+    // ═══════════════════════════════════════════
+    // LOCKDOWN MODE
+    // ═══════════════════════════════════════════
+
+    // 14. Full exam lockdown (right-click, shortcuts, text selection, etc.)
+    if (this.config.lockdownMode) {
+      this._lockdownCleanup = lockdownManager.activate(handleViolation);
+    }
+
     console.log('[ProctoringEngine] All detectors started');
   }
 
@@ -279,6 +292,12 @@ class ProctoringEngine {
     if (this.screenshotInterval) {
       clearInterval(this.screenshotInterval);
       this.screenshotInterval = null;
+    }
+
+    // Lockdown mode
+    if (this._lockdownCleanup) {
+      this._lockdownCleanup();
+      this._lockdownCleanup = null;
     }
 
     // Advanced detectors

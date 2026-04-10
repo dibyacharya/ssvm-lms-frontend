@@ -161,19 +161,19 @@ const StudentGradingTable = () => {
   const getGradeColorClass = (grade) => {
     switch (grade) {
       case "O":
-        return "bg-green-500 text-white";
+        return "bg-blue-500 text-gray-900";
       case "E":
-        return "bg-green-300";
+        return "bg-blue-300";
       case "A":
         return "bg-yellow-300";
       case "B":
         return "bg-yellow-200";
       case "C":
-        return "bg-orange-200";
+        return "bg-blue-200";
       case "D":
-        return "bg-orange-300";
+        return "bg-blue-300";
       default:
-        return "bg-red-400 text-white";
+        return "bg-red-400 text-gray-900";
     }
   };
 
@@ -183,7 +183,7 @@ const StudentGradingTable = () => {
         <h1 className="text-2xl font-bold text-gray-800">Grade Sheet</h1>
         <button
           onClick={exportToExcel}
-          className="bg-green-600 text-white px-6 py-2 rounded shadow-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+          className="bg-blue-600 text-gray-900 px-6 py-2 rounded shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -221,10 +221,10 @@ const StudentGradingTable = () => {
                 <div className="text-gray-500 text-xs">(10 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Equiv.</div>
                 <div>Assignment</div>
-                <div className="text-green-200 text-xs">(10 Marks)</div>
+                <div className="text-blue-200 text-xs">(10 Marks)</div>
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-center text-xs font-medium uppercase tracking-wider">
@@ -236,10 +236,10 @@ const StudentGradingTable = () => {
                 <div className="text-gray-500 text-xs">(10 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Equiv.</div>
                 <div>Quiz</div>
-                <div className="text-green-200 text-xs">(10 Marks)</div>
+                <div className="text-blue-200 text-xs">(10 Marks)</div>
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-center text-xs font-medium uppercase tracking-wider">
@@ -251,15 +251,15 @@ const StudentGradingTable = () => {
                 <div className="text-gray-500 text-xs">(10 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Equiv</div>
                 <div>Activity</div>
-                <div className="text-green-200 text-xs">(10 Marks)</div>
+                <div className="text-blue-200 text-xs">(10 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Total Internal</div>
-                <div className="text-green-200 text-xs">(30 Marks)</div>
+                <div className="text-blue-200 text-xs">(30 Marks)</div>
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-center text-xs font-medium uppercase tracking-wider">
@@ -267,19 +267,19 @@ const StudentGradingTable = () => {
                 <div className="text-gray-500 text-xs">(20 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Total</div>
-                <div className="text-green-200 text-xs">(50 Marks)</div>
+                <div className="text-blue-200 text-xs">(50 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-yellow-500 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-yellow-500 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>{endLabel}</div>
                 <div className="text-yellow-200 text-xs">(50 Marks)</div>
               </th>
 
-              <th className="sticky top-0 px-4 py-3 bg-green-600 text-white text-center text-xs font-medium uppercase tracking-wider">
+              <th className="sticky top-0 px-4 py-3 bg-blue-600 text-gray-900 text-center text-xs font-medium uppercase tracking-wider">
                 <div>Total</div>
-                <div className="text-green-200 text-xs">(100 Marks)</div>
+                <div className="text-blue-200 text-xs">(100 Marks)</div>
               </th>
 
               <th className="sticky top-0 px-4 py-3 bg-gray-100 text-black text-center text-xs font-medium uppercase tracking-wider">
@@ -335,7 +335,7 @@ const StudentGradingTable = () => {
                           e.target.value
                         )
                       }
-                      className="w-16 px-2 py-1 text-center border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50"
+                      className="w-16 px-2 py-1 text-center border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
                     />
                   </td>
 
@@ -356,7 +356,7 @@ const StudentGradingTable = () => {
                     />
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-medium">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-medium">
                     {equivalentAssignment}
                   </td>
 
@@ -386,7 +386,7 @@ const StudentGradingTable = () => {
                     />
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-medium">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-medium">
                     {equivalentQuiz}
                   </td>
 
@@ -424,11 +424,11 @@ const StudentGradingTable = () => {
                     />
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-medium">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-medium">
                     {equivalentActivity}
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-medium">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-medium">
                     {totalInternal}
                   </td>
 
@@ -445,7 +445,7 @@ const StudentGradingTable = () => {
                     />
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-medium">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-medium">
                     {total50}
                   </td>
 
@@ -462,7 +462,7 @@ const StudentGradingTable = () => {
                     />
                   </td>
 
-                  <td className="px-4 py-3 text-center bg-green-50 font-bold">
+                  <td className="px-4 py-3 text-center bg-blue-50 font-bold">
                     {total100}
                   </td>
 
@@ -484,11 +484,11 @@ const StudentGradingTable = () => {
         <h3 className="text-lg font-semibold mb-3">Grading System</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
           <div className="flex items-center">
-            <div className="w-6 h-6 rounded bg-green-500 mr-2"></div>
+            <div className="w-6 h-6 rounded bg-blue-500 mr-2"></div>
             <span>O: ≥90</span>
           </div>
           <div className="flex items-center">
-            <div className="w-6 h-6 rounded bg-green-300 mr-2"></div>
+            <div className="w-6 h-6 rounded bg-blue-300 mr-2"></div>
             <span>E: ≥80</span>
           </div>
           <div className="flex items-center">
@@ -500,11 +500,11 @@ const StudentGradingTable = () => {
             <span>B: ≥60</span>
           </div>
           <div className="flex items-center">
-            <div className="w-6 h-6 rounded bg-orange-200 mr-2"></div>
+            <div className="w-6 h-6 rounded bg-blue-200 mr-2"></div>
             <span>C: ≥50</span>
           </div>
           <div className="flex items-center">
-            <div className="w-6 h-6 rounded bg-orange-300 mr-2"></div>
+            <div className="w-6 h-6 rounded bg-blue-300 mr-2"></div>
             <span>D: ≥40</span>
           </div>
           <div className="flex items-center">

@@ -9,9 +9,9 @@ const QuestionNavigation = ({ questions, answers, currentIndex, onNavigate }) =>
   };
 
   const statusStyles = {
-    answered: 'bg-emerald-500 text-white border-emerald-500',
+    answered: 'bg-blue-500 text-gray-900 border-blue-500',
     unanswered: 'bg-white text-gray-500 border-gray-200 hover:border-gray-300',
-    review: 'bg-amber-500 text-white border-amber-500',
+    review: 'bg-amber-500 text-gray-900 border-amber-500',
   };
 
   const answeredCount = answers.filter((a) => a?.answer).length;
@@ -30,7 +30,7 @@ const QuestionNavigation = ({ questions, answers, currentIndex, onNavigate }) =>
               onClick={() => onNavigate(i)}
               className={`w-full aspect-square rounded-lg border text-xs font-semibold flex items-center justify-center transition-all ${
                 i === currentIndex
-                  ? 'ring-2 ring-indigo-500 ring-offset-1'
+                  ? 'ring-2 ring-blue-500 ring-offset-1'
                   : ''
               } ${statusStyles[status]}`}
             >
@@ -42,7 +42,7 @@ const QuestionNavigation = ({ questions, answers, currentIndex, onNavigate }) =>
 
       <div className="space-y-1.5 text-[11px]">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-emerald-500" />
+          <span className="w-3 h-3 rounded bg-blue-500" />
           <span className="text-gray-600">Answered ({answeredCount})</span>
         </div>
         <div className="flex items-center gap-2">

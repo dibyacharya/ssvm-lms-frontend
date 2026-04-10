@@ -57,12 +57,12 @@ const CourseSchedule = () => {
   const getDayColor = (day) => {
     const colors = {
       Monday: "bg-blue-50 text-blue-600",
-      Tuesday: "bg-purple-50 text-purple-600",
+      Tuesday: "bg-blue-50 text-blue-600",
       Wednesday: "bg-amber-50 text-amber-600",
       Thursday: "bg-rose-50 text-rose-600",
       Friday: "bg-cyan-50 text-cyan-600",
-      Saturday: "bg-emerald-50 text-emerald-600",
-      Sunday: "bg-orange-50 text-orange-600",
+      Saturday: "bg-blue-50 text-blue-600",
+      Sunday: "bg-blue-50 text-blue-600",
     };
     return colors[day] || "bg-gray-50 text-gray-600";
   };
@@ -292,7 +292,7 @@ const CourseSchedule = () => {
                       </button>
                       <button
                         onClick={handleAddDayAndTime}
-                        className="px-4 py-2 bg-primary text-white rounded-lg 
+                        className="px-4 py-2 bg-primary text-gray-900 rounded-lg 
                           hover:bg-primary/90 transition-all duration-200 font-medium shadow-sm"
                       >
                         Add Class Time

@@ -181,7 +181,7 @@ const WeeklyPlanner = () => {
                       />
                       <button
                         onClick={() => handleAddTopic(week.weekNumber)}
-                        className="px-5 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 
+                        className="px-5 py-3 bg-primary text-gray-900 rounded-xl hover:bg-primary/90 
                           transition-all duration-200 font-medium shadow-sm"
                       >
                         Add
@@ -220,7 +220,7 @@ const WeeklyPlanner = () => {
 
       <button
         onClick={addWeek}
-        className="mt-8 flex items-center justify-center w-full bg-primary text-white px-6 py-4 rounded-xl 
+        className="mt-8 flex items-center justify-center w-full bg-primary text-gray-900 px-6 py-4 rounded-xl 
           hover:bg-primary/90 transition-all duration-300 font-medium shadow-sm hover:shadow"
       >
         <Plus className="w-5 h-5 mr-2" />

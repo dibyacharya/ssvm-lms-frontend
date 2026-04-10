@@ -103,7 +103,7 @@ const VideoPlayer = ({ lecture }) => {
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
-        <div className="text-white text-sm">Loading video...</div>
+        <div className="text-gray-900 text-sm">Loading video...</div>
       </div>
     );
   }
@@ -111,7 +111,7 @@ const VideoPlayer = ({ lecture }) => {
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-black rounded-lg">
-        <div className="text-red-400 text-sm text-center px-4">{error}</div>
+        <div className="text-red-600 text-sm text-center px-4">{error}</div>
       </div>
     );
   }
@@ -147,7 +147,7 @@ const VideoPlayer = ({ lecture }) => {
   return (
     <video
       key={videoSrc}
-      className="w-full h-full rounded-lg shadow-lg dark:shadow-xl"
+      className="w-full h-full rounded-lg shadow-card-sm"
       controls
       controlsList="nodownload noplaybackrate"
       disablePictureInPicture
@@ -178,27 +178,27 @@ const TranscriptViewer = ({ lecture, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col border border-gray-200 dark:border-gray-600">
+      <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col border border-gray-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <FileText size={20} className="text-accent1" />
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-900">
               Transcript: {displayTitle(lecture.title)}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <X size={18} className="text-gray-500 dark:text-gray-400" />
+            <X size={18} className="text-gray-500" />
           </button>
         </div>
 
         {/* Transcript Content */}
         <div className="flex-1 overflow-y-auto p-4">
           {lecture.transcriptStatus === "processing" ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent1 mb-3" />
               <p>Transcript is being generated...</p>
             </div>
@@ -206,14 +206,14 @@ const TranscriptViewer = ({ lecture, onClose }) => {
             <div className="space-y-3">
               {segments.map((seg, idx) => (
                 <div key={idx} className="flex gap-3 group">
-                  <span className="text-xs text-gray-400 dark:text-gray-500 font-mono min-w-[50px] pt-1 text-right">
+                  <span className="text-xs text-gray-400 font-mono min-w-[50px] pt-1 text-right">
                     {formatTime(seg.start)}
                   </span>
                   <div className="flex-1">
-                    <span className="text-xs font-semibold text-accent1 dark:text-accent1 block mb-0.5">
+                    <span className="text-xs font-semibold text-primary-600 block mb-0.5">
                       {seg.speaker}
                     </span>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm text-gray-600 leading-relaxed">
                       {seg.text}
                     </p>
                   </div>
@@ -221,11 +221,11 @@ const TranscriptViewer = ({ lecture, onClose }) => {
               ))}
             </div>
           ) : plainText ? (
-            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
               {plainText}
             </p>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
               <FileText size={32} className="mb-3 opacity-50" />
               <p>No transcript available for this lecture.</p>
             </div>
@@ -318,8 +318,8 @@ export default function LecturePanel() {
 
   if (!course || !course.syllabus || !course.syllabus.modules) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent1 dark:border-accent1"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -336,7 +336,7 @@ export default function LecturePanel() {
 
   if (modulesWithLectures.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 relative -top-6 w-full mx-auto p-4 min-h-screen">
+      <div className="bg-gray-50 relative -top-6 w-full mx-auto p-4 min-h-screen">
         <div className="w-full">
           <div className="relative overflow-hidden rounded-xl mb-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 shadow-lg">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full" />
@@ -345,10 +345,10 @@ export default function LecturePanel() {
             <div className="relative z-10 px-8 py-8 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <Video className="w-7 h-7 text-white" />
+                  <Video className="w-7 h-7 text-gray-900" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white tracking-tight">
+                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                     Class Recordings
                   </h1>
                   <p className="text-rose-100 text-sm mt-1">
@@ -359,9 +359,9 @@ export default function LecturePanel() {
             </div>
           </div>
           <div className="flex items-center justify-center mt-12">
-            <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">No Lectures Available</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <div className="text-center p-8 bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm border border-gray-200">
+              <h2 className="text-xl font-bold mb-4 text-gray-900">No Lectures Available</h2>
+              <p className="text-gray-500 mb-4">
                 There are currently no lectures for this course.
               </p>
             </div>
@@ -372,7 +372,7 @@ export default function LecturePanel() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 relative -top-6 w-full mx-auto p-4 min-h-screen">
+    <div className="bg-gray-50 relative -top-6 w-full mx-auto p-4 min-h-screen">
       <div className="w-full">
         {/* Header Banner — matches teacher portal style */}
         <div className="relative overflow-hidden rounded-xl mb-6 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 shadow-lg">
@@ -382,10 +382,10 @@ export default function LecturePanel() {
           <div className="relative z-10 px-8 py-8 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Video className="w-7 h-7 text-white" />
+                <Video className="w-7 h-7 text-gray-900" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                   Class Recordings
                 </h1>
                 <p className="text-rose-100 text-sm mt-1">
@@ -397,8 +397,8 @@ export default function LecturePanel() {
               onClick={toggleFocusMode}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
                 focusMode
-                  ? 'bg-white/30 border-white/40 text-white'
-                  : 'bg-white/20 border-white/30 text-white hover:bg-white/30'
+                  ? 'bg-white/30 border-white/40 text-gray-900'
+                  : 'bg-white/20 border-white/30 text-gray-900 hover:bg-white/30'
               }`}
             >
               {focusMode ? <Minimize size={16} /> : <Maximize size={16} />}
@@ -413,12 +413,12 @@ export default function LecturePanel() {
           /* Focus Mode Layout */
           <div className="space-y-4">
             {/* Main Content - Full Width */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-6 border border-gray-200 dark:border-gray-600">
+            <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm p-6 border border-gray-200">
               {selectedLecture ? (
                 <div>
                   {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
                     <div className="mb-6">
-                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-card-sm">
                         <VideoPlayer lecture={selectedLecture} />
                       </div>
                       {/* Download Button — teachers only */}
@@ -427,7 +427,7 @@ export default function LecturePanel() {
                           <a
                             href={resolveVideoUrl(selectedLecture, true)}
                             download={`${selectedLecture.title || "recording"}.mp4`}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 text-primary-600 border border-primary-700 hover:bg-primary-900/50 transition-colors text-sm font-medium"
                           >
                             <Download size={16} />
                             Download Recording
@@ -439,16 +439,16 @@ export default function LecturePanel() {
 
                   {/* Key Takeaways */}
                   <div className="mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">
                       Key takeaways from this chapter
                     </h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       {keyTakeaways.map((takeaway, index) => (
                         <div key={index} className="flex items-start space-x-3">
-                          <div className="flex-shrink-0 w-6 h-6 text-accent1 dark:text-accent1 rounded-full flex items-center justify-center text-sm font-medium mt-0.5 border border-accent1 dark:border-accent1">
+                          <div className="flex-shrink-0 w-6 h-6 text-primary-600 rounded-full flex items-center justify-center text-sm font-medium mt-0.5 border border-primary-500">
                             {index + 1}
                           </div>
-                          <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                          <p className="text-gray-600 text-sm leading-relaxed">
                             {takeaway}
                           </p>
                         </div>
@@ -456,20 +456,20 @@ export default function LecturePanel() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="bg-gray-100/40 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      <h3 className="text-lg font-semibold text-gray-900">
                         Lecture Content
                       </h3>
                     </div>
                     <div className="prose max-w-none pl-7">
-                      <p className="text-gray-700 dark:text-gray-300">{selectedLecture.content}</p>
+                      <p className="text-gray-600">{selectedLecture.content}</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-64">
-                  <p className="text-xl text-gray-600 dark:text-gray-400">
+                  <p className="text-xl text-gray-500">
                     Select a lecture to view details
                   </p>
                 </div>
@@ -477,10 +477,10 @@ export default function LecturePanel() {
             </div>
 
             {/* Compact Notes in Focus Mode */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-600">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Quick Notes</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm border border-gray-200">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900">Quick Notes</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   Take notes while watching
                 </p>
               </div>
@@ -494,35 +494,35 @@ export default function LecturePanel() {
           <div className="grid grid-cols-12 gap-4 h-[calc(100vh-140px)]">
             
             {/* Left Panel - Course Modules (3 columns) */}
-            <div className="col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-4 overflow-y-auto border border-gray-200 dark:border-gray-600">
+            <div className="col-span-3 bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm p-4 overflow-y-auto border border-gray-200">
              
 
-              <h3 className="font-bold text-md mb-4 text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">
+              <h3 className="font-bold text-md mb-4 text-gray-900 border-b border-gray-200 pb-2">
                 Course Modules
               </h3>
 
               <div className="space-y-2">
                 {modulesWithLectures.map((module) => (
-                  <div key={module._id} className="border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                  <div key={module._id} className="border border-gray-200 rounded-lg bg-white/70 backdrop-blur-xl">
                     <button
                       onClick={() => toggleModule(module._id)}
-                      className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-gray-900 dark:text-white"
+                      className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-gray-900"
                     >
                       <div className="flex flex-col text-left">
                         <span className="font-medium text-sm">
                           Module {module.moduleNumber}: {module.moduleTitle}
                         </span>
                         {module.lectures.length > 0 && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-gray-500">
                             ({module.lectures.length} recordings)
                           </span>
                         )}
                       </div>
                       <div className="flex items-center">
                         {expandedModules[module._id] ? (
-                          <ChevronDown size={16} className="text-gray-600 dark:text-gray-300" />
+                          <ChevronDown size={16} className="text-gray-600" />
                         ) : (
-                          <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+                          <ChevronRight size={16} className="text-gray-600" />
                         )}
                       </div>
                     </button>
@@ -530,15 +530,15 @@ export default function LecturePanel() {
                     {expandedModules[module._id] &&
                       module.lectures &&
                       module.lectures.length > 0 && (
-                        <div className="border-t border-gray-200 dark:border-gray-600">
+                        <div className="border-t border-gray-200">
                           {module.lectures.map((lecture) => (
                             <button
                               key={lecture._id}
                               onClick={() => handleLectureSelect(lecture)}
-                              className={`w-full text-left p-3 pl-6 transition-all duration-200 flex items-start border-b border-gray-100 dark:border-gray-600 last:border-b-0 ${
+                              className={`w-full text-left p-3 pl-6 transition-all duration-200 flex items-start border-b border-gray-100 last:border-b-0 ${
                                 selectedLecture?._id === lecture._id
-                                  ? " dark:bg-accent1 dark:text-white dark:bg-opacity-20 text-accent1 dark:text-accent1 border-l-4 border-l-accent1"
-                                  : "hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                                  ? " bg-primary-900/20 text-primary-600 border-l-4 border-l-accent1"
+                                  : "hover:bg-gray-50 text-gray-700"
                               }`}
                             >
                               <div className="mr-3 mt-1">
@@ -546,8 +546,8 @@ export default function LecturePanel() {
                                   size={16}
                                   className={
                                     selectedLecture?._id === lecture._id
-                                      ? "text-accent1 dark:text-white"
-                                      : "text-gray-400 dark:text-gray-500"
+                                      ? "text-primary-600"
+                                      : "text-gray-400"
                                   }
                                 />
                               </div>
@@ -559,8 +559,8 @@ export default function LecturePanel() {
                                   <p
                                     className={`text-xs ${
                                       selectedLecture?._id === lecture._id
-                                        ? "text-accent1 dark:text-accent1"
-                                        : "text-gray-500 dark:text-gray-400"
+                                        ? "text-primary-600"
+                                        : "text-gray-500"
                                     }`}
                                   >
                                     Lecture {lecture.lectureOrder} • {formatDate(lecture.createdAt)}
@@ -571,7 +571,7 @@ export default function LecturePanel() {
                                     </span>
                                   )}
                                   {lecture.transcriptStatus === "ready" && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-50 text-primary-600 font-medium">
                                       TXT
                                     </span>
                                   )}
@@ -587,14 +587,14 @@ export default function LecturePanel() {
             </div>
 
             {/* Center Panel - Lecture Content (6 columns) */}
-            <div className="col-span-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-6 overflow-y-auto border border-gray-200 dark:border-gray-600">
+            <div className="col-span-6 bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm p-6 overflow-y-auto border border-gray-200">
               {selectedLecture ? (
                 <div>
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                    <h2 className="text-2xl font-bold text-gray-900">
                       {displayTitle(selectedLecture.title)}
                     </h2>
-                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
                       <div className="flex items-center">
                         <Calendar size={16} className="mr-1" />
                         {formatDate(selectedLecture.createdAt)}
@@ -608,7 +608,7 @@ export default function LecturePanel() {
 
                   {(selectedLecture.videoUrl || selectedLecture.recordingUrl) && (
                     <div className="mb-6">
-                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-lg dark:shadow-xl">
+                      <div className="aspect-video w-full rounded-lg overflow-hidden shadow-card-sm">
                         <VideoPlayer lecture={selectedLecture} />
                       </div>
                       {/* Download Button — teachers only */}
@@ -617,7 +617,7 @@ export default function LecturePanel() {
                           <a
                             href={resolveVideoUrl(selectedLecture, true)}
                             download={`${selectedLecture.title || "recording"}.mp4`}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 text-primary-600 border border-primary-700 hover:bg-primary-900/50 transition-colors text-sm font-medium"
                           >
                             <Download size={16} />
                             Download Recording
@@ -631,7 +631,7 @@ export default function LecturePanel() {
                   {(selectedLecture.vconfRoomId || selectedLecture.recordingStatus === "ready" || selectedLecture.transcriptStatus === "ready") && (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {selectedLecture.recordingStatus === "processing" && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 border border-yellow-800">
                           <Video size={12} />
                           Recording Processing...
                         </span>
@@ -646,7 +646,7 @@ export default function LecturePanel() {
                         </button>
                       )}
                       {selectedLecture.transcriptStatus === "processing" && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-600 border border-primary-800">
                           <FileText size={12} />
                           Transcript Processing...
                         </span>
@@ -656,16 +656,16 @@ export default function LecturePanel() {
 
                   {/* Key Takeaways */}
                   <div className="mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">
                       Key takeaways from this chapter
                     </h3>
                     <div className="space-y-3">
                       {keyTakeaways.map((takeaway, index) => (
                         <div key={index} className="flex items-start space-x-3">
-                          <div className="flex-shrink-0 w-6 h-6 dark:text-white  bg-opacity-10 dark:bg-accent1 dark:bg-opacity-20 text-accent1 dark:text-accent1 rounded-full flex items-center justify-center text-sm font-medium mt-0.5 border border-accent1 border-opacity-30 dark:border-accent1 dark:border-opacity-40">
+                          <div className="flex-shrink-0 w-6 h-6 bg-primary-900/20 text-primary-600 rounded-full flex items-center justify-center text-sm font-medium mt-0.5 border border-primary-500/40">
                             {index + 1}
                           </div>
-                          <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                          <p className="text-gray-600 text-sm leading-relaxed">
                             {takeaway}
                           </p>
                         </div>
@@ -673,20 +673,20 @@ export default function LecturePanel() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg mb-6 p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="bg-gray-100/40 rounded-lg mb-6 p-4 border border-gray-200">
                     <div className="flex items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      <h3 className="text-lg font-semibold text-gray-900">
                         Lecture Content
                       </h3>
                     </div>
                     <div className="prose max-w-none pl-7">
-                      <p className="text-gray-700 dark:text-gray-300">{selectedLecture.content}</p>
+                      <p className="text-gray-600">{selectedLecture.content}</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-xl text-gray-600 dark:text-gray-400">
+                  <p className="text-xl text-gray-500">
                     Select a lecture to view details
                   </p>
                 </div>
@@ -694,31 +694,31 @@ export default function LecturePanel() {
             </div>
 
             {/* Right Panel - AI Tutor (3 columns) */}
-            <div className="col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-4 border border-gray-200 dark:border-gray-600 flex flex-col">
+            <div className="col-span-3 bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm p-4 border border-gray-200 flex flex-col">
               <div className="mb-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">AI Tutor</h3>
-                  <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+                  <h3 className="text-lg font-bold text-gray-900">AI Tutor</h3>
+                  <ChevronRight size={20} className="text-gray-400" />
                 </div>
                 <div className="mt-2">
-                  <div className="flex items-center text-sm text-accent1 dark:text-accent1 mb-1">
+                  <div className="flex items-center text-sm text-primary-600 mb-1">
                     <div className="w-2 h-2 bg-accent1 rounded-full mr-2"></div>
                     Context: {displayTitle(selectedLecture?.title) || "Tree Traversal Methods"}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     Timestamp: 5:23 • Confidence: 95%
                   </p>
                 </div>
               </div>
 
               <div className="flex-1 mb-4">
-                <div className=" dark:bg-accent1 dark:bg-opacity-10 rounded-lg p-4 border border-accent1 border-opacity-20 dark:border-accent1 dark:border-opacity-30">
+                <div className=" bg-primary-900/10 rounded-lg p-4 border border-primary-500/30">
                   <div className="flex items-start">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1">
-                      <MessageSquare size={16} className="text-accent1 dark:text-white" />
+                      <MessageSquare size={16} className="text-primary-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                      <p className="text-sm text-gray-600 mb-3">
                         Hello! I'm here to help you understand {displayTitle(selectedLecture?.title) || "the topic at hand."}. What would you like to know?
                       </p>
                     </div>
@@ -727,35 +727,35 @@ export default function LecturePanel() {
               </div>
 
               <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Quick Actions:</h4>
+                <h4 className="text-sm font-semibold text-gray-600 mb-3">Quick Actions:</h4>
                 <div className="space-y-2">
                   <button 
                     onClick={() => handleQuickAction("summarize")}
-                    className="w-full text-left p-3 rounded-lg bg-orange-50 dark:bg-orange-900 dark:bg-opacity-10 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900 dark:hover:bg-opacity-20 transition-colors"
+                    className="w-full text-left p-3 rounded-lg bg-orange-900/10 border border-blue-800 hover:bg-orange-900/20 transition-colors"
                   >
                     <div className="flex items-center">
-                      <BookOpen size={16} className="text-orange-600 dark:text-orange-400 mr-2" />
-                      <span className="text-sm text-orange-700 dark:text-orange-300">Summarize this lecture</span>
+                      <BookOpen size={16} className="text-blue-400 mr-2" />
+                      <span className="text-sm text-blue-300">Summarize this lecture</span>
                     </div>
                   </button>
                   
                   <button 
                     onClick={() => handleQuickAction("practice")}
-                    className="w-full text-left p-3 rounded-lg bg-red-50 dark:bg-red-900 dark:bg-opacity-10 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900 dark:hover:bg-opacity-20 transition-colors"
+                    className="w-full text-left p-3 rounded-lg bg-red-900/10 border border-red-800 hover:bg-red-900/20 transition-colors"
                   >
                     <div className="flex items-center">
-                      <Target size={16} className="text-red-600 dark:text-red-400 mr-2" />
-                      <span className="text-sm text-red-700 dark:text-red-300">Give me practice questions</span>
+                      <Target size={16} className="text-red-600 mr-2" />
+                      <span className="text-sm text-red-600">Give me practice questions</span>
                     </div>
                   </button>
                   
                   <button 
                     onClick={() => handleQuickAction("explain")}
-                    className="w-full text-left p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900 dark:bg-opacity-10 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900 dark:hover:bg-opacity-20 transition-colors"
+                    className="w-full text-left p-3 rounded-lg bg-cyan-900/10 border border-cyan-800 hover:bg-cyan-900/20 transition-colors"
                   >
                     <div className="flex items-center">
-                      <HelpCircle size={16} className="text-cyan-600 dark:text-cyan-400 mr-2" />
-                      <span className="text-sm text-cyan-700 dark:text-cyan-300">Explain current concept</span>
+                      <HelpCircle size={16} className="text-cyan-600 mr-2" />
+                      <span className="text-sm text-cyan-600">Explain current concept</span>
                     </div>
                   </button>
                 </div>
@@ -771,23 +771,23 @@ export default function LecturePanel() {
 
         {/* Bottom Panel - Interactive Notes (only in normal mode) */}
         {!focusMode && (
-          <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-600">
+          <div className="mt-4 bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm border border-gray-200">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Interactive Notes</h3>
+                <h3 className="text-lg font-bold text-gray-900">Interactive Notes</h3>
                 <div className="flex items-center space-x-2">
-                  <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Book size={16} className="text-gray-600 dark:text-gray-400" />
+                  <button className="p-1 rounded hover:bg-gray-50">
+                    <Book size={16} className="text-gray-500" />
                   </button>
-                  <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Calendar size={16} className="text-gray-600 dark:text-gray-400" />
+                  <button className="p-1 rounded hover:bg-gray-50">
+                    <Calendar size={16} className="text-gray-500" />
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 Start taking notes linked to video timestamps
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-gray-400">
                 Click anywhere to begin
               </p>
             </div>

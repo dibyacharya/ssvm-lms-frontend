@@ -115,11 +115,11 @@ export default function MeetingReport({ meetingId, onClose }) {
     return (
       <Overlay>
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <AlertTriangle className="w-8 h-8 text-red-400" />
+          <AlertTriangle className="w-8 h-8 text-red-600" />
           <p className="text-gray-600">{error}</p>
           <button
             onClick={fetchReport}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-900 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Retry
           </button>
@@ -316,7 +316,7 @@ export default function MeetingReport({ meetingId, onClose }) {
                               <span
                                 className={`text-sm w-40 shrink-0 truncate ${
                                   isCorrect
-                                    ? "text-green-700 font-semibold"
+                                    ? "text-blue-700 font-semibold"
                                     : "text-gray-600"
                                 }`}
                               >
@@ -326,7 +326,7 @@ export default function MeetingReport({ meetingId, onClose }) {
                               <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all ${
-                                    isCorrect ? "bg-green-400" : "bg-blue-400"
+                                    isCorrect ? "bg-blue-400" : "bg-blue-400"
                                   }`}
                                   style={{ width: `${pct}%` }}
                                 />
@@ -378,7 +378,7 @@ export default function MeetingReport({ meetingId, onClose }) {
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           q.status === "answered" || q.answer
-                            ? "bg-green-50 text-green-600"
+                            ? "bg-blue-50 text-blue-600"
                             : q.status === "dismissed"
                             ? "bg-red-50 text-red-600"
                             : "bg-yellow-50 text-yellow-600"
@@ -481,7 +481,7 @@ export default function MeetingReport({ meetingId, onClose }) {
           </button>
           <button
             onClick={onClose}
-            className="report-close-btn px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="report-close-btn px-4 py-2 text-sm font-medium text-gray-900 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Close
           </button>
@@ -495,7 +495,7 @@ export default function MeetingReport({ meetingId, onClose }) {
 
 function Overlay({ children }) {
   return (
-    <div className="report-overlay-bg fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+    <div className="report-overlay-bg fixed inset-0 z-50 bg-gray-50/20 flex items-center justify-center">
       {children}
     </div>
   );

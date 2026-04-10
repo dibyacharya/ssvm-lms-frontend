@@ -74,7 +74,7 @@ const AnnouncementsSection = ({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Recent Announcements</h2>
           <button
-            className="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
             onClick={onOpenModal}
           >
             View All
@@ -98,7 +98,7 @@ const AnnouncementsSection = ({
               <p className="text-gray-700 mb-3">{announcement.content}</p>
 
               {announcement.image?.imageUrl && (
-                <div className="flex items-center text-emerald-600 mt-2">
+                <div className="flex items-center text-blue-600 mt-2">
                   <FileVideo className="h-5 w-5 mr-2" />
                   <a
                     href={announcement.image.imageUrl}
@@ -153,7 +153,7 @@ const AnnouncementsSection = ({
                       title: e.target.value,
                     })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 />
               </div>
               <div>
@@ -173,7 +173,7 @@ const AnnouncementsSection = ({
                       content: e.target.value,
                     })
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 />
               </div>
               <div>
@@ -205,7 +205,7 @@ const AnnouncementsSection = ({
                 </button>
                 <button
                   onClick={handleAddAnnouncement}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
+                  className="px-4 py-2 bg-blue-600 text-gray-900 rounded-md hover:bg-blue-700"
                   disabled={!newAnnouncement.title || !newAnnouncement.content}
                 >
                   Post Announcement

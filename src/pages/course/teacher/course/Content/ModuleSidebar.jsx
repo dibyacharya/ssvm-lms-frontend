@@ -33,15 +33,15 @@ const ModuleSidebar = ({
       case "video":
         return <Video size={16} className="text-blue-500" />;
       case "text":
-        return <MessageSquare size={16} className="text-green-500" />;
+        return <MessageSquare size={16} className="text-blue-500" />;
       case "link":
-        return <Link2 size={16} className="text-purple-500" />;
+        return <Link2 size={16} className="text-blue-500" />;
       case "file":
         // For files, check the file type
         if (contentItem.fileType === "pdf") {
           return <FileText size={16} className="text-red-500" />;
         } else if (contentItem.fileType === "image") {
-          return <Image size={16} className="text-orange-500" />;
+          return <Image size={16} className="text-blue-500" />;
         } else if (contentItem.fileType === "presentation") {
           return <FileText size={16} className="text-yellow-500" />;
         } else {

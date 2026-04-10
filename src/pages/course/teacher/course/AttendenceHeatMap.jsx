@@ -22,12 +22,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
       )}
     </div>
   </div>
@@ -191,8 +191,8 @@ const AttendanceHeatMap = () => {
     if (!semesterStartDate || !semesterEndDate) {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mb-4">
-            <Calendar className="w-10 h-10 text-orange-400" />
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-amber-100 flex items-center justify-center mb-4">
+            <Calendar className="w-10 h-10 text-blue-400" />
           </div>
           <h3 className="text-xl font-semibold text-primary mb-2">
             {periodLbl} Dates Not Set
@@ -209,7 +209,7 @@ const AttendanceHeatMap = () => {
       return (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-yellow-100 flex items-center justify-center mb-4">
-            <CalendarDays className="w-10 h-10 text-amber-400" />
+            <CalendarDays className="w-10 h-10 text-amber-600" />
           </div>
           <h3 className="text-xl font-semibold text-primary mb-2">
             No Attendance Data
@@ -226,13 +226,13 @@ const AttendanceHeatMap = () => {
       <>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-emerald-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-blue-500">
             <div className="flex items-center justify-between">
               <h3 className="text-tertiary font-medium">Overall Attendance</h3>
               <div
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   calculateOverallAttendance() >= 75
-                    ? "bg-emerald-50 text-emerald-600"
+                    ? "bg-blue-50 text-blue-600"
                     : "bg-red-50 text-red-500"
                 }`}
               >
@@ -257,7 +257,7 @@ const AttendanceHeatMap = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-purple-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-tertiary/10 border-l-4 border-l-blue-500">
             <h3 className="text-tertiary font-medium mb-2">Days Recorded</h3>
             <div className="text-3xl font-bold text-primary">
               {attendanceData.length}
@@ -295,7 +295,7 @@ const AttendanceHeatMap = () => {
         </div>
 
         {/* Heat Map Container */}
-        <div className="bg-white rounded-xl relative shadow-sm border-2 border-orange-100 overflow-hidden">
+        <div className="bg-white rounded-xl relative shadow-sm border-2 border-blue-100 overflow-hidden">
           <div className="p-6 overflow-x-auto">
             <div className="min-w-[750px]">
               <HeatMap
@@ -332,7 +332,7 @@ const AttendanceHeatMap = () => {
                       placement="top"
                       trigger="hover"
                       content={
-                        <div className="bg-secondary text-white p-2 rounded shadow-lg text-xs">
+                        <div className="bg-secondary text-gray-900 p-2 rounded shadow-lg text-xs">
                           <div className="font-bold mb-1">
                             {new Date(data.date).toLocaleDateString("en-US", {
                               weekday: "short",
@@ -372,8 +372,8 @@ const AttendanceHeatMap = () => {
         </div>
 
         {/* How to Read Info Card */}
-        <div className="flex items-start p-5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 mt-6 border-l-4 border-l-orange-400">
-          <HelpCircle className="w-5 h-5 text-orange-500 mt-0.5 mr-3 flex-shrink-0" />
+        <div className="flex items-start p-5 rounded-xl bg-gradient-to-r from-blue-50 to-amber-50 border border-blue-200 mt-6 border-l-4 border-l-blue-400">
+          <HelpCircle className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
           <div>
             <p className="text-primary font-medium mb-1">
               How to read this chart
@@ -400,9 +400,9 @@ const AttendanceHeatMap = () => {
         <SectionHeader
           icon={BarChart2}
           title="Attendance Heat Map"
-          gradient="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500"
+          gradient="bg-gradient-to-r from-blue-500 via-amber-500 to-yellow-500"
         />
-        <div className="px-6 py-3 bg-gradient-to-r from-orange-50 to-yellow-50 border-b border-orange-100">
+        <div className="px-6 py-3 bg-gradient-to-r from-blue-50 to-yellow-50 border-b border-blue-100">
           <p className="text-sm text-tertiary">
             Visual representation of attendance patterns over time
           </p>

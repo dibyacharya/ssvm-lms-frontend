@@ -21,7 +21,7 @@ const AssignmentCard = ({
     <div className="bg-white rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
-          <FileText className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
+          <FileText className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
           <div>
             <h3 className="font-medium text-gray-900">{assignment.title}</h3>
             <p className="text-gray-600 text-sm line-clamp-2 mt-1">
@@ -39,7 +39,7 @@ const AssignmentCard = ({
 
         <div className="text-right flex flex-col items-end">
           {hasSubmitted ? (
-            <span className="flex items-center space-x-1 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+            <span className="flex items-center space-x-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
               <CheckCircle className="h-3 w-3" />
               <span>Submitted</span>
             </span>
@@ -61,7 +61,7 @@ const AssignmentCard = ({
 
           <Link
             to={`/student/assignment/${courseID}/${index}`}
-            className="text-green-600 hover:text-green-800 text-sm mt-3 inline-block"
+            className="text-blue-600 hover:text-blue-800 text-sm mt-3 inline-block"
           >
             View Details
           </Link>

@@ -18,11 +18,11 @@ const violationIcons = {
 };
 
 const violationColors = {
-  tab_switch: 'text-amber-500 bg-amber-500/10',
-  no_face: 'text-red-500 bg-red-500/10',
+  tab_switch: 'text-amber-500 bg-amber-50',
+  no_face: 'text-red-500 bg-red-50',
   multiple_faces: 'text-red-600 bg-red-600/10',
-  copy_paste: 'text-orange-500 bg-orange-500/10',
-  fullscreen_exit: 'text-purple-500 bg-purple-500/10',
+  copy_paste: 'text-blue-500 bg-blue-500/10',
+  fullscreen_exit: 'text-blue-500 bg-blue-500/10',
   browser_resize: 'text-blue-500 bg-blue-500/10',
 };
 
@@ -62,7 +62,7 @@ const ProctoringReport = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -94,7 +94,7 @@ const ProctoringReport = () => {
           <button onClick={() => navigate(-1)} className="p-2 text-gray-400 hover:text-gray-600"><FaArrowLeft /></button>
           <div>
             <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <FaShieldAlt className="text-purple-500" /> Proctoring Report
+              <FaShieldAlt className="text-blue-500" /> Proctoring Report
             </h1>
             <p className="text-sm text-gray-500">
               {submission?.student?.user?.name || submission?.student?.name || 'Student'} • {exam?.title || 'Exam'}
@@ -107,7 +107,7 @@ const ProctoringReport = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold border-4 ${
-                (submission?.integrityScore ?? 100) >= 80 ? 'border-emerald-500 text-emerald-600 bg-emerald-50' :
+                (submission?.integrityScore ?? 100) >= 80 ? 'border-blue-500 text-blue-600 bg-blue-50' :
                 (submission?.integrityScore ?? 100) >= 50 ? 'border-amber-500 text-amber-600 bg-amber-50' :
                 'border-red-500 text-red-600 bg-red-50'
               }`}>
@@ -188,7 +188,7 @@ const ProctoringReport = () => {
                         {v.screenshotUrl && (
                           <button
                             onClick={() => setSelectedScreenshot(v.screenshotUrl)}
-                            className="mt-2 text-[10px] text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                            className="mt-2 text-[10px] text-blue-600 hover:text-blue-700 flex items-center gap-1"
                           >
                             <FaCamera /> View Screenshot
                           </button>
@@ -206,18 +206,18 @@ const ProctoringReport = () => {
         {screenshots.length > 0 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <FaCamera className="text-indigo-500" /> Periodic Screenshots ({screenshots.length})
+              <FaCamera className="text-blue-500" /> Periodic Screenshots ({screenshots.length})
             </h3>
             <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {screenshots.map((ss, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedScreenshot(ss.url)}
-                  className="aspect-video bg-gray-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all group relative"
+                  className="aspect-video bg-gray-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all group relative"
                 >
                   <img src={ss.url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5">
-                    <p className="text-[8px] text-white">{fmtTime(ss.capturedAt)}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gray-50/20 px-1.5 py-0.5">
+                    <p className="text-[8px] text-gray-900">{fmtTime(ss.capturedAt)}</p>
                   </div>
                 </button>
               ))}
@@ -229,7 +229,7 @@ const ProctoringReport = () => {
         {faceLog.length > 0 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <FaUser className="text-emerald-500" /> Face Detection Log ({faceLog.length} entries)
+              <FaUser className="text-blue-500" /> Face Detection Log ({faceLog.length} entries)
             </h3>
             <div className="max-h-60 overflow-y-auto">
               <table className="w-full text-xs">
@@ -249,7 +249,7 @@ const ProctoringReport = () => {
                       <td className="py-1.5 px-2 text-center">{entry.confidence ? `${(entry.confidence * 100).toFixed(0)}%` : '—'}</td>
                       <td className="py-1.5 px-2 text-center">
                         {entry.facesDetected === 1 ? (
-                          <span className="text-emerald-600">✓ OK</span>
+                          <span className="text-blue-600">✓ OK</span>
                         ) : entry.facesDetected === 0 ? (
                           <span className="text-red-600">⚠ No face</span>
                         ) : (

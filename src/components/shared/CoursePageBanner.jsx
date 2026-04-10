@@ -12,7 +12,7 @@ const CoursePageBanner = ({
   icon: Icon,
   title,
   subtitle,
-  gradient = "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500",
+  gradient = "bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500",
   rightContent,
 }) => (
   <div
@@ -27,15 +27,15 @@ const CoursePageBanner = ({
       <div className="flex items-center gap-4">
         {Icon && (
           <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <Icon className="w-7 h-7 text-white" />
+            <Icon className="w-7 h-7 text-gray-900" />
           </div>
         )}
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-white/80 text-sm mt-1">{subtitle}</p>
+            <p className="text-gray-900/80 text-sm mt-1">{subtitle}</p>
           )}
         </div>
       </div>

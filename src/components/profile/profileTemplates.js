@@ -125,7 +125,7 @@ export const TEACHER_PROFILE_SECTIONS = [
     title: "Contact Details",
     fields: [
       "School Associated",
-      "KIIT mail ID",
+      "Official Email ID",
       "Personal Email ID",
       "Mobile Number",
       "WhatsApp Number",
@@ -287,7 +287,7 @@ export const TEACHER_ALIASES = {
   lastname: "Last",
   dob: "Date of Birth",
   schoolassociated: "School Associated",
-  kiitmailid: "KIIT mail ID",
+  ssvmmailid: "Official Email ID",
   personalemailid: "Personal Email ID",
   mobile: "Mobile Number",
   whatsapp: "WhatsApp Number",

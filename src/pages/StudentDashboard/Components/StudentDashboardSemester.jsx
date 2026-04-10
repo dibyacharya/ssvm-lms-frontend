@@ -35,14 +35,14 @@ import DashboardSemesterContent from "./DashBoardSemContent";
 
 // Gradient color palette for semester cards — cycles through these
 const CARD_GRADIENTS = [
-  { bg: "from-blue-500 to-cyan-400", light: "bg-blue-50 dark:bg-blue-900/20", accent: "text-blue-600 dark:text-blue-400", border: "border-blue-200 dark:border-blue-700", ring: "ring-blue-400" },
-  { bg: "from-violet-500 to-purple-400", light: "bg-violet-50 dark:bg-violet-900/20", accent: "text-violet-600 dark:text-violet-400", border: "border-violet-200 dark:border-violet-700", ring: "ring-violet-400" },
-  { bg: "from-emerald-500 to-teal-400", light: "bg-emerald-50 dark:bg-emerald-900/20", accent: "text-emerald-600 dark:text-emerald-400", border: "border-emerald-200 dark:border-emerald-700", ring: "ring-emerald-400" },
-  { bg: "from-amber-500 to-orange-400", light: "bg-amber-50 dark:bg-amber-900/20", accent: "text-amber-600 dark:text-amber-400", border: "border-amber-200 dark:border-amber-700", ring: "ring-amber-400" },
+  { bg: "from-blue-500 to-blue-400", light: "bg-blue-50 dark:bg-blue-900/20", accent: "text-blue-600 dark:text-blue-400", border: "border-blue-200 dark:border-blue-700", ring: "ring-blue-400" },
+  { bg: "from-blue-500 to-blue-400", light: "bg-violet-50 dark:bg-violet-900/20", accent: "text-blue-600 dark:text-blue-400", border: "border-violet-200 dark:border-violet-700", ring: "ring-blue-400" },
+  { bg: "from-blue-500 to-blue-400", light: "bg-blue-50 dark:bg-blue-900/20", accent: "text-blue-600 dark:text-blue-400", border: "border-blue-200 dark:border-blue-700", ring: "ring-blue-400" },
+  { bg: "from-amber-500 to-blue-400", light: "bg-amber-50 dark:bg-amber-900/20", accent: "text-amber-600 dark:text-amber-600", border: "border-amber-200 dark:border-amber-700", ring: "ring-amber-400" },
   { bg: "from-pink-500 to-rose-400", light: "bg-pink-50 dark:bg-pink-900/20", accent: "text-pink-600 dark:text-pink-400", border: "border-pink-200 dark:border-pink-700", ring: "ring-pink-400" },
-  { bg: "from-indigo-500 to-blue-400", light: "bg-indigo-50 dark:bg-indigo-900/20", accent: "text-indigo-600 dark:text-indigo-400", border: "border-indigo-200 dark:border-indigo-700", ring: "ring-indigo-400" },
-  { bg: "from-teal-500 to-green-400", light: "bg-teal-50 dark:bg-teal-900/20", accent: "text-teal-600 dark:text-teal-400", border: "border-teal-200 dark:border-teal-700", ring: "ring-teal-400" },
-  { bg: "from-red-500 to-pink-400", light: "bg-red-50 dark:bg-red-900/20", accent: "text-red-600 dark:text-red-400", border: "border-red-200 dark:border-red-700", ring: "ring-red-400" },
+  { bg: "from-blue-500 to-blue-400", light: "bg-blue-50 dark:bg-indigo-900/20", accent: "text-blue-600 dark:text-indigo-400", border: "border-indigo-200 dark:border-indigo-700", ring: "ring-indigo-400" },
+  { bg: "from-blue-500 to-blue-400", light: "bg-teal-50 dark:bg-teal-900/20", accent: "text-teal-600 dark:text-teal-400", border: "border-teal-200 dark:border-teal-700", ring: "ring-teal-400" },
+  { bg: "from-red-500 to-pink-400", light: "bg-red-50 dark:bg-red-900/20", accent: "text-red-600 dark:text-red-600", border: "border-red-200 dark:border-red-700", ring: "ring-red-400" },
 ];
 
 export default function DashboardSemester({ setActiveSection }) {
@@ -179,24 +179,24 @@ export default function DashboardSemester({ setActiveSection }) {
         icon={GraduationCap}
         title={`${timeGreeting.text}${coursesData?.user?.name ? `, ${coursesData.user.name}` : ""}!`}
         subtitle={`Welcome to your Student Dashboard • ${todayDate}`}
-        gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500"
+        gradient="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500"
         rightContent={
           <div className="flex items-center gap-3">
             {/* Quick Stats */}
             <div className="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl">
-              <BookOpen className="w-4 h-4 text-white/80" />
-              <span className="text-white/90 text-sm font-medium">{stats.totalCourses} Courses</span>
+              <BookOpen className="w-4 h-4 text-gray-900/80" />
+              <span className="text-gray-900/90 text-sm font-medium">{stats.totalCourses} Courses</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl">
-              <Layers className="w-4 h-4 text-white/80" />
-              <span className="text-white/90 text-sm font-medium">{stats.activeSemesters} Active {periodLabel}s</span>
+              <Layers className="w-4 h-4 text-gray-900/80" />
+              <span className="text-gray-900/90 text-sm font-medium">{stats.activeSemesters} Active {periodLabel}s</span>
             </div>
             {/* Notification Bell */}
             <button
               onClick={() => setShowNotification(!showNotification)}
               className="relative p-2.5 bg-white/15 backdrop-blur-sm rounded-xl hover:bg-white/25 transition-colors"
             >
-              <Bell className="h-5 w-5 text-white" />
+              <Bell className="h-5 w-5 text-gray-900" />
               <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-400 rounded-full ring-2 ring-white/20"></span>
             </button>
           </div>
@@ -220,15 +220,15 @@ export default function DashboardSemester({ setActiveSection }) {
 
       {/* Notification Dropdown */}
       {showNotification && (
-        <div className="absolute right-10 mt-0 w-80 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 p-4 z-50">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-3">Notifications</h3>
+        <div className="absolute right-10 mt-0 w-80 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-300 p-4 z-50">
+          <h3 className="font-semibold text-gray-800 dark:text-gray-900 mb-3">Notifications</h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition-colors">
               <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                 <Book className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-800 dark:text-white">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-900">
                   New course material available
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
@@ -264,24 +264,24 @@ export default function DashboardSemester({ setActiveSection }) {
                 <AccordionItemButton
                   className={
                     isAccessible
-                      ? `group relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl border ${colorScheme.border} p-0 cursor-pointer hover:shadow-lg hover:ring-2 hover:${colorScheme.ring} transition-all duration-300`
-                      : "relative overflow-hidden bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-0 cursor-not-allowed opacity-60"
+                      ? `group relative overflow-hidden bg-white dark:bg-white rounded-xl border ${colorScheme.border} p-0 cursor-pointer hover:shadow-lg hover:ring-2 hover:${colorScheme.ring} transition-all duration-300`
+                      : "relative overflow-hidden bg-gray-50 dark:bg-white/50 rounded-xl border border-gray-200 dark:border-gray-200 p-0 cursor-not-allowed opacity-60"
                   }
                 >
                   <div className="flex items-center gap-4 p-4">
                     {/* Number Badge with gradient */}
                     <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${isAccessible ? colorScheme.bg : "from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700"} flex items-center justify-center shadow-md flex-shrink-0`}>
-                      <span className="text-xl font-bold text-white">{semester.semNumber}</span>
+                      <span className="text-xl font-bold text-gray-900">{semester.semNumber}</span>
                       {!isAccessible && (
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-400 dark:bg-gray-500 rounded-full flex items-center justify-center">
-                          <Lock className="w-3 h-3 text-white" />
+                          <Lock className="w-3 h-3 text-gray-900" />
                         </div>
                       )}
                     </div>
 
                     {/* Semester Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className={`text-lg font-bold ${isAccessible ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}`}>
+                      <h3 className={`text-lg font-bold ${isAccessible ? "text-gray-900 dark:text-gray-900" : "text-gray-400 dark:text-gray-500"}`}>
                         {semester.name}
                       </h3>
                       <p className={`text-sm ${isAccessible ? "text-gray-500 dark:text-gray-400" : "text-gray-400 dark:text-gray-600"}`}>

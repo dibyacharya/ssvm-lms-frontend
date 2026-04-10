@@ -11,7 +11,7 @@ This pack is designed for frontend-only automatic visual assignment.
 
 ## Recommended usage
 1. Put this folder under:
-   `KIIT_LMS_FRONTEND/KIIT_LMS_FRONTEND/public/lms_banner_pack`
+   `SSVM_LMS_FRONTEND/SSVM_LMS_FRONTEND/public/lms_banner_pack`
 2. Build a frontend resolver that:
    - prefers explicit course-provided theme/banner if available
    - otherwise maps by course title / course code / program keywords

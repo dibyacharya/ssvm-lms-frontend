@@ -165,7 +165,7 @@ Enter multiple URLs (one per line or separated by commas)"
             />
             <button
               onClick={addLinks}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2"
+              className="w-full px-4 py-2 bg-blue-600 text-gray-900 rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Add Links</span>
@@ -193,7 +193,7 @@ Enter multiple URLs (one per line or separated by commas)"
             </div>
           ) : (
             <div className="text-center py-6 text-gray-500">
-              <LinkIcon className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+              <LinkIcon className="w-12 h-12 mx-auto text-gray-600 mb-2" />
               <p>No links added yet</p>
             </div>
           )}
@@ -208,7 +208,7 @@ Enter multiple URLs (one per line or separated by commas)"
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-gray-900 rounded-md hover:bg-blue-700"
           >
             Save Links
           </button>

@@ -31,3 +31,4 @@ public/config.js.bak.codex
 # logs
 *.log
 npm-debug.log*
+.vercel

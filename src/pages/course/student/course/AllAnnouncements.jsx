@@ -83,22 +83,22 @@ const AllAnnouncements = () => {
         icon={Bell}
         title="All Announcements"
         subtitle="Stay updated with the latest course announcements"
-        gradient="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-500"
+        gradient="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700"
       />
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-lg border border-gray-100 dark:border-gray-600">
+      <div className="p-6 bg-white dark:bg-white rounded-xl shadow-sm dark:shadow-lg border border-gray-100 dark:border-gray-300">
 
       {/* Search and Filter Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <input
           type="text"
           placeholder="Search announcements..."
-          className="w-full md:w-1/2 px-4 py-2 border border-tertiary/10 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+          className="w-full md:w-1/2 px-4 py-2 border border-tertiary/10 dark:border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
         <select
-          className="w-full md:w-1/4 px-4 py-2 border border-tertiary/10 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+          className="w-full md:w-1/4 px-4 py-2 border border-tertiary/10 dark:border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 transition-colors"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
@@ -117,16 +117,16 @@ const AllAnnouncements = () => {
         ) : Object.keys(groupedAnnouncements).length > 0 ? (
           Object.keys(groupedAnnouncements).map((weekRange) => (
             <div key={weekRange}>
-              <h2 className="text-lg font-semibold text-primary dark:text-blue-400 mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
+              <h2 className="text-lg font-semibold text-primary dark:text-blue-400 mb-4 border-b border-gray-200 dark:border-gray-300 pb-2">
                 {weekRange}
               </h2>
               <div className="space-y-4">
                 {groupedAnnouncements[weekRange].map((announcement) => (
                   <div
                     key={announcement._id}
-                    className="p-4 border border-tertiary/10 dark:border-gray-600 rounded-lg hover:shadow-md dark:hover:shadow-lg transition-all bg-white dark:bg-gray-700"
+                    className="p-4 border border-tertiary/10 dark:border-gray-300 rounded-lg hover:shadow-md dark:hover:shadow-lg transition-all bg-white dark:bg-gray-700"
                   >
-                    <h3 className="text-lg font-semibold text-primary dark:text-white">
+                    <h3 className="text-lg font-semibold text-primary dark:text-gray-900">
                       {announcement.title}
                     </h3>
                     <div className="text-sm text-tertiary dark:text-gray-400 mt-1">
@@ -143,10 +143,10 @@ const AllAnnouncements = () => {
                       <img
                         src={announcement.image.imageUrl}
                         alt={announcement.title}
-                        className="mt-3 w-[50%] h-[300px] object-cover rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm dark:shadow-lg"
+                        className="mt-3 w-[50%] h-[300px] object-cover rounded-lg border border-gray-200 dark:border-gray-300 shadow-sm dark:shadow-lg"
                       />
                     )}
-                    <p className="mt-3 text-tertiary dark:text-gray-300 leading-relaxed">{announcement.content}</p>
+                    <p className="mt-3 text-tertiary dark:text-gray-600 leading-relaxed">{announcement.content}</p>
                   </div>
                 ))}
               </div>

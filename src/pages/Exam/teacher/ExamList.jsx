@@ -76,7 +76,7 @@ const TeacherExamList = ({ courseId }) => {
         <h2 className="text-lg font-bold text-gray-900">Examinations</h2>
         <button
           onClick={() => navigate(`/teacher/exam/create/${courseId}`)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-sm font-semibold hover:from-primary-700 hover:to-primary-600 transition-colors"
         >
           <FaPlus className="text-xs" /> Create Exam
         </button>
@@ -90,8 +90,8 @@ const TeacherExamList = ({ courseId }) => {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               filter === f
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                ? 'bg-primary-600 text-gray-900'
+                : 'bg-white/70 text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -102,7 +102,7 @@ const TeacherExamList = ({ courseId }) => {
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">

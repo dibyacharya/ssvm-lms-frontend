@@ -149,7 +149,7 @@ const PostEditor = ({ post, onUpdatePost, onSavePost, onPreview }) => {
             onClick={toggleCodeView}
             className={`flex items-center px-3 py-1.5 text-sm rounded-md ${
               isCodeView
-                ? "bg-blue-600 text-white hover:bg-blue-700"
+                ? "bg-blue-600 text-gray-900 hover:bg-blue-700"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -201,7 +201,7 @@ const PostEditor = ({ post, onUpdatePost, onSavePost, onPreview }) => {
 
           <button
             onClick={() => insertTemplate(educationalTemplates[0])}
-            className="flex items-center bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition text-sm"
+            className="flex items-center bg-blue-600 text-gray-900 px-3 py-2 rounded-md hover:bg-blue-700 transition text-sm"
             title="Insert Concept Explainer template"
           >
             <BookOpen className="w-4 h-4 mr-2" />
@@ -210,7 +210,7 @@ const PostEditor = ({ post, onUpdatePost, onSavePost, onPreview }) => {
 
           <button
             onClick={() => insertTemplate(educationalTemplates[1])}
-            className="flex items-center bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 transition text-sm"
+            className="flex items-center bg-blue-600 text-gray-900 px-3 py-2 rounded-md hover:bg-blue-700 transition text-sm"
             title="Insert Tutorial Guide template"
           >
             <FileText className="w-4 h-4 mr-2" />
@@ -219,7 +219,7 @@ const PostEditor = ({ post, onUpdatePost, onSavePost, onPreview }) => {
 
           <button
             onClick={() => insertTemplate(educationalTemplates[2])}
-            className="flex items-center bg-amber-600 text-white px-3 py-2 rounded-md hover:bg-amber-700 transition text-sm"
+            className="flex items-center bg-amber-600 text-gray-900 px-3 py-2 rounded-md hover:bg-amber-700 transition text-sm"
             title="Insert Topic Explorer template"
           >
             <BookText className="w-4 h-4 mr-2" />
@@ -237,14 +237,14 @@ const PostEditor = ({ post, onUpdatePost, onSavePost, onPreview }) => {
       <div className="flex space-x-4">
         <button
           onClick={onPreview}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="flex items-center bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           <Eye className="w-4 h-4 mr-2" />
           Preview
         </button>
         <button
           onClick={onSavePost}
-          className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+          className="flex items-center bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           <Save className="w-4 h-4 mr-2" />
           Save

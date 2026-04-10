@@ -1,134 +1,136 @@
 import React from "react";
-import {
-  FaTachometerAlt,
-  FaBook,
-  FaCalendarAlt,
-  FaUserGraduate,
-  FaSignOutAlt,
-  FaCreditCard,
-  FaFileAlt,
-} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { HelpCircle, Settings, Video } from "lucide-react";
+import {
+  LayoutDashboard,
+  BookOpen,
+  CalendarDays,
+  FileText,
+  Video,
+  UserCircle,
+  Settings,
+  HelpCircle,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import useLiveClassAlert from "../../../hooks/useLiveClassAlert";
 
 const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { alertClass, minutesLeft, isLive, joinUrl } = useLiveClassAlert(5);
+
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  // Menu items configuration for better organization
   const menuItems = [
     {
       id: "Dashboard",
       label: "Dashboard",
-      icon: <FaTachometerAlt />,
+      icon: LayoutDashboard,
     },
     {
       id: "Courseware",
       label: "Courseware",
-      icon: <FaBook />,
+      icon: BookOpen,
     },
     {
       id: "Timetable",
       label: "Timetable",
-      icon: <FaCalendarAlt />,
-    },
-    {
-      id: "Fees",
-      label: "Fees & Payments",
-      icon: <FaCreditCard />,
+      icon: CalendarDays,
     },
     {
       id: "Exams",
       label: "Examinations",
-      icon: <FaFileAlt />,
+      icon: FileText,
     },
   ];
 
-  return (
-    <div
-      className={`${
-        isCollapsed ? "w-20" : "w-64"
-      } dark:bg-gray-900 bg-white  shadow-md transition-all duration-300 border-r border-gray-100 flex flex-col justify-between h-screen`}
-      onMouseEnter={() => setIsCollapsed(false)}
-      onMouseLeave={() => setIsCollapsed(true)}
-    >
+  const bottomLinks = [
+    {
+      to: "/profile",
+      label: "Profile",
+      icon: UserCircle,
+    },
+    {
+      to: "/student/profile/account",
+      label: "Account",
+      icon: Settings,
+    },
+    {
+      to: "/student/profile/help",
+      label: "Help",
+      icon: HelpCircle,
+    },
+  ];
+
+  const sidebarContent = (
+    <aside className="w-64 flex flex-col justify-between h-screen bg-white border-r border-gray-200 shrink-0">
+      {/* Top Section */}
       <div>
-        {/* Header Logo */}
-        <div className="mt-6 text-black flex items-center justify-center px-4 gap-2">
-          {isCollapsed ? (
-            <img
-              src="/logo.png"
-              alt="Company Logo"
-              className="transition-all duration-300 object-contain w-[50px] h-[40px]"
-            />
-          ) : (
-            <img
-              src="/logo_full.png"
-              alt="Company Logo"
-              className="transition-all duration-300 object-contain w-full h-auto"
-            />
-          )}
+        {/* Logo / Brand */}
+        <div className="px-6 pt-6 pb-4">
+          <span className="text-2xl font-black tracking-tight select-none">
+            <span className="text-gray-900">SSVM</span>
+            <span className="text-blue-500 ml-1">LMS</span>
+          </span>
         </div>
 
-        {/* Navigation */}
-        <ul className="mt-6 space-y-1 px-2">
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-base
-        ${
-          activeSection === item.id
-            ? "bg-accent1/10 dark:bg-accent2 text-accent1 font-medium"
-            : "text-tertiary hover:bg-gray-100  dark:text-secondary dark:hover:bg-gray-400"
-        }`}
-              >
-                <span className="text-accent1 flex justify-center w-7">
-                  {React.cloneElement(item.icon, { size: 22 })}
-                </span>
-                <span
-                  className={`whitespace-nowrap transition-opacity duration-300 ${
-                    isCollapsed ? "opacity-0" : "opacity-100"
-                  }`}
-                  style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-                >
-                  {item.label}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="mx-4 mb-2">
+          <div className="h-px bg-gray-200" />
+        </div>
 
-        {/* Live Class Alert — blinks when class starts within 5 min */}
+        {/* Main Navigation */}
+        <nav className="mt-2 px-2 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = activeSection === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium
+                  ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600 border-l-[3px] border-blue-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+              >
+                <span className="flex items-center justify-center w-7 shrink-0">
+                  <Icon
+                    size={20}
+                    className={isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"}
+                  />
+                </span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Live Class Alert */}
         {alertClass && joinUrl && (
           <div className="px-2 mt-3">
             <button
               onClick={() => navigate(joinUrl)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                bg-red-50 border border-red-200
+                hover:bg-red-100 transition-all group"
             >
-              <span className="relative flex justify-center w-7">
-                <Video size={20} className="text-red-600 dark:text-red-400" />
+              <span className="relative flex items-center justify-center w-7 shrink-0">
+                <Video size={20} className="text-red-600" />
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500" />
               </span>
-              <span
-                className={`whitespace-nowrap transition-opacity duration-300 flex flex-col items-start ${
-                  isCollapsed ? "opacity-0" : "opacity-100"
-                }`}
-                style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-              >
-                <span className="text-sm font-semibold text-red-700 dark:text-red-400 animate-pulse">
+              <span className="flex flex-col items-start">
+                <span className="text-sm font-semibold text-red-600 animate-pulse">
                   {isLive ? "Live Class" : "Join Class"}
                 </span>
-                <span className="text-[10px] text-red-500 dark:text-red-400/80 leading-tight truncate max-w-[140px]">
+                <span className="text-[10px] text-red-600/70 leading-tight truncate max-w-[140px]">
                   {isLive
                     ? alertClass.subject || alertClass.title || "Now"
                     : `Starts in ${minutesLeft} min`}
@@ -139,74 +141,95 @@ const StudentDashboardSidebar = ({ activeSection, setActiveSection }) => {
         )}
       </div>
 
-      {/* Profile and Logout */}
-      <div className="mb-6 px-2">
-        <Link
-          to="/profile"
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-secondary dark:hover:bg-gray-400 hover:bg-gray-100"
-        >
-          <span className="text-accent1 flex justify-center w-7">
-            <FaUserGraduate size={22} />
-          </span>
-          <span
-            className={`whitespace-nowrap transition-opacity duration-300 ${
-              isCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-            style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
+      {/* Bottom Section */}
+      <div className="pb-4">
+        <div className="mx-4 mb-2">
+          <div className="h-px bg-gray-200" />
+        </div>
+
+        {/* Bottom nav links */}
+        <div className="px-2 space-y-1 mt-2">
+          {bottomLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+                  text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                  transition-colors text-sm font-medium"
+              >
+                <span className="flex items-center justify-center w-7 shrink-0">
+                  <Icon
+                    size={20}
+                    className="text-gray-400 group-hover:text-gray-600 transition-colors"
+                  />
+                </span>
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+              text-red-500 hover:bg-red-50
+              transition-colors text-sm font-medium"
           >
-            Profile
-          </span>
-        </Link>
-        <Link
-          to={"/student/profile/account"}
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-secondary hover:bg-gray-100 dark:hover:bg-gray-400"
-        >
-          <span className="text-accent1 flex justify-center w-7">
-            <Settings size={22} />
-          </span>
-          <span
-            className={`whitespace-nowrap transition-opacity duration-300 ${
-              isCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-            style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-          >
-            Account
-          </span>
-        </Link>
-        <Link
-          to={"/student/profile/help"}
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-secondary hover:bg-gray-100 dark:hover:bg-gray-400"
-        >
-          <span className="text-accent1 flex justify-center w-7">
-            <HelpCircle size={22} />
-          </span>
-          <span
-            className={`whitespace-nowrap transition-opacity duration-300 ${
-              isCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-            style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-          >
-            Help
-          </span>
-        </Link>
-        <button
-          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-red-500 hover:bg-red-100 mt-1"
-          onClick={handleLogout}
-        >
-          <span className="flex justify-center w-7">
-            <FaSignOutAlt size={22} />
-          </span>
-          <span
-            className={`whitespace-nowrap transition-opacity duration-300 ${
-              isCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-            style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-          >
-            Logout
-          </span>
-        </button>
+            <span className="flex items-center justify-center w-7 shrink-0">
+              <LogOut size={20} className="group-hover:text-red-600 transition-colors" />
+            </span>
+            <span>Logout</span>
+          </button>
+        </div>
+
+        {/* User info - simple name + role */}
+        <div className="mx-4 mt-2">
+          <div className="h-px bg-gray-200" />
+        </div>
+        <div className="px-6 py-3">
+          <p className="text-sm font-medium text-gray-700 truncate">
+            {user?.name || "Student"}
+          </p>
+          <p className="text-xs text-gray-400 capitalize">
+            {user?.role || "student"}
+          </p>
+        </div>
       </div>
-    </div>
+    </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden md:block">{sidebarContent}</div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-50 md:hidden">
+            {sidebarContent}
+          </div>
+        </>
+      )}
+
+      {/* Mobile toggle button */}
+      <button
+        onClick={() => setMobileOpen((prev) => !prev)}
+        className="fixed bottom-4 left-4 z-50 md:hidden
+          w-12 h-12 rounded-full flex items-center justify-center
+          bg-white border border-gray-200
+          shadow-sm text-gray-600 hover:text-blue-500
+          transition-colors"
+      >
+        {mobileOpen ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
+      </button>
+    </>
   );
 };
 

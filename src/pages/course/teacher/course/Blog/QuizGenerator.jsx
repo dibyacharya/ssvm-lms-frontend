@@ -88,7 +88,7 @@ const QuizGenerator = ({
               });
             }
           }}
-          className="flex items-center bg-purple-600 text-white px-3 py-1.5 rounded-md hover:bg-purple-700 transition text-sm"
+          className="flex items-center bg-blue-600 text-gray-900 px-3 py-1.5 rounded-md hover:bg-blue-700 transition text-sm"
         >
           <Plus className="w-4 h-4 mr-1" />
           {showForm ? "Cancel" : "Add Quiz Question"}
@@ -109,7 +109,7 @@ const QuizGenerator = ({
               >
                 <div className="flex-1">
                   <p className="font-medium">{quiz.question}</p>
-                  <p className="text-sm text-green-600">
+                  <p className="text-sm text-blue-600">
                     Correct answer: {quiz.options[quiz.correctOption]}
                   </p>
                 </div>
@@ -188,7 +188,7 @@ const QuizGenerator = ({
           <div>
             <button
               type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+              className="bg-blue-600 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
               {editIndex >= 0 ? "Update Question" : "Add Question"}
             </button>

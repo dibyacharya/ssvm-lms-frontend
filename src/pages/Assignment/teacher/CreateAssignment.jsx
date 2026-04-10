@@ -188,18 +188,18 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
       className="flex flex-col lg:flex-row w-full p-4 md:p-6 gap-4 max-h-[90vh] overflow-y-auto"
     >
       {/* Left Section - Assignment Form */}
-      <div className="w-full lg:w-2/3 p-4 bg-white shadow-md rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Create Assignment</h2>
+      <div className="w-full lg:w-2/3 p-4 bg-white/70 backdrop-blur-xl shadow-card-sm rounded-lg border border-gray-200">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Create Assignment</h2>
         <input
           type="text"
-          className="w-full border p-2 rounded mb-4"
+          className="w-full glass-input p-2 rounded mb-4"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
         <textarea
-          className="w-full border p-2 rounded mb-4"
+          className="w-full glass-input p-2 rounded mb-4"
           placeholder="Description"
           rows="8"
           value={description}
@@ -207,25 +207,25 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
         ></textarea>
 
         {/* AI Question Generator */}
-        <div className="mb-6 p-4 border rounded-lg border-blue-200 bg-blue-50">
-          <h3 className="text-lg font-semibold mb-3 text-blue-800">
+        <div className="mb-6 p-4 rounded-lg border border-primary-700 bg-primary-900/20">
+          <h3 className="text-lg font-semibold mb-3 text-primary-600">
             AI Question Generator
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-            <select className="w-full border p-2 rounded" value={selectedOutcome} onChange={(e) => setSelectedOutcome(e.target.value)}>
+            <select className="w-full glass-input p-2 rounded" value={selectedOutcome} onChange={(e) => setSelectedOutcome(e.target.value)}>
               <option value="">Select a Course Outcome</option>
               {courseOutcomes.map((o, i) => <option key={i} value={o}>{o}</option>)}
             </select>
-            <select className="w-full border p-2 rounded" value={selectedBloomLevel} onChange={(e) => setSelectedBloomLevel(e.target.value)}>
+            <select className="w-full glass-input p-2 rounded" value={selectedBloomLevel} onChange={(e) => setSelectedBloomLevel(e.target.value)}>
               <option value="">Select a Bloom's Level</option>
               {bloomLevels.map((l, i) => <option key={i} value={l}>{l}</option>)}
             </select>
-             <select className="w-full border p-2 rounded" value={questionType} onChange={(e) => setQuestionType(e.target.value)}>
+             <select className="w-full glass-input p-2 rounded" value={questionType} onChange={(e) => setQuestionType(e.target.value)}>
                <option value="">Select Question Type</option>
                {questionTypes.map((t, i) => <option key={i} value={t}>{t}</option>)}
             </select>
             <textarea
-                className="w-full border p-2 rounded md:col-span-2"
+                className="w-full glass-input p-2 rounded md:col-span-2"
                 placeholder="Extra Prompt (Optional)"
                 rows="2"
                 value={extraPrompt}
@@ -235,29 +235,29 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
 
           <button
             type="button"
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300 transition-colors mb-3"
+            className="w-full bg-primary-600 text-gray-900 p-2 rounded hover:bg-primary-500 disabled:bg-primary-800 transition-colors mb-3"
             onClick={generateQuestion}
             disabled={generatingQuestion || !selectedOutcome || !selectedBloomLevel || !questionType}
           >
             {generatingQuestion ? "Generating..." : "Generate Question"}
           </button>
 
-          {aiError && <div className="text-red-600 text-sm mb-3 p-2 bg-red-100 rounded">{aiError}</div>}
+          {aiError && <div className="text-red-600 text-sm mb-3 p-2 bg-red-900/20 rounded">{aiError}</div>}
 
           {generatedQuestions.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-md font-semibold mb-2">Generated Questions:</h4>
+              <h4 className="text-md font-semibold mb-2 text-gray-900">Generated Questions:</h4>
               <div className="space-y-3">
                 {generatedQuestions.map((item, index) => (
-                  <div key={index} className="p-3 border rounded bg-white shadow-sm">
+                  <div key={index} className="p-3 border border-gray-200 rounded bg-white/40 shadow-card-sm">
                     <div className="flex justify-between items-start">
                       <p className="text-sm mb-2 pr-2" dangerouslySetInnerHTML={{ __html: item.question }}></p>
                       <button type="button" onClick={() => removeQuestion(index)} className="text-red-500 hover:text-red-700 ml-2 text-lg font-bold" title="Remove question">×</button>
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <button type="button" className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200" onClick={() => addQuestionToDescription(item.rawQuestion)}>Use This Question</button>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span className="font-semibold capitalize px-2 py-0.5 bg-gray-200 rounded">{item.type}</span>
+                      <button type="button" className="text-xs px-2 py-1 bg-primary-50 text-primary-600 rounded hover:bg-primary-900/50" onClick={() => addQuestionToDescription(item.rawQuestion)}>Use This Question</button>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span className="font-semibold capitalize px-2 py-0.5 bg-gray-100 rounded">{item.type}</span>
                         <span>{item.bloomLevel}</span>
                       </div>
                     </div>
@@ -270,15 +270,15 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
 
         {/* File Upload Section */}
         <div className="mb-4">
-          <label className="block mb-2 font-semibold">Attachments (PDF only)</label>
-          <input type="file" accept=".pdf" multiple onChange={handleFileUpload} className="w-full border p-2 rounded" />
+          <label className="block mb-2 font-semibold text-gray-900">Attachments (PDF only)</label>
+          <input type="file" accept=".pdf" multiple onChange={handleFileUpload} className="w-full glass-input p-2 rounded" />
           {attachments.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-semibold mb-2">Selected ({attachments.length})</h4>
-              <div className="border rounded p-2 space-y-2">
+              <h4 className="text-sm font-semibold mb-2 text-gray-600">Selected ({attachments.length})</h4>
+              <div className="border border-gray-200 rounded p-2 space-y-2">
                 {attachments.map((file, index) => (
                   <div key={index} className="flex justify-between items-center py-1 px-2 hover:bg-gray-50 rounded">
-                    <span className="text-sm text-gray-700 truncate max-w-xs">📄 {file.name} ({(file.size / 1024).toFixed(2)} KB)</span>
+                    <span className="text-sm text-gray-600 truncate max-w-xs">📄 {file.name} ({(file.size / 1024).toFixed(2)} KB)</span>
                     <button type="button" onClick={() => handleRemoveFile(index)} className="text-red-500 hover:text-red-700 font-bold">×</button>
                   </div>
                 ))}
@@ -289,11 +289,11 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
       </div>
 
       {/* Right Sidebar */}
-      <div className="w-full lg:w-1/3 p-4 bg-gray-50 shadow-md rounded-lg h-fit">
-        <h3 className="text-lg font-semibold mb-4">Assignment Settings</h3>
+      <div className="w-full lg:w-1/3 p-4 bg-white/40 backdrop-blur-xl shadow-card-sm rounded-lg border border-gray-200 h-fit">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900">Assignment Settings</h3>
         <div className="mb-4">
-          <label className="block font-medium mb-1">Total Points</label>
-          <select className="w-full border p-2 rounded" value={totalPoints} onChange={(e) => setTotalPoints(e.target.value)}>
+          <label className="block font-medium mb-1 text-gray-600">Total Points</label>
+          <select className="w-full glass-input p-2 rounded" value={totalPoints} onChange={(e) => setTotalPoints(e.target.value)}>
             <option value="100">100</option>
             <option value="50">50</option>
             <option value="25">25</option>
@@ -302,18 +302,18 @@ const AssignmentForm = ({ courseID, fetchAssignments = () => console.log("Fetchi
           </select>
         </div>
         <div className="mb-4">
-          <label className="block font-medium mb-1">Due Date</label>
-          <input type="date" className="w-full border p-2 rounded" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+          <label className="block font-medium mb-1 text-gray-600">Due Date</label>
+          <input type="date" className="w-full glass-input p-2 rounded" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300 transition-colors"
+          className="w-full bg-primary-600 text-gray-900 p-2 rounded hover:bg-primary-500 disabled:bg-primary-800 transition-colors"
           disabled={loading || !title || !dueDate}
         >
           {loading ? "Creating..." : "Create Assignment"}
         </button>
-        {success && <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">Assignment created successfully!</div>}
-        {error && <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>}
+        {success && <div className="mt-4 p-2 bg-primary-50 text-primary-600 rounded">Assignment created successfully!</div>}
+        {error && <div className="mt-4 p-2 bg-red-900/20 text-red-600 rounded">{error}</div>}
       </div>
     </form>
   );

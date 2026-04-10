@@ -37,11 +37,11 @@ const DeleteConfirmationModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div className="bg-white rounded-lg w-11/12 max-w-md">
-        <div className="flex justify-between items-center p-4 border-b bg-red-600 text-white rounded-t-lg">
+        <div className="flex justify-between items-center p-4 border-b bg-red-600 text-gray-900 rounded-t-lg">
           <h3 className="font-semibold text-lg">Delete Module</h3>
           <button
             onClick={onClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-gray-900 hover:text-gray-700 transition-colors"
           >
             <XIcon size={24} />
           </button>
@@ -88,7 +88,7 @@ const DeleteConfirmationModal = ({
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-red-600 text-gray-900 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
               disabled={loading}
             >
               {loading ? "Deleting..." : "Delete Module"}

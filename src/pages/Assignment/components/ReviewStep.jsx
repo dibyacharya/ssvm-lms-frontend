@@ -74,8 +74,8 @@ const ReviewStep = ({
             </div>
           )}
           {completeIn && completeIn > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
-              <AlertCircle className="text-orange-600" size={16} />
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <AlertCircle className="text-blue-600" size={16} />
               <span className="text-sm font-medium text-orange-900">
                 Time Limit: {completeIn} minutes ({completeIn >= 60 ? `${Math.floor(completeIn / 60)} hour${Math.floor(completeIn / 60) > 1 ? 's' : ''}` : ''}{completeIn % 60 !== 0 && completeIn >= 60 ? ` ${completeIn % 60} minute${completeIn % 60 > 1 ? 's' : ''}` : completeIn < 60 ? `${completeIn} minute${completeIn > 1 ? 's' : ''}` : ''})
               </span>
@@ -103,7 +103,7 @@ const ReviewStep = ({
                   <p className="text-sm text-gray-900 truncate">{q.question}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded ${
-                      q.type === 'objective' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
+                      q.type === 'objective' ? 'bg-blue-100 text-blue-700' : 'bg-blue-100 text-blue-700'
                     }`}>
                       {q.type}
                     </span>
@@ -157,7 +157,7 @@ const ReviewStep = ({
           <button
             onClick={handleSave}
             disabled={loading || !assignmentTitle || (questions.length === 0 && attachments.length === 0)}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
+            className="px-6 py-3 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
           >
             {loading ? (
               <>

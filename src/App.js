@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -28,24 +28,16 @@ const CourseManagement = React.lazy(() => import("./pages/course/teacher/CourseM
 const CourseDetails = React.lazy(() => import("./pages/course/student/CourseDetails.jsx"));
 const AssignmentViewer = React.lazy(() => import("./pages/Assignment/teacher/AssignmentViewer.jsx"));
 const TeacherAssignmentGrading = React.lazy(() => import("./pages/Assignment/teacher/TeacherAssignmentGrading.jsx"));
-const ActivityViewer = React.lazy(() => import("./pages/Activity/teacher/ActivityViewer.jsx"));
 const EContentViewer = React.lazy(() => import("./pages/Econtent/EcontentViewer.jsx"));
 const TeacherProfileSection = React.lazy(() => import("./pages/TeacherDashboard/Components/TeacherProfile/TeacherProfileSection.jsx"));
 const StudentProfileSection = React.lazy(() => import("./pages/StudentDashboard/Components/StudentProfileSection.jsx"));
-const ITS = React.lazy(() => import("./pages/Its/Its.jsx"));
 const StudentAssignmentSectionCourse = React.lazy(() => import("./pages/Assignment/ShowAssignmentCourse.jsx"));
-const PublicHelpdeskIntake = React.lazy(() => import("./pages/HelpDesk/PublicHelpdeskIntake.jsx"));
 const Profile = React.lazy(() => import("./pages/Profile/Profile.jsx"));
-const FeeGateWrapper = React.lazy(() => import("./components/fees/FeeGateWrapper"));
 
 // ─── VConf pages (LiveKit only loads when needed) ───
 const VconfMeetingRoom = React.lazy(() => import("./pages/vconf/MeetingRoom"));
 const VconfSchedule = React.lazy(() => import("./pages/vconf/VconfSchedule"));
 const VconfRecordings = React.lazy(() => import("./pages/vconf/VconfRecordings"));
-const VconfTranscriptViewer = React.lazy(() => import("./pages/vconf/VconfTranscriptViewer"));
-
-// ─── Payment Status page ───
-const PaymentStatus = React.lazy(() => import("./pages/PaymentStatus"));
 
 // ─── Exam pages ───
 const ExamInterface = React.lazy(() => import("./pages/Exam/student/ExamInterface"));
@@ -60,21 +52,14 @@ const LiveProctoringDashboard = React.lazy(() => import("./pages/Exam/teacher/Li
 const ProctoringReport = React.lazy(() => import("./pages/Exam/teacher/ProctoringReport"));
 const QuestionBankManager = React.lazy(() => import("./pages/Exam/teacher/QuestionBankManager"));
 const SemesterResults = React.lazy(() => import("./pages/Exam/student/SemesterResults"));
-const MyCertificates = React.lazy(() => import("./pages/Exam/student/MyCertificates"));
-const ApplyCertificate = React.lazy(() => import("./pages/Exam/student/ApplyCertificate"));
 // ─── Account Settings pages ───
 const TeacherAccountSettings = React.lazy(() => import("./pages/TeacherDashboard/Components/TeacherProfile/TeacherAccountSettings"));
 const StudentAccountSettings = React.lazy(() => import("./pages/StudentDashboard/Components/StudentAccountSettings"));
 
+// ─── Physical Class (FFmpeg Recording + QR Attendance) ───
+const PhysAttendanceScan = React.lazy(() => import("./pages/PhysClass/PhysAttendanceScan"));
+
 const App = () => {
-   useEffect(() => {
-  const theme = localStorage.getItem("theme") || "light";
-  if (theme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
-}, []);
   return (
     <AuthProvider>
       <UtilityProvider>
@@ -116,28 +101,35 @@ const Layout = () => {
   // to prevent route evaluation before auth is resolved.
   if (loading && !user) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500" />
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 animate-spin" />
+          <div className="absolute inset-1.5 rounded-full border-2 border-transparent border-t-accent-500 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="min-h-screen kiitx-banner-bg"
-      style={{ backgroundImage: "url(/loginbg.jpg)" }}
-    >
-      {/* Conditionally render Navbar */}
-      {/* {!hideNavbarRoutes.includes(location.pathname) && <Navbar />} */}
-
+    <div className="min-h-screen bg-gray-50">
       <main className="mx-auto">
-        <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500" /></div>}>
+        <Suspense fallback={
+          <div className="flex flex-col items-center justify-center h-screen bg-gray-50 gap-4">
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 animate-spin" />
+              <div className="absolute inset-1.5 rounded-full border-2 border-transparent border-t-accent-500 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+            </div>
+            <p className="text-surface-500 text-sm animate-pulse">Loading...</p>
+          </div>
+        }>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPasswordOtp />} />
-          <Route path="/helpdesk" element={<PublicHelpdeskIntake />} />
           <Route
             path="/profile"
             element={
@@ -177,14 +169,6 @@ const Layout = () => {
             }
           />
           <Route
-            path="/teacher/activity/:activityID"
-            element={
-              <PrivateRoute roles={["teacher"]}>
-                <ActivityViewer />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/teacher/econtent/:courseId"
             element={
               <PrivateRoute roles={["teacher"]}>
@@ -196,9 +180,7 @@ const Layout = () => {
             path="/student/dashboard"
             element={
               <PrivateRoute roles={["student"]}>
-                <FeeGateWrapper>
-                  <StudentDashboard />
-                </FeeGateWrapper>
+                <StudentDashboard />
               </PrivateRoute>
             }
           />
@@ -239,14 +221,6 @@ const Layout = () => {
             element={
               <PrivateRoute roles={["student"]}>
                 <CourseDetails />
-              </PrivateRoute>
-            }
-          />
-           <Route
-            path="/its"
-            element={
-              <PrivateRoute roles={["student"]}>
-                <ITS />
               </PrivateRoute>
             }
           />
@@ -292,26 +266,6 @@ const Layout = () => {
             element={
               <PrivateRoute roles={["student"]}>
                 <SemesterResults />
-              </PrivateRoute>
-            }
-          />
-
-          {/* ─── My Certificates (Student) ─── */}
-          <Route
-            path="/my-certificates"
-            element={
-              <PrivateRoute roles={["student"]}>
-                <MyCertificates />
-              </PrivateRoute>
-            }
-          />
-
-          {/* ─── Apply for Certificate (Student) ─── */}
-          <Route
-            path="/apply-certificate"
-            element={
-              <PrivateRoute roles={["student"]}>
-                <ApplyCertificate />
               </PrivateRoute>
             }
           />
@@ -425,20 +379,12 @@ const Layout = () => {
               </PrivateRoute>
             }
           />
+          {/* ─── Physical Class Attendance (QR scan) ─── */}
           <Route
-            path="/vconf/recording/:id"
+            path="/attend"
             element={
-              <PrivateRoute roles={["teacher", "student"]}>
-                <VconfTranscriptViewer />
-              </PrivateRoute>
-            }
-          />
-          {/* ─── Payment Status (Student) ─── */}
-          <Route
-            path="/payment-status"
-            element={
-              <PrivateRoute roles={["student"]}>
-                <PaymentStatus />
+              <PrivateRoute roles={["student", "teacher"]}>
+                <PhysAttendanceScan />
               </PrivateRoute>
             }
           />

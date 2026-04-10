@@ -84,10 +84,10 @@ const StudentGradebook = () => {
   };
 
   const getGradeColor = (percentage) => {
-    if (percentage >= 90) return "text-green-600";
+    if (percentage >= 90) return "text-blue-600";
     if (percentage >= 80) return "text-blue-600";
     if (percentage >= 70) return "text-yellow-600";
-    if (percentage >= 60) return "text-orange-600";
+    if (percentage >= 60) return "text-blue-600";
     return "text-red-600";
   };
 
@@ -97,28 +97,28 @@ const StudentGradebook = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-50">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header Banner */}
         <DashboardBanner
           icon={Award}
           title="Gradebook"
           subtitle="View your published grades for all enrolled courses"
-          gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+          gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-fuchsia-500"
         />
 
         {/* Courses List */}
         {courses.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
+          <div className="bg-white dark:bg-white rounded-lg shadow-md p-12 text-center">
             <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">
+            <p className="text-xl text-gray-600 dark:text-gray-600 mb-2">
               No courses enrolled
             </p>
             <p className="text-gray-500 dark:text-gray-400">
@@ -139,19 +139,19 @@ const StudentGradebook = () => {
               return (
                 <div
                   key={course._id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+                  className="bg-white dark:bg-white rounded-lg shadow-md overflow-hidden"
                 >
                   {/* Course Header */}
                   <button
                     onClick={() => handleCourseToggle(course._id)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1 text-left">
                       <div className="bg-accent1/10 dark:bg-accent2/20 p-3 rounded-lg">
                         <BookOpen className="h-6 w-6 text-accent1" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900">
                           {course.courseName || course.name}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -167,7 +167,7 @@ const StudentGradebook = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {courseData?.grades && (
-                        <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-medium">
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium">
                           Published
                         </span>
                       )}
@@ -191,21 +191,21 @@ const StudentGradebook = () => {
 
                   {/* Course Grades Content */}
                   {isExpanded && (
-                    <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+                    <div className="border-t border-gray-200 dark:border-gray-200 p-6">
                       {isLoading ? (
                         <div className="flex justify-center py-8">
                           <LoadingSpinner />
                         </div>
                       ) : courseData?.error ? (
                         <div className="text-center py-8">
-                          <p className="text-red-500 dark:text-red-400">
+                          <p className="text-red-500 dark:text-red-600">
                             {courseData.error}
                           </p>
                         </div>
                       ) : !courseData?.grades ? (
                         <div className="text-center py-12">
                           <FileText className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                          <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">
+                          <p className="text-xl text-gray-600 dark:text-gray-600 mb-2">
                             Grades Not Published Yet
                           </p>
                           <p className="text-gray-500 dark:text-gray-400">
@@ -217,8 +217,8 @@ const StudentGradebook = () => {
                         <div className="space-y-6">
                           {/* Assessment Plan Overview */}
                           {courseData.assessmentPlan && (
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                            <div className="bg-gray-50 dark:bg-gray-50/50 rounded-lg p-4">
+                              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-600 mb-3">
                                 Assessment Weightage
                               </h4>
                               <div className="grid grid-cols-3 gap-4">
@@ -231,7 +231,7 @@ const StudentGradebook = () => {
                                   </p>
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                     {courseData.assessmentPlan.midTermExam}%
                                   </p>
                                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -239,7 +239,7 @@ const StudentGradebook = () => {
                                   </p>
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                     {courseData.assessmentPlan.continuousAssessment}%
                                   </p>
                                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -252,16 +252,16 @@ const StudentGradebook = () => {
 
                           {/* Grades Breakdown */}
                           <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-900">
                               Your Grades
                             </h4>
 
                             {/* End Term */}
                             {courseData.assessmentPlan && (
-                              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                              <div className="border border-gray-200 dark:border-gray-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center">
                                   <div>
-                                    <p className="font-medium text-gray-900 dark:text-white">
+                                    <p className="font-medium text-gray-900 dark:text-gray-900">
                                       {courseEndExamLabel}
                                     </p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -288,10 +288,10 @@ const StudentGradebook = () => {
 
                             {/* Mid Term */}
                             {courseData.assessmentPlan && (
-                              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                              <div className="border border-gray-200 dark:border-gray-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center">
                                   <div>
-                                    <p className="font-medium text-gray-900 dark:text-white">
+                                    <p className="font-medium text-gray-900 dark:text-gray-900">
                                       {courseMidExamLabel}
                                     </p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -319,8 +319,8 @@ const StudentGradebook = () => {
                             {/* Continuous Evaluation */}
                             {courseData.continuousPlan?.categories &&
                               courseData.continuousPlan.categories.length > 0 && (
-                                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                                  <p className="font-medium text-gray-900 dark:text-white mb-3">
+                                <div className="border border-gray-200 dark:border-gray-200 rounded-lg p-4">
+                                  <p className="font-medium text-gray-900 dark:text-gray-900 mb-3">
                                     Continuous Assessment
                                   </p>
                                   <div className="space-y-2">
@@ -340,10 +340,10 @@ const StudentGradebook = () => {
                                         return (
                                           <div
                                             key={category._id}
-                                            className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                            className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-200 last:border-0"
                                           >
                                             <div className="flex-1">
-                                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                              <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                                                 {category.category}
                                               </p>
                                               <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -380,7 +380,7 @@ const StudentGradebook = () => {
                             <div className="bg-gradient-to-r from-accent1/10 to-accent2/10 dark:from-accent1/20 dark:to-accent2/20 rounded-lg p-6 border-2 border-accent1/30">
                               <div className="flex justify-between items-center">
                                 <div>
-                                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-900">
                                     Total Marks
                                   </p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">

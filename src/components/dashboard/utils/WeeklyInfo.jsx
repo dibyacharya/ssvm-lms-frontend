@@ -17,7 +17,7 @@ const WeeklyPlanTable = ({ course }) => {
       cell: ({ row }) => (
         <ul className="list-disc pl-5 space-y-1">
           {row.original.topics.map((topic, index) => (
-            <li key={index} className="text-gray-700 dark:text-gray-300">
+            <li key={index} className="text-gray-700 dark:text-gray-600">
               {topic}
             </li>
           ))}
@@ -33,23 +33,23 @@ const WeeklyPlanTable = ({ course }) => {
   });
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-lg border border-gray-200 dark:border-gray-600">
+    <div className="p-4 bg-white dark:bg-white rounded-lg shadow-sm dark:shadow-lg border border-gray-200 dark:border-gray-300">
       <div className="mb-4">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Weekly Plan</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900">Weekly Plan</h3>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
           Course schedule and topics by week
         </p>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+        <table className="w-full border-collapse border border-gray-300 dark:border-gray-300 rounded-lg overflow-hidden">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-gray-200 dark:bg-gray-700">
                 {headerGroup.headers.map((header) => (
                   <th 
                     key={header.id} 
-                    className="border border-gray-300 dark:border-gray-600 p-3 text-left font-semibold text-gray-800 dark:text-gray-200"
+                    className="border border-gray-300 dark:border-gray-300 p-3 text-left font-semibold text-gray-800 dark:text-gray-700"
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -64,12 +64,12 @@ const WeeklyPlanTable = ({ course }) => {
             {table.getRowModel().rows.map((row) => (
               <tr 
                 key={row.id} 
-                className="border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="border border-gray-300 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td 
                     key={cell.id} 
-                    className="border border-gray-300 dark:border-gray-600 p-3 text-gray-900 dark:text-gray-100 align-top"
+                    className="border border-gray-300 dark:border-gray-300 p-3 text-gray-900 dark:text-gray-800 align-top"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

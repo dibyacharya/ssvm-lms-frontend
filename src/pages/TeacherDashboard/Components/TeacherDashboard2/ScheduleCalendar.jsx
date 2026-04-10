@@ -42,8 +42,8 @@ const ScheduleCalendar = ({ events = [] }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Today's Schedule Section (Now Clickable with Time Range) */}
-      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Today's Schedule</h2>
+      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-300">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-900">Today's Schedule</h2>
         {todaysEvents.length > 0 ? (
           <div className="space-y-4">
             {todaysEvents.map((event) => (
@@ -52,17 +52,17 @@ const ScheduleCalendar = ({ events = [] }) => {
                 href={event.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between p-4 bg-primary/5 dark:bg-primary/10 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all border border-primary/10 dark:border-primary/20"
+                className="flex items-center justify-between p-4 bg-primary/5 dark:bg-primary/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all border border-primary/10 dark:border-primary/20"
               >
                 <div className="flex items-center space-x-4">
                   <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-lg">
                     <Video className="h-5 w-5 text-primary dark:text-primary/90" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                    <h3 className="font-medium text-gray-900 dark:text-gray-900 truncate max-w-[150px]">
                       {event.subject}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-600">
                       {event.roomNumber || "Online"}
                     </p>
                   </div>
@@ -77,20 +77,20 @@ const ScheduleCalendar = ({ events = [] }) => {
           </div>
         ) : (
           <div className="text-center py-10">
-            <CalendarIcon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-500" />
+            <CalendarIcon className="mx-auto h-12 w-12 text-gray-600 dark:text-gray-500" />
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">No meetings scheduled for today.</p>
           </div>
         )}
       </div>
 
       {/* Calendar Section */}
-      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
+      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-300">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Calendar</h2>
-          <span className="text-gray-600 dark:text-gray-300">{currentMonth}</span>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900">Calendar</h2>
+          <span className="text-gray-600 dark:text-gray-600">{currentMonth}</span>
         </div>
-        <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
+        <div className="border border-gray-200 dark:border-gray-300 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 dark:text-gray-600 bg-gray-50 dark:bg-white border-b border-gray-200 dark:border-gray-300">
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
               <div key={day} className="py-2">{day}</div>
             ))}
@@ -108,8 +108,8 @@ const ScheduleCalendar = ({ events = [] }) => {
                   key={day}
                   className={`py-2 text-center relative ${
                     isToday 
-                      ? "bg-primary dark:bg-primary/90 text-white font-bold rounded-lg" 
-                      : "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                      ? "bg-primary dark:bg-primary/90 text-gray-900 font-bold rounded-lg" 
+                      : "text-gray-900 dark:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                   }`}
                 >
                   {day}
@@ -124,13 +124,13 @@ const ScheduleCalendar = ({ events = [] }) => {
       </div>
 
       {/* Announcement Section */}
-      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-600">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-          Welcome to OneCampus !
+      <div className="md:col-span-1 bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-300">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-900">
+          Welcome to LMS Platform!
         </h2>
         <div className="w-full h-[300px]">
           <iframe
-            className="rounded-lg w-full h-[300px] border border-gray-200 dark:border-gray-600"
+            className="rounded-lg w-full h-[300px] border border-gray-200 dark:border-gray-300"
             src="https://www.youtube.com/embed/vfDcYz7zJio"
             title="YouTube video"
             frameBorder="0"

@@ -503,8 +503,8 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-gray-700">
+        <div className="rounded-xl border border-gray-200 bg-white/70 backdrop-blur-xl p-6 shadow-card-sm">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
             <Loader2 className="h-5 w-5 animate-spin" />
             Loading profile...
           </div>
@@ -516,8 +516,8 @@ export default function Profile() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
-          <div className="mb-3 flex items-center gap-2 text-base font-semibold text-red-700">
+        <div className="rounded-xl border border-red-800 bg-white/70 backdrop-blur-xl p-6 shadow-card-sm">
+          <div className="mb-3 flex items-center gap-2 text-base font-semibold text-red-600">
             <AlertTriangle className="h-5 w-5" />
             Failed to load profile
           </div>
@@ -525,7 +525,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={loadPage}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-semibold text-red-700"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-700 bg-white/40 px-3 py-2 text-sm font-semibold text-red-600"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -542,7 +542,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/40 px-3 py-2 text-sm font-semibold text-gray-600 shadow-card-sm hover:bg-gray-50"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -552,7 +552,7 @@ export default function Profile() {
             <button
               type="button"
               onClick={handleEditToggle}
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm hover:bg-blue-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-primary-700 bg-white/40 px-3 py-2 text-sm font-semibold text-primary-600 shadow-card-sm hover:bg-primary-900/20"
             >
               <Edit3 className="h-4 w-4" />
               Edit
@@ -563,7 +563,7 @@ export default function Profile() {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/40 px-3 py-2 text-sm font-semibold text-gray-600 shadow-card-sm disabled:opacity-60"
               >
                 <X className="h-4 w-4" />
                 Cancel
@@ -572,7 +572,7 @@ export default function Profile() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg border border-primary-700 bg-white/40 px-3 py-2 text-sm font-semibold text-primary-600 shadow-card-sm disabled:opacity-60"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save
@@ -639,7 +639,7 @@ export default function Profile() {
           </>
         )}
 
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs text-gray-500 shadow-sm">
+        <div className="rounded-xl border border-gray-200 bg-white/70 backdrop-blur-xl px-4 py-2 text-xs text-gray-400 shadow-card-sm">
           Last updated: {toDateDisplay(profileData?.audit?.updatedAt)}
         </div>
       </div>

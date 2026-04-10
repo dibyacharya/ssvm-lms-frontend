@@ -32,7 +32,7 @@ const ProfileDropdown = ({role}) => {
         aria-haspopup="menu"
         aria-expanded={open ? "true" : "false"}
         onClick={() => setOpen((v) => !v)}
-        className="cursor-pointer flex items-center space-x-2 p-2 rounded-full hover:bg-primary/20 dark:hover:bg-blue-500/20"
+        className="cursor-pointer flex items-center space-x-2 p-2 rounded-full hover:bg-primary/20 dark:hover:bg-purple-500/20"
       >
         <User />
       </button>

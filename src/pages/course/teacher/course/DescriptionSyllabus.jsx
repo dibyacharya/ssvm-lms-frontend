@@ -19,12 +19,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
           {count}
         </span>
       )}
@@ -71,7 +71,7 @@ const DescriptionSyllabus = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="bg-red-50 p-6 rounded-xl text-center max-w-md">
-          <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <AlertCircle className="w-10 h-10 text-red-600 mx-auto mb-3" />
           <p className="text-red-600">{error}</p>
         </div>
       </div>
@@ -85,11 +85,11 @@ const DescriptionSyllabus = () => {
           <SectionHeader
             icon={BookOpen}
             title="Course Syllabus"
-            gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+            gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-fuchsia-500"
           />
           <div className="p-12 text-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-100 to-fuchsia-100 flex items-center justify-center mx-auto mb-4">
-              <Library className="w-10 h-10 text-violet-400" />
+              <Library className="w-10 h-10 text-blue-400" />
             </div>
             <h3 className="text-xl font-semibold text-primary mb-2">
               No Syllabus Available
@@ -119,7 +119,7 @@ const DescriptionSyllabus = () => {
         <SectionHeader
           icon={BookOpen}
           title="Course Syllabus"
-          gradient="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500"
+          gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-fuchsia-500"
           count={`${syllabus.length} Modules`}
         />
         <div className="px-6 py-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 border-b border-violet-100">
@@ -149,7 +149,7 @@ const DescriptionSyllabus = () => {
               <div
                 className={`cursor-pointer transition-all duration-200 ${
                   isExpanded
-                    ? "bg-gradient-to-r from-indigo-50 via-blue-50 to-violet-50 border-b border-indigo-100"
+                    ? "bg-gradient-to-r from-blue-50 via-blue-50 to-violet-50 border-b border-indigo-100"
                     : "hover:bg-gray-50"
                 }`}
                 onClick={() => setExpandedModule(isExpanded ? null : moduleNo)}
@@ -159,25 +159,25 @@ const DescriptionSyllabus = () => {
                     <div
                       className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
                         isExpanded
-                          ? "bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg shadow-indigo-200"
-                          : "bg-gradient-to-r from-indigo-500 to-blue-600"
+                          ? "bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-indigo-200"
+                          : "bg-gradient-to-r from-blue-500 to-blue-600"
                       }`}
                     >
-                      <Layers className="w-6 h-6 text-white" />
+                      <Layers className="w-6 h-6 text-gray-900" />
                     </div>
                     <div className="flex flex-col flex-1">
                       <div className="flex items-center gap-3">
                         <span
                           className={`font-semibold px-3 py-1 rounded-full text-xs transition-all duration-200 ${
                             isExpanded
-                              ? "bg-gradient-to-r from-indigo-500 to-blue-600 text-white"
-                              : "bg-gradient-to-r from-indigo-500 to-blue-600 text-white"
+                              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900"
+                              : "bg-gradient-to-r from-blue-500 to-blue-600 text-gray-900"
                           }`}
                         >
                           Module {moduleNo}
                         </span>
                         {timeWeightage && (
-                          <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-full border border-amber-200 font-medium">
+                          <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-gradient-to-r from-amber-50 to-blue-50 text-amber-700 rounded-full border border-amber-200 font-medium">
                             <Clock className="w-3 h-3" />
                             {timeWeightage}
                           </span>
@@ -197,7 +197,7 @@ const DescriptionSyllabus = () => {
                   >
                     <ChevronDown
                       className={`w-5 h-5 transition-colors duration-200 ${
-                        isExpanded ? "text-indigo-600" : "text-tertiary"
+                        isExpanded ? "text-blue-600" : "text-tertiary"
                       }`}
                     />
                   </div>

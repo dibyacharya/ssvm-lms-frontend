@@ -89,8 +89,8 @@ const AssignmentList = () => {
       <div className="flex items-center space-x-2 mt-2">
         {status.submitted ? (
           <>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-green-600">
+            <CheckCircle className="h-4 w-4 text-blue-600" />
+            <span className="text-sm text-blue-600">
               Submitted {status.submissionDate && `on ${formatDate(status.submissionDate)}`}
             </span>
             {status.grade && (
@@ -134,7 +134,7 @@ const AssignmentList = () => {
           icon={FileText}
           title="All Assignments"
           subtitle="Track and manage your course assignments"
-          gradient="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"
+          gradient="bg-gradient-to-r from-amber-500 via-blue-500 to-red-500"
         />
         <p className="text-gray-500 dark:text-gray-400">No courses available.</p>
       </div>
@@ -147,7 +147,7 @@ const AssignmentList = () => {
         icon={FileText}
         title="All Assignments"
         subtitle={`Welcome back, ${coursesData.user.name} • ${coursesData.courses.length} courses`}
-        gradient="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"
+        gradient="bg-gradient-to-r from-amber-500 via-blue-500 to-red-500"
       />
 
       <div className="space-y-4">
@@ -162,7 +162,7 @@ const AssignmentList = () => {
                 className="w-full bg-white px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center space-x-4">
-                  <BookOpen className="h-6 w-6 text-indigo-600" />
+                  <BookOpen className="h-6 w-6 text-blue-600" />
                   <div className="text-left">
                     <h2 className="text-xl font-semibold text-gray-900">
                       {course.title}
@@ -199,9 +199,9 @@ const AssignmentList = () => {
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-4 flex-1">
-                              <FileText className="h-6 w-6 text-indigo-600 mt-1 flex-shrink-0" />
+                              <FileText className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
                               <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900 hover:text-indigo-600">
+                                <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600">
                                   {assignment.title}
                                 </h3>
                                 <p className="text-gray-600 mt-1 line-clamp-2">

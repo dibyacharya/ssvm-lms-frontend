@@ -66,7 +66,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
           value={form.question}
           onChange={(e) => update('question', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
       </div>
@@ -83,7 +83,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
                 update('options', ['True', 'False']);
               }
             }}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {TYPES.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
@@ -98,7 +98,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
             onChange={(e) => update('points', Number(e.target.value))}
             min={0.5}
             step={0.5}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -106,7 +106,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
           <select
             value={form.difficulty}
             onChange={(e) => update('difficulty', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {DIFFICULTIES.map((d) => (
               <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
@@ -127,20 +127,20 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
                   name="correctAnswer"
                   checked={form.correctAnswer === opt && opt !== ''}
                   onChange={() => update('correctAnswer', opt)}
-                  className="w-4 h-4 text-indigo-600"
+                  className="w-4 h-4 text-blue-600"
                 />
                 <input
                   type="text"
                   value={opt}
                   onChange={(e) => updateOption(i, e.target.value)}
                   placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {form.options.length > 2 && (
                   <button
                     type="button"
                     onClick={() => removeOption(i)}
-                    className="p-2 text-red-400 hover:text-red-600"
+                    className="p-2 text-red-600 hover:text-red-600"
                   >
                     <FaTrash className="text-xs" />
                   </button>
@@ -152,7 +152,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
             <button
               type="button"
               onClick={addOption}
-              className="mt-2 flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+              className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
             >
               <FaPlus className="text-[10px]" /> Add Option
             </button>
@@ -169,7 +169,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
             <select
               value={form.correctAnswer}
               onChange={(e) => update('correctAnswer', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select...</option>
               <option value="True">True</option>
@@ -180,7 +180,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
               type="text"
               value={form.correctAnswer}
               onChange={(e) => update('correctAnswer', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           )}
         </div>
@@ -194,7 +194,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
             value={form.modelAnswer}
             onChange={(e) => update('modelAnswer', e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       )}
@@ -207,7 +207,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
             type="text"
             value={form.topic}
             onChange={(e) => update('topic', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -215,7 +215,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
           <select
             value={form.bloomLevel}
             onChange={(e) => update('bloomLevel', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">None</option>
             {BLOOM_LEVELS.map((b) => (
@@ -232,7 +232,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
           value={form.explanation}
           onChange={(e) => update('explanation', e.target.value)}
           rows={2}
-          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -249,7 +249,7 @@ const QuestionForm = ({ initial = {}, onSave, onCancel }) => {
         )}
         <button
           type="submit"
-          className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="px-6 py-2 bg-blue-600 text-gray-900 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           {initial._id ? 'Update Question' : 'Add Question'}
         </button>

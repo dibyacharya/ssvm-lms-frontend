@@ -223,7 +223,7 @@ const TeacherAssignmentGrading = () => {
         <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-orange-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+              <div className="bg-blue-500 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
                 PPT
               </div>
               <h3 className="ml-3 font-semibold text-lg">{fileName}</h3>
@@ -237,7 +237,7 @@ const TeacherAssignmentGrading = () => {
                 download={fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+                className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
               >
                 <FileText className="h-5 w-5" />
                 Download Presentation
@@ -251,7 +251,7 @@ const TeacherAssignmentGrading = () => {
         <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-gray-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+              <div className="bg-gray-500 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
                 FILE
               </div>
               <h3 className="ml-3 font-semibold text-lg">{fileName}</h3>
@@ -265,7 +265,7 @@ const TeacherAssignmentGrading = () => {
                 download={fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+                className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
               >
                 <FileText className="h-5 w-5" />
                 Download File
@@ -556,7 +556,7 @@ const TeacherAssignmentGrading = () => {
                 </button>
                 <button
                   onClick={() => setSortBy('submitted')}
-                  className={`px-3 py-1 rounded ${sortBy === 'submitted' ? 'bg-green-100 text-green-600' : 'text-gray-600'}`}
+                  className={`px-3 py-1 rounded ${sortBy === 'submitted' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
                 >
                   Submitted
                 </button>
@@ -609,7 +609,7 @@ const TeacherAssignmentGrading = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           {student.status === 'submitted' ? (
-                            <CheckCircle2 size={16} className="text-green-600" />
+                            <CheckCircle2 size={16} className="text-blue-600" />
                           ) : (
                             <XCircle size={16} className="text-red-500" />
                           )}
@@ -654,7 +654,7 @@ const TeacherAssignmentGrading = () => {
                     <p className="text-sm text-gray-600">{selectedStudent.rollNo}</p>
                   </div>
                   {selectedStudent.submission && (
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                       Submitted
                     </span>
                   )}
@@ -845,7 +845,7 @@ const TeacherAssignmentGrading = () => {
                           </div>
                           <button
                             onClick={() => handleSaveGrade(selectedStudent)}
-                            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                            className="w-full px-4 py-3 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 font-medium"
                           >
                             Save Grade
                           </button>
@@ -884,14 +884,14 @@ const TeacherAssignmentGrading = () => {
                   </div>
                   {selectedStudent.submission && (
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-blue-600">
                         {calculateObjectiveScore(selectedStudent.submission) || 0}
                       </div>
                       <div className="text-sm text-gray-500">
                         / {selectedStudent.submission.totalObjectivePoints || getTotalObjectivePoints()} points
                       </div>
                       {selectedStudent.submission.objectiveScore !== undefined && (
-                        <div className="text-xs text-green-600 mt-1">
+                        <div className="text-xs text-blue-600 mt-1">
                           (Auto-calculated)
                         </div>
                       )}
@@ -990,16 +990,16 @@ const TeacherAssignmentGrading = () => {
                           <div
                             key={q._id}
                             className={`border rounded-lg p-4 ${
-                              isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                              isCorrect ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'
                             }`}
                           >
                             <div className="flex items-center gap-2 mb-3">
-                              <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded font-medium">
+                              <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded font-medium">
                                 Q{index + 1}
                               </span>
                               <span className="text-sm text-gray-500">{q.points || 10} points</span>
                               {isCorrect ? (
-                                <span className="ml-auto px-2 py-1 bg-green-200 text-green-800 rounded text-xs font-medium">
+                                <span className="ml-auto px-2 py-1 bg-blue-200 text-blue-800 rounded text-xs font-medium">
                                   Correct
                                 </span>
                               ) : (
@@ -1019,7 +1019,7 @@ const TeacherAssignmentGrading = () => {
                                     key={optIndex}
                                     className={`p-3 rounded-lg border ${
                                       isCorrectOption
-                                        ? 'bg-green-100 border-green-300'
+                                        ? 'bg-blue-100 border-blue-300'
                                         : isSelected
                                         ? 'bg-red-100 border-red-300'
                                         : 'bg-gray-50 border-gray-200'
@@ -1031,7 +1031,7 @@ const TeacherAssignmentGrading = () => {
                                       </span>
                                       <span>{option}</span>
                                       {isCorrectOption && (
-                                        <CheckCircle2 className="ml-auto text-green-600" size={16} />
+                                        <CheckCircle2 className="ml-auto text-blue-600" size={16} />
                                       )}
                                       {isSelected && !isCorrectOption && (
                                         <XCircle className="ml-auto text-red-600" size={16} />
@@ -1043,13 +1043,13 @@ const TeacherAssignmentGrading = () => {
                             </div>
                             <div className="mt-3 text-sm">
                               <span className="text-gray-600">Student Answer: </span>
-                              <span className={`font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`font-medium ${isCorrect ? 'text-blue-600' : 'text-red-600'}`}>
                                 {studentAnswer || 'Not answered'}
                               </span>
                               {!isCorrect && (
                                 <>
                                   <span className="text-gray-600 ml-3">Correct Answer: </span>
-                                  <span className="font-medium text-green-600">{q.correctAnswer}</span>
+                                  <span className="font-medium text-blue-600">{q.correctAnswer}</span>
                                 </>
                               )}
                             </div>
@@ -1114,7 +1114,7 @@ const TeacherAssignmentGrading = () => {
                       </div>
                       <button
                         onClick={() => handleSaveGrade(selectedStudent)}
-                        className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                        className="w-full px-4 py-3 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 font-medium"
                       >
                         Save Grade
                       </button>
@@ -1133,18 +1133,18 @@ const TeacherAssignmentGrading = () => {
       {isFullscreen && selectedStudent?.submission?.submissionFile && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+          <div className="flex items-center justify-between p-4 bg-gray-50 text-gray-900">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-semibold">
                 {selectedStudent.submission.submissionFile.split('/').pop()}
               </h3>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-gray-600">
                 {selectedStudent.name} - {selectedStudent.rollNo}
               </span>
             </div>
             <button
               onClick={() => setIsFullscreen(false)}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Exit Fullscreen (Esc)"
             >
               <X className="h-6 w-6" />

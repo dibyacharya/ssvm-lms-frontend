@@ -16,7 +16,7 @@ const ExamDashboard = () => {
 
   const loadCourses = async () => {
     try {
-      const res = await api.get('/courses/teacher/my-courses');
+      const res = await api.get('/courses');
       setCourses(res.data.courses || res.data || []);
     } catch {
       toast.error('Failed to load courses');
@@ -28,7 +28,7 @@ const ExamDashboard = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -36,8 +36,8 @@ const ExamDashboard = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <FaFileAlt className="text-indigo-500 text-xl" />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Examinations</h1>
+        <FaFileAlt className="text-blue-500 text-xl" />
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-900">Examinations</h1>
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400">Select a course to manage exams and question banks.</p>
 
@@ -51,20 +51,20 @@ const ExamDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className="bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-300 p-4 hover:shadow-md transition-shadow"
             >
-              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{course.title || course.name}</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-900 text-sm">{course.title || course.name}</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{course.courseCode || ''}</p>
               <div className="flex items-center gap-2 mt-3">
                 <button
                   onClick={() => navigate(`/teacher/exams/${course._id}`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-gray-900 rounded-lg text-xs font-semibold hover:bg-blue-700"
                 >
                   <FaFileAlt className="text-[10px]" /> Exams <FaChevronRight className="text-[8px]" />
                 </button>
                 <button
                   onClick={() => navigate(`/teacher/question-bank/${course._id}`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-500"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-500"
                 >
                   <FaClipboardList className="text-[10px]" /> Question Bank
                 </button>

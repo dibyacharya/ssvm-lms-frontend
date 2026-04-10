@@ -135,12 +135,12 @@ const CustomVideoLayout = ({ meetingTitle }) => {
         {/* Main area: show shared screen for viewers, or "You are sharing" for the sharer */}
         {isLocalSharing ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-900 to-black relative">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
-              <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-white text-xl font-semibold">You are sharing your screen</p>
+            <p className="text-gray-900 text-xl font-semibold">You are sharing your screen</p>
             <p className="text-slate-400 text-sm">Participants can see your shared content</p>
             {/* Show other participants in a row below */}
             {otherCameraTracks.length > 0 && (
@@ -154,7 +154,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
                     >
                       <VideoTrack trackRef={t} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 py-0.5">
-                        <span className="text-white text-[10px] font-medium truncate block">
+                        <span className="text-gray-900 text-[10px] font-medium truncate block">
                           {t.participant?.name || ''}
                         </span>
                       </div>
@@ -176,7 +176,7 @@ const CustomVideoLayout = ({ meetingTitle }) => {
           <div
             ref={pipRef}
             onMouseDown={handlePipMouseDown}
-            className="absolute z-20 w-60 h-60 rounded-full overflow-hidden border-2 border-emerald-400/60 shadow-2xl bg-black cursor-grab active:cursor-grabbing transition-all"
+            className="absolute z-20 w-60 h-60 rounded-full overflow-hidden border-2 border-blue-400/60 shadow-2xl bg-black cursor-grab active:cursor-grabbing transition-all"
             style={{
               ...(pipPos
                 ? { left: pipPos.x, top: pipPos.y, position: 'fixed' }
@@ -195,8 +195,8 @@ const CustomVideoLayout = ({ meetingTitle }) => {
 
         {/* Course label at bottom center */}
         {meetingTitle && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-6 py-2 bg-black/60 backdrop-blur-sm rounded-full">
-            <span className="text-white text-sm font-medium">Course: {meetingTitle}</span>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-6 py-2 bg-gray-50/20 backdrop-blur-sm rounded-full">
+            <span className="text-gray-900 text-sm font-medium">Course: {meetingTitle}</span>
           </div>
         )}
       </div>
@@ -581,7 +581,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType: mimeOptions,
-      videoBitsPerSecond: 2_500_000, // 2.5 Mbps — smooth 720p recording
+      videoBitsPerSecond: 6_000_000, // 6 Mbps — smooth 1080p/60fps recording
     });
 
     mediaRecorder.ondataavailable = (event) => {
@@ -719,8 +719,8 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
 
       // Create an off-screen canvas for recording
       const canvas = document.createElement('canvas');
-      canvas.width = 1280;
-      canvas.height = 720;
+      canvas.width = 1920;
+      canvas.height = 1080;
       canvasRef.current = canvas;
       const ctx = canvas.getContext('2d');
 
@@ -1549,8 +1549,8 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         <div className="flex items-center space-x-2">
           {isRecording && (
             <div className="px-3 py-1 bg-red-900/50 border border-red-500/30 rounded-full flex items-center space-x-2">
-              <Disc size={12} className="text-red-400 animate-pulse" />
-              <span className="text-xs text-red-300 font-medium">Recording</span>
+              <Disc size={12} className="text-red-600 animate-pulse" />
+              <span className="text-xs text-red-600 font-medium">Recording</span>
             </div>
           )}
         </div>
@@ -1559,14 +1559,14 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden relative w-full">
         {mediaError && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center animate-in slide-in-from-top-4">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-red-600 text-gray-900 px-6 py-3 rounded-xl shadow-lg z-50 flex items-center animate-in slide-in-from-top-4">
             <span className="font-semibold text-sm mr-2">{mediaError}</span>
-            <button onClick={() => setMediaError("")} className="text-red-200 hover:text-white"><X size={16} /></button>
+            <button onClick={() => setMediaError("")} className="text-red-200 hover:text-gray-900"><X size={16} /></button>
           </div>
         )}
 
         {!canPlaybackAudio && (
-          <div className="absolute top-4 left-4 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-lg z-50 flex items-center space-x-3 cursor-pointer hover:bg-amber-600 transition-colors" onClick={() => room.startAudio()}>
+          <div className="absolute top-4 left-4 bg-amber-500 text-gray-900 px-4 py-3 rounded-xl shadow-lg z-50 flex items-center space-x-3 cursor-pointer hover:bg-amber-600 transition-colors" onClick={() => room.startAudio()}>
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-bounce">
               <Mic size={16} />
             </div>
@@ -1581,12 +1581,12 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             needing Chrome's native notification bar. Chrome's "Hide" button only hides
             the native bar; this banner stays visible so there's always a way to stop. */}
         {isScreenShareEnabled && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-blue-600 text-white px-5 py-2.5 rounded-xl shadow-lg flex items-center space-x-3 backdrop-blur-sm border border-blue-400/30 animate-in slide-in-from-top-4">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-blue-600 text-gray-900 px-5 py-2.5 rounded-xl shadow-lg flex items-center space-x-3 backdrop-blur-sm border border-blue-400/30 animate-in slide-in-from-top-4">
             <Monitor size={16} className="text-blue-200 shrink-0" />
             <span className="text-sm font-medium whitespace-nowrap">You are sharing your screen</span>
             <button
               onClick={toggleScreenShare}
-              className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              className="bg-red-500 hover:bg-red-600 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
               Stop Sharing
             </button>
@@ -1594,7 +1594,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         )}
 
         {isHandRaised && user?.role === 'student' && (
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-amber-500/90 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center space-x-2 backdrop-blur-sm animate-bounce">
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-amber-500/90 text-gray-900 px-4 py-2 rounded-full shadow-lg z-50 flex items-center space-x-2 backdrop-blur-sm animate-bounce">
             <Hand size={14} />
             <span className="text-xs font-bold">Your hand is raised</span>
             <button onClick={handleRaiseHand} className="text-[10px] bg-white text-amber-600 px-2 py-0.5 rounded-full font-bold ml-2">Lower</button>
@@ -1602,8 +1602,8 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         )}
 
         {showDebug && (
-          <div className="absolute top-20 left-4 bg-black/80 text-green-400 font-mono text-[10px] p-4 rounded-xl shadow-xl z-50 w-72 backdrop-blur-sm border border-green-500/30">
-            <h4 className="border-b border-green-500/50 pb-1 mb-2 font-bold text-green-300">LiveKit Dev Debug</h4>
+          <div className="absolute top-20 left-4 bg-black/80 text-blue-400 font-mono text-[10px] p-4 rounded-xl shadow-xl z-50 w-72 backdrop-blur-sm border border-blue-500/30">
+            <h4 className="border-b border-blue-500/50 pb-1 mb-2 font-bold text-blue-300">LiveKit Dev Debug</h4>
             <div className="space-y-1">
               <p>Room: {room.name}</p>
               <p>State: {room.state}</p>
@@ -1735,7 +1735,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                         return (
                           <p key={idx} className="py-1 border-b border-slate-100 last:border-0">
                             <span className="text-slate-400 text-[10px] mr-1">[{timeStr}]</span>
-                            <span className="text-indigo-600 font-bold">{t.speaker}:</span> {t.text}
+                            <span className="text-blue-600 font-bold">{t.speaker}:</span> {t.text}
                           </p>
                         );
                       })}
@@ -1749,13 +1749,13 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                       <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Participation Sync</h4>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-2">
-                          <Users size={16} className="text-indigo-500" />
+                          <Users size={16} className="text-blue-500" />
                           <span className="text-sm font-semibold">{participants.length} Active</span>
                         </div>
                         {user?.role === 'teacher' && (
                           <button
                             onClick={syncDashboardTab}
-                            className="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
+                            className="text-[10px] bg-blue-600 text-gray-900 px-2 py-1 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
                           >
                             Sync to All
                           </button>
@@ -1764,21 +1764,21 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs">
                           <span className="text-slate-500">Class Focus</span>
-                          <span className="text-emerald-500 font-bold">High (85%)</span>
+                          <span className="text-blue-500 font-bold">High (85%)</span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-1.5">
-                          <div className="bg-emerald-500 h-1.5 rounded-full w-[85%]"></div>
+                          <div className="bg-blue-500 h-1.5 rounded-full w-[85%]"></div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                    <div className="bg-blue-50 border border-indigo-100 rounded-xl p-4">
                       <h4 className="text-xs font-bold text-indigo-700 uppercase mb-2">Topic Progress</h4>
                       <div className="space-y-2">
                         {['Introduction', 'Core Architecture', 'Permission Logic'].map((topic, i) => (
                           <div key={i} className="flex items-center space-x-2">
                             <div className="w-4 h-4 rounded-full border border-indigo-300 flex items-center justify-center">
-                              {i === 0 && <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>}
+                              {i === 0 && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
                             </div>
                             <span className={`text-xs ${i === 0 ? 'text-indigo-900 font-semibold' : 'text-indigo-400 font-medium'}`}>{topic}</span>
                           </div>
@@ -1815,37 +1815,37 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => { sendCommand({ type: 'LOCK_MIC' }); setStudentMicLocked(true); setMediaError("Student mics locked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentMicLocked ? "bg-red-600 text-white ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentMicLocked ? "bg-red-600 text-gray-900 ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {studentMicLocked ? "Mics Locked" : "Lock Mics"}
                           </button>
                           <button
                             onClick={() => { sendCommand({ type: 'UNLOCK_MIC' }); setStudentMicLocked(false); setMediaError("Student mics unlocked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentMicLocked ? "bg-emerald-600 text-white ring-2 ring-emerald-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentMicLocked ? "bg-blue-600 text-gray-900 ring-2 ring-blue-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {!studentMicLocked ? "Mics Open" : "Unlock Mics"}
                           </button>
                           <button
                             onClick={() => { sendCommand({ type: 'LOCK_CAM' }); setStudentCamLocked(true); setMediaError("Student cameras locked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentCamLocked ? "bg-red-600 text-white ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentCamLocked ? "bg-red-600 text-gray-900 ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {studentCamLocked ? "Cams Locked" : "Lock Cams"}
                           </button>
                           <button
                             onClick={() => { sendCommand({ type: 'UNLOCK_CAM' }); setStudentCamLocked(false); setMediaError("Student cameras unlocked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentCamLocked ? "bg-emerald-600 text-white ring-2 ring-emerald-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentCamLocked ? "bg-blue-600 text-gray-900 ring-2 ring-blue-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {!studentCamLocked ? "Cams Open" : "Unlock Cams"}
                           </button>
                           <button
                             onClick={() => { sendCommand({ type: 'LOCK_SCREEN' }); setStudentScreenLocked(true); setMediaError("Student screens locked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentScreenLocked ? "bg-red-600 text-white ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (studentScreenLocked ? "bg-red-600 text-gray-900 ring-2 ring-red-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {studentScreenLocked ? "Screens Locked" : "Lock Screens"}
                           </button>
                           <button
                             onClick={() => { sendCommand({ type: 'UNLOCK_SCREEN' }); setStudentScreenLocked(false); setMediaError("Student screens unlocked"); setTimeout(() => setMediaError(""), 2000); }}
-                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentScreenLocked ? "bg-emerald-600 text-white ring-2 ring-emerald-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
+                            className={"py-1.5 rounded-lg text-xs font-semibold transition-colors " + (!studentScreenLocked ? "bg-blue-600 text-gray-900 ring-2 ring-blue-300" : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200")}
                           >
                             {!studentScreenLocked ? "Screens Open" : "Unlock Screens"}
                           </button>
@@ -1861,7 +1861,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                                 {p.identity.charAt(0).toUpperCase()}
                               </div>
                               {raisedHands.has(p.identity) && (
-                                <div className="absolute -top-1 -right-1 bg-amber-500 text-white rounded-full p-0.5 border border-white">
+                                <div className="absolute -top-1 -right-1 bg-amber-500 text-gray-900 rounded-full p-0.5 border border-white">
                                   <Hand size={8} />
                                 </div>
                               )}
@@ -1876,15 +1876,15 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                           </div>
                           <div className="flex space-x-2 items-center">
                             <div className="flex space-x-1">
-                              {!p.isMicrophoneEnabled ? <MicOff size={14} className="text-red-400" /> : <Mic size={14} className="text-slate-400" />}
-                              {!p.isCameraEnabled ? <VideoOff size={14} className="text-red-400" /> : <Video size={14} className="text-slate-400" />}
+                              {!p.isMicrophoneEnabled ? <MicOff size={14} className="text-red-600" /> : <Mic size={14} className="text-slate-400" />}
+                              {!p.isCameraEnabled ? <VideoOff size={14} className="text-red-600" /> : <Video size={14} className="text-slate-400" />}
                             </div>
                             {user?.role === 'teacher' && !p.isLocal && (
                               <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {raisedHands.has(p.identity) && (
                                   <button
                                     onClick={() => grantSpeakingPermission(p.identity)}
-                                    className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded hover:bg-emerald-700"
+                                    className="text-[10px] bg-blue-600 text-gray-900 px-2 py-0.5 rounded hover:bg-blue-700"
                                   >
                                     Allow
                                   </button>
@@ -1892,7 +1892,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                                 {raisedHands.has(p.identity) && (
                                   <button
                                     onClick={() => lowerStudentHand(p.identity)}
-                                    className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded hover:bg-amber-700"
+                                    className="text-[10px] bg-amber-600 text-gray-900 px-2 py-0.5 rounded hover:bg-amber-700"
                                   >
                                     Lower
                                   </button>
@@ -1900,7 +1900,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                                 {p.isMicrophoneEnabled && (
                                   <button
                                     onClick={() => sendCommand({ type: 'TOGGLE_MIC', targetIdentity: p.identity })}
-                                    className="text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded hover:bg-slate-700"
+                                    className="text-[10px] bg-slate-800 text-gray-900 px-2 py-0.5 rounded hover:bg-slate-700"
                                   >
                                     Mute
                                   </button>
@@ -1936,7 +1936,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                           onChange={e => setManualText(e.target.value)}
                         />
                       </div>
-                      <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold text-sm transition-colors">
+                      <button type="submit" className="w-full bg-blue-600 hover:bg-indigo-700 text-gray-900 py-2 rounded-lg font-semibold text-sm transition-colors">
                         Send to DB
                       </button>
                     </form>
@@ -1955,7 +1955,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
         <div className="flex items-center space-x-2 shrink-0">
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-400">Connected</span>
-            <span className="text-[10px] text-emerald-500 flex items-center gap-1">
+            <span className="text-[10px] text-blue-500 flex items-center gap-1">
               <Wifi size={10} /> LiveKit
             </span>
           </div>
@@ -2008,7 +2008,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             onClick={() => toggleBackground('white')}
             className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
               bgMode === 'white'
-                ? 'bg-white/20 text-white ring-1 ring-white/50'
+                ? 'bg-white/20 text-gray-900 ring-1 ring-white/50'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             )}
             title="White Background"
@@ -2022,7 +2022,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
             onClick={toggleNoiseFilter}
             className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
               noiseFilter
-                ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/50'
+                ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             )}
             title="Noise Suppression"
@@ -2048,9 +2048,9 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
                 disabled={!isRecording}
                 className={"flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all shrink-0 " + (
                   isRecordingPaused
-                    ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                    ? 'bg-amber-50 text-amber-500 hover:bg-amber-500/20'
                     : isRecording
-                      ? 'bg-slate-800 text-amber-500 hover:bg-slate-700 text-amber-400'
+                      ? 'bg-slate-800 text-amber-500 hover:bg-slate-700 text-amber-600'
                       : 'bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed'
                 )}
               >
@@ -2119,7 +2119,7 @@ function MeetingContent({ activeMeetingId, isRecording, setIsRecording, showRigh
               sessionStorage.removeItem(`joined_${activeMeetingId}`);
               setClassEnded('ended');
             }}
-            className="flex items-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-xs transition-colors shadow-lg shadow-red-900/20 cursor-pointer shrink-0"
+            className="flex items-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-gray-900 rounded-xl font-semibold text-xs transition-colors shadow-lg shadow-red-900/20 cursor-pointer shrink-0"
           >
             <PhoneOff size={16} className="mr-1.5" />
             {user?.role === 'teacher' ? 'End' : 'Leave'}
@@ -2237,16 +2237,16 @@ export default function MeetingRoom() {
   }, [activeMeetingId, rejoinCounter]);
 
   return (
-    <div className="fixed inset-0 bg-slate-900 text-white overflow-hidden flex flex-col z-[9999]">
+    <div className="fixed inset-0 bg-slate-900 text-gray-900 overflow-hidden flex flex-col z-[9999]">
       {classEnded ? (
         <div className="flex flex-col items-center justify-center h-full p-8">
           <div className="bg-slate-800 p-10 rounded-2xl shadow-xl max-w-md w-full text-center border border-slate-700">
             {classEnded === 'ended' ? (
               <>
-                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 size={40} className="text-green-400" />
+                <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 size={40} className="text-blue-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-3">Class Ended</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">Class Ended</h2>
                 <p className="text-slate-400 text-sm mb-8">
                   {user?.role === 'teacher'
                     ? 'The class has been ended successfully. Recording will be processed and available in Class Recordings shortly.'
@@ -2256,9 +2256,9 @@ export default function MeetingRoom() {
             ) : (
               <>
                 <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <WifiOff size={40} className="text-amber-400" />
+                  <WifiOff size={40} className="text-amber-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-3">Connection Lost</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">Connection Lost</h2>
                 <p className="text-slate-400 text-sm mb-8">
                   You were disconnected from the class. This may be due to a network issue. Click below to rejoin the ongoing session.
                 </p>
@@ -2274,7 +2274,7 @@ export default function MeetingRoom() {
                   sessionStorage.setItem(`joined_${id}`, 'true');
                   setRejoinCounter(c => c + 1);
                 }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 hover:bg-indigo-700 text-gray-900 font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
               >
                 <RefreshCw size={18} />
                 Rejoin Classroom
@@ -2283,7 +2283,7 @@ export default function MeetingRoom() {
                 <>
                   <button
                     onClick={() => setShowReport(true)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-gray-900 font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
                   >
                     <BarChart3 size={18} />
                     View Meeting Report
@@ -2309,18 +2309,18 @@ export default function MeetingRoom() {
         </div>
       ) : !connectionDetails ? (
         <div className="flex flex-col items-center justify-center space-y-4 h-full">
-          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-indigo-200 font-medium">{meetingError || "Connecting to classroom..."}</p>
         </div>
       ) : !hasJoined ? (
         <div className="flex flex-col items-center justify-center space-y-6 h-full p-8 absolute inset-0 z-50 bg-slate-900">
           <div className="bg-slate-800 p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-slate-700">
-            <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Video size={32} className="text-indigo-400" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Ready to join?</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Ready to join?</h2>
             <p className="text-slate-400 text-sm mb-8">Make sure you are in a quiet environment.</p>
-            <button onClick={() => { setHasJoined(true); sessionStorage.setItem(`joined_${id}`, 'true'); }} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/30">
+            <button onClick={() => { setHasJoined(true); sessionStorage.setItem(`joined_${id}`, 'true'); }} className="w-full bg-blue-600 hover:bg-indigo-700 text-gray-900 font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-blue-500/30">
               Join Classroom
             </button>
           </div>
@@ -2364,12 +2364,12 @@ function ControlButton({ icon: Icon, active, onClick, label, variant = 'secondar
   let iconClass = '';
 
   if (variant === 'secondary') {
-    bgClass = active ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-red-500/10 text-red-500 hover:bg-red-500/20';
-    if (active) iconClass = 'text-white';
+    bgClass = active ? 'bg-slate-700 text-gray-900 hover:bg-slate-600' : 'bg-red-50 text-red-500 hover:bg-red-500/20';
+    if (active) iconClass = 'text-gray-900';
   } else if (variant === 'ghost') {
-    bgClass = active ? 'bg-indigo-600 text-white' : 'bg-transparent text-slate-400 hover:bg-slate-800';
+    bgClass = active ? 'bg-blue-600 text-gray-900' : 'bg-transparent text-slate-400 hover:bg-slate-800';
   } else if (variant === 'ai') {
-    bgClass = active ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-indigo-400 hover:bg-indigo-900/30';
+    bgClass = active ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-gray-900 shadow-lg shadow-blue-500/30' : 'bg-slate-800 text-indigo-400 hover:bg-indigo-900/30';
   }
 
   return (

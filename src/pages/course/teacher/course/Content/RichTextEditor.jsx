@@ -659,7 +659,7 @@ function FormatBar({ position, onFormat, onClose }) {
 
   return (
     <div 
-      className="format-bar absolute z-50 bg-gray-800 rounded-lg shadow-lg p-1 flex items-center space-x-1"
+      className="format-bar absolute z-50 bg-white rounded-lg shadow-lg p-1 flex items-center space-x-1"
       style={{ 
         left: position.x - 150, 
         top: position.y - 50,
@@ -670,7 +670,7 @@ function FormatBar({ position, onFormat, onClose }) {
         <button
           key={index}
           onClick={() => handleFormatClick(button)}
-          className="p-2 text-white hover:bg-gray-700 rounded transition-colors"
+          className="p-2 text-gray-900 hover:bg-gray-100 rounded transition-colors"
           title={button.title}
         >
           <button.icon className="w-4 h-4" />
@@ -681,7 +681,7 @@ function FormatBar({ position, onFormat, onClose }) {
       
       <button
         onClick={onClose}
-        className="p-1 text-white hover:bg-gray-700 rounded text-xs transition-colors"
+        className="p-1 text-gray-900 hover:bg-gray-100 rounded text-xs transition-colors"
         title="Close"
       >
         ×

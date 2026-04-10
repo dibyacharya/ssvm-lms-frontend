@@ -147,24 +147,22 @@ const Timetable = () => {
   }, [entries]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-5">
-        {/* Header Banner */}
-        <DashboardBanner
-          icon={CalendarIcon}
-          title="Timetable"
-          subtitle="Your weekly class schedule"
-          gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500"
-        />
+        {/* Page Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Timetable</h1>
+          <p className="text-sm text-gray-500 mt-1">Your weekly class schedule</p>
+        </div>
 
         {/* Controls Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-5 py-3.5">
+        <div className="bg-white dark:bg-white rounded-xl shadow-sm border border-gray-200 dark:border-gray-200 px-5 py-3.5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             {/* Week Navigation */}
             <div className="flex items-center gap-1.5">
               <button
                 onClick={goToPrevWeek}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:scale-95"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors active:scale-95"
                 title="Previous week"
               >
                 <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -174,8 +172,8 @@ const Timetable = () => {
                 onClick={goToToday}
                 className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all active:scale-95 ${
                   isCurrentWeek
-                    ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/25"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-gray-600"
+                    ? "bg-blue-500 text-white shadow-sm shadow-blue-500/25"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-600 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-600"
                 }`}
               >
                 Today
@@ -183,14 +181,14 @@ const Timetable = () => {
 
               <button
                 onClick={goToNextWeek}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:scale-95"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors active:scale-95"
                 title="Next week"
               >
                 <ChevronRight className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
 
-              <div className="ml-3 pl-3 border-l border-gray-200 dark:border-gray-700">
-                <span className="text-sm font-bold text-gray-800 dark:text-white">
+              <div className="ml-3 pl-3 border-l border-gray-200 dark:border-gray-200">
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-900">
                   {weekLabel}
                 </span>
               </div>
@@ -202,8 +200,8 @@ const Timetable = () => {
                 onClick={() => setViewMode("week")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   viewMode === "week"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-900 shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-900"
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
@@ -213,8 +211,8 @@ const Timetable = () => {
                 onClick={() => setViewMode("list")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   viewMode === "list"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-900 shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-900"
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -258,9 +256,9 @@ const Timetable = () => {
                 <LoadingSpinner />
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <CalendarIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">
+              <div className="bg-white dark:bg-white rounded-lg shadow-sm border border-gray-200 dark:border-gray-200 p-12 text-center">
+                <CalendarIcon className="w-16 h-16 text-gray-600 dark:text-gray-600 mx-auto mb-4" />
+                <p className="text-xl text-gray-600 dark:text-gray-600 mb-2">
                   No classes scheduled
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
@@ -276,10 +274,10 @@ const Timetable = () => {
                 return (
                   <div
                     key={dk}
-                    className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden ${
+                    className={`bg-white dark:bg-white rounded-lg shadow-sm border overflow-hidden ${
                       isToday
                         ? "border-accent1/50 dark:border-accent1/30"
-                        : "border-gray-200 dark:border-gray-700"
+                        : "border-gray-200 dark:border-gray-200"
                     }`}
                   >
                     {/* Day Header */}
@@ -287,7 +285,7 @@ const Timetable = () => {
                       className={`px-5 py-3 border-b ${
                         isToday
                           ? "bg-accent1/10 dark:bg-accent1/20 border-accent1/20"
-                          : "bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700"
+                          : "bg-gray-50 dark:bg-gray-50/50 border-gray-200 dark:border-gray-200"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -296,7 +294,7 @@ const Timetable = () => {
                             className={`text-sm font-semibold ${
                               isToday
                                 ? "text-accent1"
-                                : "text-gray-900 dark:text-white"
+                                : "text-gray-900 dark:text-gray-900"
                             }`}
                           >
                             {getDayLabel(dayKey)}
@@ -305,7 +303,7 @@ const Timetable = () => {
                             {formatDateDisplay(dayData.date)}
                           </span>
                           {isToday && (
-                            <span className="text-[10px] bg-accent1 text-white px-1.5 py-0.5 rounded-full font-medium">
+                            <span className="text-[10px] bg-accent1 text-gray-900 px-1.5 py-0.5 rounded-full font-medium">
                               Today
                             </span>
                           )}
@@ -333,9 +331,9 @@ const Timetable = () => {
                             <button
                               key={entry.instanceId}
                               onClick={() => setSelectedEntry(entry)}
-                              className={`w-full px-5 py-3 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left ${
+                              className={`w-full px-5 py-3 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-100/50 transition-colors text-left ${
                                 listStatus === "live"
-                                  ? "bg-green-50/50 dark:bg-green-900/10"
+                                  ? "bg-blue-50/50 dark:bg-blue-900/10"
                                   : ""
                               }`}
                             >
@@ -343,8 +341,8 @@ const Timetable = () => {
                               <div className="relative flex-shrink-0">
                                 {listStatus === "live" ? (
                                   <span className="relative flex h-3 w-3">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
                                   </span>
                                 ) : (
                                   <div
@@ -363,7 +361,7 @@ const Timetable = () => {
                                         ? "line-through text-gray-400"
                                         : listStatus === "ended"
                                         ? "text-gray-400 dark:text-gray-500"
-                                        : "text-gray-900 dark:text-white"
+                                        : "text-gray-900 dark:text-gray-900"
                                     }`}
                                   >
                                     {formatTime(new Date(entry.instanceStart))}
@@ -383,7 +381,7 @@ const Timetable = () => {
                                     {entry.courseCode}
                                   </span>
                                   {listStatus === "live" && (
-                                    <span className="text-[10px] bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-medium">
+                                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-medium">
                                       LIVE
                                     </span>
                                   )}
@@ -393,7 +391,7 @@ const Timetable = () => {
                                     </span>
                                   )}
                                   {isCancelled && (
-                                    <span className="text-[10px] bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full">
+                                    <span className="text-[10px] bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-600 px-1.5 py-0.5 rounded-full">
                                       Cancelled
                                     </span>
                                   )}

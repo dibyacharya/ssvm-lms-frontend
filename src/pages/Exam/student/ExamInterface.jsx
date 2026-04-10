@@ -313,7 +313,7 @@ const ExamInterface = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -326,13 +326,13 @@ const ExamInterface = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col select-none">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <div className="bg-white/70 backdrop-blur-xl border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
             {exam.title}
           </h1>
           {proctoringEnabled && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 rounded-full text-[10px] font-medium">
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-red-900/40 text-red-600 rounded-full text-[10px] font-medium">
               <FaShieldAlt className="text-[8px]" /> AI Proctored
             </span>
           )}
@@ -343,7 +343,7 @@ const ExamInterface = () => {
           <button
             onClick={() => setShowConfirm(true)}
             disabled={submitting}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-xs font-semibold hover:from-primary-700 hover:to-primary-600 transition-colors"
           >
             <FaPaperPlane className="text-[10px]" />
             Submit
@@ -376,8 +376,8 @@ const ExamInterface = () => {
               disabled={currentIndex === 0}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 currentIndex === 0
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'text-gray-500 cursor-not-allowed'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <FaArrowLeft className="text-xs" /> Previous
@@ -387,8 +387,8 @@ const ExamInterface = () => {
               onClick={toggleReview}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium transition-colors ${
                 answers[currentIndex]?.markedForReview
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'text-gray-500 hover:bg-gray-100'
+                  ? 'bg-amber-900/40 text-amber-600'
+                  : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
               <FaFlag className="text-[10px]" />
@@ -402,8 +402,8 @@ const ExamInterface = () => {
               disabled={currentIndex === exam.questions.length - 1}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 currentIndex === exam.questions.length - 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-indigo-600 hover:bg-indigo-50'
+                  ? 'text-gray-500 cursor-not-allowed'
+                  : 'text-primary-600 hover:bg-primary-50'
               }`}
             >
               Next <FaArrowRight className="text-xs" />
@@ -422,26 +422,26 @@ const ExamInterface = () => {
 
           {/* Proctoring status in sidebar */}
           {proctoringEnabled && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="mt-4 p-3 bg-gray-100 rounded-xl border border-gray-200">
               <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Proctoring Status
               </h4>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">Face Detection</span>
-                  <span className={`font-medium ${faceDetected ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <span className="text-gray-500">Face Detection</span>
+                  <span className={`font-medium ${faceDetected ? 'text-primary-600' : 'text-red-600'}`}>
                     {faceDetected ? 'OK' : 'No Face'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">Violations</span>
-                  <span className={`font-medium ${warningCount > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <span className="text-gray-500">Violations</span>
+                  <span className={`font-medium ${warningCount > 0 ? 'text-red-600' : 'text-primary-600'}`}>
                     {warningCount} / {maxWarnings}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">Engine</span>
-                  <span className={`font-medium ${proctoringReady ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  <span className="text-gray-500">Engine</span>
+                  <span className={`font-medium ${proctoringReady ? 'text-primary-600' : 'text-amber-600'}`}>
                     {proctoringReady ? 'Active' : 'Loading...'}
                   </span>
                 </div>
@@ -463,11 +463,11 @@ const ExamInterface = () => {
 
       {/* Submit confirmation modal */}
       {showConfirm && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-gray-50/20">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4"
+            className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-card border border-gray-200 p-6 max-w-sm w-full mx-4"
           >
             <h3 className="text-lg font-bold text-gray-900 mb-2">Submit Exam?</h3>
             <div className="text-sm text-gray-600 mb-4 space-y-1">
@@ -475,7 +475,7 @@ const ExamInterface = () => {
               <p>Marked for review: {answers.filter((a) => a.markedForReview).length}</p>
               <p>Not answered: {answers.filter((a) => !a.answer).length}</p>
             </div>
-            <p className="text-xs text-red-500 mb-4">
+            <p className="text-xs text-red-600 mb-4">
               Once submitted, you cannot change your answers.
             </p>
             <div className="flex items-center gap-3">
@@ -491,7 +491,7 @@ const ExamInterface = () => {
                   handleSubmit();
                 }}
                 disabled={submitting}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-sm font-semibold hover:from-primary-700 hover:to-primary-600"
               >
                 {submitting ? 'Submitting...' : 'Confirm Submit'}
               </button>

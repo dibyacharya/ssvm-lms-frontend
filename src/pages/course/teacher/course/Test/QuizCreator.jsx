@@ -222,7 +222,7 @@ const QuizCreator = () => {
         <div className="ml-4">
           <button
             onClick={addNewQuestion}
-            className="py-2 px-4 bg-primary text-white rounded-md hover:bg-green-700 transition flex items-center"
+            className="py-2 px-4 bg-primary text-gray-900 rounded-md hover:bg-blue-700 transition flex items-center"
           >
             <FaPlus className="mr-2" /> Add Question
           </button>
@@ -278,7 +278,7 @@ const QuizCreator = () => {
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center">
-                  <span className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                  <span className="bg-primary text-gray-900 rounded-full w-8 h-8 flex items-center justify-center mr-3">
                     {index + 1}
                   </span>
                   <div className="w-full">
@@ -296,7 +296,7 @@ const QuizCreator = () => {
                     disabled={index === 0}
                     className={`p-2 rounded-md ${
                       index === 0
-                        ? "text-gray-300 cursor-not-allowed"
+                        ? "text-gray-600 cursor-not-allowed"
                         : "text-tertiary hover:bg-gray-100"
                     }`}
                     title="Move Up"
@@ -308,7 +308,7 @@ const QuizCreator = () => {
                     disabled={index === quiz.questions.length - 1}
                     className={`p-2 rounded-md ${
                       index === quiz.questions.length - 1
-                        ? "text-gray-300 cursor-not-allowed"
+                        ? "text-gray-600 cursor-not-allowed"
                         : "text-tertiary hover:bg-gray-100"
                     }`}
                     title="Move Down"
@@ -375,7 +375,7 @@ const QuizCreator = () => {
                     <div
                       className={`w-8 h-8 rounded-full border flex items-center justify-center mr-3 ${
                         editingQuestionData.correctAnswer === option.id
-                          ? "border-primary bg-primary text-white"
+                          ? "border-primary bg-primary text-gray-900"
                           : "border-gray-300 bg-gray-100"
                       }`}
                     >
@@ -416,7 +416,7 @@ const QuizCreator = () => {
               </button>
               <button
                 onClick={saveQuestion}
-                className="py-2 px-4 bg-primary text-white rounded-md hover:bg-green-700 transition flex items-center"
+                className="py-2 px-4 bg-primary text-gray-900 rounded-md hover:bg-blue-700 transition flex items-center"
               >
                 <FaSave className="mr-2" /> Save Question
               </button>
@@ -429,12 +429,12 @@ const QuizCreator = () => {
       <div className="flex flex-wrap gap-3 justify-center mt-8 pt-6 border-t border-gray-200">
         <button
           onClick={exportQuiz}
-          className="py-2 px-4 bg-secondary text-white rounded-md hover:bg-gray-800 transition flex items-center"
+          className="py-2 px-4 bg-secondary text-gray-900 rounded-md hover:bg-white transition flex items-center"
         >
           <FaDownload className="mr-2" /> Export Quiz
         </button>
 
-        <label className="py-2 px-4 bg-secondary text-white rounded-md hover:bg-gray-800 transition flex items-center cursor-pointer">
+        <label className="py-2 px-4 bg-secondary text-gray-900 rounded-md hover:bg-white transition flex items-center cursor-pointer">
           <FaUpload className="mr-2" /> Import Quiz
           <input
             type="file"
@@ -453,7 +453,7 @@ const QuizCreator = () => {
     return (
       <div className="bg-white rounded-lg shadow-lg">
         {/* Quiz header */}
-        <div className="bg-primary p-4 rounded-t-lg text-white flex justify-between items-center">
+        <div className="bg-primary p-4 rounded-t-lg text-gray-900 flex justify-between items-center">
           <div>
             <h2 className="text-lg font-bold">{quiz.title}</h2>
             <p className="text-sm">Student: [Preview Mode]</p>
@@ -472,7 +472,7 @@ const QuizCreator = () => {
             <>
               <div className="mb-6">
                 <div className="flex items-center mb-2">
-                  <span className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                  <span className="bg-primary text-gray-900 rounded-full w-8 h-8 flex items-center justify-center mr-2">
                     1
                   </span>
                   <span className="text-sm text-tertiary">
@@ -502,7 +502,7 @@ const QuizCreator = () => {
               </div>
 
               <div className="flex justify-end">
-                <button className="py-2 px-6 bg-primary text-white rounded-md hover:bg-green-700 transition duration-300">
+                <button className="py-2 px-6 bg-primary text-gray-900 rounded-md hover:bg-blue-700 transition duration-300">
                   Next
                 </button>
               </div>

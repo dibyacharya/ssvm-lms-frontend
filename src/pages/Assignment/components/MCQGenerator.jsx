@@ -91,7 +91,7 @@ const MCQGenerator = ({
         </div>
         <button
           onClick={addQuestion}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700"
         >
           <Plus size={16} />
           Add Question
@@ -232,7 +232,7 @@ const MCQGenerator = ({
         <button
           onClick={handleSave}
           disabled={!isValid}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <Save size={16} />
           Save Questions

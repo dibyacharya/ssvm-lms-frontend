@@ -165,7 +165,7 @@ describe("LMS Profile page", () => {
         Title: "Dr",
         First: "Asha",
         Last: "Patra",
-        "KIIT mail ID": "asha@kiit.ac.in",
+        "Official Email ID": "asha@example.com",
         "Personal Email ID": "asha.personal@example.com",
       },
     });
@@ -178,7 +178,7 @@ describe("LMS Profile page", () => {
     });
 
     await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }));
-    const kiitMailInput = await screen.findByPlaceholderText("Enter KIIT mail ID");
-    expect(kiitMailInput).toBeDisabled();
+    const ssvmMailInput = await screen.findByPlaceholderText("Enter Official Email ID");
+    expect(ssvmMailInput).toBeDisabled();
   });
 });

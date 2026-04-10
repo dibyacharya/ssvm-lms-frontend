@@ -14,220 +14,190 @@ import Timetable from "../../components/timetable/Timetable.jsx";
 import { useAuth } from "../../context/AuthContext.js";
 import { Link, useNavigate } from "react-router-dom";
 import { useUtilityContext } from "../../context/UtilityContext.js";
-import { HelpCircle, Settings, Video } from "lucide-react";
-import { IoMdAnalytics } from "react-icons/io";
-import TeacherAnalyticsDashboard from "./TeacherAnalyticsDashboard.jsx";
+import { HelpCircle, Settings, Video, Pin, PinOff } from "lucide-react";
 import ExamDashboard from "../Exam/teacher/ExamDashboard";
 import useLiveClassAlert from "../../hooks/useLiveClassAlert";
 
 const TeacherDashboard = () => {
-  // const [activeSection, setActiveSection] = useState("Dashboard");
   const { activeSection, setActiveSection } = useUtilityContext();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { alertClass, minutesLeft, isLive, joinUrl } = useLiveClassAlert(5);
+
+  // Sidebar collapse state - matches admin portal behavior
+  const [isPinned, setIsPinned] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const isExpanded = isPinned || isHovered;
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
   const menuItems = [
-    {
-      id: "Dashboard",
-      label: "Dashboard",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      id: "myCourses",
-      label: "My Courses",
-      icon: <FaBook />,
-    },
-    {
-      id: "Timetable",
-      label: "Timetable",
-      icon: <FaCalendarAlt />,
-    },
-    {
-      id: "Analytics",
-      label: "Analytics",
-      icon: <IoMdAnalytics />,
-    },
-    {
-      id: "Exams",
-      label: "Examinations",
-      icon: <FaFileAlt />,
-    },
+    { id: "Dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
+    { id: "myCourses", label: "My Courses", icon: <FaBook /> },
+    { id: "Timetable", label: "Timetable", icon: <FaCalendarAlt /> },
+    { id: "Exams", label: "Examinations", icon: <FaFileAlt /> },
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-[#F0F4F8] overflow-hidden">
+      {/* Sidebar - collapse on hover like admin */}
       <div
-        className={`${
-          isCollapsed ? "w-20" : "w-64"
-        } bg-white dark:bg-gray-800 shadow-md dark:shadow-xl transition-all duration-300 border-r border-gray-100 dark:border-gray-600 flex flex-col justify-between`}
-        onMouseEnter={() => setIsCollapsed(false)}
-        onMouseLeave={() => setIsCollapsed(true)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`bg-white border-r border-gray-200 flex flex-col justify-between shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+          isExpanded ? "w-64" : "w-[68px]"
+        }`}
       >
         <div>
-          {/* Header Logo */}
-          <div className="mt-6 text-black dark:text-white flex items-center justify-center px-4 gap-2">
-            {isCollapsed ? (
-              <img
-                src="/logo.png"
-                alt="Company Logo"
-                className={`transition-all duration-300 object-contain ${"w-[50px] h-[40px]"}`}
-              />
-            ) : (
-              <img
-                src="/logo_full.png"
-                alt="Company Logo"
-                className={`transition-all duration-300 object-contain ${"w-full h-[auto"}`}
-              />
+          {/* Header Logo + Pin */}
+          <div className={`flex items-center justify-between pt-5 pb-3 ${isExpanded ? "px-5" : "px-3"}`}>
+            <span className="text-xl font-black tracking-tight select-none whitespace-nowrap">
+              <span className="text-gray-900">S</span>
+              {isExpanded && <span className="text-gray-900">SVM</span>}
+              {isExpanded && <span className="text-blue-500 ml-1">LMS</span>}
+            </span>
+            {isExpanded && (
+              <button
+                onClick={() => setIsPinned(!isPinned)}
+                className="p-1 rounded text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
+              >
+                {isPinned ? <Pin size={14} /> : <PinOff size={14} />}
+              </button>
             )}
           </div>
-          {/* Navigation */}
 
-          <ul className="mt-6 space-y-1 px-2">
+          <div className={`mb-2 ${isExpanded ? "mx-4" : "mx-2"}`}>
+            <div className="h-px bg-gray-200" />
+          </div>
+
+          {/* Navigation */}
+          <ul className="mt-2 space-y-1 px-2">
             {menuItems.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-base
-        ${
-          activeSection === item.id
-            ? "bg-accent1/10 dark:bg-accent1/20 text-accent1 dark:text-accent1/90 font-medium"
-            : "text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-        }`}
+                  title={!isExpanded ? item.label : undefined}
+                  className={`w-full flex items-center gap-3 rounded-lg transition-all text-sm font-medium ${
+                    isExpanded ? "px-4 py-2.5" : "px-0 py-2.5 justify-center"
+                  } ${
+                    activeSection === item.id
+                      ? "bg-blue-50 text-blue-600 border-l-[3px] border-blue-500"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
                 >
-                  {/* Icon remains visible */}
-                  <span className="text-accent1 dark:text-accent1/90 flex justify-center w-7">
-                    {React.cloneElement(item.icon, { size: 22 })}
+                  <span className={`flex justify-center w-7 shrink-0 ${activeSection === item.id ? "text-blue-500" : "text-gray-400"}`}>
+                    {React.cloneElement(item.icon, { size: 18 })}
                   </span>
-                  {/* Text fades in and out */}
-                  <span
-                    className={`whitespace-nowrap transition-opacity duration-300 ${
-                      isCollapsed ? "opacity-0" : "opacity-100"
-                    }`}
-                    style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-                  >
-                    {item.label}
-                  </span>
+                  {isExpanded && <span className="truncate">{item.label}</span>}
                 </button>
               </li>
             ))}
           </ul>
 
-          {/* Live Class Alert — blinks when class starts within 5 min */}
+          {/* Live Class Alert */}
           {alertClass && joinUrl && (
             <div className="px-2 mt-3">
               <button
                 onClick={() => navigate(joinUrl)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all group"
+                title={!isExpanded ? "Live Class" : undefined}
+                className={`w-full flex items-center gap-3 rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition-all group ${
+                  isExpanded ? "px-4 py-2.5" : "px-0 py-2.5 justify-center"
+                }`}
               >
-                <span className="relative flex justify-center w-7">
-                  <Video size={20} className="text-red-600 dark:text-red-400" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500" />
+                <span className="relative flex justify-center w-7 shrink-0">
+                  <Video size={18} className="text-red-600" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500" />
                 </span>
-                <span
-                  className={`whitespace-nowrap transition-opacity duration-300 flex flex-col items-start ${
-                    isCollapsed ? "opacity-0" : "opacity-100"
-                  }`}
-                  style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-                >
-                  <span className="text-sm font-semibold text-red-700 dark:text-red-400 animate-pulse">
-                    {isLive ? "Live Class" : "Join Class"}
+                {isExpanded && (
+                  <span className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-red-700 animate-pulse">
+                      {isLive ? "Live Class" : "Join Class"}
+                    </span>
+                    <span className="text-[10px] text-red-500 leading-tight truncate max-w-[140px]">
+                      {isLive
+                        ? alertClass.subject || alertClass.title || "Now"
+                        : `Starts in ${minutesLeft} min`}
+                    </span>
                   </span>
-                  <span className="text-[10px] text-red-500 dark:text-red-400/80 leading-tight truncate max-w-[140px]">
-                    {isLive
-                      ? alertClass.subject || alertClass.title || "Now"
-                      : `Starts in ${minutesLeft} min`}
-                  </span>
-                </span>
+                )}
               </button>
             </div>
           )}
         </div>
 
         {/* Profile and Logout */}
+        <div className="mb-4 px-2">
+          <div className={`mb-2 ${isExpanded ? "mx-2" : "mx-1"}`}>
+            <div className="h-px bg-gray-200" />
+          </div>
 
-        <div className="mb-6 px-2">
           <Link
             to={"/profile"}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title={!isExpanded ? "Profile" : undefined}
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
+              isExpanded ? "px-4 py-2" : "px-0 py-2 justify-center"
+            }`}
           >
-            <span className="text-accent1 dark:text-accent1/90 flex justify-center w-7">
-              <FaUserCircle size={22} />
-            </span>
-            <span
-              className={`whitespace-nowrap transition-opacity duration-300 ${
-                isCollapsed ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-            >
-              Profile
-            </span>
+            <span className="text-gray-400 flex justify-center w-7 shrink-0"><FaUserCircle size={18} /></span>
+            {isExpanded && <span>Profile</span>}
           </Link>
           <Link
             to={"/teacher/profile/account"}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title={!isExpanded ? "Account" : undefined}
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
+              isExpanded ? "px-4 py-2" : "px-0 py-2 justify-center"
+            }`}
           >
-            <span className="text-accent1 dark:text-accent1/90 flex justify-center w-7">
-              <Settings size={22} />
-            </span>
-            <span
-              className={`whitespace-nowrap transition-opacity duration-300 ${
-                isCollapsed ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-            >
-              Account
-            </span>
+            <span className="text-gray-400 flex justify-center w-7 shrink-0"><Settings size={18} /></span>
+            {isExpanded && <span>Account</span>}
           </Link>
           <Link
             to={"/teacher/profile/help"}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-tertiary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            title={!isExpanded ? "Help" : undefined}
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
+              isExpanded ? "px-4 py-2" : "px-0 py-2 justify-center"
+            }`}
           >
-            <span className="text-accent1 dark:text-accent1/90 flex justify-center w-7">
-              <HelpCircle size={22} />
-            </span>
-            <span
-              className={`whitespace-nowrap transition-opacity duration-300 ${
-                isCollapsed ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-            >
-              Help
-            </span>
+            <span className="text-gray-400 flex justify-center w-7 shrink-0"><HelpCircle size={18} /></span>
+            {isExpanded && <span>Help</span>}
           </Link>
           <button
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-base text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 mt-1 transition-colors"
+            className={`w-full flex items-center gap-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 mt-1 transition-colors ${
+              isExpanded ? "px-4 py-2" : "px-0 py-2 justify-center"
+            }`}
             onClick={handleLogout}
+            title={!isExpanded ? "Logout" : undefined}
           >
-            <span className="flex justify-center w-7">
-              <FaSignOutAlt size={22} />
-            </span>
-            <span
-              className={`whitespace-nowrap transition-opacity duration-300 ${
-                isCollapsed ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ transitionDelay: isCollapsed ? "0ms" : "300ms" }}
-            >
-              Logout
-            </span>
+            <span className="flex justify-center w-7 shrink-0"><FaSignOutAlt size={18} /></span>
+            {isExpanded && <span>Logout</span>}
           </button>
+
+          {/* User info - only when expanded */}
+          {isExpanded && (
+            <>
+              <div className="mx-2 mt-2 mb-1">
+                <div className="h-px bg-gray-200" />
+              </div>
+              <div className="px-4 py-2">
+                <p className="text-sm font-medium text-gray-700 truncate">{user?.name || "Teacher"}</p>
+                <p className="text-xs text-gray-400 capitalize">{user?.role || "teacher"}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-8 overflow-auto max-auto w-full">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-xl h-full border border-gray-100 dark:border-gray-600">
+      <div className="flex-1 p-8 overflow-auto">
+        <div className="bg-white rounded-xl shadow-sm h-full border border-gray-100">
           {activeSection === "Dashboard" && <TeacherDashboard2 />}
           {activeSection === "myCourses" && <TeacherCourses />}
           {activeSection === "Timetable" && <Timetable />}
-          {activeSection === "Analytics" && <TeacherAnalyticsDashboard />}
           {activeSection === "Exams" && <ExamDashboard />}
         </div>
       </div>

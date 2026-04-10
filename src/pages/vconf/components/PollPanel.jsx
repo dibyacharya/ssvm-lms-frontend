@@ -43,13 +43,13 @@ const StatusBadge = ({ status }) => {
   const base = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide";
   if (status === "active")
     return (
-      <span className={`${base} bg-green-900/50 text-green-400`}>
-        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse mr-1" />
+      <span className={`${base} bg-blue-900/50 text-blue-400`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse mr-1" />
         Active
       </span>
     );
   if (status === "closed")
-    return <span className={`${base} bg-red-900/40 text-red-400`}>Closed</span>;
+    return <span className={`${base} bg-red-900/40 text-red-600`}>Closed</span>;
   return <span className={`${base} bg-slate-700 text-slate-400`}>Draft</span>;
 };
 
@@ -116,7 +116,7 @@ const CreatePollForm = ({ createPoll }) => {
             {options.length > 2 && (
               <button
                 onClick={() => removeOption(idx)}
-                className="p-1 text-slate-500 hover:text-red-400 transition-colors"
+                className="p-1 text-slate-500 hover:text-red-600 transition-colors"
                 title="Remove option"
               >
                 <X size={14} />
@@ -164,7 +164,7 @@ const CreatePollForm = ({ createPoll }) => {
       <button
         onClick={handleCreate}
         disabled={loading || !question.trim() || options.filter((o) => o.trim()).length < 2}
-        className="w-full py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         {loading ? "Creating..." : "Create Poll"}
       </button>
@@ -198,7 +198,7 @@ const TeacherPollCard = ({ poll, pollResults, launchPoll, closePoll, fetchResult
       {poll.status === "draft" && (
         <button
           onClick={() => launchPoll(poll._id)}
-          className="w-full py-1.5 rounded-md text-xs font-medium bg-green-600 hover:bg-green-500 text-white transition-colors"
+          className="w-full py-1.5 rounded-md text-xs font-medium bg-blue-600 hover:bg-blue-500 text-gray-900 transition-colors"
         >
           Launch Poll
         </button>
@@ -221,7 +221,7 @@ const TeacherPollCard = ({ poll, pollResults, launchPoll, closePoll, fetchResult
             </button>
             <button
               onClick={() => closePoll(poll._id)}
-              className="flex-1 py-1.5 rounded-md text-xs font-medium bg-red-600/80 hover:bg-red-500 text-white transition-colors"
+              className="flex-1 py-1.5 rounded-md text-xs font-medium bg-red-600/80 hover:bg-red-500 text-gray-900 transition-colors"
             >
               Close Poll
             </button>
@@ -288,7 +288,7 @@ const StudentVoteCard = ({ activePoll, votedPolls, vote, pollResults }) => {
       <div className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/60 space-y-2">
         <p className="text-sm text-slate-200 font-medium">{activePoll.question}</p>
         {hasVoted && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-green-400 font-semibold">
+          <span className="inline-flex items-center gap-1 text-[11px] text-blue-400 font-semibold">
             <Check size={12} /> Voted
           </span>
         )}
@@ -324,7 +324,7 @@ const StudentVoteCard = ({ activePoll, votedPolls, vote, pollResults }) => {
                   isSelected ? "border-blue-500 bg-blue-500" : "border-slate-600"
                 }`}
               >
-                {isSelected && <Check size={10} className="text-white" />}
+                {isSelected && <Check size={10} className="text-gray-900" />}
               </span>
               {opt.text}
             </button>
@@ -336,14 +336,14 @@ const StudentVoteCard = ({ activePoll, votedPolls, vote, pollResults }) => {
         <button
           onClick={handleSubmit}
           disabled={submitting || selected.length === 0}
-          className="w-full py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {submitting ? "Submitting..." : "Submit Vote"}
         </button>
       )}
 
       {hasVoted && (
-        <span className="inline-flex items-center gap-1 text-xs text-green-400 font-semibold">
+        <span className="inline-flex items-center gap-1 text-xs text-blue-400 font-semibold">
           <Check size={14} /> Voted
         </span>
       )}
@@ -432,7 +432,7 @@ const PollPanel = ({
                           <StatusBadge status="closed" />
                         </div>
                         {votedPolls.has(poll._id) && (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-green-400 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-[11px] text-blue-400 font-semibold">
                             <Check size={12} /> Voted
                           </span>
                         )}

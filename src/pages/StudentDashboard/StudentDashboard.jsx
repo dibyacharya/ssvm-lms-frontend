@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 
 import CreateMeeting from "../../components/dashboard/CreateMeeting";
+import StatCard from "../../components/ui/StatCard";
+import GlassCard from "../../components/ui/GlassCard";
 
-import { Calendar, Book, CheckSquare, Video, FileText } from "lucide-react";
-import { courses, assignments, events } from "../../components/data/mockData";
+import { Video } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AssignmentList from "./Components/AssignmentList";
 import CalendarComponent from "../../components/dashboard/AttendanceCalender";
@@ -13,46 +15,61 @@ import DashboardSemester from "./Components/StudentDashboardSemester";
 import Courseware from "./Components/Courseware";
 import { useUtilityContext } from "../../context/UtilityContext";
 import Timetable from "../../components/timetable/Timetable.jsx";
-import FeesDashboard from "./Components/FeesDashboard";
 import ExamList from "../Exam/student/ExamList";
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 
 const LiveClassSection = () => {
   const navigate = useNavigate();
   const vconfLinks = [
-    { label: "View Recordings", path: "/vconf/recordings", icon: Video, color: "blue" },
+    { label: "View Recordings", path: "/vconf/recordings", icon: Video, color: "indigo" },
   ];
 
-  const colorMap = {
-    blue: { bg: "bg-blue-50 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400", border: "border-t-blue-500" },
-    purple: { bg: "bg-purple-50 dark:bg-purple-900/30", text: "text-purple-600 dark:text-purple-400", border: "border-t-purple-500" },
-  };
-
   return (
-    <div>
+    <motion.div variants={staggerItem}>
       <CreateMeeting />
       <div className="max-w-7xl mx-auto px-6 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
           {vconfLinks.map((item) => {
             const Icon = item.icon;
-            const colors = colorMap[item.color];
             return (
-              <button
+              <GlassCard
                 key={item.path}
+                hover={true}
+                glow={true}
+                glowColor="indigo"
+                padding="p-5"
                 onClick={() => navigate(item.path)}
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-gray-700 border-t-4 ${colors.border} hover:shadow-md transition-shadow text-left`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full ${colors.bg} flex items-center justify-center`}>
-                    <Icon className={`w-5 h-5 ${colors.text}`} />
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600/20 to-primary-500/10 flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-primary-600" />
                   </div>
-                  <span className="text-base font-semibold text-gray-800 dark:text-white">{item.label}</span>
+                  <span className="text-base font-semibold text-gray-900">{item.label}</span>
                 </div>
-              </button>
+              </GlassCard>
             );
           })}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -60,7 +77,10 @@ const Dashboard = () => {
   const { activeSection, setActiveSection } = useUtilityContext();
 
   return (
-    <div className="flex h-fit min-h-screen dark:bg-gray-900 dark:text-white ">
+    <div className="flex h-fit min-h-screen bg-gray-50 text-gray-900">
+      {/* Background dot grid overlay */}
+      <div className="fixed inset-0 bg-dot-grid opacity-30 pointer-events-none z-0" />
+
       {/* Sidebar */}
       <StudentDashBoardSidebar
         activeSection={activeSection}
@@ -68,18 +88,39 @@ const Dashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="max-h-screen && overflow-x-auto flex-1 ">
+      <motion.div
+        className="max-h-screen overflow-x-auto flex-1 relative z-10"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+      >
         {activeSection === "Dashboard" && (
-          <DashboardSemester setActiveSection={setActiveSection} />
+          <motion.div variants={staggerItem}>
+            <DashboardSemester setActiveSection={setActiveSection} />
+          </motion.div>
         )}
 
-
-        {activeSection === "Assignment" && <AssignmentList />}
-        {activeSection === "Courseware" && <Courseware />}
-        {activeSection === "Timetable" && <Timetable />}
-        {activeSection === "Fees" && <FeesDashboard />}
-        {activeSection === "Exams" && <ExamList />}
-      </div>
+        {activeSection === "Assignment" && (
+          <motion.div variants={staggerItem}>
+            <AssignmentList />
+          </motion.div>
+        )}
+        {activeSection === "Courseware" && (
+          <motion.div variants={staggerItem}>
+            <Courseware />
+          </motion.div>
+        )}
+        {activeSection === "Timetable" && (
+          <motion.div variants={staggerItem}>
+            <Timetable />
+          </motion.div>
+        )}
+        {activeSection === "Exams" && (
+          <motion.div variants={staggerItem}>
+            <ExamList />
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 };

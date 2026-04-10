@@ -39,12 +39,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
           {count}
         </span>
       )}
@@ -137,8 +137,8 @@ const CourseDescription = () => {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <div className="relative">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200">
-            <Loader2 className="w-7 h-7 text-white animate-spin" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-200">
+            <Loader2 className="w-7 h-7 text-gray-900 animate-spin" />
           </div>
         </div>
         <p className="text-tertiary font-medium">Loading course description...</p>
@@ -174,23 +174,23 @@ const CourseDescription = () => {
   }
 
   const courseTitle = description?.courseTitle || description?.title || "";
-  const courseCode = description?.courseCode || description?.kiitxCourseCode || "";
+  const courseCode = description?.courseCode || description?.ssvmxCourseCode || "";
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-8">
       {/* ============ Hero Header ============ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 p-8 shadow-lg">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full" />
         <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-white/5 rounded-full" />
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
-              <BookOpen className="w-7 h-7 text-white" />
+              <BookOpen className="w-7 h-7 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Course Description</h1>
-              <p className="text-emerald-100 mt-1 text-sm">
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Course Description</h1>
+              <p className="text-blue-100 mt-1 text-sm">
                 {courseTitle
                   ? `${courseCode ? courseCode + " — " : ""}${courseTitle}`
                   : "Detailed course information and learning outcomes"}
@@ -199,8 +199,8 @@ const CourseDescription = () => {
           </div>
           {courseCode && (
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-xl border border-white/20">
-              <Hash className="w-4 h-4 text-white/80" />
-              <span className="text-white font-semibold text-sm">{courseCode}</span>
+              <Hash className="w-4 h-4 text-gray-900/80" />
+              <span className="text-gray-900 font-semibold text-sm">{courseCode}</span>
             </div>
           )}
         </div>
@@ -213,7 +213,7 @@ const CourseDescription = () => {
           {/* ---------- About ---------- */}
           {description.introduction && (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-              <SectionHeader icon={BookOpen} title="About The Course" gradient="bg-gradient-to-r from-sky-500 to-blue-600" />
+              <SectionHeader icon={BookOpen} title="About The Course" gradient="bg-gradient-to-r from-blue-500 to-blue-700" />
               <div className="p-6">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{description.introduction}</p>
               </div>
@@ -223,13 +223,13 @@ const CourseDescription = () => {
           {/* ---------- Prerequisites ---------- */}
           {description.prerequisites && description.prerequisites.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-              <SectionHeader icon={BookMarked} title="Prerequisites" gradient="bg-gradient-to-r from-amber-500 to-orange-500" count={description.prerequisites.length} />
+              <SectionHeader icon={BookMarked} title="Prerequisites" gradient="bg-gradient-to-r from-amber-500 to-blue-500" count={description.prerequisites.length} />
               <div className="p-6">
                 <div className="flex flex-wrap gap-2">
                   {description.prerequisites.map((prereq, idx) => (
                     <span
                       key={idx}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-full text-sm font-semibold border border-amber-200 hover:shadow-sm hover:scale-105 transition-all duration-200 cursor-default"
+                      className="px-4 py-2 bg-gradient-to-r from-amber-50 to-blue-50 text-amber-700 rounded-full text-sm font-semibold border border-amber-200 hover:shadow-sm hover:scale-105 transition-all duration-200 cursor-default"
                     >
                       {prereq}
                     </span>
@@ -242,16 +242,16 @@ const CourseDescription = () => {
           {/* ---------- Course Outcomes ---------- */}
           {description.courseOutcomes && description.courseOutcomes.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-              <SectionHeader icon={Target} title="Course Outcomes" gradient="bg-gradient-to-r from-violet-500 to-purple-600" count={description.courseOutcomes.length} />
+              <SectionHeader icon={Target} title="Course Outcomes" gradient="bg-gradient-to-r from-blue-500 to-blue-600" count={description.courseOutcomes.length} />
               <div className="p-6">
                 <div className="space-y-3">
                   {description.courseOutcomes.map((co, idx) => (
                     <div
                       key={idx}
-                      className="group flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gradient-to-r from-white to-gray-50/50 hover:from-violet-50/40 hover:to-purple-50/30 hover:border-violet-200 hover:shadow-sm transition-all duration-200"
+                      className="group flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gradient-to-r from-white to-gray-50/50 hover:from-violet-50/40 hover:to-blue-50/30 hover:border-violet-200 hover:shadow-sm transition-all duration-200"
                     >
-                      <div className="flex-none w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-200 group-hover:shadow-md group-hover:scale-105 transition-all">
-                        <span className="text-xs font-bold text-white">{co.code || `CO${idx + 1}`}</span>
+                      <div className="flex-none w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-violet-200 group-hover:shadow-md group-hover:scale-105 transition-all">
+                        <span className="text-xs font-bold text-gray-900">{co.code || `CO${idx + 1}`}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-gray-800 font-medium leading-snug">{co.outcome}</p>
@@ -263,7 +263,7 @@ const CourseDescription = () => {
                               </span>
                             )}
                             {co.ncrfLevel && (
-                              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg font-semibold border border-purple-100">
+                              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-semibold border border-blue-100">
                                 NCRF: {co.ncrfLevel}
                               </span>
                             )}
@@ -275,7 +275,7 @@ const CourseDescription = () => {
                           </div>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-violet-400 flex-shrink-0 mt-1 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-blue-400 flex-shrink-0 mt-1 transition-colors" />
                     </div>
                   ))}
                 </div>
@@ -286,16 +286,16 @@ const CourseDescription = () => {
           {/* ---------- Module Outcomes ---------- */}
           {description.moduleOutcomes && description.moduleOutcomes.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-              <SectionHeader icon={Layers} title="Module Outcomes" gradient="bg-gradient-to-r from-emerald-500 to-green-600" count={description.moduleOutcomes.length} />
+              <SectionHeader icon={Layers} title="Module Outcomes" gradient="bg-gradient-to-r from-blue-500 to-blue-600" count={description.moduleOutcomes.length} />
               <div className="p-6">
                 <div className="space-y-3">
                   {description.moduleOutcomes.map((mo, idx) => (
                     <div
                       key={idx}
-                      className="group flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gradient-to-r from-white to-gray-50/50 hover:from-emerald-50/40 hover:to-green-50/30 hover:border-emerald-200 hover:shadow-sm transition-all duration-200"
+                      className="group flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gradient-to-r from-white to-gray-50/50 hover:from-blue-50/40 hover:to-blue-50/30 hover:border-blue-200 hover:shadow-sm transition-all duration-200"
                     >
-                      <div className="flex-none w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm shadow-emerald-200 group-hover:shadow-md group-hover:scale-105 transition-all">
-                        <span className="text-xs font-bold text-white">{mo.code || `MO${idx + 1}`}</span>
+                      <div className="flex-none w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm shadow-blue-200 group-hover:shadow-md group-hover:scale-105 transition-all">
+                        <span className="text-xs font-bold text-gray-900">{mo.code || `MO${idx + 1}`}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-gray-800 font-medium leading-snug">{mo.text}</p>
@@ -304,7 +304,7 @@ const CourseDescription = () => {
                             {mo.coMappings.map((co, i) => (
                               <span
                                 key={i}
-                                className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg font-semibold border border-emerald-100"
+                                className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-semibold border border-blue-100"
                               >
                                 {co}
                               </span>
@@ -312,7 +312,7 @@ const CourseDescription = () => {
                           </div>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-emerald-400 flex-shrink-0 mt-1 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-blue-400 flex-shrink-0 mt-1 transition-colors" />
                     </div>
                   ))}
                 </div>
@@ -350,7 +350,7 @@ const CourseDescription = () => {
             (description.moocs && description.moocs.length > 0) ||
             (description.journals && description.journals.length > 0)) && (
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-              <SectionHeader icon={LinkIcon} title="Resources" gradient="bg-gradient-to-r from-cyan-500 to-teal-600" />
+              <SectionHeader icon={LinkIcon} title="Resources" gradient="bg-gradient-to-r from-blue-500 to-blue-700" />
               <div className="p-6 space-y-5">
                 {description.journals && description.journals.length > 0 && (
                   <div>
@@ -413,9 +413,9 @@ const CourseDescription = () => {
 
           {/* ---------- Course Info ---------- */}
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300">
-            <SectionHeader icon={Award} title="Course Info" gradient="bg-gradient-to-r from-indigo-500 to-blue-600" />
+            <SectionHeader icon={Award} title="Course Info" gradient="bg-gradient-to-r from-blue-500 to-blue-600" />
             <div className="p-5 space-y-2.5">
-              <InfoCard icon={<Hash className="w-4 h-4 text-indigo-500" />} label="Course Code" value={description.courseCode || description.kiitxCourseCode} accent="bg-indigo-50/60" />
+              <InfoCard icon={<Hash className="w-4 h-4 text-blue-500" />} label="Course Code" value={description.courseCode || description.ssvmxCourseCode} accent="bg-blue-50/60" />
               <InfoCard icon={<FileText className="w-4 h-4 text-blue-500" />} label="Course Type" value={description.courseType ? description.courseType.charAt(0).toUpperCase() + description.courseType.slice(1) : null} accent="bg-blue-50/60" />
               <InfoCard
                 icon={<Award className="w-4 h-4 text-amber-500" />}
@@ -427,18 +427,18 @@ const CourseDescription = () => {
                 }
                 accent="bg-amber-50/60"
               />
-              <InfoCard icon={<GraduationCap className="w-4 h-4 text-purple-500" />} label="NCRF Level" value={description.ncrfLevel} accent="bg-purple-50/60" />
+              <InfoCard icon={<GraduationCap className="w-4 h-4 text-blue-500" />} label="NCRF Level" value={description.ncrfLevel} accent="bg-blue-50/60" />
               {description.avgNcrfLevel != null && (
                 <InfoCard icon={<Target className="w-4 h-4 text-teal-500" />} label="Average NCRF Level" value={typeof description.avgNcrfLevel === "number" ? parseFloat(description.avgNcrfLevel.toFixed(2)) : description.avgNcrfLevel} accent="bg-teal-50/60" />
               )}
               <InfoCard icon={<Globe className="w-4 h-4 text-cyan-500" />} label="Medium of Instruction" value={description.mediumOfInstruction} accent="bg-cyan-50/60" />
               <InfoCard icon={<Building className="w-4 h-4 text-rose-500" />} label="Offered By" value={description.offeredBySchool} accent="bg-rose-50/60" />
-              <InfoCard icon={<Users className="w-4 h-4 text-green-500" />} label="Developed For" value={description.developedFor} accent="bg-green-50/60" />
+              <InfoCard icon={<Users className="w-4 h-4 text-blue-500" />} label="Developed For" value={description.developedFor} accent="bg-blue-50/60" />
               {description.coordinator && (
                 <InfoCard icon={<Users className="w-4 h-4 text-sky-500" />} label="Coordinator" value={description.coordinator.name} accent="bg-sky-50/60" />
               )}
               {description.category && (
-                <InfoCard icon={<Layers className="w-4 h-4 text-emerald-500" />} label="Category" value={description.category.name} accent="bg-emerald-50/60" />
+                <InfoCard icon={<Layers className="w-4 h-4 text-blue-500" />} label="Category" value={description.category.name} accent="bg-blue-50/60" />
               )}
             </div>
           </div>
@@ -450,7 +450,7 @@ const CourseDescription = () => {
               <div className="p-6 space-y-4">
                 <div className="space-y-3">
                   <AssessmentBar label={endExamLabel} value={assessmentPlan.endTermExam} color="bg-blue-500" bgColor="bg-blue-100" textColor="text-blue-700" />
-                  <AssessmentBar label={midExamLabel} value={assessmentPlan.midTermExam} color="bg-purple-500" bgColor="bg-purple-100" textColor="text-purple-700" />
+                  <AssessmentBar label={midExamLabel} value={assessmentPlan.midTermExam} color="bg-blue-500" bgColor="bg-blue-100" textColor="text-blue-700" />
                   <AssessmentBar label="Continuous Assessment" value={assessmentPlan.continuousAssessment} color="bg-amber-500" bgColor="bg-amber-100" textColor="text-amber-700" />
                 </div>
 

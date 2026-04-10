@@ -58,7 +58,7 @@ const LmsAssetImage = ({
         />
       ) : (
         fallbackIcon && (
-          <div className="w-full h-full flex items-center justify-center text-white/60">
+          <div className="w-full h-full flex items-center justify-center text-gray-900/60">
             {fallbackIcon}
           </div>
         )

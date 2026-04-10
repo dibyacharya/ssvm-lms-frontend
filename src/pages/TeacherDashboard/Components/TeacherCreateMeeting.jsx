@@ -292,7 +292,7 @@ export default function TeacherCreateMeeting() {
           </div>
           <button
             onClick={() => openModal()}
-            className="bg-primary/80 text-white px-4 py-2 rounded-md flex items-center hover:bg-primary"
+            className="bg-primary/80 text-gray-900 px-4 py-2 rounded-md flex items-center hover:bg-primary"
           >
             <Plus className="w-4 h-4 mr-1" /> New Meeting
           </button>
@@ -432,8 +432,8 @@ export default function TeacherCreateMeeting() {
                 </div>
               </div>
 
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-sm text-green-700 font-medium">Video conference room will be automatically created when you schedule this class.</p>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-700 font-medium">Video conference room will be automatically created when you schedule this class.</p>
               </div>
 
               <div>
@@ -537,7 +537,7 @@ export default function TeacherCreateMeeting() {
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Cancel</button>
-                <button type="button" onClick={handleSubmit} className="px-4 py-2 bg-primary/80 text-white rounded-md hover:bg-primary">
+                <button type="button" onClick={handleSubmit} className="px-4 py-2 bg-primary/80 text-gray-900 rounded-md hover:bg-primary">
                   {currentMeeting ? 'Update' : 'Create'}
                 </button>
               </div>

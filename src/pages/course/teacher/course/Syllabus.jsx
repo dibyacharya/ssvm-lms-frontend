@@ -263,7 +263,7 @@ const SyllabusManager = () => {
 
       <button
         onClick={addModule}
-        className="mt-8 flex items-center justify-center w-full bg-primary text-white px-6 py-4 rounded-xl 
+        className="mt-8 flex items-center justify-center w-full bg-primary text-gray-900 px-6 py-4 rounded-xl 
           hover:bg-primary/90 transition-all duration-300 font-medium shadow-sm hover:shadow"
       >
         <Plus className="w-5 h-5 mr-2" />

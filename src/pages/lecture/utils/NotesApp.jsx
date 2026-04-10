@@ -92,20 +92,20 @@ const CompactNotesApp = () => {
   };
 
   return (
-    <div className="flex h-64 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+    <div className="flex h-64 bg-gray-50 dark:bg-gray-50 rounded-lg overflow-hidden">
       {/* Compact Sidebar */}
-      <div className="w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-600 flex flex-col">
-        <div className="p-3 border-b border-gray-200 dark:border-gray-600">
+      <div className="w-72 bg-white dark:bg-white border-r border-gray-200 dark:border-gray-300 flex flex-col">
+        <div className="p-3 border-b border-gray-200 dark:border-gray-300">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
               <FileText size={16} className="text-gray-600 dark:text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-800 dark:text-white">
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-900">
                 Notes ({notes.length})
               </h2>
             </div>
             <button
               onClick={handleAddNote}
-              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100 text-gray-600 dark:text-gray-400"
               title="New Note"
             >
               <Plus size={14} />
@@ -121,7 +121,7 @@ const CompactNotesApp = () => {
                 placeholder="Search notes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-1.5 pl-7 pr-3 text-xs rounded border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full p-1.5 pl-7 pr-3 text-xs rounded border border-gray-300 dark:border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900"
               />
             </div>
           </div>
@@ -132,21 +132,21 @@ const CompactNotesApp = () => {
             <div
               key={note.id}
               onClick={() => setActiveNoteId(note.id)}
-              className={`p-2 border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-colors ${
+              className={`p-2 border-b border-gray-100 dark:border-gray-200 cursor-pointer transition-colors ${
                 note.id === activeNoteId
                   ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-500"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-100"
               }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-grow min-w-0">
-                  <h3 className="font-medium text-xs text-gray-800 dark:text-gray-200 truncate">
+                  <h3 className="font-medium text-xs text-gray-800 dark:text-gray-700 truncate">
                     {note.title}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {formatDate(note.updatedAt)}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 truncate leading-tight">
+                  <p className="text-xs text-gray-600 dark:text-gray-600 mt-1 truncate leading-tight">
                     {note.content.replace(/[#*`[\]]/g, "").slice(0, 40)}
                     {note.content.length > 40 ? "..." : ""}
                   </p>
@@ -157,7 +157,7 @@ const CompactNotesApp = () => {
                       e.stopPropagation();
                       handleDeleteNote(note.id);
                     }}
-                    className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400 opacity-70 hover:opacity-100"
+                    className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 dark:text-red-600 opacity-70 hover:opacity-100"
                     title="Delete Note"
                   >
                     <Trash2 size={12} />
@@ -171,15 +171,15 @@ const CompactNotesApp = () => {
 
       {/* Main Content */}
       {activeNote ? (
-        <div className="flex-grow flex flex-col bg-white dark:bg-gray-800">
+        <div className="flex-grow flex flex-col bg-white dark:bg-white">
           {/* Note Header */}
-          <div className="p-3 border-b border-gray-200 dark:border-gray-600">
+          <div className="p-3 border-b border-gray-200 dark:border-gray-300">
             <div className="flex items-center justify-between">
               <input
                 type="text"
                 value={activeNote.title}
                 onChange={(e) => handleUpdateNote("title", e.target.value)}
-                className="flex-grow text-sm font-semibold mr-2 p-1 border-0 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded bg-transparent text-gray-900 dark:text-white"
+                className="flex-grow text-sm font-semibold mr-2 p-1 border-0 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded bg-transparent text-gray-900 dark:text-gray-900"
                 placeholder="Note Title"
               />
               <button
@@ -187,7 +187,7 @@ const CompactNotesApp = () => {
                 className={`p-1.5 rounded ${
                   isEditing 
                     ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-100 text-gray-600 dark:text-gray-400'
                 }`}
                 title={isEditing ? "Preview" : "Edit"}
               >
@@ -218,13 +218,13 @@ const CompactNotesApp = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-grow flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex-grow flex items-center justify-center bg-gray-50 dark:bg-gray-50">
           <div className="text-center">
             <FileText size={32} className="text-gray-400 dark:text-gray-500 mx-auto mb-2" />
             <h2 className="text-sm text-gray-500 dark:text-gray-400 mb-2">No notes available</h2>
             <button
               onClick={handleAddNote}
-              className="px-3 py-1.5 text-xs bg-blue-600 dark:bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-400 focus:outline-none"
+              className="px-3 py-1.5 text-xs bg-blue-600 dark:bg-blue-500 text-gray-900 rounded hover:bg-blue-700 dark:hover:bg-blue-400 focus:outline-none"
             >
               Create your first note
             </button>

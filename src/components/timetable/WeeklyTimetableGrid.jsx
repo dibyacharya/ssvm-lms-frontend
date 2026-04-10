@@ -63,11 +63,11 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
       : null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white dark:bg-white rounded-xl shadow-md border border-gray-200 dark:border-gray-200 overflow-hidden">
       {/* Header row with day names */}
-      <div className="grid grid-cols-[56px_repeat(6,1fr)] border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+      <div className="grid grid-cols-[56px_repeat(6,1fr)] border-b border-gray-200 dark:border-gray-200 bg-gray-50 dark:bg-gray-50/40">
         {/* Time column header */}
-        <div className="px-1 py-3 text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center border-r border-gray-200 dark:border-gray-700 uppercase tracking-wider">
+        <div className="px-1 py-3 text-[10px] font-semibold text-gray-400 dark:text-gray-500 text-center border-r border-gray-200 dark:border-gray-200 uppercase tracking-wider">
           Time
         </div>
         {displayDays.map((date) => {
@@ -77,21 +77,21 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
           return (
             <div
               key={dk}
-              className={`px-1 py-3 text-center border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative transition-colors ${
+              className={`px-1 py-3 text-center border-r border-gray-200 dark:border-gray-200 last:border-r-0 relative transition-colors ${
                 isToday
-                  ? "bg-emerald-50 dark:bg-emerald-900/25"
+                  ? "bg-blue-50 dark:bg-blue-900/25"
                   : ""
               }`}
             >
               {/* Today pill indicator */}
               {isToday && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-emerald-500" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-b-full bg-blue-500" />
               )}
               <p
                 className={`text-xs font-bold tracking-wide ${
                   isToday
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-gray-700 dark:text-gray-200"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-700"
                 }`}
               >
                 {getDayShortLabel(dayKey)}
@@ -100,14 +100,14 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
                 <p
                   className={`text-[10px] font-medium ${
                     isToday
-                      ? "text-emerald-500 dark:text-emerald-400"
+                      ? "text-blue-500 dark:text-blue-400"
                       : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
                   {formatDateDisplay(date)}
                 </p>
                 {isToday && (
-                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded-full leading-none">
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-blue-500 text-gray-900 px-1.5 py-0.5 rounded-full leading-none">
                     TODAY
                   </span>
                 )}
@@ -120,11 +120,11 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
       {/* Time grid body */}
       <div className="grid grid-cols-[56px_repeat(6,1fr)]" style={{ minHeight: "460px" }}>
         {/* Time labels column */}
-        <div className="border-r border-gray-200 dark:border-gray-700 relative bg-gray-50/50 dark:bg-gray-900/20">
+        <div className="border-r border-gray-200 dark:border-gray-200 relative bg-gray-50/50 dark:bg-gray-50/20">
           {HOUR_SLOTS.map((hour) => (
             <div
               key={hour}
-              className="border-b border-gray-100 dark:border-gray-700/50 flex items-start justify-center"
+              className="border-b border-gray-100 dark:border-gray-200/50 flex items-start justify-center"
               style={{ height: `${100 / 10}%` }}
             >
               <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 pt-1 leading-none tabular-nums">
@@ -144,17 +144,17 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
           return (
             <div
               key={dk}
-              className={`border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative transition-colors ${
+              className={`border-r border-gray-200 dark:border-gray-200 last:border-r-0 relative transition-colors ${
                 isToday
-                  ? "bg-emerald-50/60 dark:bg-emerald-900/10"
-                  : "hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
+                  ? "bg-blue-50/60 dark:bg-blue-900/10"
+                  : "hover:bg-gray-50/50 dark:hover:bg-white/50"
               }`}
             >
               {/* Today's left & right accent borders */}
               {isToday && (
                 <>
-                  <div className="absolute inset-y-0 left-0 w-[2px] bg-emerald-400/40 z-[5]" />
-                  <div className="absolute inset-y-0 right-0 w-[2px] bg-emerald-400/40 z-[5]" />
+                  <div className="absolute inset-y-0 left-0 w-[2px] bg-blue-400/40 z-[5]" />
+                  <div className="absolute inset-y-0 right-0 w-[2px] bg-blue-400/40 z-[5]" />
                 </>
               )}
 
@@ -164,8 +164,8 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
                   key={hour}
                   className={`border-b ${
                     isToday
-                      ? "border-emerald-100 dark:border-emerald-900/30"
-                      : "border-gray-100 dark:border-gray-700/50"
+                      ? "border-blue-100 dark:border-blue-900/30"
+                      : "border-gray-100 dark:border-gray-200/50"
                   }`}
                   style={{ height: `${100 / 10}%` }}
                 />
@@ -227,8 +227,8 @@ const WeeklyTimetableGrid = ({ entries = [], weekDates = [], onEntryClick, loadi
               {isToday && dayEntries.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center opacity-40">
-                    <CalendarDays className="w-6 h-6 text-emerald-400 mx-auto mb-1" />
-                    <p className="text-[10px] text-emerald-500 font-medium">No classes today</p>
+                    <CalendarDays className="w-6 h-6 text-blue-400 mx-auto mb-1" />
+                    <p className="text-[10px] text-blue-500 font-medium">No classes today</p>
                   </div>
                 </div>
               )}

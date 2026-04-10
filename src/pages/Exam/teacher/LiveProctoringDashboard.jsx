@@ -9,7 +9,7 @@ import * as examService from '../../../services/exam.service';
 import toast from 'react-hot-toast';
 
 const sessionStatusColors = {
-  active: 'bg-emerald-100 text-emerald-700',
+  active: 'bg-blue-100 text-blue-700',
   waiting: 'bg-amber-100 text-amber-700',
   paused: 'bg-blue-100 text-blue-700',
   completed: 'bg-gray-100 text-gray-600',
@@ -73,27 +73,27 @@ const LiveProctoringDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 text-gray-400 hover:text-white"><FaArrowLeft /></button>
+            <button onClick={() => navigate(-1)} className="p-2 text-gray-400 hover:text-gray-900"><FaArrowLeft /></button>
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
-                <FaDesktop className="text-emerald-400" />
+                <FaDesktop className="text-blue-400" />
                 Live Proctoring — {exam?.title || 'Exam'}
               </h1>
               <p className="text-sm text-gray-400 flex items-center gap-2">
                 {lastRefreshed && <span>Last refreshed: {lastRefreshed.toLocaleTimeString()}</span>}
-                {autoRefresh && <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />}
+                {autoRefresh && <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
               </p>
             </div>
           </div>
@@ -101,13 +101,13 @@ const LiveProctoringDashboard = () => {
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 ${
-                autoRefresh ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-300'
+                autoRefresh ? 'bg-blue-600 text-gray-900' : 'bg-gray-700 text-gray-600'
               }`}
             >
               <FaSync className={autoRefresh ? 'animate-spin' : ''} />
               Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
             </button>
-            <button onClick={loadDashboard} className="px-3 py-2 bg-gray-700 rounded-xl text-xs font-semibold text-gray-300 hover:bg-gray-600">
+            <button onClick={loadDashboard} className="px-3 py-2 bg-gray-700 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-600">
               <FaSync /> Refresh Now
             </button>
           </div>
@@ -117,12 +117,12 @@ const LiveProctoringDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
             { label: 'Total', value: sessions.length, icon: FaUser, color: 'text-blue-400' },
-            { label: 'Active', value: summary.active || activeSessions.length, icon: FaDesktop, color: 'text-emerald-400' },
-            { label: 'Waiting', value: summary.waiting || sessions.filter(s => s.status === 'waiting').length, icon: FaClock, color: 'text-amber-400' },
-            { label: 'Disconnected', value: summary.disconnected || sessions.filter(s => s.status === 'disconnected').length, icon: FaWifi, color: 'text-red-400' },
-            { label: 'With Violations', value: warningSessions.length, icon: FaExclamationTriangle, color: 'text-orange-400' },
+            { label: 'Active', value: summary.active || activeSessions.length, icon: FaDesktop, color: 'text-blue-400' },
+            { label: 'Waiting', value: summary.waiting || sessions.filter(s => s.status === 'waiting').length, icon: FaClock, color: 'text-amber-600' },
+            { label: 'Disconnected', value: summary.disconnected || sessions.filter(s => s.status === 'disconnected').length, icon: FaWifi, color: 'text-red-600' },
+            { label: 'With Violations', value: warningSessions.length, icon: FaExclamationTriangle, color: 'text-blue-400' },
           ].map(s => (
-            <div key={s.label} className="bg-gray-800 rounded-xl border border-gray-700 p-4">
+            <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <s.icon className={`text-lg ${s.color}`} />
                 <span className="text-2xl font-bold">{s.value}</span>
@@ -144,17 +144,17 @@ const LiveProctoringDashboard = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.02 }}
-                  className={`bg-gray-800 rounded-xl border p-4 ${
+                  className={`bg-white rounded-xl border p-4 ${
                     session.violationCount > 3 ? 'border-red-500/50' :
                     session.violationCount > 0 ? 'border-amber-500/30' :
                     session.status === 'disconnected' ? 'border-red-700/30' :
-                    'border-gray-700'
+                    'border-gray-200'
                   }`}
                 >
                   {/* Student info */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300">
+                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600">
                         {(session.student?.user?.name || session.student?.name || '?')[0]?.toUpperCase()}
                       </div>
                       <div>
@@ -173,21 +173,21 @@ const LiveProctoringDashboard = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-400">Progress</span>
-                      <span className="text-gray-300 font-medium">{session.answeredCount || 0}/{exam?.questions?.length || '?'} answered</span>
+                      <span className="text-gray-600 font-medium">{session.answeredCount || 0}/{exam?.questions?.length || '?'} answered</span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-indigo-500 rounded-full transition-all"
+                        className="h-full bg-blue-500 rounded-full transition-all"
                         style={{ width: `${exam?.questions?.length ? ((session.answeredCount || 0) / exam.questions.length) * 100 : 0}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Violations */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-700">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
                     <div className="flex items-center gap-1.5">
-                      <FaExclamationTriangle className={`text-[10px] ${session.violationCount > 0 ? 'text-orange-400' : 'text-gray-600'}`} />
-                      <span className={`text-xs font-medium ${session.violationCount > 3 ? 'text-red-400' : session.violationCount > 0 ? 'text-orange-400' : 'text-gray-500'}`}>
+                      <FaExclamationTriangle className={`text-[10px] ${session.violationCount > 0 ? 'text-blue-400' : 'text-gray-600'}`} />
+                      <span className={`text-xs font-medium ${session.violationCount > 3 ? 'text-red-600' : session.violationCount > 0 ? 'text-blue-400' : 'text-gray-500'}`}>
                         {session.violationCount || 0} violations
                       </span>
                     </div>
@@ -197,7 +197,7 @@ const LiveProctoringDashboard = () => {
                       </span>
                       <button
                         onClick={() => navigate(`/teacher/exam/${examId}/proctoring/${session.student?._id || session.student}`)}
-                        className="p-1.5 text-gray-500 hover:text-indigo-400"
+                        className="p-1.5 text-gray-500 hover:text-blue-400"
                         title="View proctoring report"
                       >
                         <FaEye className="text-xs" />

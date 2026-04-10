@@ -111,11 +111,11 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div className="bg-white rounded-lg w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-4 border-b bg-green-600 text-white rounded-t-lg">
+        <div className="flex justify-between items-center p-4 border-b bg-blue-600 text-gray-900 rounded-t-lg">
           <h3 className="font-semibold text-lg">Add New Module/Topic</h3>
           <button
             onClick={onClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-gray-900 hover:text-gray-700 transition-colors"
           >
             <XIcon size={24} />
           </button>
@@ -140,7 +140,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                     type="number"
                     value={moduleNumber}
                     onChange={(e) => setModuleNumber(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     min="1"
                     required
                   />
@@ -153,7 +153,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                     type="text"
                     value={moduleTitle}
                     onChange={(e) => setModuleTitle(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
@@ -169,7 +169,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                     <div className="flex text-sm text-gray-600">
                       <label
                         htmlFor="file-upload"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
+                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                       >
                         <span>Upload files</span>
                         <input
@@ -212,7 +212,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                           ) : (
                             <PresentationIcon
                               size={20}
-                              className="text-orange-500 mr-2"
+                              className="text-blue-500 mr-2"
                             />
                           )}
                           <span className="text-sm text-gray-700 truncate max-w-xs">
@@ -241,7 +241,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                   <button
                     type="button"
                     onClick={addLinkField}
-                    className="text-xs bg-green-100 text-green-800 py-1 px-2 rounded"
+                    className="text-xs bg-blue-100 text-blue-800 py-1 px-2 rounded"
                   >
                     + Add Link
                   </button>
@@ -255,7 +255,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
                         value={link}
                         onChange={(e) => updateLink(index, e.target.value)}
                         placeholder="https://example.com"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <button
@@ -280,7 +280,7 @@ const AddModuleModal = ({ show, onClose, courseId, onModuleAdded }) => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-blue-600 text-gray-900 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
                 disabled={loading}
               >
                 {loading ? "Adding..." : "Add Module"}

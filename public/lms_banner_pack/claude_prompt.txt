@@ -1,7 +1,7 @@
 You are working inside the existing LMS monorepo.
 
 The full asset pack is already placed here:
-`KIIT_LMS_FRONTEND/KIIT_LMS_FRONTEND/public/lms_banner_pack`
+`SSVM_LMS_FRONTEND/SSVM_LMS_FRONTEND/public/lms_banner_pack`
 
 Implement a complete automatic visual system in the LMS frontend using this pack.
 

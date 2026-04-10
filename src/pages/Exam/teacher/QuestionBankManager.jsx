@@ -133,8 +133,8 @@ const QuestionBankManager = () => {
     }
   };
 
-  const difficultyColors = { easy: 'text-emerald-600 bg-emerald-50', medium: 'text-amber-600 bg-amber-50', hard: 'text-red-600 bg-red-50' };
-  const statusColors = { approved: 'text-emerald-700 bg-emerald-100', pending: 'text-amber-700 bg-amber-100', rejected: 'text-red-700 bg-red-100' };
+  const difficultyColors = { easy: 'text-primary-600 bg-primary-50', medium: 'text-amber-600 bg-amber-50', hard: 'text-red-600 bg-red-50' };
+  const statusColors = { approved: 'text-emerald-600 bg-emerald-900/30', pending: 'text-amber-600 bg-amber-50', rejected: 'text-red-600 bg-red-50' };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -149,20 +149,20 @@ const QuestionBankManager = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAIDialog(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 text-white rounded-xl text-xs font-semibold hover:bg-purple-700"
+              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-xs font-semibold hover:from-primary-700 hover:to-primary-600"
             >
               <FaRobot /> AI Generate
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700"
+              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-xs font-semibold hover:from-primary-700 hover:to-primary-600"
             >
               <FaFileUpload /> Import
             </button>
             <input ref={fileInputRef} type="file" accept=".xlsx,.csv" onChange={handleImport} className="hidden" />
             <button
               onClick={() => { setEditingQuestion(null); setShowForm(true); }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700"
+              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-xs font-semibold hover:from-primary-700 hover:to-primary-600"
             >
               <FaPlus /> Add Question
             </button>
@@ -173,12 +173,12 @@ const QuestionBankManager = () => {
         {stats && (
           <div className="grid grid-cols-4 gap-3">
             {Object.entries(stats.byDifficulty || {}).map(([key, val]) => (
-              <div key={key} className="bg-white rounded-xl border border-gray-200 p-3 text-center">
+              <div key={key} className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-3 text-center">
                 <p className="text-lg font-bold text-gray-900">{val}</p>
                 <p className="text-xs text-gray-500 capitalize">{key}</p>
               </div>
             ))}
-            <div className="bg-white rounded-xl border border-gray-200 p-3 text-center">
+            <div className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-3 text-center">
               <p className="text-lg font-bold text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total</p>
             </div>
@@ -194,7 +194,7 @@ const QuestionBankManager = () => {
               placeholder="Search questions..."
               value={filters.search}
               onChange={(e) => { setFilters(f => ({ ...f, search: e.target.value })); setPage(1); }}
-              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-8 pr-3 py-2 bg-white/70 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           {[
@@ -206,7 +206,7 @@ const QuestionBankManager = () => {
               key={key}
               value={filters[key]}
               onChange={(e) => { setFilters(f => ({ ...f, [key]: e.target.value })); setPage(1); }}
-              className="px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 bg-white/70 border border-gray-200 rounded-xl text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">{label}: All</option>
               {options.map(o => <option key={o} value={o}>{o.replace('_', ' ')}</option>)}
@@ -221,7 +221,7 @@ const QuestionBankManager = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+              className="bg-white/70 backdrop-blur-xl rounded-2xl border border-gray-200 p-6 shadow-card-sm"
             >
               <h3 className="font-semibold text-gray-900 mb-4">
                 {editingQuestion ? 'Edit Question' : 'New Question'}
@@ -238,7 +238,7 @@ const QuestionBankManager = () => {
         {/* Questions list */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
           </div>
         ) : questions.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">No questions found</div>
@@ -250,13 +250,13 @@ const QuestionBankManager = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.02 }}
-                className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow"
+                className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-4 hover:shadow-card-sm transition-shadow"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900">{q.question}</p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-50 text-primary-600">
                         {q.type?.replace('_', ' ')}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${difficultyColors[q.difficulty] || ''}`}>
@@ -272,11 +272,11 @@ const QuestionBankManager = () => {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {q.status === 'pending' && (
                       <>
-                        <button onClick={() => handleApprove(q._id, 'approved')} className="p-1.5 text-emerald-500 hover:text-emerald-700"><FaCheck className="text-xs" /></button>
-                        <button onClick={() => handleApprove(q._id, 'rejected')} className="p-1.5 text-red-400 hover:text-red-600"><FaTimes className="text-xs" /></button>
+                        <button onClick={() => handleApprove(q._id, 'approved')} className="p-1.5 text-primary-600 hover:text-primary-600"><FaCheck className="text-xs" /></button>
+                        <button onClick={() => handleApprove(q._id, 'rejected')} className="p-1.5 text-red-600 hover:text-red-600"><FaTimes className="text-xs" /></button>
                       </>
                     )}
-                    <button onClick={() => setEditingQuestion(q)} className="p-1.5 text-gray-400 hover:text-indigo-600"><FaEdit className="text-xs" /></button>
+                    <button onClick={() => setEditingQuestion(q)} className="p-1.5 text-gray-400 hover:text-primary-600"><FaEdit className="text-xs" /></button>
                     <button onClick={() => handleDelete(q._id)} className="p-1.5 text-gray-400 hover:text-red-600"><FaTrash className="text-xs" /></button>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ const QuestionBankManager = () => {
                 key={i}
                 onClick={() => setPage(i + 1)}
                 className={`w-8 h-8 rounded-lg text-xs font-medium ${
-                  page === i + 1 ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                  page === i + 1 ? 'bg-primary-600 text-gray-900' : 'bg-white/70 border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 {i + 1}
@@ -304,36 +304,36 @@ const QuestionBankManager = () => {
 
         {/* AI Generate Dialog */}
         {showAIDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50/20">
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-card border border-gray-200 p-6 max-w-sm w-full mx-4">
               <h3 className="text-lg font-bold text-gray-900 mb-4">AI Question Generator</h3>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Topic *</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Topic *</label>
                   <input
                     type="text"
                     value={aiForm.topic}
                     onChange={(e) => setAiForm(f => ({ ...f, topic: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="e.g., Data Structures - Binary Trees"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Count</label>
-                    <input type="number" value={aiForm.count} onChange={(e) => setAiForm(f => ({ ...f, count: Number(e.target.value) }))} min={1} max={20} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm" />
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Count</label>
+                    <input type="number" value={aiForm.count} onChange={(e) => setAiForm(f => ({ ...f, count: Number(e.target.value) }))} min={1} max={20} className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-900" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Difficulty</label>
-                    <select value={aiForm.difficulty} onChange={(e) => setAiForm(f => ({ ...f, difficulty: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Difficulty</label>
+                    <select value={aiForm.difficulty} onChange={(e) => setAiForm(f => ({ ...f, difficulty: e.target.value }))} className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-600">
                       <option value="easy">Easy</option>
                       <option value="medium">Medium</option>
                       <option value="hard">Hard</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                    <select value={aiForm.type} onChange={(e) => setAiForm(f => ({ ...f, type: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                    <select value={aiForm.type} onChange={(e) => setAiForm(f => ({ ...f, type: e.target.value }))} className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-600">
                       <option value="mcq">MCQ</option>
                       <option value="true_false">True/False</option>
                       <option value="short_answer">Short Answer</option>
@@ -343,7 +343,7 @@ const QuestionBankManager = () => {
               </div>
               <div className="flex items-center gap-3 mt-5">
                 <button onClick={() => setShowAIDialog(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button onClick={handleAIGenerate} disabled={generating} className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700">
+                <button onClick={handleAIGenerate} disabled={generating} className="flex-1 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-sm font-semibold hover:from-primary-700 hover:to-primary-600">
                   {generating ? 'Generating...' : 'Generate'}
                 </button>
               </div>

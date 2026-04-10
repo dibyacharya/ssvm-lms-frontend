@@ -63,14 +63,14 @@ const ExamList = ({ courseId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <h2 className="text-2xl font-bold text-gray-900">
         {courseId ? 'Course Exams' : 'My Examinations'}
       </h2>
 
@@ -80,22 +80,22 @@ const ExamList = ({ courseId }) => {
           { label: 'Total Exams', value: stats.total, icon: FaFileAlt, color: 'indigo' },
           { label: 'Upcoming', value: stats.upcoming, icon: FaClock, color: 'blue' },
           { label: 'Live Now', value: stats.live, icon: FaPlay, color: 'emerald' },
-          { label: 'Completed', value: stats.completed, icon: FaCheckCircle, color: 'purple' },
+          { label: 'Completed', value: stats.completed, icon: FaCheckCircle, color: 'primary' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+            className="bg-white/70 backdrop-blur-xl rounded-xl border border-gray-200 p-4 shadow-card-sm"
           >
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg bg-${stat.color}-100 dark:bg-${stat.color}-900/30 flex items-center justify-center`}>
-                <stat.icon className={`text-${stat.color}-600 dark:text-${stat.color}-400`} />
+              <div className={`w-10 h-10 rounded-lg bg-${stat.color}-900/30 flex items-center justify-center`}>
+                <stat.icon className={`text-${stat.color}-400`} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-xs text-gray-500">{stat.label}</p>
               </div>
             </div>
           </motion.div>
@@ -110,8 +110,8 @@ const ExamList = ({ courseId }) => {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${
               filter === f
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                ? 'bg-primary-600 text-gray-900'
+                : 'bg-white/70 backdrop-blur-xl text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}

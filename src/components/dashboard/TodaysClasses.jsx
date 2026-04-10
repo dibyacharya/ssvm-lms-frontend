@@ -64,8 +64,8 @@ export default function TodaysClasses() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-white rounded-xl border border-gray-100 dark:border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-blue-500" />
           Today's Classes
         </h3>
@@ -75,9 +75,9 @@ export default function TodaysClasses() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+    <div className="bg-white dark:bg-white rounded-xl border border-gray-100 dark:border-gray-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-200 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 flex items-center gap-2">
           <Clock className="w-5 h-5 text-blue-500" />
           Today's Classes
         </h3>
@@ -87,13 +87,13 @@ export default function TodaysClasses() {
       </div>
 
       {error ? (
-        <div className="px-6 py-4 text-sm text-amber-600 dark:text-amber-400 flex items-center gap-2">
+        <div className="px-6 py-4 text-sm text-amber-600 dark:text-amber-600 flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
       ) : classes.length === 0 ? (
         <div className="px-6 py-8 text-center">
-          <BookOpen className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+          <BookOpen className="w-10 h-10 text-gray-600 dark:text-gray-600 mx-auto mb-2" />
           <p className="text-sm text-gray-500 dark:text-gray-400">No classes scheduled for today</p>
         </div>
       ) : (
@@ -111,10 +111,10 @@ export default function TodaysClasses() {
             return (
               <div
                 key={cls._id || idx}
-                className={`px-6 py-3 flex items-center gap-4 ${live ? "bg-blue-50 dark:bg-blue-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/30"} transition-colors`}
+                className={`px-6 py-3 flex items-center gap-4 ${live ? "bg-blue-50 dark:bg-blue-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-100/30"} transition-colors`}
               >
                 <div className="text-center min-w-[60px]">
-                  <div className={`text-sm font-bold ${live ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}>
+                  <div className={`text-sm font-bold ${live ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-600"}`}>
                     {formatTime(startTime)}
                   </div>
                   <div className="text-[10px] text-gray-400">{formatTime(endTime)}</div>
@@ -124,11 +124,11 @@ export default function TodaysClasses() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-semibold truncate ${live ? "text-blue-700 dark:text-blue-300" : "text-gray-900 dark:text-white"}`}>
+                    <span className={`text-sm font-semibold truncate ${live ? "text-blue-700 dark:text-blue-300" : "text-gray-900 dark:text-gray-900"}`}>
                       {courseName}
                     </span>
                     {courseCode && <span className="text-[10px] text-gray-400 font-mono">{courseCode}</span>}
-                    {live && <span className="px-1.5 py-0.5 bg-blue-500 text-white text-[9px] font-bold rounded uppercase">Live</span>}
+                    {live && <span className="px-1.5 py-0.5 bg-blue-500 text-gray-900 text-[9px] font-bold rounded uppercase">Live</span>}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     {teacher && <span>{teacher}</span>}
@@ -146,7 +146,7 @@ export default function TodaysClasses() {
                     href={joinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-gray-900 text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
                   >
                     <Video className="w-3.5 h-3.5" />
                     Join

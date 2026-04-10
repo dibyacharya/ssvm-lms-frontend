@@ -96,7 +96,7 @@ const ExamGrading = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -131,7 +131,7 @@ const ExamGrading = () => {
                       key={sub._id}
                       onClick={() => { setSelectedIdx(i); setGrades({}); }}
                       className={`w-full text-left px-3 py-2.5 border-b border-gray-50 transition-colors ${
-                        i === selectedIdx ? 'bg-indigo-50 border-l-2 border-l-indigo-600' : 'hover:bg-gray-50'
+                        i === selectedIdx ? 'bg-blue-50 border-l-2 border-l-blue-600' : 'hover:bg-gray-50'
                       }`}
                     >
                       <p className="text-xs font-medium text-gray-900 truncate">
@@ -139,7 +139,7 @@ const ExamGrading = () => {
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                          sub.status === 'graded' ? 'bg-emerald-100 text-emerald-700' :
+                          sub.status === 'graded' ? 'bg-blue-100 text-blue-700' :
                           sub.status === 'submitted' ? 'bg-amber-100 text-amber-700' :
                           sub.status === 'flagged' ? 'bg-red-100 text-red-700' :
                           'bg-gray-100 text-gray-600'
@@ -183,11 +183,11 @@ const ExamGrading = () => {
                         </div>
                         <div>
                           <span className="text-gray-500">Total: </span>
-                          <span className="font-bold text-indigo-600">{currentSub.totalScore ?? 0}/{exam?.totalPoints}</span>
+                          <span className="font-bold text-blue-600">{currentSub.totalScore ?? 0}/{exam?.totalPoints}</span>
                         </div>
                         {currentSub.integrityScore != null && (
                           <div className="flex items-center gap-1">
-                            <FaShieldAlt className={`text-[10px] ${currentSub.integrityScore >= 80 ? 'text-emerald-500' : currentSub.integrityScore >= 50 ? 'text-amber-500' : 'text-red-500'}`} />
+                            <FaShieldAlt className={`text-[10px] ${currentSub.integrityScore >= 80 ? 'text-blue-500' : currentSub.integrityScore >= 50 ? 'text-amber-500' : 'text-red-500'}`} />
                             <span className="text-gray-500">Integrity: </span>
                             <span className="font-bold">{currentSub.integrityScore}%</span>
                           </div>
@@ -235,7 +235,7 @@ const ExamGrading = () => {
                         >
                           {/* Question */}
                           <div className="flex items-start gap-3 mb-3">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                            <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
                             <div className="flex-1">
                               <p className="text-sm text-gray-900">{q?.question || `Question ${i + 1}`}</p>
                               <div className="flex items-center gap-2 mt-1">
@@ -250,7 +250,7 @@ const ExamGrading = () => {
                             <div>
                               <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1">Student's Answer</p>
                               <div className={`p-3 rounded-xl text-sm ${
-                                !isSubjective && ans.isCorrect ? 'bg-emerald-50 text-emerald-800' :
+                                !isSubjective && ans.isCorrect ? 'bg-blue-50 text-blue-800' :
                                 !isSubjective && ans.isCorrect === false ? 'bg-red-50 text-red-800' :
                                 'bg-gray-50 text-gray-800'
                               }`}>
@@ -262,7 +262,7 @@ const ExamGrading = () => {
                             {!isSubjective && q?.correctAnswer && (
                               <div>
                                 <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1">Correct Answer</p>
-                                <p className="text-sm text-emerald-700 bg-emerald-50 p-2 rounded-lg">{q.correctAnswer}</p>
+                                <p className="text-sm text-blue-700 bg-blue-50 p-2 rounded-lg">{q.correctAnswer}</p>
                               </div>
                             )}
 
@@ -270,7 +270,7 @@ const ExamGrading = () => {
                             {isSubjective && q?.modelAnswer && (
                               <div>
                                 <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1">Model Answer</p>
-                                <p className="text-sm text-indigo-700 bg-indigo-50 p-3 rounded-lg whitespace-pre-wrap">{q.modelAnswer}</p>
+                                <p className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg whitespace-pre-wrap">{q.modelAnswer}</p>
                               </div>
                             )}
 
@@ -285,7 +285,7 @@ const ExamGrading = () => {
                                     max={q?.points || 10}
                                     value={gradeVal.pointsAwarded ?? ans.pointsAwarded ?? ''}
                                     onChange={(e) => handleGradeChange(ans._id, 'pointsAwarded', e.target.value)}
-                                    className="w-full mt-1 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full mt-1 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder={`/${q?.points || 1}`}
                                   />
                                 </div>
@@ -295,7 +295,7 @@ const ExamGrading = () => {
                                     type="text"
                                     value={gradeVal.feedback ?? ans.feedback ?? ''}
                                     onChange={(e) => handleGradeChange(ans._id, 'feedback', e.target.value)}
-                                    className="w-full mt-1 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full mt-1 px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Optional feedback..."
                                   />
                                 </div>
@@ -306,7 +306,7 @@ const ExamGrading = () => {
                             {!isSubjective && (
                               <div className="flex items-center gap-1.5 text-xs">
                                 {ans.isCorrect ? (
-                                  <><FaCheck className="text-emerald-500" /><span className="text-emerald-600 font-medium">{ans.pointsAwarded} pts awarded</span></>
+                                  <><FaCheck className="text-blue-500" /><span className="text-blue-600 font-medium">{ans.pointsAwarded} pts awarded</span></>
                                 ) : ans.isCorrect === false ? (
                                   <><span className="text-red-500 font-medium">0 pts — Incorrect</span></>
                                 ) : null}
@@ -324,7 +324,7 @@ const ExamGrading = () => {
                       <button
                         onClick={handleSaveGrades}
                         disabled={saving || Object.keys(grades).length === 0}
-                        className="w-full py-3 bg-indigo-600 text-white rounded-2xl font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+                        className="w-full py-3 bg-blue-600 text-gray-900 rounded-2xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                       >
                         <FaSave /> {saving ? 'Saving...' : 'Save Grades'}
                       </button>

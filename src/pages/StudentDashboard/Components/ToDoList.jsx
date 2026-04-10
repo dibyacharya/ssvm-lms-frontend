@@ -23,8 +23,8 @@ const SWAYAM_QUADRANTS = {
   TESTS_QUIZZES: {
     id: "tests_quizzes",
     name: "Tests and Quizzes",
-    color: "bg-emerald-500",
-    hoverColor: "bg-emerald-600",
+    color: "bg-blue-500",
+    hoverColor: "bg-blue-600",
     icon: FileText,
   },
   DISCUSSION_FORUM: {
@@ -53,7 +53,7 @@ const INITIAL_COLUMNS = {
   completed: {
     id: "completed",
     title: "Completed",
-    color: "bg-green-300",
+    color: "bg-blue-300",
     taskIds: [],
   },
 };
@@ -257,14 +257,14 @@ const SwayamKanbanBoard = () => {
       // Use dangerouslySetInnerHTML to render the string as HTML
       return (
         <div
-          className="mt-2 p-1 rounded border border-gray-200 dark:border-gray-600"
+          className="mt-2 p-1 rounded border border-gray-200 dark:border-gray-300"
           dangerouslySetInnerHTML={{ __html: sanitized }}
         />
       );
     } catch (error) {
       console.error("Error rendering component:", error);
       return (
-        <div className="text-red-500 dark:text-red-400 text-xs">Error rendering component</div>
+        <div className="text-red-500 dark:text-red-600 text-xs">Error rendering component</div>
       );
     }
   };
@@ -354,7 +354,7 @@ const SwayamKanbanBoard = () => {
     ).length;
   };
   return (
-    <div className="flex flex-col min-h-screen p-6 bg-gray-100 dark:bg-gray-900 space-y-6">
+    <div className="flex flex-col min-h-screen p-6 bg-gray-100 dark:bg-gray-50 space-y-6">
       {/* Header Banner */}
       <DashboardBanner
         icon={CheckSquare}
@@ -367,15 +367,15 @@ const SwayamKanbanBoard = () => {
       <div className="w-full max-w-4xl mx-auto p-6">
         <div className="relative mb-16">
           {/* Center circle */}
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full w-32 h-32 flex flex-col items-center justify-center shadow-lg border-4 border-gray-100 dark:border-gray-600">
-            <span className="font-bold text-2xl text-gray-800 dark:text-white">Tasks</span>
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 bg-white dark:bg-white rounded-full w-32 h-32 flex flex-col items-center justify-center shadow-lg border-4 border-gray-100 dark:border-gray-300">
+            <span className="font-bold text-2xl text-gray-800 dark:text-gray-900">Tasks</span>
             <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {Object.values(data.tasks).length} Total Tasks
             </span>
           </div>
 
           {/* Connector lines */}
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-72 h-72 rounded-full border-2 border-gray-200 dark:border-gray-600"></div>
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-72 h-72 rounded-full border-2 border-gray-200 dark:border-gray-300"></div>
 
           {/* Quadrants Grid */}
           <div className="grid grid-cols-2 gap-6 p-8">
@@ -392,7 +392,7 @@ const SwayamKanbanBoard = () => {
                       ? "scale-105 shadow-xl " + quadrant.hoverColor
                       : ""
                   } 
-                  p-6 h-44 rounded-xl flex flex-col items-center justify-center text-white font-medium transition-all 
+                  p-6 h-44 rounded-xl flex flex-col items-center justify-center text-gray-900 font-medium transition-all 
                   duration-300 transform cursor-pointer shadow-md hover:shadow-lg hover:scale-105 dark:shadow-lg dark:hover:shadow-xl`}
                   onClick={() => handleQuadrantClick(quadrant.id)}
                 >
@@ -412,13 +412,13 @@ const SwayamKanbanBoard = () => {
         </div>
 
         {selectedQuadrant && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-4 mt-6 border border-gray-200 dark:border-gray-600 animate-fadeIn">
-            <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-white rounded-lg shadow-md dark:shadow-lg p-4 mt-6 border border-gray-200 dark:border-gray-300 animate-fadeIn">
+            <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-gray-900">
               {SWAYAM_QUADRANTS[selectedQuadrant.toUpperCase()]?.name ||
                 selectedQuadrant}{" "}
               Tasks
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-600">
               {getTaskCount(selectedQuadrant)} task(s) in this quadrant. Click
               to view details.
             </p>
@@ -430,7 +430,7 @@ const SwayamKanbanBoard = () => {
       <div className="mb-6 flex justify-center">
         {!isAddingTask ? (
           <motion.button
-            className="flex items-center space-x-2 bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 dark:hover:bg-blue-400"
+            className="flex items-center space-x-2 bg-blue-600 dark:bg-blue-500 text-gray-900 px-4 py-2 rounded-md shadow-md hover:bg-blue-700 dark:hover:bg-blue-400"
             onClick={() => setIsAddingTask(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -442,12 +442,12 @@ const SwayamKanbanBoard = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg dark:shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-600"
+            className="bg-white dark:bg-white p-4 rounded-lg shadow-lg dark:shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-300"
           >
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold text-gray-900 dark:text-white">Add New Task</h3>
+              <h3 className="font-bold text-gray-900 dark:text-gray-900">Add New Task</h3>
               <button
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-700"
                 onClick={() => setIsAddingTask(false)}
               >
                 <X size={20} />
@@ -458,17 +458,17 @@ const SwayamKanbanBoard = () => {
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               placeholder="Task title"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md mb-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-2 border border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 rounded-md mb-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               autoFocus
             />
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-1">
                 Column
               </label>
               <select
                 value={newTaskColumn}
                 onChange={(e) => setNewTaskColumn(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {data.columnOrder.map((columnId) => (
                   <option key={columnId} value={columnId}>
@@ -478,13 +478,13 @@ const SwayamKanbanBoard = () => {
               </select>
             </div>
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-1">
                 Quadrant
               </label>
               <select
                 value={newTaskQuadrant}
                 onChange={(e) => setNewTaskQuadrant(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value={SWAYAM_QUADRANTS.VIDEO_LECTURE.id}>
                   Video Lecture
@@ -501,13 +501,13 @@ const SwayamKanbanBoard = () => {
               </select>
             </div>
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-1">
                 Task Type
               </label>
               <select
                 value={newTaskType}
                 onChange={(e) => setNewTaskType(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {TASK_TYPES.map((type) => (
                   <option key={type.id} value={type.id}>
@@ -517,14 +517,14 @@ const SwayamKanbanBoard = () => {
               </select>
             </div>
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-1">
                 Custom Component (HTML/Tailwind)
               </label>
               <textarea
                 value={newTaskComponent}
                 onChange={(e) => setNewTaskComponent(e.target.value)}
                 placeholder="<div class='bg-blue-100 p-2 rounded'>Your custom content here</div>"
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md h-24 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-300 dark:border-gray-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900 rounded-md h-24 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {newTaskComponent && (
                 <div className="mt-2">
@@ -535,7 +535,7 @@ const SwayamKanbanBoard = () => {
             </div>
             <div className="flex justify-end">
               <motion.button
-                className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 dark:hover:bg-blue-400"
+                className="bg-blue-600 dark:bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-700 dark:hover:bg-blue-400"
                 onClick={addTask}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -567,13 +567,13 @@ const SwayamKanbanBoard = () => {
                     : ""
                 }`}
               >
-                <h3 className="font-bold text-center text-gray-900 dark:text-white">{column.title}</h3>
+                <h3 className="font-bold text-center text-gray-900 dark:text-gray-900">{column.title}</h3>
               </div>
               <div
                 className={`min-h-72 p-2 rounded-b-lg ${
                   dragOverColumn === column.id && !dragOverTask
                     ? "bg-blue-100 dark:bg-blue-900/30"
-                    : "bg-gray-100 dark:bg-gray-800"
+                    : "bg-gray-100 dark:bg-white"
                 }`}
               >
                 {tasks.map((task) => (
@@ -605,7 +605,7 @@ const SwayamKanbanBoard = () => {
                           type="text"
                           value={editingTaskTitle}
                           onChange={(e) => setEditingTaskTitle(e.target.value)}
-                          className="w-full p-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-300 bg-white dark:bg-white text-gray-900 dark:text-gray-900 rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           autoFocus
                         />
                         <select
@@ -613,7 +613,7 @@ const SwayamKanbanBoard = () => {
                           onChange={(e) =>
                             setEditingTaskQuadrant(e.target.value)
                           }
-                          className="w-full p-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-300 bg-white dark:bg-white text-gray-900 dark:text-gray-900 rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value={SWAYAM_QUADRANTS.VIDEO_LECTURE.id}>
                             Video Lecture
@@ -631,7 +631,7 @@ const SwayamKanbanBoard = () => {
                         <select
                           value={editingTaskType}
                           onChange={(e) => setEditingTaskType(e.target.value)}
-                          className="w-full p-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-300 bg-white dark:bg-white text-gray-900 dark:text-gray-900 rounded mb-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           {TASK_TYPES.map((type) => (
                             <option key={type.id} value={type.id}>
@@ -645,7 +645,7 @@ const SwayamKanbanBoard = () => {
                             setEditingTaskComponent(e.target.value)
                           }
                           placeholder="Custom component HTML"
-                          className="w-full p-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded mb-2 h-20 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full p-1 border border-gray-300 dark:border-gray-300 bg-white dark:bg-white text-gray-900 dark:text-gray-900 rounded mb-2 h-20 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         {editingTaskComponent && (
                           <div className="mt-1 mb-2">
@@ -658,7 +658,7 @@ const SwayamKanbanBoard = () => {
                         <div className="flex justify-end space-x-2 mt-2">
                           <button
                             onClick={() => setEditingTaskId(null)}
-                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-700"
                           >
                             <X size={16} />
                           </button>
@@ -675,7 +675,7 @@ const SwayamKanbanBoard = () => {
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-2">
                             <Move size={16} className="text-gray-400 dark:text-gray-500" />
-                            <p className="text-gray-900 dark:text-white">{task.content}</p>
+                            <p className="text-gray-900 dark:text-gray-900">{task.content}</p>
                           </div>
                           <div className="flex space-x-1 ml-2">
                             <button
@@ -686,7 +686,7 @@ const SwayamKanbanBoard = () => {
                             </button>
                             <button
                               onClick={() => deleteTask(task.id)}
-                              className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                              className="text-red-500 dark:text-red-600 hover:text-red-700 dark:hover:text-red-600"
                             >
                               <X size={16} />
                             </button>
@@ -701,13 +701,13 @@ const SwayamKanbanBoard = () => {
                           <span
                             className={`text-xs px-2 py-1 rounded-full ${getQuadrantColor(
                               task.quadrant
-                            )} bg-opacity-20 text-gray-700 dark:text-gray-300`}
+                            )} bg-opacity-20 text-gray-700 dark:text-gray-600`}
                           >
                             {getQuadrantName(task.quadrant)}
                           </span>
 
                           {task.type && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">
+                            <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-600">
                               {getTaskTypeName(task.type)}
                             </span>
                           )}
@@ -717,7 +717,7 @@ const SwayamKanbanBoard = () => {
                   </motion.div>
                 ))}
                 {tasks.length === 0 && (
-                  <div className="h-20 flex items-center justify-center text-gray-400 dark:text-gray-500 italic border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+                  <div className="h-20 flex items-center justify-center text-gray-400 dark:text-gray-500 italic border-2 border-dashed border-gray-300 dark:border-gray-300 rounded-md">
                     Drop tasks here
                   </div>
                 )}

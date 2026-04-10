@@ -34,7 +34,7 @@ const FileViewer = ({ selectedFile }) => {
       <div className="flex flex-col items-center justify-center h-full bg-gray-100">
         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-orange-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+            <div className="bg-blue-500 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
               PPT
             </div>
             <h3 className="ml-3 font-semibold text-lg">
@@ -49,7 +49,7 @@ const FileViewer = ({ selectedFile }) => {
             <a
               href={getFullUrl(selectedFile.fileUrl)}
               download={selectedFile.fileName}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
+              className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -75,7 +75,7 @@ const FileViewer = ({ selectedFile }) => {
       <div className="flex flex-col items-center justify-center h-full bg-gray-100">
         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-gray-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+            <div className="bg-gray-500 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
               FILE
             </div>
             <h3 className="ml-3 font-semibold text-lg">
@@ -89,7 +89,7 @@ const FileViewer = ({ selectedFile }) => {
             <a
               href={getFullUrl(selectedFile.fileUrl)}
               download={selectedFile.fileName}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
+              className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

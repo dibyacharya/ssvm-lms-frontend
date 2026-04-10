@@ -267,7 +267,7 @@ const StudentContentSection = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
       </div>
     );
   }
@@ -275,10 +275,10 @@ const StudentContentSection = () => {
   if (error) {
     return (
       <div className="text-center py-16">
-        <p className="text-red-500 mb-2">{error}</p>
+        <p className="text-red-600 mb-2">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-primary-600 hover:underline"
         >
           Retry
         </button>
@@ -289,12 +289,12 @@ const StudentContentSection = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {!viewingItem && (
-        <div className="w-80 bg-white shadow-lg border-r">
-          <div className="relative overflow-hidden p-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+        <div className="w-80 bg-white/70 backdrop-blur-xl shadow-card border-r border-gray-200">
+          <div className="relative overflow-hidden p-6 bg-gradient-to-r from-primary-600 via-blue-600 to-primary-600">
             <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
             <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
-            <h2 className="relative z-10 text-xl font-bold text-white">Course Modules</h2>
-            <p className="relative z-10 text-sm text-white/70 mt-1">{courseData?.title}</p>
+            <h2 className="relative z-10 text-xl font-bold text-gray-900">Course Modules</h2>
+            <p className="relative z-10 text-sm text-gray-900/70 mt-1">{courseData?.title}</p>
           </div>
 
           <div className="overflow-y-auto h-full pb-20">
@@ -312,7 +312,7 @@ const StudentContentSection = () => {
                     <div
                       onClick={() => handleModuleToggle(moduleRow._id)}
                       className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
-                        expandedModule === moduleRow._id ? "bg-blue-50" : ""
+                        expandedModule === moduleRow._id ? "bg-primary-50" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -327,13 +327,13 @@ const StudentContentSection = () => {
                           <h3 className="font-medium text-gray-900 mb-1">
                             Module {moduleRow.moduleNumber}: {moduleRow.moduleTitle}
                           </h3>
-                          <p className="text-sm text-gray-600 line-clamp-1">
+                          <p className="text-sm text-gray-500 line-clamp-1">
                             {moduleRow.description || `${totalCount} items`}
                           </p>
                         </div>
                         <div className="ml-2 flex-shrink-0">
                           {expandedModule === moduleRow._id ? (
-                            <ChevronDown size={20} className="text-blue-600" />
+                            <ChevronDown size={20} className="text-primary-600" />
                           ) : (
                             <ChevronRight size={20} className="text-gray-400" />
                           )}
@@ -344,7 +344,7 @@ const StudentContentSection = () => {
                 })()}
 
                 {expandedModule === moduleRow._id && (
-                  <div className="bg-gray-50 px-4 pb-4">
+                  <div className="bg-white/[0.02] px-4 pb-4">
                     <div className="space-y-2">
                       {Object.entries(contentTypes).map(([key, config]) => {
                         const Icon = config.icon;
@@ -358,8 +358,8 @@ const StudentContentSection = () => {
                             onClick={() => handleContentTypeSelect(moduleRow, key)}
                             className={`w-full flex items-center justify-between p-3 rounded-md text-sm transition-colors ${
                               isActive
-                                ? "bg-blue-100 text-blue-700 border border-blue-200"
-                                : "bg-white hover:bg-gray-100 text-gray-700 border border-gray-200"
+                                ? "bg-primary-100 text-primary-600 border border-primary-500/30"
+                                : "bg-white/5 hover:bg-gray-100 text-gray-600 border border-gray-200"
                             }`}
                           >
                             <div className="flex items-center space-x-2">
@@ -369,8 +369,8 @@ const StudentContentSection = () => {
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${
                                 isActive
-                                  ? "bg-blue-200 text-blue-800"
-                                  : "bg-gray-200 text-gray-600"
+                                  ? "bg-primary-500/30 text-primary-600"
+                                  : "bg-white/10 text-gray-500"
                               }`}
                             >
                               {count}
@@ -390,12 +390,12 @@ const StudentContentSection = () => {
       <div className="flex-1 flex flex-col">
         {viewingItem ? (
           <>
-            <div className="bg-white shadow-sm border-b p-4">
+            <div className="bg-white/70 backdrop-blur-xl shadow-card border-b border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setViewingItem(null)}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                    className="p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-500"
                     title="Back to files"
                   >
                     <ArrowLeft size={20} />
@@ -414,7 +414,7 @@ const StudentContentSection = () => {
                     <a
                       href={getFullUrl(viewingItem.fileUrl || viewingItem.url)}
                       download
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+                      className="bg-primary-600 text-gray-900 px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2 text-sm"
                     >
                       <Download size={16} />
                       <span>Download</span>
@@ -440,7 +440,7 @@ const StudentContentSection = () => {
                 return (
                   <>
                     {viewerLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                         <div className="text-center">
                           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent" />
                           <p className="mt-2 text-gray-600">Loading...</p>
@@ -480,7 +480,7 @@ const StudentContentSection = () => {
                     )}
 
                     {viewerFailed && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                         <div className="text-center max-w-md">
                           <FileText className="mx-auto text-gray-400 mb-4" size={48} />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -493,7 +493,7 @@ const StudentContentSection = () => {
                             href={viewerUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 inline-flex items-center gap-2 text-sm"
+                            className="bg-primary-600 text-gray-900 px-4 py-2 rounded-lg hover:bg-primary-700 inline-flex items-center gap-2 text-sm"
                           >
                             <ExternalLink size={16} />
                             Open in New Tab
@@ -512,7 +512,7 @@ const StudentContentSection = () => {
               icon={FileText}
               title={`Module ${selectedModule.moduleNumber}: ${selectedModule.moduleTitle}`}
               subtitle={`Viewing ${contentTypes[selectedContentType]?.label}`}
-              gradient="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"
+              gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600"
             />
 
             <div className="flex-1 overflow-y-auto p-6">
@@ -570,11 +570,11 @@ const ReadonlyContentCard = ({
       case "pdfs":
         return <FileText className="text-red-500" size={24} />;
       case "ppts":
-        return <Presentation className="text-orange-500" size={24} />;
+        return <Presentation className="text-blue-500" size={24} />;
       case "videos":
-        return <Video className="text-blue-500" size={24} />;
+        return <Video className="text-primary-600" size={24} />;
       case "links":
-        return <Link className="text-green-500" size={24} />;
+        return <Link className="text-primary-600" size={24} />;
       default:
         return <FileText className="text-gray-500" size={24} />;
     }
@@ -582,7 +582,7 @@ const ReadonlyContentCard = ({
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      className="glass-card rounded-lg overflow-hidden hover:shadow-card transition-shadow cursor-pointer"
       onClick={onView}
     >
       <LmsAssetImage
@@ -605,13 +605,13 @@ const ReadonlyContentCard = ({
 
         {contentType === "links" && (item.url || item.fileUrl) ? (
           <div className="mb-3">
-            <p className="text-xs text-blue-600 truncate" title={item.url || item.fileUrl}>
+            <p className="text-xs text-primary-600 truncate" title={item.url || item.fileUrl}>
               {item.url || item.fileUrl}
             </p>
           </div>
         ) : null}
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-gray-400">
           {item.fileSize ? <span>{formatFileSize(item.fileSize)}</span> : <span />}
           {item.createDate ? <span>{formatDate(item.createDate)}</span> : null}
         </div>

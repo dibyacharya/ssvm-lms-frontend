@@ -24,9 +24,9 @@ const SectionHeader = ({ icon: Icon, title, gradient }) => (
     <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
     <div className="relative z-10 flex items-center gap-3">
       <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
-      <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+      <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
     </div>
   </div>
 );
@@ -142,54 +142,54 @@ const StudentAccountSettings = () => {
 
   const colorSchemeClasses = {
     blue: { primary: "bg-blue-600 hover:bg-blue-700", secondary: "text-blue-600", highlight: "border-blue-500" },
-    green: { primary: "bg-green-600 hover:bg-green-700", secondary: "text-green-600", highlight: "border-green-500" },
-    purple: { primary: "bg-purple-600 hover:bg-purple-700", secondary: "text-purple-600", highlight: "border-purple-500" },
+    green: { primary: "bg-blue-600 hover:bg-blue-700", secondary: "text-blue-600", highlight: "border-blue-500" },
+    purple: { primary: "bg-blue-600 hover:bg-blue-700", secondary: "text-blue-600", highlight: "border-blue-500" },
     amber: { primary: "bg-amber-600 hover:bg-amber-700", secondary: "text-amber-600", highlight: "border-amber-500" },
   };
 
   const currentScheme = colorSchemeClasses[colorScheme];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 py-8 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-50 text-gray-800 dark:text-gray-800 py-8 transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 space-y-6">
         {isSettingsSaved && (
-          <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
+          <div className="fixed top-4 right-4 bg-blue-500 text-gray-900 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
             <CheckCircle size={20} />
             <span>Settings saved successfully!</span>
           </div>
         )}
 
         <button
-          className="p-2 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent dark:border-gray-700 transition-colors duration-200"
+          className="p-2 rounded-full bg-white dark:bg-white shadow-sm hover:bg-gray-50 dark:hover:bg-gray-100 border border-transparent dark:border-gray-200 transition-colors duration-200"
           onClick={() => navigate(-1)}
         >
-          <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-600" />
         </button>
 
         {/* Page Header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 px-8 py-8 shadow-lg">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-8 py-8 shadow-lg">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
           <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
           <div className="relative z-10 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Settings className="w-6 h-6 text-white" />
+              <Settings className="w-6 h-6 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Account Settings</h1>
-              <p className="text-white/80 text-sm mt-1.5">Manage your profile, appearance, and security</p>
+              <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
+              <p className="text-gray-900/80 text-sm mt-1.5">Manage your profile, appearance, and security</p>
             </div>
           </div>
         </div>
 
         {/* Profile Edit Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
-          <SectionHeader icon={User} title="Profile Information" gradient="bg-gradient-to-r from-blue-500 to-cyan-500" />
+        <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <SectionHeader icon={User} title="Profile Information" gradient="bg-gradient-to-r from-blue-500 to-blue-700" />
           <div className="p-6 space-y-4">
             {profileErr && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 rounded-lg">{profileErr}</div>
+              <div className="p-3 bg-red-50 dark:bg-red-50 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-600 rounded-lg">{profileErr}</div>
             )}
             {profileMsg && (
-              <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-400 rounded-lg">{profileMsg}</div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-sm text-blue-700 dark:text-blue-400 rounded-lg">{profileMsg}</div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -198,7 +198,7 @@ const StudentAccountSettings = () => {
                   type="text"
                   value={profileForm.name}
                   onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-300 text-gray-900 dark:text-gray-900"
                   placeholder="Your name"
                 />
               </div>
@@ -208,7 +208,7 @@ const StudentAccountSettings = () => {
                   type="tel"
                   value={profileForm.mobileNo}
                   onChange={(e) => setProfileForm((p) => ({ ...p, mobileNo: e.target.value }))}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-300 text-gray-900 dark:text-gray-900"
                   placeholder="Mobile number"
                 />
               </div>
@@ -217,7 +217,7 @@ const StudentAccountSettings = () => {
               <button
                 onClick={handleProfileSave}
                 disabled={profileLoading}
-                className={`px-6 py-3 ${currentScheme.primary} text-white rounded-lg shadow-md flex items-center gap-2 transition-all hover:shadow-lg disabled:opacity-70`}
+                className={`px-6 py-3 ${currentScheme.primary} text-gray-900 rounded-lg shadow-md flex items-center gap-2 transition-all hover:shadow-lg disabled:opacity-70`}
               >
                 <Save size={18} />
                 {profileLoading ? "Saving..." : "Save Profile"}
@@ -227,11 +227,11 @@ const StudentAccountSettings = () => {
         </div>
 
         {/* Appearance Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
-          <SectionHeader icon={Palette} title="Appearance" gradient="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500" />
+        <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <SectionHeader icon={Palette} title="Appearance" gradient="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500" />
           <div className="p-6 space-y-6">
             <div>
-              <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
+              <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-gray-900">
                 <Palette size={18} className={currentScheme.secondary} />
                 Color Scheme
               </h3>
@@ -241,7 +241,7 @@ const StudentAccountSettings = () => {
                     key={scheme}
                     onClick={() => handleColorSchemeChange(scheme)}
                     className={`p-4 border rounded-lg flex flex-col items-center gap-2 transition-all ${
-                      colorScheme === scheme ? `border-${scheme}-500 shadow-md` : "border-gray-200 dark:border-gray-700"
+                      colorScheme === scheme ? `border-${scheme}-500 shadow-md` : "border-gray-200 dark:border-gray-200"
                     }`}
                   >
                     <div className={`w-8 h-8 bg-${scheme}-500 rounded-full`}></div>
@@ -251,7 +251,7 @@ const StudentAccountSettings = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
+              <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-gray-900 dark:text-gray-900">
                 <Sun size={18} className={currentScheme.secondary} />
                 Theme
               </h3>
@@ -273,14 +273,14 @@ const StudentAccountSettings = () => {
         </div>
 
         {/* Change Password Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
-          <SectionHeader icon={Lock} title="Change Password" gradient="bg-gradient-to-r from-violet-500 to-purple-600" />
+        <div className="bg-white dark:bg-white rounded-2xl shadow-sm border border-tertiary/10 overflow-hidden">
+          <SectionHeader icon={Lock} title="Change Password" gradient="bg-gradient-to-r from-blue-500 to-blue-600" />
           <div className="p-6 space-y-4">
             {passwordError && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400 rounded-lg">{passwordError}</div>
+              <div className="p-3 bg-red-50 dark:bg-red-50 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-600 rounded-lg">{passwordError}</div>
             )}
             {passwordMessage && (
-              <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-400 rounded-lg">{passwordMessage}</div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-sm text-blue-700 dark:text-blue-400 rounded-lg">{passwordMessage}</div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -290,10 +290,10 @@ const StudentAccountSettings = () => {
                     type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-300 text-gray-900 dark:text-gray-900"
                     placeholder="Enter current password"
                   />
-                  <button type="button" onClick={() => setShowCurrentPassword((p) => !p)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                  <button type="button" onClick={() => setShowCurrentPassword((p) => !p)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-600">
                     {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -305,10 +305,10 @@ const StudentAccountSettings = () => {
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-300 text-gray-900 dark:text-gray-900"
                     placeholder="Enter new password"
                   />
-                  <button type="button" onClick={() => setShowNewPassword((p) => !p)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                  <button type="button" onClick={() => setShowNewPassword((p) => !p)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-600">
                     {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -318,7 +318,7 @@ const StudentAccountSettings = () => {
               <button
                 onClick={handleChangePassword}
                 disabled={isChangingPassword}
-                className={`px-6 py-3 ${currentScheme.primary} text-white rounded-lg shadow-md flex items-center gap-2 transition-all hover:shadow-lg disabled:opacity-70`}
+                className={`px-6 py-3 ${currentScheme.primary} text-gray-900 rounded-lg shadow-md flex items-center gap-2 transition-all hover:shadow-lg disabled:opacity-70`}
               >
                 {isChangingPassword ? "Updating..." : "Update Password"}
               </button>

@@ -297,12 +297,12 @@ const ContentSection = () => {
     <div className="flex h-screen bg-gray-50">
       {/* Left Sidebar - Module Accordion (hidden when viewing content) */}
       {!viewingItem && (
-      <div className="w-80 bg-white shadow-lg border-r">
-        <div className="relative overflow-hidden p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
+      <div className="w-80 bg-white/70 backdrop-blur-xl shadow-card border-r border-gray-200">
+        <div className="relative overflow-hidden p-6 bg-gradient-to-r from-primary-600 to-blue-600">
           <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
           <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
-          <h2 className="relative z-10 text-xl font-bold text-white">Course Modules</h2>
-          <p className="relative z-10 text-sm text-white/70 mt-1">{courseData?.title}</p>
+          <h2 className="relative z-10 text-xl font-bold text-gray-900">Course Modules</h2>
+          <p className="relative z-10 text-sm text-gray-900/70 mt-1">{courseData?.title}</p>
         </div>
         
         <div className="overflow-y-auto h-full pb-20">
@@ -315,7 +315,7 @@ const ContentSection = () => {
                   <div
                     onClick={() => handleModuleToggle(module._id)}
                     className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
-                      expandedModule === module._id ? 'bg-blue-50' : ''
+                      expandedModule === module._id ? 'bg-primary-50' : ''
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -330,13 +330,13 @@ const ContentSection = () => {
                         <h3 className="font-medium text-gray-900 mb-1">
                           Module {module.moduleNumber}: {module.moduleTitle}
                         </h3>
-                        <p className="text-sm text-gray-600 line-clamp-1">
+                        <p className="text-sm text-gray-500 line-clamp-1">
                           {module.description}
                         </p>
                       </div>
                       <div className="ml-2 flex-shrink-0">
                         {expandedModule === module._id ? (
-                          <ChevronDown size={20} className="text-blue-600" />
+                          <ChevronDown size={20} className="text-primary-600" />
                         ) : (
                           <ChevronRight size={20} className="text-gray-400" />
                         )}
@@ -348,7 +348,7 @@ const ContentSection = () => {
 
               {/* Module Content - Accordion Panel */}
               {expandedModule === module._id && (
-                <div className="bg-gray-50 px-4 pb-4">
+                <div className="bg-white/[0.02] px-4 pb-4">
                   <div className="space-y-2">
                     {Object.entries(contentTypes).map(([key, config]) => {
                       const Icon = config.icon;
@@ -360,8 +360,8 @@ const ContentSection = () => {
                           onClick={() => handleContentTypeSelect(module, key)}
                           className={`w-full flex items-center justify-between p-3 rounded-md text-sm transition-colors ${
                             selectedModule?._id === module._id && selectedContentType === key
-                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                              : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
+                              ? 'bg-primary-100 text-primary-600 border border-primary-500/30'
+                              : 'bg-white/5 hover:bg-gray-100 text-gray-600 border border-gray-200'
                           }`}
                         >
                           <div className="flex items-center space-x-2">
@@ -370,8 +370,8 @@ const ContentSection = () => {
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             selectedModule?._id === module._id && selectedContentType === key
-                              ? 'bg-blue-200 text-blue-800'
-                              : 'bg-gray-200 text-gray-600'
+                              ? 'bg-primary-500/30 text-primary-600'
+                              : 'bg-white/10 text-gray-500'
                           }`}>
                             {count}
                           </span>
@@ -392,12 +392,12 @@ const ContentSection = () => {
         {viewingItem ? (
           /* INLINE VIEWER - Shows file/link on the same page */
           <>
-            <div className="bg-white shadow-sm border-b p-4">
+            <div className="bg-white/70 backdrop-blur-xl shadow-card border-b border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleCloseViewer}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                    className="p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-500"
                     title="Back to files"
                   >
                     <ArrowLeft size={20} />
@@ -415,7 +415,7 @@ const ContentSection = () => {
                   <a
                     href={getFullUrl(viewingItem.fileUrl || viewingItem.videoUrl)}
                     download
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+                    className="bg-primary-600 text-gray-900 px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center space-x-2 text-sm"
                   >
                     <Download size={16} />
                     <span>Download</span>
@@ -439,7 +439,7 @@ const ContentSection = () => {
                 return (
                   <>
                     {viewerLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                         <div className="text-center">
                           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
                           <p className="mt-2 text-gray-600">Loading...</p>
@@ -467,7 +467,7 @@ const ContentSection = () => {
                       />
                     )}
                     {viewerFailed && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                         <div className="text-center max-w-md">
                           <FileText className="mx-auto text-gray-400 mb-4" size={48} />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load preview</h3>
@@ -477,14 +477,14 @@ const ContentSection = () => {
                               href={viewerUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+                              className="bg-primary-600 text-gray-900 px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2 text-sm"
                             >
                               <ExternalLink size={16} />
                               Open in New Tab
                             </a>
                             <button
                               onClick={() => { setViewerFailed(false); setViewerLoading(true); }}
-                              className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm"
+                              className="border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm"
                             >
                               Try Again
                             </button>
@@ -500,22 +500,22 @@ const ContentSection = () => {
         ) : selectedModule ? (
           <>
             {/* Header Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 shadow-lg">
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 p-6 shadow-lg">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
               <div className="absolute -bottom-8 right-20 w-24 h-24 bg-white/5 rounded-full" />
               <div className="absolute top-4 right-40 w-12 h-12 bg-white/10 rounded-full" />
               <div className="relative z-10 flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-bold text-white">
+                  <h1 className="text-xl font-bold text-gray-900">
                     Module {selectedModule.moduleNumber}: {selectedModule.moduleTitle}
                   </h1>
-                  <p className="text-white/70 text-sm mt-1">
+                  <p className="text-gray-900/70 text-sm mt-1">
                     Viewing {contentTypes[selectedContentType]?.label}
                   </p>
                 </div>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="bg-white text-blue-600 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-all shadow-md flex items-center space-x-2"
+                  className="bg-white text-primary-600 font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-50 transition-all shadow-md flex items-center space-x-2"
                 >
                   <Plus size={20} />
                   <span>Add {contentTypes[selectedContentType]?.label}</span>
@@ -580,11 +580,11 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSi
       case 'pdfs':
         return <FileText className="text-red-500" size={24} />;
       case 'ppts':
-        return <Presentation className="text-orange-500" size={24} />;
+        return <Presentation className="text-blue-500" size={24} />;
       case 'videos':
         return <Video className="text-blue-500" size={24} />;
       case 'links':
-        return <Link className="text-green-500" size={24} />;
+        return <Link className="text-blue-500" size={24} />;
       default:
         return <FileText className="text-gray-500" size={24} />;
     }
@@ -592,7 +592,7 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSi
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      className="glass-card rounded-lg overflow-hidden hover:shadow-card transition-shadow cursor-pointer"
       onClick={onView}
     >
       {/* Thumbnail */}
@@ -612,7 +612,7 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSi
         </h3>
 
         {item.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-500 mb-3 line-clamp-2">
             {item.description || item.content}
           </p>
         )}
@@ -620,13 +620,13 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSi
         {/* Show URL for links */}
         {contentType === 'links' && (item.url || item.link) && (
           <div className="mb-3">
-            <p className="text-xs text-blue-600 truncate" title={item.url || item.link}>
+            <p className="text-xs text-primary-600 truncate" title={item.url || item.link}>
               {item.url || item.link}
             </p>
           </div>
         )}
 
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+        <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
           {item.fileSize && (
             <span>{formatFileSize(item.fileSize)}</span>
           )}
@@ -639,7 +639,7 @@ const ContentCard = ({ item, contentType, onDelete, onEdit, onView, formatFileSi
         <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={onEdit}
-            className="text-green-600 hover:text-green-800 transition-colors"
+            className="text-primary-600 hover:text-blue-800 transition-colors"
             title="Edit"
           >
             <Edit size={16} />
@@ -700,52 +700,52 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="glass-modal rounded-lg p-6 w-full max-w-md mx-4">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">
           Add {contentTypes[contentType]?.label}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Name *
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
             />
           </div>
 
           {(contentType === 'links' || contentType === 'videos') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
                 Video URL {contentType === 'links' ? '*' : ''}
               </label>
               <input
                 type="url"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full glass-input rounded-md px-3 py-2"
                 placeholder={contentType === 'videos' ? 'https://www.youtube.com/watch?v=...' : 'https://example.com'}
                 required={contentType === 'links'}
               />
               {contentType === 'videos' && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   Paste a YouTube or Vimeo URL, or upload a video file below
                 </p>
               )}
@@ -754,18 +754,18 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
 
           {contentType !== 'links' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
                 File {contentType !== 'videos' ? '*' : ''}
               </label>
               <input
                 type="file"
                 accept={getAcceptedFileTypes()}
                 onChange={(e) => setFile(e.target.files[0])}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full glass-input rounded-md px-3 py-2"
                 required={contentType !== 'videos' && contentType !== 'links'}
               />
               {contentType === 'videos' && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   Upload .mp4, .avi, .mov, .wmv, .flv, .webm (optional if URL provided)
                 </p>
               )}
@@ -773,14 +773,14 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Thumbnail
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setThumbnail(e.target.files[0])}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
             />
           </div>
 
@@ -788,14 +788,14 @@ const AddContentModal = ({ contentType, onClose, onAdd, isLoading }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary-600 text-gray-900 rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Adding...' : 'Add'}
             </button>
@@ -847,79 +847,79 @@ const EditContentModal = ({ item, contentType, onClose, onUpdate, isLoading }) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="glass-modal rounded-lg p-6 w-full max-w-md mx-4">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">
           Edit {contentTypes[contentType]?.label}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Name *
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
             />
           </div>
 
           {(contentType === 'links' || contentType === 'videos') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
                 {contentType === 'videos' ? 'Video URL' : 'URL'} {contentType === 'links' ? '*' : ''}
               </label>
               <input
                 type="url"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full glass-input rounded-md px-3 py-2"
                 placeholder={contentType === 'videos' ? 'https://www.youtube.com/watch?v=...' : 'https://example.com'}
                 required={contentType === 'links'}
               />
               {contentType === 'videos' && (
-                <p className="text-xs text-gray-500 mt-1">YouTube or Vimeo URL</p>
+                <p className="text-xs text-gray-400 mt-1">YouTube or Vimeo URL</p>
               )}
             </div>
           )}
 
           {contentType !== 'links' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-600 mb-1">
                 Replace File (optional)
               </label>
               <input
                 type="file"
                 accept={getAcceptedFileTypes()}
                 onChange={(e) => setFile(e.target.files[0])}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full glass-input rounded-md px-3 py-2"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               Replace Thumbnail (optional)
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setThumbnail(e.target.files[0])}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full glass-input rounded-md px-3 py-2"
             />
           </div>
 
@@ -927,14 +927,14 @@ const EditContentModal = ({ item, contentType, onClose, onUpdate, isLoading }) =
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-primary-600 text-gray-900 rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Updating...' : 'Update'}
             </button>

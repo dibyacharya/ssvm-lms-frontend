@@ -32,17 +32,17 @@ const EventComponent = ({ event }) => (
     }}
     data-tooltip-id={`tooltip-${event._id}`}
   >
-    <span className="text-white text-sm font-medium truncate">
+    <span className="text-gray-900 text-sm font-medium truncate">
       {event.subject || event.title}
     </span>
   </div>
 );
 
 const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
-  <div className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md dark:hover:shadow-lg transition-shadow duration-300">
+  <div className="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-300 hover:shadow-md dark:hover:shadow-lg transition-shadow duration-300">
     <div className="flex justify-between items-start mb-4">
       <div>
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-900">
           {meeting.subject || meeting.title}
         </h2>
         {meeting.isTimetable && (
@@ -50,7 +50,7 @@ const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
             {meeting.periodLabel || getPeriodLabel()} {meeting.semester} Timetable
           </span>
         )}
-        <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
+        <p className="text-gray-500 dark:text-gray-600 text-sm mt-1">
           {meeting.description || 'Regular class schedule'}
         </p>
       </div>
@@ -60,29 +60,29 @@ const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
       ></div>
     </div>
     <div className="space-y-2 mb-4">
-      <div className="flex items-center text-gray-600 dark:text-gray-300">
+      <div className="flex items-center text-gray-600 dark:text-gray-600">
         <FaUserTie className="mr-2 text-gray-400 dark:text-gray-500" />
         <span>{meeting.instructor || 'Scheduled Class'}</span>
       </div>
-      <div className="flex items-center text-gray-600 dark:text-gray-300">
+      <div className="flex items-center text-gray-600 dark:text-gray-600">
         <FaClock className="mr-2 text-gray-400 dark:text-gray-500" />
         <span>
           {moment(meeting.start).format("h:mm A")} -{" "}
           {moment(meeting.end).format("h:mm A")}
         </span>
       </div>
-      <div className="flex items-center text-gray-600 dark:text-gray-300">
+      <div className="flex items-center text-gray-600 dark:text-gray-600">
         <FaCalendarAlt className="mr-2 text-gray-400 dark:text-gray-500" />
         <span>{moment(meeting.date || meeting.start).format("dddd, MMMM D, YYYY")}</span>
       </div>
       {meeting.roomNumber && (
-        <div className="flex items-center text-gray-600 dark:text-gray-300">
+        <div className="flex items-center text-gray-600 dark:text-gray-600">
           <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
           <span>{meeting.roomNumber}</span>
         </div>
       )}
       {!meeting.isTimetable && meeting.participants !== undefined && (
-        <div className="flex items-center text-gray-600 dark:text-gray-300">
+        <div className="flex items-center text-gray-600 dark:text-gray-600">
           <FaUsers className="mr-2 text-gray-400 dark:text-gray-500" />
           <span>{meeting.participants} participants</span>
         </div>
@@ -93,7 +93,7 @@ const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
         href={meeting.link}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
+        className="block w-full bg-accent1 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-gray-900 py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
         onClick={(e) => {
           e.preventDefault();
           onJoin(meeting);
@@ -108,7 +108,7 @@ const SubjectMeeting = ({ meeting, onJoin, onJoinVConf }) => (
     {!meeting.isTimetable && (meeting.vconfRoomId || meeting._id) && (
       <button
         onClick={() => onJoinVConf(meeting)}
-        className="block w-full bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
+        className="block w-full bg-blue-600 dark:bg-blue-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-gray-900 py-3 px-4 rounded-lg text-center font-medium transition-colors duration-300 mt-2"
       >
         <div className="flex items-center justify-center">
           <FaVideo className="mr-2" />
@@ -275,34 +275,34 @@ const CreateMeeting = () => {
 
   if (coursesLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-50">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary dark:border-blue-400 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading meetings...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-600">Loading meetings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 bg-gray-50 dark:bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header Banner */}
         <DashboardBanner
           icon={Video}
           title="Class Meetings Calendar"
           subtitle={`Schedule and join your virtual classroom sessions${studentSemesters.length > 0 ? ` • ${studentSemesters.map(sem => `Period ${sem}`).join(', ')} Timetable Included` : ''}`}
-          gradient="bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600"
+          gradient="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-800"
         />
 
         {/* View Toggle */}
         <div className="flex justify-end mt-6 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-1 flex">
+          <div className="bg-white dark:bg-white rounded-lg shadow-sm border border-gray-200 dark:border-gray-300 p-1 flex">
             <button
               className={`px-4 py-2 rounded transition-colors duration-200 ${
                 view === "calendar"
-                  ? "bg-accent1 dark:bg-blue-600 text-white"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ? "bg-accent1 dark:bg-blue-600 text-gray-900"
+                  : "text-gray-600 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-100"
               }`}
               onClick={() => setView("calendar")}
             >
@@ -311,8 +311,8 @@ const CreateMeeting = () => {
             <button
               className={`px-4 py-2 rounded transition-colors duration-200 ${
                 view === "cards"
-                  ? "bg-accent1 dark:bg-blue-600 text-white"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ? "bg-accent1 dark:bg-blue-600 text-gray-900"
+                  : "text-gray-600 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-100"
               }`}
               onClick={() => setView("cards")}
             >
@@ -323,7 +323,7 @@ const CreateMeeting = () => {
 
         {/* Conditional Rendering based on view state */}
         {view === "calendar" ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-600">
+          <div className="bg-white dark:bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-300">
             <div style={{ height: 600 }} className="calendar-container dark:calendar-dark">
               <Calendar
                 localizer={localizer}
@@ -347,10 +347,10 @@ const CreateMeeting = () => {
           </div>
         ) : (
           <div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-600">
+            <div className="bg-white dark:bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-300">
               <div className="flex items-center justify-between">
                 <button
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-200"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-100 text-gray-600 dark:text-gray-600 transition-colors duration-200"
                   onClick={() =>
                     setSelectedDate(
                       moment(selectedDate).subtract(1, "days").toDate()
@@ -359,11 +359,11 @@ const CreateMeeting = () => {
                 >
                   &larr; Previous Day
                 </button>
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-900">
                   {moment(selectedDate).format("dddd, MMMM D, YYYY")}
                 </h2>
                 <button
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-200"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-100 text-gray-600 dark:text-gray-600 transition-colors duration-200"
                   onClick={() =>
                     setSelectedDate(
                       moment(selectedDate).add(1, "days").toDate()
@@ -387,12 +387,12 @@ const CreateMeeting = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-800 p-10 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-600">
+              <div className="bg-white dark:bg-white p-10 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-300">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">
                   No meetings scheduled for this day.
                 </p>
                 <button
-                  className="mt-4 bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                  className="mt-4 bg-accent1 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-gray-900 py-2 px-4 rounded-lg transition-colors duration-200"
                   onClick={() => setSelectedDate(new Date())}
                 >
                   Return to Today
@@ -442,8 +442,8 @@ const CreateMeeting = () => {
       {/* Modal for selected meeting details */}
       {selectedMeeting && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-600 shadow-xl">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-white rounded-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-300 shadow-xl">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-900">
               {selectedMeeting.subject || selectedMeeting.title}
             </h2>
             {selectedMeeting.isTimetable && (
@@ -451,15 +451,15 @@ const CreateMeeting = () => {
                 {selectedMeeting.periodLabel || getPeriodLabel()} {selectedMeeting.semester} Timetable
               </div>
             )}
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-gray-600 dark:text-gray-600 mb-4">
               {selectedMeeting.description || 'Regular class schedule'}
             </p>
             <div className="space-y-2 mb-4">
-              <div className="flex items-center text-gray-600 dark:text-gray-300">
+              <div className="flex items-center text-gray-600 dark:text-gray-600">
                 <FaUserTie className="mr-2 text-gray-400 dark:text-gray-500" />
                 <span>{selectedMeeting.instructor || 'Scheduled Class'}</span>
               </div>
-              <div className="flex items-center text-gray-600 dark:text-gray-300">
+              <div className="flex items-center text-gray-600 dark:text-gray-600">
                 <FaClock className="mr-2 text-gray-400 dark:text-gray-500" />
                 <span>
                   {moment(selectedMeeting.start).format("h:mm A")} -{" "}
@@ -467,7 +467,7 @@ const CreateMeeting = () => {
                 </span>
               </div>
               {selectedMeeting.roomNumber && (
-                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                <div className="flex items-center text-gray-600 dark:text-gray-600">
                   <FaChalkboardTeacher className="mr-2 text-gray-400 dark:text-gray-500" />
                   <span>{selectedMeeting.roomNumber}</span>
                 </div>
@@ -476,7 +476,7 @@ const CreateMeeting = () => {
             <div className="flex space-x-2 mt-6">
               {!selectedMeeting.isTimetable && selectedMeeting.link && (
                 <button
-                  className="flex-1 bg-accent1 dark:bg-blue-600 hover:bg-emerald-700 dark:hover:bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
+                  className="flex-1 bg-accent1 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-gray-900 py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
                   onClick={() => window.open(selectedMeeting.link, "_blank")}
                 >
                   <FaVideo className="mr-2" />
@@ -485,7 +485,7 @@ const CreateMeeting = () => {
               )}
               {!selectedMeeting.isTimetable && (selectedMeeting.vconfRoomId || selectedMeeting._id) && (
                 <button
-                  className="flex-1 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
+                  className="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-gray-900 py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
                   onClick={() => handleJoinVConf(selectedMeeting)}
                 >
                   <FaVideo className="mr-2" />
@@ -497,7 +497,7 @@ const CreateMeeting = () => {
                   selectedMeeting.isTimetable
                     ? "w-full"
                     : "bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500"
-                } text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg transition-colors duration-200`}
+                } text-gray-800 dark:text-gray-700 py-2 px-4 rounded-lg transition-colors duration-200`}
                 onClick={() => setSelectedMeeting(null)}
               >
                 Close

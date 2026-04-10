@@ -204,7 +204,7 @@ const SelfQuiz = () => {
       </div>
       <button
         onClick={startQuiz}
-        className="w-full py-3 px-6 bg-primary text-white font-semibold rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center"
+        className="w-full py-3 px-6 bg-primary text-gray-900 font-semibold rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center"
       >
         Start Quiz <FaArrowRight className="ml-2" />
       </button>
@@ -219,7 +219,7 @@ const SelfQuiz = () => {
     return (
       <div className="bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
         {/* Quiz header */}
-        <div className="bg-primary p-4 rounded-t-lg text-white flex justify-between items-center">
+        <div className="bg-primary p-4 rounded-t-lg text-gray-900 flex justify-between items-center">
           <div>
             <h2 className="text-lg font-bold">Concrete Knowledge Quiz</h2>
             <p className="text-sm">Student: {user.name}</p>
@@ -246,7 +246,7 @@ const SelfQuiz = () => {
         <div className="p-6">
           <div className="mb-6">
             <div className="flex items-center mb-2">
-              <span className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center mr-2">
+              <span className="bg-primary text-gray-900 rounded-full w-8 h-8 flex items-center justify-center mr-2">
                 {currentQuestionIndex + 1}
               </span>
               <span className="text-sm text-tertiary">
@@ -266,7 +266,7 @@ const SelfQuiz = () => {
                 key={option.id}
                 className={`p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-primary transition duration-200 ${
                   answers[currentQuestion.id] === option.id
-                    ? "border-primary bg-green-50"
+                    ? "border-primary bg-blue-50"
                     : ""
                 }`}
                 onClick={() =>
@@ -277,7 +277,7 @@ const SelfQuiz = () => {
                   <div
                     className={`w-6 h-6 rounded-full border flex items-center justify-center mr-3 ${
                       answers[currentQuestion.id] === option.id
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-gray-900"
                         : "border-gray-300"
                     }`}
                   >
@@ -296,7 +296,7 @@ const SelfQuiz = () => {
               disabled={!answers[currentQuestion.id]}
               className={`py-2 px-6 rounded-md flex items-center ${
                 answers[currentQuestion.id]
-                  ? "bg-primary text-white hover:bg-green-700"
+                  ? "bg-primary text-gray-900 hover:bg-blue-700"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               } transition duration-300`}
             >
@@ -319,7 +319,7 @@ const SelfQuiz = () => {
   const renderResultsScreen = () => (
     <div className="bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
       {/* Results header */}
-      <div className="bg-primary p-6 rounded-t-lg text-white text-center">
+      <div className="bg-primary p-6 rounded-t-lg text-gray-900 text-center">
         <FaTrophy className="text-4xl mx-auto mb-2" />
         <h2 className="text-2xl font-bold">Quiz Completed!</h2>
         <p>Thank you for completing the Concrete Knowledge Quiz</p>
@@ -411,7 +411,7 @@ const SelfQuiz = () => {
         <div className="flex justify-center">
           <button
             onClick={resetQuiz}
-            className="py-3 px-6 bg-primary text-white font-semibold rounded-md hover:bg-green-700 transition duration-300 flex items-center"
+            className="py-3 px-6 bg-primary text-gray-900 font-semibold rounded-md hover:bg-blue-700 transition duration-300 flex items-center"
           >
             <FaRedo className="mr-2" /> Take Quiz Again
           </button>

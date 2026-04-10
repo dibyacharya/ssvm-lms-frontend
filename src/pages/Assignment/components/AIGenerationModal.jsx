@@ -147,7 +147,7 @@ const AIGenerationModal = ({
           <button
             onClick={handleGenerate}
             disabled={generating || !numQuestions || !selectedCourseOutcome || !selectedBloomLevel}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {generating ? (
               <>

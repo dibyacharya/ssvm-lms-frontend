@@ -31,7 +31,7 @@ const ExamResult = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-primary-400/30 border-t-primary-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -41,10 +41,10 @@ const ExamResult = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full p-8 text-center"
+        className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-card border border-gray-200 max-w-md w-full p-8 text-center"
       >
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <FaCheckCircle className="text-emerald-600 text-3xl" />
+        <div className="w-20 h-20 bg-primary-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
+          <FaCheckCircle className="text-primary-600 text-3xl" />
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Exam Submitted!</h1>
@@ -58,8 +58,8 @@ const ExamResult = () => {
             </p>
 
             {submission?.totalScore != null && (
-              <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                <p className="text-3xl font-bold text-indigo-600">{submission.totalScore}</p>
+              <div className="bg-gray-100 rounded-xl p-4 mb-4">
+                <p className="text-3xl font-bold text-primary-600">{submission.totalScore}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {submission.percentage != null && `${submission.percentage}%`}
                   {submission.grade && ` | Grade: ${submission.grade}`}
@@ -69,23 +69,23 @@ const ExamResult = () => {
 
             <div className="grid grid-cols-2 gap-3 text-xs mb-6">
               {submission?.objectiveScore != null && (
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-blue-600 font-semibold">{submission.objectiveScore}</p>
-                  <p className="text-blue-500">Objective Score</p>
+                <div className="bg-primary-50 rounded-lg p-3">
+                  <p className="text-primary-600 font-semibold">{submission.objectiveScore}</p>
+                  <p className="text-primary-500">Objective Score</p>
                 </div>
               )}
               {submission?.timeSpentSeconds != null && (
-                <div className="bg-purple-50 rounded-lg p-3">
-                  <p className="text-purple-600 font-semibold">
+                <div className="bg-primary-50 rounded-lg p-3">
+                  <p className="text-primary-600 font-semibold">
                     {Math.round(submission.timeSpentSeconds / 60)} min
                   </p>
-                  <p className="text-purple-500">Time Spent</p>
+                  <p className="text-primary-500">Time Spent</p>
                 </div>
               )}
             </div>
 
             {submission?.autoSubmitted && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 mb-4 flex items-center gap-2">
+              <div className="bg-amber-50 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-600 mb-4 flex items-center gap-2">
                 <FaClock /> This exam was auto-submitted
               </div>
             )}
@@ -100,7 +100,7 @@ const ExamResult = () => {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 mx-auto px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2 mx-auto px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 rounded-xl text-sm font-medium hover:from-primary-700 hover:to-primary-600 transition-colors"
         >
           <FaArrowLeft className="text-xs" /> Back to Dashboard
         </button>

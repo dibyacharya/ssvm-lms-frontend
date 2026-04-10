@@ -214,11 +214,11 @@ const TeacherProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-50 py-8">
       <div className="max-w-6xl mx-auto px-4 space-y-6 ">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 rounded-lg hover:bg-primary/10 text-green-600 hover:text-green-700 mb-4 justify-start p-2 border-2 border-primary"
+          className="flex items-center space-x-2 rounded-lg hover:bg-primary/10 text-blue-600 hover:text-blue-700 mb-4 justify-start p-2 border-2 border-primary"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>Back</span>
@@ -226,7 +226,7 @@ const TeacherProfilePage = () => {
 
         {/* Profile Header Row */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 h-16"></div>
+          <div className="bg-gradient-to-r from-blue-600 to-blue-600 h-16"></div>
           <div className="p-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               <div className="w-36 h-40 rounded-lg overflow-hidden shadow-lg bg-gray-200 flex items-center justify-center">
@@ -240,7 +240,7 @@ const TeacherProfilePage = () => {
                 </h1>
                 <div className="flex flex-col md:flex-row items-center gap-4 mt-2 text-gray-600">
                   
-                  <span className="text-green-600 font-semibold">
+                  <span className="text-blue-600 font-semibold">
                    Faculty
                   </span>
                   
@@ -254,12 +254,12 @@ const TeacherProfilePage = () => {
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-green-600" />
+              <GraduationCap className="w-5 h-5 text-blue-600" />
               Mentor Details
             </h2>
             <button
               onClick={() => toggleEdit("mentor")}
-              className="text-green-600 hover:text-green-700"
+              className="text-blue-600 hover:text-blue-700"
             >
               {editingSection === "mentor" ? (
                 <X className="w-5 h-5" />
@@ -351,7 +351,7 @@ const TeacherProfilePage = () => {
               <div className="flex justify-end">
                 <button
                   onClick={saveMentorDetails}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-green-700"
+                  className="bg-blue-600 text-gray-900 px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700"
                 >
                   <Save className="w-4 h-4" />
                   Save Changes
@@ -362,7 +362,7 @@ const TeacherProfilePage = () => {
             <div className="space-y-4">
               {mentorDetails.profTitle && (
                 <div className="flex items-center gap-3">
-                  <GraduationCap className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <GraduationCap className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <p className="text-gray-700">{mentorDetails.profTitle}</p>
                 </div>
               )}
@@ -375,7 +375,7 @@ const TeacherProfilePage = () => {
                 mentorDetails.scopusLink ||
                 mentorDetails.linkedInLink) && (
                 <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <Globe className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <div className="flex gap-2 flex-wrap">
                     {mentorDetails.googleScholarLink && (
                       <a
@@ -426,20 +426,20 @@ const TeacherProfilePage = () => {
         {/* Contact Information Row */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Bookmark className="w-5 h-5 text-green-600" />
+            <Bookmark className="w-5 h-5 text-blue-600" />
             Contact Information
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Mail className="w-5 h-5 text-green-600" />
+              <Mail className="w-5 h-5 text-blue-600" />
               <span className="text-gray-600">{teacherDetails.email}</span>
             </div>
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <Phone className="w-5 h-5 text-green-600" />
+              <Phone className="w-5 h-5 text-blue-600" />
               <span className="text-gray-600">{teacherDetails.phone}</span>
             </div>
             {/* <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
-              <MapPin className="w-5 h-5 text-green-600" />
+              <MapPin className="w-5 h-5 text-blue-600" />
               <span className="text-gray-600">
                 {teacherDetails.officeLocation}
               </span>
@@ -450,16 +450,16 @@ const TeacherProfilePage = () => {
         {/* Address Information */}
         {/* <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-green-600" />
+            <MapPin className="w-5 h-5 text-blue-600" />
             Address
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-green-600 font-medium mb-1">Permanent Address</div>
+              <div className="text-sm text-blue-600 font-medium mb-1">Permanent Address</div>
               <div className="text-gray-700 break-words">{user?.fullPermanentAddress || "—"}</div>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-green-600 font-medium mb-1">Correspondence Address</div>
+              <div className="text-sm text-blue-600 font-medium mb-1">Correspondence Address</div>
               <div className="text-gray-700 break-words">{user?.fullCorrespondenceAddress || "—"}</div>
             </div>
           </div>
@@ -468,7 +468,7 @@ const TeacherProfilePage = () => {
         {/* Specialization Row */}
         {/* <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Book className="w-5 h-5 text-green-600" />
+            <Book className="w-5 h-5 text-blue-600" />
             Specialization
           </h2>
           <div className="bg-gray-50 p-4 rounded-lg">

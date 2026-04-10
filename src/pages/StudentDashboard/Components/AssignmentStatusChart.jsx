@@ -93,7 +93,7 @@ const AssignmentStatusChart = ({
         {/* Center Total Count */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-800 dark:text-white">
+            <div className="text-2xl font-bold text-gray-800 dark:text-gray-900">
               {allAssignmentsCount}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Total</div>
@@ -103,14 +103,14 @@ const AssignmentStatusChart = ({
 
       {/* Assignment Status Legend */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+        <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-emerald-500 dark:bg-emerald-400 rounded-full mr-2"></div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full mr-2"></div>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
               Submitted
             </span>
           </div>
-          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+          <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
             {submittedAssignmentsCount}
           </span>
         </div>
@@ -118,7 +118,7 @@ const AssignmentStatusChart = ({
         <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-blue-400 dark:bg-blue-400 rounded-full mr-2"></div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
               Pending
             </span>
           </div>

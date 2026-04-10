@@ -30,7 +30,7 @@ const CaptionInput = ({ sendCaption, clearCaption }) => {
       <div className="flex justify-center">
         <button
           onClick={() => setVisible((v) => !v)}
-          className="flex items-center gap-1 px-3 py-0.5 text-xs text-slate-400 hover:text-white bg-slate-800/90 rounded-t-md border border-b-0 border-slate-700 transition-colors"
+          className="flex items-center gap-1 px-3 py-0.5 text-xs text-slate-400 hover:text-gray-900 bg-slate-800/90 rounded-t-md border border-b-0 border-slate-700 transition-colors"
           title={visible ? "Hide captions bar" : "Show captions bar"}
         >
           <Subtitles size={12} />
@@ -43,7 +43,7 @@ const CaptionInput = ({ sendCaption, clearCaption }) => {
       {visible && (
         <div className="w-full bg-slate-800/90 backdrop-blur border-t border-slate-700 py-2 px-4 flex items-center gap-3">
           {/* CC badge */}
-          <span className="flex-shrink-0 px-2 py-0.5 text-xs font-bold text-white bg-blue-500 rounded-full select-none">
+          <span className="flex-shrink-0 px-2 py-0.5 text-xs font-bold text-gray-900 bg-blue-500 rounded-full select-none">
             CC
           </span>
 
@@ -51,7 +51,7 @@ const CaptionInput = ({ sendCaption, clearCaption }) => {
           <select
             value={speaker}
             onChange={(e) => setSpeaker(e.target.value)}
-            className="flex-shrink-0 bg-slate-700 text-white text-sm rounded px-2 py-1.5 outline-none border border-slate-600 focus:border-blue-500 cursor-pointer"
+            className="flex-shrink-0 bg-slate-700 text-gray-900 text-sm rounded px-2 py-1.5 outline-none border border-slate-600 focus:border-blue-500 cursor-pointer"
           >
             {SPEAKER_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
@@ -68,14 +68,14 @@ const CaptionInput = ({ sendCaption, clearCaption }) => {
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type caption..."
-            className="flex-1 bg-slate-700 text-white placeholder-slate-400 rounded-lg px-3 py-2 text-sm outline-none border border-slate-600 focus:border-blue-500"
+            className="flex-1 bg-slate-700 text-gray-900 placeholder-slate-400 rounded-lg px-3 py-2 text-sm outline-none border border-slate-600 focus:border-blue-500"
           />
 
           {/* Send button */}
           <button
             onClick={handleSend}
             disabled={!text.trim()}
-            className="flex-shrink-0 flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded px-3 py-2 transition-colors"
+            className="flex-shrink-0 flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-gray-900 text-sm font-medium rounded px-3 py-2 transition-colors"
           >
             <Send size={14} />
             Send
@@ -84,7 +84,7 @@ const CaptionInput = ({ sendCaption, clearCaption }) => {
           {/* Clear button */}
           <button
             onClick={clearCaption}
-            className="flex-shrink-0 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+            className="flex-shrink-0 p-1.5 text-slate-400 hover:text-gray-900 hover:bg-slate-700 rounded transition-colors"
             title="Clear captions"
           >
             <X size={16} />

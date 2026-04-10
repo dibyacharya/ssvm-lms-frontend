@@ -397,7 +397,7 @@ const EditAssignmentForm = ({
               />
               <div
                 className={`block w-14 h-8 rounded-full ${
-                  isActive ? "bg-green-400" : "bg-gray-400"
+                  isActive ? "bg-blue-400" : "bg-gray-400"
                 }`}
               ></div>
               <div
@@ -418,13 +418,13 @@ const EditAssignmentForm = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-1/2 bg-gray-400 text-white p-2 rounded hover:bg-gray-500"
+            className="w-1/2 bg-gray-400 text-gray-900 p-2 rounded hover:bg-gray-500"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="w-1/2 bg-green-400 text-white p-2 rounded hover:bg-green-500 disabled:bg-green-300"
+            className="w-1/2 bg-blue-400 text-gray-900 p-2 rounded hover:bg-blue-500 disabled:bg-blue-300"
             disabled={loading || !title || !dueDate}
           >
             {loading ? "Updating..." : "Update"}
@@ -433,7 +433,7 @@ const EditAssignmentForm = ({
 
         {/* Display success or error message */}
         {success && (
-          <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">
+          <div className="mt-4 p-2 bg-blue-100 text-blue-700 rounded">
             Assignment updated successfully!
           </div>
         )}

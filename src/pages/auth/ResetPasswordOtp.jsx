@@ -84,7 +84,7 @@ const ResetPasswordOtp = () => {
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -109,7 +109,7 @@ const ResetPasswordOtp = () => {
                 }
                 placeholder="6-digit OTP"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -130,7 +130,7 @@ const ResetPasswordOtp = () => {
                 onChange={(event) => setNewPassword(event.target.value)}
                 autoComplete="new-password"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -151,7 +151,7 @@ const ResetPasswordOtp = () => {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -159,10 +159,10 @@ const ResetPasswordOtp = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 rounded-lg text-white font-medium transition ${
+            className={`w-full py-3 rounded-lg text-gray-900 font-medium transition ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-700"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "Resetting..." : "Reset Password"}
@@ -173,7 +173,7 @@ const ResetPasswordOtp = () => {
           Didn't receive OTP?{" "}
           <Link
             to="/forgot-password"
-            className="text-emerald-600 hover:text-emerald-500"
+            className="text-blue-600 hover:text-blue-500"
           >
             Request again
           </Link>

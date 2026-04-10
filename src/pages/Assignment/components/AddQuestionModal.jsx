@@ -86,7 +86,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
-            <Plus className="text-green-500" size={24} />
+            <Plus className="text-blue-500" size={24} />
             <h2 className="text-2xl font-bold">Add Question</h2>
           </div>
           <button
@@ -106,7 +106,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
               <textarea
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows="6"
                 placeholder="Enter your question here..."
               />
@@ -138,7 +138,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
                   min="0"
                   max={!isUngraded && totalPoints > 0 ? totalPoints - currentTotalPoints : undefined}
                   disabled={isUngraded}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     isUngraded 
                       ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' 
                       : 'border-gray-300'
@@ -159,7 +159,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
                 <select
                   value={bloomLevel}
                   onChange={(e) => setBloomLevel(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Select level</option>
                   {bloomLevels.map(level => (
@@ -173,7 +173,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
                   <select
                     value={courseOutcome}
                     onChange={(e) => setCourseOutcome(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select course outcome</option>
                     {getCourseOutcomes().map((outcome, index) => {
@@ -207,7 +207,7 @@ const AddQuestionModal = ({ isOpen, onClose, onSave, courseData, bloomLevels, ge
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <Save size={16} />
             Add Question

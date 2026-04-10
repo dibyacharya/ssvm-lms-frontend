@@ -56,12 +56,12 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-white">
+    <div className="flex flex-col h-full bg-gray-50 text-gray-900">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-700 bg-slate-800">
-        <MessageCircle className="w-4 h-4 text-slate-400" />
-        <span className="text-sm font-semibold text-slate-200">Chat</span>
-        <span className="ml-auto text-xs text-slate-500">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white/70">
+        <MessageCircle className="w-4 h-4 text-gray-400" />
+        <span className="text-sm font-semibold text-gray-600">Chat</span>
+        <span className="ml-auto text-xs text-gray-400">
           {messages.length} message{messages.length !== 1 ? "s" : ""}
         </span>
       </div>
@@ -69,8 +69,8 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
       {/* Messages list */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-3">
-            <MessageCircle className="w-10 h-10 text-slate-600" />
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
+            <MessageCircle className="w-10 h-10 text-gray-400" />
             <p className="text-sm text-center leading-relaxed">
               No messages yet.
               <br />
@@ -85,7 +85,7 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
                 <div className="flex items-baseline gap-2 mb-0.5">
                   <span
                     className={`text-xs font-bold truncate max-w-[120px] ${
-                      isOwn ? "text-blue-400" : "text-slate-300"
+                      isOwn ? "text-primary-600" : "text-gray-600"
                     }`}
                   >
                     {isOwn ? "You" : msg.senderName}
@@ -95,19 +95,19 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none ${
                       msg.senderRole === "Teacher"
-                        ? "bg-blue-600/30 text-blue-300"
-                        : "bg-slate-600/40 text-slate-400"
+                        ? "bg-primary-600/30 text-primary-600"
+                        : "bg-surface-600/40 text-gray-400"
                     }`}
                   >
                     {msg.senderRole}
                   </span>
 
-                  <span className="ml-auto text-[10px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="ml-auto text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     {formatTime(msg.sentAt)}
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-300 break-words whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-gray-600 break-words whitespace-pre-wrap leading-relaxed">
                   {msg.content}
                 </p>
               </div>
@@ -118,7 +118,7 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
       </div>
 
       {/* Input area */}
-      <div className="border-t border-slate-700 bg-slate-800 p-3">
+      <div className="border-t border-gray-200 bg-white/70 p-3">
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -127,12 +127,12 @@ export default function ChatPanel({ messages, sendMessage, userName, userRole })
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
-            className="flex-1 resize-none rounded-lg bg-slate-700 text-sm text-white placeholder-slate-500 px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500 border border-slate-600 transition-colors"
+            className="flex-1 resize-none rounded-lg bg-gray-100 text-sm text-gray-900 placeholder-surface-500 px-3 py-2 outline-none focus:ring-1 focus:ring-primary-500 border border-gray-100 transition-colors"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white transition-colors shrink-0"
+            className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary-600 hover:bg-primary-500 disabled:bg-gray-100 disabled:text-gray-400 text-gray-900 transition-colors shrink-0"
             title="Send message"
           >
             <Send className="w-4 h-4" />

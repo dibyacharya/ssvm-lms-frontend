@@ -72,8 +72,8 @@ const DonutChart = ({ percentage, size = 120, strokeWidth = 10 }) => {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-gray-800">{percentage}%</span>
-        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+        <span className="text-2xl font-bold text-gray-900">{percentage}%</span>
+        <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
           Rate
         </span>
       </div>
@@ -90,10 +90,10 @@ const StatCard = ({ icon: Icon, label, value, color, bgColor, borderColor }) => 
       <div
         className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}
       >
-        <Icon className="w-5 h-5 text-white" />
+        <Icon className="w-5 h-5 text-gray-900" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
         <p className="text-xs text-gray-500 font-medium">{label}</p>
       </div>
     </div>
@@ -112,15 +112,15 @@ const SectionHeader = ({ icon: Icon, title, gradient, count, rightContent }) => 
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">
           {title}
         </h2>
       </div>
       <div className="flex items-center gap-3">
         {count != null && (
-          <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+          <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
             {count}
           </span>
         )}
@@ -135,20 +135,20 @@ const ProgressBar = ({ value = 0 }) => {
   const pct = Math.min(100, Math.max(0, Math.round(value)));
   const barColor =
     pct >= 75
-      ? "bg-emerald-500"
+      ? "bg-primary-500"
       : pct >= 50
       ? "bg-amber-500"
       : "bg-red-500";
   const textColor =
     pct >= 75
-      ? "text-emerald-600"
+      ? "text-primary-600"
       : pct >= 50
       ? "text-amber-600"
       : "text-red-600";
 
   return (
     <div className="flex items-center gap-2 min-w-[120px]">
-      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
           style={{ width: `${pct}%` }}
@@ -176,8 +176,8 @@ const StudentAvatar = ({ name, isPresent }) => {
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
         isPresent
-          ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-300"
-          : "bg-gray-100 text-gray-500 ring-2 ring-gray-200"
+          ? "bg-primary-100 text-primary-600 ring-2 ring-primary-500/30"
+          : "bg-white/10 text-gray-500 ring-2 ring-white/[0.08]"
       }`}
     >
       {initials}
@@ -350,13 +350,13 @@ const AttendanceTracker = () => {
         <div className="absolute inset-0 flex items-center justify-between px-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg border border-white/10">
-              <ClipboardCheck className="w-8 h-8 text-white" />
+              <ClipboardCheck className="w-8 h-8 text-gray-900" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">
                 Attendance Tracker
               </h1>
-              <p className="text-white/70 text-sm mt-0.5 font-medium">
+              <p className="text-gray-900/70 text-sm mt-0.5 font-medium">
                 Track and manage student attendance records
               </p>
             </div>
@@ -371,25 +371,25 @@ const AttendanceTracker = () => {
           icon={Users}
           label="Total Students"
           value={students.length}
-          color="bg-blue-500"
-          bgColor="bg-blue-50/80"
-          borderColor="border-blue-100"
+          color="bg-primary-500"
+          bgColor="bg-primary-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={UserCheck}
           label="Present"
           value={presentCount}
-          color="bg-emerald-500"
-          bgColor="bg-emerald-50/80"
-          borderColor="border-emerald-100"
+          color="bg-primary-500"
+          bgColor="bg-primary-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={XCircle}
           label="Absent"
           value={absentCount}
           color="bg-red-500"
-          bgColor="bg-red-50/80"
-          borderColor="border-red-100"
+          bgColor="bg-red-50"
+          borderColor="border-gray-200"
         />
         <StatCard
           icon={TrendingUp}
@@ -397,34 +397,28 @@ const AttendanceTracker = () => {
           value={`${attendancePct}%`}
           color={
             attendancePct >= 75
-              ? "bg-emerald-500"
+              ? "bg-primary-500"
               : attendancePct >= 50
               ? "bg-amber-500"
               : "bg-red-500"
           }
           bgColor={
             attendancePct >= 75
-              ? "bg-emerald-50/80"
+              ? "bg-primary-50"
               : attendancePct >= 50
-              ? "bg-amber-50/80"
-              : "bg-red-50/80"
+              ? "bg-amber-50"
+              : "bg-red-50"
           }
-          borderColor={
-            attendancePct >= 75
-              ? "border-emerald-100"
-              : attendancePct >= 50
-              ? "border-amber-100"
-              : "border-red-100"
-          }
+          borderColor="border-gray-200"
         />
       </div>
 
       {/* ═══════ SESSION CONTROL PANEL ═══════ */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <SectionHeader
           icon={ClipboardCheck}
           title="Session Details"
-          gradient="bg-gradient-to-r from-sky-500 to-blue-600"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-700"
         />
 
         <div className="p-6">
@@ -445,7 +439,7 @@ const AttendanceTracker = () => {
                         if (d) setCurrentDate(d);
                         if (t) setCurrentTime(t);
                       }}
-                      className="w-full p-3.5 rounded-xl border border-gray-200 bg-white hover:border-sky-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 transition-all duration-200 shadow-sm text-gray-800 font-medium text-sm appearance-none cursor-pointer"
+                      className="w-full p-3.5 rounded-xl border border-gray-200 bg-white/5 hover:border-primary-500/30 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 shadow-card text-gray-900 font-medium text-sm appearance-none cursor-pointer"
                     >
                       {Object.keys(attendanceSessions)
                         .sort()
@@ -466,20 +460,20 @@ const AttendanceTracker = () => {
 
                     {/* Selected session info */}
                     <div className="grid grid-cols-2 gap-3 mt-3">
-                      <div className="flex items-center p-3 rounded-xl border border-gray-100 bg-gray-50">
-                        <Calendar className="w-4 h-4 text-sky-500 mr-2 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm font-medium">{currentDate}</span>
+                      <div className="flex items-center p-3 rounded-xl border border-gray-200 bg-white/5">
+                        <Calendar className="w-4 h-4 text-primary-600 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 text-sm font-medium">{currentDate}</span>
                       </div>
-                      <div className="flex items-center p-3 rounded-xl border border-gray-100 bg-gray-50">
-                        <Clock className="w-4 h-4 text-sky-500 mr-2 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm font-medium">{currentTime}</span>
+                      <div className="flex items-center p-3 rounded-xl border border-gray-200 bg-white/5">
+                        <Clock className="w-4 h-4 text-primary-600 mr-2 flex-shrink-0" />
+                        <span className="text-gray-600 text-sm font-medium">{currentTime}</span>
                       </div>
                     </div>
 
                     {/* Delete selected session */}
                     <button
                       type="button"
-                      className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-red-100 text-red-500 text-xs font-semibold hover:bg-red-50 transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-red-500/20 text-red-500 text-xs font-semibold hover:bg-red-50 transition-colors"
                       onClick={async () => {
                         const key = `${currentDate}_${currentTime}`;
                         const count = (attendanceSessions[key] || []).length;
@@ -508,8 +502,8 @@ const AttendanceTracker = () => {
                     </button>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50">
-                    <ClipboardCheck className="w-8 h-8 text-gray-300 mb-2" />
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl border-2 border-dashed border-gray-200 bg-white/[0.02]">
+                    <ClipboardCheck className="w-8 h-8 text-gray-400 mb-2" />
                     <p className="text-sm font-medium text-gray-500 text-center">No sessions yet</p>
                     <p className="text-xs text-gray-400 text-center mt-1">
                       Sessions are created automatically when a live class ends
@@ -528,7 +522,7 @@ const AttendanceTracker = () => {
             <div className="flex flex-col justify-between gap-4">
               <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4 border border-gray-100">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-gray-900">
                     Mark All Students
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
@@ -540,8 +534,8 @@ const AttendanceTracker = () => {
                   disabled={students.length === 0}
                   className={`relative inline-flex h-9 w-[72px] items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     allPresent
-                      ? "bg-emerald-500 focus:ring-emerald-400 shadow-md shadow-emerald-200"
-                      : "bg-red-400 focus:ring-red-300 shadow-md shadow-red-200"
+                      ? "bg-primary-500 focus:ring-primary-400 shadow-md shadow-primary-500/20"
+                      : "bg-red-500 focus:ring-red-400 shadow-md shadow-red-500/20"
                   } ${
                     students.length === 0
                       ? "opacity-50 cursor-not-allowed"
@@ -556,9 +550,9 @@ const AttendanceTracker = () => {
                 </button>
               </div>
 
-              <div className="flex items-start p-4 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-100">
-                <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center mr-3 flex-shrink-0">
-                  <AlertCircle className="w-4 h-4 text-sky-600" />
+              <div className="flex items-start p-4 rounded-xl bg-primary-50 border border-primary-500/20">
+                <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3 flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 text-primary-600" />
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed">
                   Tap on a student's status button to toggle between present and
@@ -571,21 +565,21 @@ const AttendanceTracker = () => {
       </div>
 
       {/* ═══════ STUDENT ATTENDANCE TABLE ═══════ */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <SectionHeader
           icon={Users}
           title="Student Attendance"
-          gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-600"
           count={students.length}
         />
 
         {students.length === 0 ? (
           /* Empty State */
           <div className="flex flex-col items-center justify-center py-20 px-6">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center mb-5 shadow-inner">
-              <UserX className="w-10 h-10 text-gray-300" />
+            <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-5">
+              <UserX className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-lg font-bold text-gray-700 mb-2">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
               No Students Found
             </h3>
             <p className="text-gray-400 text-sm text-center max-w-md leading-relaxed">
@@ -597,7 +591,7 @@ const AttendanceTracker = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-50/50">
+                <tr className="bg-white/5">
                   <th className="py-3.5 px-4 text-left font-semibold text-gray-400 text-xs uppercase tracking-wider whitespace-nowrap">
                     #
                   </th>
@@ -639,7 +633,7 @@ const AttendanceTracker = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 {students.map((student, index) => {
                   const lastStatus = getLastSessionStatus(student.id);
                   const attendanceRate = getStudentAttendanceRate
@@ -657,8 +651,8 @@ const AttendanceTracker = () => {
                   return (
                     <tr
                       key={student.id}
-                      className={`group transition-all duration-200 hover:bg-emerald-50/40 ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      className={`group transition-all duration-200 hover:bg-gray-50 ${
+                        index % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"
                       }`}
                     >
                       {/* # */}
@@ -668,7 +662,7 @@ const AttendanceTracker = () => {
 
                       {/* Roll No. */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 text-xs font-bold font-mono">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-white/10 text-gray-600 text-xs font-bold font-mono">
                           {student.rollNo || "\u2014"}
                         </span>
                       </td>
@@ -680,7 +674,7 @@ const AttendanceTracker = () => {
                             name={student.name}
                             isPresent={present}
                           />
-                          <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
+                          <span className="text-sm font-medium text-gray-900 group-hover:text-gray-900">
                             {student.name}
                           </span>
                         </div>
@@ -691,7 +685,7 @@ const AttendanceTracker = () => {
                         {onlinePresence != null ? (
                           <ProgressBar value={onlinePresence} />
                         ) : (
-                          <span className="text-gray-300 text-sm">{"\u2014"}</span>
+                          <span className="text-gray-400 text-sm">{"\u2014"}</span>
                         )}
                       </td>
 
@@ -702,8 +696,8 @@ const AttendanceTracker = () => {
                             onClick={() => toggleAttendance(student.id)}
                             className={`flex items-center gap-1.5 py-1.5 px-4 rounded-full transition-all duration-300 ease-in-out text-xs font-semibold ${
                               present
-                                ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-200"
-                                : "bg-red-50 text-red-500 hover:bg-red-100 border border-red-200"
+                                ? "bg-primary-500 text-gray-900 hover:bg-primary-600 shadow-md shadow-primary-500/20"
+                                : "bg-red-50 text-red-600 hover:bg-red-500/20 border border-red-500/20"
                             }`}
                           >
                             {present ? (
@@ -724,17 +718,17 @@ const AttendanceTracker = () => {
                       {/* Last Status */}
                       <td className="py-3.5 px-4 text-center">
                         {lastStatus === "Present" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-100 text-primary-600 text-xs font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
                             Present
                           </span>
                         ) : lastStatus === "Absent" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-500 text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-xs font-semibold">
                             <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
                             Absent
                           </span>
                         ) : (
-                          <span className="text-gray-300 text-sm">
+                          <span className="text-gray-400 text-sm">
                             {"\u2014"}
                           </span>
                         )}
@@ -748,22 +742,22 @@ const AttendanceTracker = () => {
                       {/* CA Assignment */}
                       <td className="py-3.5 px-4 text-center text-sm whitespace-nowrap">
                         {caCompleted != null && caTotal != null ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-100">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary-50 text-primary-600 text-xs font-semibold border border-primary-500/20">
                             {caCompleted}/{caTotal}
                           </span>
                         ) : (
-                          <span className="text-gray-300">{"\u2014"}</span>
+                          <span className="text-gray-400">{"\u2014"}</span>
                         )}
                       </td>
 
                       {/* Mobile Number */}
                       <td className="py-3.5 px-4 text-sm whitespace-nowrap">
                         {mobile ? (
-                          <span className="text-gray-600 font-mono text-xs">
+                          <span className="text-gray-500 font-mono text-xs">
                             {mobile}
                           </span>
                         ) : (
-                          <span className="text-gray-300 font-mono text-xs">
+                          <span className="text-gray-400 font-mono text-xs">
                             XXXXXXXXXX
                           </span>
                         )}

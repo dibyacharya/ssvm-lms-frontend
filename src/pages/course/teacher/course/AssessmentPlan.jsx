@@ -14,9 +14,9 @@ const SectionHeader = ({ icon: Icon, title, gradient, children }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {children}
     </div>
@@ -144,7 +144,7 @@ const AssessmentPlan = () => {
       <SectionHeader
         icon={BarChart3}
         title="Assessment Plan"
-        gradient="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600"
+        gradient="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600"
       >
         <div className="flex items-center gap-2">
           {isLocked && (
@@ -156,7 +156,7 @@ const AssessmentPlan = () => {
           {!isEditing && !isLocked && (
             <button
               onClick={handleEdit}
-              className="inline-flex items-center px-3 py-1.5 text-sm bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium"
+              className="inline-flex items-center px-3 py-1.5 text-sm bg-white/20 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-white/30 transition-colors font-medium"
             >
               <Edit3 className="w-3.5 h-3.5 mr-1.5" />
               Edit
@@ -166,7 +166,7 @@ const AssessmentPlan = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCancel}
-                className="inline-flex items-center px-3 py-1.5 text-sm bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium"
+                className="inline-flex items-center px-3 py-1.5 text-sm bg-white/20 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-white/30 transition-colors font-medium"
               >
                 <X className="w-3.5 h-3.5 mr-1.5" />
                 Cancel
@@ -198,9 +198,9 @@ const AssessmentPlan = () => {
       <div className="p-6">
         {/* Total Marks Box */}
         <div className="mb-6">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-center shadow-lg shadow-indigo-200/50">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-center shadow-lg shadow-indigo-200/50">
             <div className="text-sm text-indigo-100 mb-1 font-medium">Total Marks</div>
-            <div className="text-5xl font-bold text-white">{totalMarks}</div>
+            <div className="text-5xl font-bold text-gray-900">{totalMarks}</div>
             <div className="text-xs text-indigo-200 mt-1">out of 100</div>
           </div>
         </div>
@@ -246,8 +246,8 @@ const AssessmentPlan = () => {
           </div>
 
           {/* Continuous Assessment */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300">
-            <div className="text-sm font-semibold mb-3 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-50 border border-blue-200 rounded-xl p-5 text-center transition-all duration-200 hover:shadow-md hover:border-blue-300">
+            <div className="text-sm font-semibold mb-3 bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
               Continuous Assessment
             </div>
             {isEditing && !isLocked ? (
@@ -286,8 +286,8 @@ const AssessmentPlan = () => {
               </div>
             )}
             {totalMarks === 100 && (
-              <div className="flex items-center gap-2.5 p-3.5 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200">
-                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <div className="flex items-center gap-2.5 p-3.5 rounded-lg text-sm bg-blue-50 text-blue-800 border border-blue-200">
+                <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <span>Perfect! Total marks equal 100.</span>
               </div>
             )}

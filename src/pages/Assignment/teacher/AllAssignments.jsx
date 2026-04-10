@@ -36,12 +36,12 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       />
 
       {/* Modal Content */}
-      <div className="relative z-50 w-full max-w-7xl bg-white rounded-lg shadow-xl">
+      <div className="relative z-50 w-full max-w-7xl bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm border border-gray-200">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-primary">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1 hover:bg-gray-50 rounded-full transition-colors"
           >
             <X size={20} className="text-tertiary" />
           </button>
@@ -83,7 +83,7 @@ const AssignmentCard = ({
   } = assignment;
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow-card-sm border border-gray-200 hover:shadow-card-sm transition-all duration-300 overflow-hidden">
       <div className="p-4">
         {/* Header Section */}
         <div className="flex justify-between items-start mb-3">
@@ -99,7 +99,7 @@ const AssignmentCard = ({
             
             {/* Description */}
             {description && (
-              <p className="text-sm text-gray-600 mt-1.5 line-clamp-1 leading-snug">
+              <p className="text-sm text-gray-500 mt-1.5 line-clamp-1 leading-snug">
                 {description.length > 100 ? `${description.substring(0, 100)}...` : description}
               </p>
             )}
@@ -107,26 +107,26 @@ const AssignmentCard = ({
             {/* Date and Due Date */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               {date && (
-                <div className="flex items-center text-xs text-gray-500">
+                <div className="flex items-center text-xs text-gray-400">
                   <Calendar size={12} className="mr-1" />
                   <span>{date}</span>
                 </div>
               )}
               {dueDate && (
-                <div className="flex items-center text-xs text-gray-500">
+                <div className="flex items-center text-xs text-gray-400">
                   <Calendar size={12} className="mr-1" />
                   <span className="font-medium">{dueDate}</span>
                 </div>
               )}
               {assignment.isUngraded ? (
                 <div className="flex items-center text-xs">
-                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
                     Ungraded
                   </span>
                 </div>
               ) : (
                 grade && (
-                  <div className="flex items-center text-xs text-gray-500">
+                  <div className="flex items-center text-xs text-gray-400">
                     <Award size={12} className="mr-1" />
                     <span>{grade} pts</span>
                   </div>
@@ -153,7 +153,7 @@ const AssignmentCard = ({
                 </a>
               ))}
               {attachments.length > 3 && (
-                <span className="text-xs text-gray-500 px-2 py-1">+{attachments.length - 3} more</span>
+                <span className="text-xs text-gray-400 px-2 py-1">+{attachments.length - 3} more</span>
               )}
             </div>
           </div>
@@ -168,7 +168,7 @@ const AssignmentCard = ({
               <span className="text-sm font-semibold text-primary">
                 {stats?.turnedIn || 0}
               </span>
-              <span className="text-xs text-gray-500">Turned in</span>
+              <span className="text-xs text-gray-400">Turned in</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -176,7 +176,7 @@ const AssignmentCard = ({
               <span className="text-sm font-semibold text-primary">
                 {stats?.assigned || 0}
               </span>
-              <span className="text-xs text-gray-500">Assigned</span>
+              <span className="text-xs text-gray-400">Assigned</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -184,7 +184,7 @@ const AssignmentCard = ({
               <span className="text-sm font-semibold text-amber-700">
                 {stats?.graded || 0}
               </span>
-              <span className="text-xs text-gray-500">Graded</span>
+              <span className="text-xs text-gray-400">Graded</span>
             </div>
 
             {/* Status Badge */}
@@ -205,21 +205,21 @@ const AssignmentCard = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onGrade(id)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-900 bg-primary hover:bg-primary/90 rounded-md transition-colors"
             >
               <ClipboardCheck size={14} />
               Grade
             </button>
             <button
               onClick={() => onEdit(id)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white/5 hover:bg-gray-100 rounded-md transition-colors"
             >
               <Edit size={14} />
               Edit
             </button>
             <button
               onClick={() => onDelete(id)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-900 bg-red-600 hover:bg-red-700 rounded-md transition-colors"
             >
               <Trash size={14} />
               Delete
@@ -434,29 +434,29 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
   };
 
   return (
-    <div className="bg-gray-50 md:px-[15%] rounded-lg shadow-sm">
+    <div className="bg-gray-50 md:px-[15%] rounded-lg shadow-card-sm">
       {/* Header Section - Only show when NOT creating assignment */}
       {!isCreateModalOpen && (
-        <div className="px-6 py-5 border-b border-gray-200 bg-white rounded-t-lg">
+        <div className="px-6 py-5 border-b border-gray-200 bg-white/70 backdrop-blur-xl rounded-t-lg">
           <div className="flex justify-between items-start">
             <div className="flex-1">
               {/* Back button - Only show when hideTabs is true (accessed from Continuous Assessment) */}
               {hideTabs && (
                 <button
                   onClick={handleBackToContinuousAssessment}
-                  className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors px-3 py-2 mb-3 -ml-3"
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors px-3 py-2 mb-3 -ml-3"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span>Back to Continuos Assessment</span>
                 </button>
               )}
               <h2 className="text-2xl font-bold text-primary mb-2">Assignments</h2>
-              <p className="text-sm text-gray-600 max-w-2xl">
+              <p className="text-sm text-gray-500 max-w-2xl">
                 Manage and track all course assignments. Create new assignments, view submission statistics, grade student work, and monitor assignment progress.
               </p>
             </div>
             <button
-              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+              className="flex items-center gap-2 bg-primary text-gray-900 px-4 py-2 rounded-md hover:bg-primary/90 transition-colors shadow-card-sm"
               onClick={() => handleOpenCreateModal(displayTab)}
             >
               <Plus size={18} />
@@ -472,7 +472,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
                   activeTab === 'subjective'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
                 }`}
               >
                 <FileText size={16} />
@@ -483,7 +483,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
                 className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
                   activeTab === 'objective'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
                 }`}
               >
                 <CheckCircle size={16} />
@@ -496,7 +496,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
 
       {/* Create Assignment Form - Displayed below nav */}
       {isCreateModalOpen && (
-        <div className="bg-white">
+        <div className="bg-white/70 backdrop-blur-xl">
           <AssignmentSectionRevamp
             courseID={courseID}
             inModal={false}
@@ -531,7 +531,7 @@ const AllAssignments = ({ courseID, initialTab = 'subjective', hideTabs = false 
       {!isCreateModalOpen && (
         <div className="p-6">
         {assignments.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-gray-100">
+          <div className="bg-white/70 backdrop-blur-xl p-8 rounded-lg shadow-card-sm text-center border border-gray-200">
             <div className="text-lg text-tertiary">
               No assignments found for this course.
             </div>

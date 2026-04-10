@@ -488,7 +488,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-96 bg-gray-50 dark:bg-gray-900">
+      <div className="flex justify-center items-center h-96 bg-gray-50">
         <LoadingSpinner />
       </div>
     );
@@ -497,7 +497,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   // Error state
   if (error) {
     return (
-      <div className="text-red-500 dark:text-red-400 p-4 bg-white dark:bg-gray-800 rounded-lg">
+      <div className="text-red-600 p-4 bg-white/70 backdrop-blur-xl rounded-lg">
         {error}
       </div>
     );
@@ -511,9 +511,9 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           icon={CheckCircle}
           title="Assignments"
           subtitle="View and submit your graded assignments"
-          gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+          gradient="bg-gradient-to-r from-amber-600 via-blue-500 to-red-500"
         />
-        <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
+        <div className="p-4 bg-white/70 backdrop-blur-xl text-gray-900 rounded-lg">
           No assignments found.
         </div>
       </div>
@@ -528,9 +528,9 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           icon={CheckCircle}
           title="Assignments"
           subtitle="View and submit your graded assignments"
-          gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+          gradient="bg-gradient-to-r from-amber-600 via-blue-500 to-red-500"
         />
-        <div className="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg">
+        <div className="p-4 bg-white/70 backdrop-blur-xl text-gray-900 rounded-lg">
           Please select an assignment.
         </div>
       </div>
@@ -578,10 +578,10 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           {showFullscreenButton && (
             <button
               onClick={() => setIsFullscreen(true)}
-              className="absolute top-4 right-4 z-10 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="absolute top-4 right-4 z-10 bg-white/70 backdrop-blur-xl p-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
               title="Fullscreen"
             >
-              <Maximize className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <Maximize className="h-5 w-5 text-gray-600" />
             </button>
           )}
           <iframe
@@ -593,14 +593,14 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       );
     } else if (fileType === 'image') {
       return (
-        <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-4 relative">
+        <div className="flex items-center justify-center h-full bg-white p-4 relative">
           {showFullscreenButton && (
             <button
               onClick={() => setIsFullscreen(true)}
-              className="absolute top-4 right-4 z-10 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="absolute top-4 right-4 z-10 bg-white/70 backdrop-blur-xl p-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
               title="Fullscreen"
             >
-              <Maximize className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <Maximize className="h-5 w-5 text-gray-600" />
             </button>
           )}
           <img
@@ -612,17 +612,17 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       );
     } else if (fileType === 'ppt' || fileType === 'pptx') {
       return (
-        <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-6">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+        <div className="flex flex-col items-center justify-center h-full bg-white p-6">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-lg shadow-lg max-w-md w-full">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-orange-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+              <div className="bg-blue-500 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
                 PPT
               </div>
-              <h3 className="ml-3 font-semibold text-lg text-gray-900 dark:text-white">
+              <h3 className="ml-3 font-semibold text-lg text-gray-900">
                 {fileName}
               </h3>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-500 mb-6">
               PowerPoint presentations cannot be previewed directly. You can download the file to view it.
             </p>
             <div className="flex justify-center">
@@ -631,7 +631,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 download={fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+                className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
               >
                 <FileText className="h-5 w-5" />
                 Download Presentation
@@ -642,17 +642,17 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       );
     } else {
       return (
-        <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-900 p-6">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+        <div className="flex flex-col items-center justify-center h-full bg-white p-6">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-lg shadow-lg max-w-md w-full">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-gray-500 text-white text-sm flex items-center justify-center w-10 h-10 rounded">
+              <div className="bg-surface-600 text-gray-900 text-sm flex items-center justify-center w-10 h-10 rounded">
                 FILE
               </div>
-              <h3 className="ml-3 font-semibold text-lg text-gray-900 dark:text-white">
+              <h3 className="ml-3 font-semibold text-lg text-gray-900">
                 {fileName}
               </h3>
             </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-500 mb-6">
               This file type cannot be previewed. You can download it to view.
             </p>
             <div className="flex justify-center">
@@ -661,7 +661,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 download={fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
+                className="bg-blue-500 text-gray-900 px-4 py-2 rounded-md hover:bg-blue-600 flex items-center gap-2"
               >
                 <FileText className="h-5 w-5" />
                 Download File
@@ -674,16 +674,16 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <CoursePageBanner
         icon={CheckCircle}
         title="Assignments"
         subtitle="View and submit your graded assignments"
-        gradient="bg-gradient-to-r from-amber-600 via-orange-500 to-red-500"
+        gradient="bg-gradient-to-r from-amber-600 via-blue-500 to-red-500"
       />
       <div className="flex">
       {/* Sidebar - Assignment List */}
-      <div className="w-1/4 bg-white dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-700 min-h-screen">
+      <div className="w-1/4 bg-white/70 backdrop-blur-xl p-4 border-r border-gray-200 min-h-screen">
         <div className="space-y-2">
           {assignments.map((assignment, index) => {
             // Check if student has submitted (using studentSubmission field from API)
@@ -696,19 +696,19 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 onClick={() => handleAssignmentSelect(assignment, index)}
                 className={`p-3 rounded-lg cursor-pointer transition-colors ${
                   isSelected
-                    ? "bg-blue-100 dark:bg-blue-900/30 border-l-4 border-blue-500"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700 bg-white dark:bg-gray-700"
+                    ? "bg-primary-50 border-l-4 border-primary-500"
+                    : "hover:bg-gray-50 bg-white/70 backdrop-blur-xl"
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-gray-900 dark:text-white text-sm">
+                  <h3 className="font-medium text-gray-900 text-sm">
                     {assignment.title}
                   </h3>
                   {hasSubmitted && (
-                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <CheckCircle className="h-4 w-4 text-primary-600" />
                   )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   {formatDate(assignment.dueDate)}
                 </p>
               </div>
@@ -718,35 +718,35 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="flex-1 bg-gray-50 p-6">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Assignment Header */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-3xl font-bold text-gray-900">
                   {selectedAssignment.title}
                 </h1>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">
+                <p className="text-gray-600 mt-2">
                   {courseData?.title || "Course"}
                 </p>
-                <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
+                <p className="text-gray-500 mt-2 text-sm">
                   {selectedAssignment.description}
                 </p>
               </div>
               <div className="text-right">
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2 text-gray-500">
                   <Calendar className="h-5 w-5" />
                   <span className="text-sm">{formatDate(selectedAssignment.dueDate)}</span>
                 </div>
                 {selectedAssignment.isUngraded ? (
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
                       Ungraded
                     </span>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-500 mt-1">
                     {selectedAssignment.totalPoints} points
                   </p>
                 )}
@@ -755,21 +755,21 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
             
             {/* Start Assignment Prompt */}
             {selectedAssignment.completeIn && !assignmentStarted && !submission && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
+              <div className="mt-4 p-4 bg-gradient-to-r from-primary-900/20 to-indigo-900/20 border-2 border-primary-700 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                      <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary-50">
+                      <Clock className="h-6 w-6 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         Timed Assignment
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        This assignment has a time limit of <strong className="text-blue-600 dark:text-blue-400">{selectedAssignment.completeIn} minutes</strong>.
+                      <p className="text-sm text-gray-500">
+                        This assignment has a time limit of <strong className="text-primary-600">{selectedAssignment.completeIn} minutes</strong>.
                         Once you start, the timer will begin and cannot be paused.
                       </p>
-                      <div className="mt-2 flex items-center gap-2 text-xs text-yellow-700 dark:text-yellow-400">
+                      <div className="mt-2 flex items-center gap-2 text-xs text-yellow-400">
                         <AlertTriangle className="h-4 w-4" />
                         <span>Your assignment will be auto-submitted when time expires</span>
                       </div>
@@ -777,7 +777,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   </div>
                   <button
                     onClick={() => handleStartAssignment(selectedAssignment)}
-                    className="ml-4 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors font-medium shadow-md"
+                    className="ml-4 px-6 py-3 bg-primary-600 text-gray-900 rounded-lg hover:bg-primary-500 transition-colors font-medium shadow-md"
                   >
                     Start Assignment
                   </button>
@@ -789,44 +789,44 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
             {selectedAssignment.completeIn && !submission && assignmentStarted && (
               <div className={`mt-4 p-4 rounded-lg border-2 ${
                 timeRemaining && timeRemaining < 5 * 60 * 1000
-                  ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                  ? 'bg-red-900/20 border-red-700'
                   : timeRemaining && timeRemaining < 10 * 60 * 1000
-                  ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
-                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+                  ? 'bg-yellow-900/20 border-yellow-700'
+                  : 'bg-primary-900/20 border-primary-700'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Clock className={`h-6 w-6 ${
                       timeRemaining && timeRemaining < 5 * 60 * 1000
-                        ? 'text-red-600 dark:text-red-400 animate-pulse'
+                        ? 'text-red-600 animate-pulse'
                         : timeRemaining && timeRemaining < 10 * 60 * 1000
-                        ? 'text-yellow-600 dark:text-yellow-400'
-                        : 'text-blue-600 dark:text-blue-400'
+                        ? 'text-yellow-400'
+                        : 'text-primary-600'
                     }`} />
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-sm font-medium text-gray-600">
                         Time Remaining
                       </p>
                       <p className={`text-2xl font-bold font-mono ${
                         timeRemaining && timeRemaining < 5 * 60 * 1000
-                          ? 'text-red-600 dark:text-red-400'
+                          ? 'text-red-600'
                           : timeRemaining && timeRemaining < 10 * 60 * 1000
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'text-blue-600 dark:text-blue-400'
+                          ? 'text-yellow-400'
+                          : 'text-primary-600'
                       }`}>
                         {timeRemaining ? formatTimeRemaining(timeRemaining) : '--:--:--'}
                       </p>
                     </div>
                   </div>
                   {timeRemaining && timeRemaining < 5 * 60 * 1000 && (
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                    <div className="flex items-center gap-2 text-red-600">
                       <AlertTriangle className="h-5 w-5" />
                       <span className="text-sm font-medium">Time running out!</span>
                     </div>
                   )}
                 </div>
                 {isTimeUp && (
-                  <div className="mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded text-red-800 dark:text-red-300 text-sm font-medium">
+                  <div className="mt-2 p-2 bg-red-50 rounded text-red-600 text-sm font-medium">
                     Time expired! Submitting your assignment...
                   </div>
                 )}
@@ -836,16 +836,16 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
           {/* Submission Status */}
           {submission && (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-green-800 dark:text-green-300">
+            <div className="bg-primary-900/20 border border-primary-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-primary-600">
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-semibold">Submitted</span>
               </div>
-              <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+              <p className="text-sm text-primary-600 mt-1">
                 Submitted on: {formatDate(submission.submissionDate)}
               </p>
               {submission.objectiveScore !== undefined && submission.totalObjectivePoints > 0 && (
-                <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+                <p className="text-sm text-primary-600 mt-1">
                   Score: {submission.objectiveScore}/{submission.totalObjectivePoints}
                 </p>
               )}
@@ -854,7 +854,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                   href={submission.submissionFile}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-flex items-center gap-1"
+                  className="text-sm text-primary-600 hover:underline mt-2 inline-flex items-center gap-1"
                 >
                   <FileText className="h-4 w-4" />
                   View Submission File
@@ -862,26 +862,26 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
               )}
               {/* Show grade if available (only show if teacher has graded) */}
               {submission.grade !== null && submission.grade !== undefined && (
-                <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
-                  <div className="text-sm font-semibold text-green-800 dark:text-green-300 mb-1">Your Grade:</div>
-                  <div className="text-2xl font-bold text-green-700 dark:text-green-400">
+                <div className="mt-3 pt-3 border-t border-primary-700">
+                  <div className="text-sm font-semibold text-primary-600 mb-1">Your Grade:</div>
+                  <div className="text-2xl font-bold text-primary-600">
                     {submission.grade} / {selectedAssignment.totalPoints}
                   </div>
                 </div>
               )}
               {/* Show pending message if subjective questions exist but not graded yet (only for graded assignments) */}
               {(submission.grade === null || submission.grade === undefined) && subjectiveQuestions.length > 0 && !selectedAssignment.isUngraded && (
-                <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
-                  <div className="text-sm text-green-800 dark:text-green-300">
+                <div className="mt-3 pt-3 border-t border-primary-700">
+                  <div className="text-sm text-primary-600">
                     Your submission is pending teacher review. You will see your grade once the teacher has graded your assignment.
                   </div>
                 </div>
               )}
               {/* Show feedback if available */}
               {submission.feedback && (
-                <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
-                  <div className="text-sm font-semibold text-green-800 dark:text-green-300 mb-1">Teacher Feedback:</div>
-                  <div className="text-sm text-green-700 dark:text-green-400 bg-white dark:bg-gray-800 p-2 rounded border border-green-200 dark:border-green-700">
+                <div className="mt-3 pt-3 border-t border-primary-700">
+                  <div className="text-sm font-semibold text-primary-600 mb-1">Teacher Feedback:</div>
+                  <div className="text-sm text-primary-600 bg-white/70 backdrop-blur-xl p-2 rounded border border-primary-700">
                     {submission.feedback}
                   </div>
                 </div>
@@ -891,15 +891,15 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
           {/* Tabs Section - Only show if there are attachments */}
           {hasAttachments && questions.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="border-b border-gray-200 dark:border-gray-700">
+            <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow">
+              <div className="border-b border-gray-200">
                 <nav className="flex space-x-1 px-4" aria-label="Tabs">
                   <button
                     onClick={() => setActiveTab('questions')}
                     className={`px-4 py-3 text-sm font-medium transition-colors ${
                       activeTab === 'questions'
-                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'border-b-2 border-blue-500 text-primary-600'
+                        : 'text-gray-500 hover:text-gray-600'
                     }`}
                   >
                     Questions
@@ -908,8 +908,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                     onClick={() => setActiveTab('attachments')}
                     className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
                       activeTab === 'attachments'
-                        ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'border-b-2 border-blue-500 text-primary-600'
+                        : 'text-gray-500 hover:text-gray-600'
                     }`}
                   >
                     <Paperclip className="h-4 w-4" />
@@ -924,14 +924,14 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           {activeTab === 'questions' && (
             <>
               {!assignmentStarted && selectedAssignment.completeIn && !submission ? (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-                  <p className="text-gray-500 dark:text-gray-400">
+                <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6 text-center">
+                  <p className="text-gray-500">
                     Please start the assignment to view questions.
                   </p>
                 </div>
               ) : questions.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-                  <p className="text-gray-500 dark:text-gray-400">
+                <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6 text-center">
+                  <p className="text-gray-500">
                     No questions available for this assignment.
                   </p>
                 </div>
@@ -939,8 +939,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 <div className="space-y-6">
               {/* Subjective Questions */}
               {subjectiveQuestions.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+                <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6">
+                  <h2 className="text-2xl font-semibold mb-4 text-gray-900">
                     Subjective Questions
                   </h2>
                   <div className="space-y-6">
@@ -948,28 +948,28 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                       const qId = q._id || q.id;
                       const answerValue = subjectiveAnswers[qId] || '';
                       return (
-                        <div key={qId} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div key={qId} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded text-sm font-medium">
+                            <span className="bg-primary-50 text-primary-600 px-3 py-1 rounded text-sm font-medium">
                               Question {index + 1}
                             </span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-sm text-gray-500">
                               {q.points || 0} points
                             </span>
                           </div>
-                          <p className="text-gray-900 dark:text-white font-medium mb-3">
+                          <p className="text-gray-900 font-medium mb-3">
                             {q.question}
                           </p>
                           <textarea
                             value={answerValue}
                             onChange={(e) => handleSubjectiveAnswerChange(qId, e.target.value)}
-                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/70 backdrop-blur-xl text-gray-900"
                             rows="6"
                             placeholder="Type your answer here..."
                             disabled={!!submission || !assignmentStarted}
                           />
                           {submission && answerValue && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <p className="text-xs text-gray-500 mt-2">
                               Your answer is saved
                             </p>
                           )}
@@ -979,12 +979,12 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
                     {/* PDF Upload Option for Subjective */}
                     {!submission && assignmentStarted && (
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-                        <Upload className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500 mb-3" />
-                        <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                      <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                        <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                        <h3 className="font-medium text-gray-900 mb-2">
                           Upload PDF Submission (Optional)
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <p className="text-sm text-gray-500 mb-4">
                           You can upload a PDF file with your answers instead of or in addition to text answers.
                         </p>
                         <input
@@ -999,15 +999,15 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                           htmlFor="pdf-upload"
                           className={`inline-flex items-center px-4 py-2 rounded-lg cursor-pointer transition-colors ${
                             assignmentStarted
-                              ? 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white'
-                              : 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed'
+                              ? 'bg-primary-600 hover:bg-primary-500 text-gray-900'
+                              : 'bg-gray-100 text-gray-900 cursor-not-allowed'
                           }`}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           {selectedFile ? selectedFile.name : "Choose PDF File"}
                         </label>
                         {selectedFile && (
-                          <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                          <p className="text-sm text-primary-600 mt-2">
                             ✓ PDF selected
                           </p>
                         )}
@@ -1019,12 +1019,12 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
               {/* Objective Questions */}
               {objectiveQuestions.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+                <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6">
+                  <h2 className="text-2xl font-semibold mb-4 text-gray-900">
                     Objective Questions (MCQ)
                   </h2>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <div className="bg-primary-900/20 border border-primary-800 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-primary-600">
                       <strong>Note:</strong> Your score will be automatically calculated after submission.
                     </p>
                   </div>
@@ -1035,25 +1035,25 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                       const isCorrect = selectedAnswer === q.correctAnswer;
                       
                       return (
-                        <div key={qId} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div key={qId} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded text-sm font-medium">
+                            <span className="bg-primary-50 text-primary-600 px-3 py-1 rounded text-sm font-medium">
                               Question {index + 1}
                             </span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-sm text-gray-500">
                               {q.points || 0} points
                             </span>
                             {submission && selectedAnswer && (
                               <span className={`text-xs px-2 py-1 rounded ${
                                 isCorrect 
-                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
-                                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                  ? 'bg-primary-50 text-primary-600' 
+                                  : 'bg-red-50 text-red-600'
                               }`}>
                                 {isCorrect ? '✓ Correct' : '✗ Incorrect'}
                               </span>
                             )}
                           </div>
-                          <p className="text-gray-900 dark:text-white font-medium mb-3">
+                          <p className="text-gray-900 font-medium mb-3">
                             {q.question}
                           </p>
                           <div className="space-y-2">
@@ -1064,8 +1064,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                                   key={optIndex}
                                   className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
                                     isSelected
-                                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                      ? 'border-primary-500 bg-primary-50'
+                                      : 'border-gray-200 hover:border-white/[0.12]'
                                   }`}
                                 >
                                   <input
@@ -1077,10 +1077,10 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                                     disabled={!!submission || !assignmentStarted}
                                     className="w-4 h-4 text-blue-600"
                                   />
-                                  <span className="font-medium text-gray-900 dark:text-white">
+                                  <span className="font-medium text-gray-900">
                                     {String.fromCharCode(65 + optIndex)}.
                                   </span>
-                                  <span className="flex-1 text-gray-900 dark:text-white">
+                                  <span className="flex-1 text-gray-900">
                                     {option}
                                   </span>
                                 </label>
@@ -1096,21 +1096,21 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
               {/* Submit Button */}
               {!submission && assignmentStarted && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow p-6">
                   <button
                     onClick={handleSubmit}
                     disabled={isTimeUp}
                     className={`w-full px-6 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${
                       isTimeUp
-                        ? 'bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed'
-                        : 'bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-400'
+                        ? 'bg-gray-100 text-gray-900 cursor-not-allowed'
+                        : 'bg-primary-600 text-gray-900 hover:bg-primary-500'
                     }`}
                   >
                     <Send className="h-5 w-5" />
                     {isTimeUp ? 'Submitting...' : 'Submit Assignment'}
                   </button>
                   {selectedAssignment.completeIn && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                    <p className="text-xs text-gray-500 mt-2 text-center">
                       This is a timed assignment. You have {selectedAssignment.completeIn} minutes to complete it.
                     </p>
                   )}
@@ -1123,12 +1123,12 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
           {/* Attachments Section */}
           {activeTab === 'attachments' && hasAttachments && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow">
               <div className="flex flex-col h-[calc(100vh-300px)] min-h-[600px]">
                 {/* Attachment List Sidebar */}
                 {attachments.length > 1 && (
-                  <div className="border-b border-gray-200 dark:border-gray-700 p-4">
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  <div className="border-b border-gray-200 p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">
                       Select Attachment:
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -1141,8 +1141,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                             onClick={() => setSelectedAttachmentIndex(index)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                               isSelected
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                ? 'bg-blue-500 text-gray-900'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-100'
                             }`}
                           >
                             <FileText className="h-4 w-4" />
@@ -1166,12 +1166,12 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
 
           {/* Show attachments tab if no questions but has attachments */}
           {questions.length === 0 && hasAttachments && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow">
               <div className="flex flex-col h-[calc(100vh-300px)] min-h-[600px]">
                 {/* Attachment List Sidebar */}
                 {attachments.length > 1 && (
-                  <div className="border-b border-gray-200 dark:border-gray-700 p-4">
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  <div className="border-b border-gray-200 p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">
                       Select Attachment:
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -1184,8 +1184,8 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                             onClick={() => setSelectedAttachmentIndex(index)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                               isSelected
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                ? 'bg-blue-500 text-gray-900'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-100'
                             }`}
                           >
                             <FileText className="h-4 w-4" />
@@ -1211,7 +1211,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
           {isFullscreen && attachments[selectedAttachmentIndex] && (
             <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+              <div className="flex items-center justify-between p-4 bg-gray-50 text-gray-900">
                 <div className="flex items-center gap-4">
                   <h3 className="text-lg font-semibold">
                     {attachments[selectedAttachmentIndex].name || `Attachment ${selectedAttachmentIndex + 1}`}
@@ -1221,7 +1221,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                       <button
                         onClick={() => setSelectedAttachmentIndex(Math.max(0, selectedAttachmentIndex - 1))}
                         disabled={selectedAttachmentIndex === 0}
-                        className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-1 bg-gray-100 hover:bg-surface-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Previous
                       </button>
@@ -1231,7 +1231,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                       <button
                         onClick={() => setSelectedAttachmentIndex(Math.min(attachments.length - 1, selectedAttachmentIndex + 1))}
                         disabled={selectedAttachmentIndex === attachments.length - 1}
-                        className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-1 bg-gray-100 hover:bg-surface-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Next
                       </button>
@@ -1240,7 +1240,7 @@ const StudentAssignmentSection = ({ courseID, selectedID }) => {
                 </div>
                 <button
                   onClick={() => setIsFullscreen(false)}
-                  className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
                   title="Exit Fullscreen (Esc)"
                 >
                   <X className="h-6 w-6" />

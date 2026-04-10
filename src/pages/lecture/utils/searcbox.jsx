@@ -219,16 +219,16 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
       )}
 
       {/* Input Area */}
-      <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+      <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-300">
         {/* Model Selector */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-600">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-300">
           <div className="relative">
             <button
               onClick={toggleDropdown}
               className="flex items-center space-x-2 px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
             >
               <Sparkles size={14} className="text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-medium text-gray-900 dark:text-white">{selectedModel}</span>
+              <span className="text-xs font-medium text-gray-900 dark:text-gray-900">{selectedModel}</span>
               {isDropdownOpen ? (
                 <ChevronUp size={14} className="text-gray-400 dark:text-gray-500" />
               ) : (
@@ -237,13 +237,13 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute mt-1 w-20 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
+              <div className="absolute mt-1 w-20 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-300 rounded-lg shadow-lg z-10">
                 <button
                   onClick={() => handleModelSelect("v1")}
                   className={`block w-full text-left px-3 py-1.5 text-xs hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors ${
                     selectedModel === "v1" 
-                      ? "bg-gray-100 dark:bg-gray-600 font-medium text-gray-900 dark:text-white" 
-                      : "text-gray-700 dark:text-gray-300"
+                      ? "bg-gray-100 dark:bg-gray-600 font-medium text-gray-900 dark:text-gray-900" 
+                      : "text-gray-700 dark:text-gray-600"
                   }`}
                 >
                   v1
@@ -252,8 +252,8 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
                   onClick={() => handleModelSelect("v2")}
                   className={`block w-full text-left px-3 py-1.5 text-xs hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors ${
                     selectedModel === "v2" 
-                      ? "bg-gray-100 dark:bg-gray-600 font-medium text-gray-900 dark:text-white" 
-                      : "text-gray-700 dark:text-gray-300"
+                      ? "bg-gray-100 dark:bg-gray-600 font-medium text-gray-900 dark:text-gray-900" 
+                      : "text-gray-700 dark:text-gray-600"
                   }`}
                 >
                   v2
@@ -272,7 +272,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
             onKeyDown={handleKeyDown}
             placeholder="Ask about this lecture..."
             className="w-full min-h-[32px] max-h-[120px] pr-10 resize-none overflow-y-auto focus:outline-none
-                      text-gray-800 dark:text-gray-100 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 text-sm"
+                      text-gray-800 dark:text-gray-800 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 text-sm"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -285,7 +285,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
             className={`absolute right-4 bottom-4 p-1.5 rounded-lg transition-colors duration-200 ${
               loading
                 ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
-                : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400"
+                : "bg-blue-600 dark:bg-blue-500 text-gray-900 hover:bg-blue-700 dark:hover:bg-blue-400"
             }`}
           >
             {loading ? (
@@ -297,7 +297,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
         </div>
 
         {/* Bottom Info */}
-        <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-600">
+        <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-300">
           <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
             Press Enter to send • Shift+Enter for new line
           </div>
@@ -309,7 +309,7 @@ const AutoResizeTextbox = ({ selectedLecture }) => {
         <div className="flex justify-center mt-2">
           <button
             onClick={stopGeneration}
-            className="flex items-center space-x-1 px-3 py-1 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-400 transition-colors duration-200 text-xs"
+            className="flex items-center space-x-1 px-3 py-1 bg-red-600 dark:bg-red-500 text-gray-900 rounded-lg hover:bg-red-700 dark:hover:bg-red-400 transition-colors duration-200 text-xs"
           >
             <Square size={12} fill="white" />
             <span>Stop</span>

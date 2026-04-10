@@ -34,12 +34,12 @@ const SectionHeader = ({ icon: Icon, title, gradient, count }) => (
     <div className="relative z-10 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-          <Icon className="w-5 h-5 text-white" />
+          <Icon className="w-5 h-5 text-gray-900" />
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
       </div>
       {count != null && (
-        <span className="px-2.5 py-1 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
+        <span className="px-2.5 py-1 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">{count}</span>
       )}
     </div>
   </div>
@@ -638,20 +638,20 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-6">
       {/* Header - Gradient Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-fuchsia-600 via-blue-600 to-blue-600 shadow-lg">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
         <div className="absolute -bottom-6 right-20 w-24 h-24 bg-white/5 rounded-full" />
         <div className="absolute top-1/2 left-1/4 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2" />
         <div className="relative z-10 px-8 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-purple-900/20">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-blue-900/20">
+              <Target className="w-6 h-6 text-gray-900" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
                 {isAssessmentMode ? "Continuous Assessment" : "Continuous Assessments Plan"}
               </h2>
-              <p className="text-white/70 mt-0.5 text-sm">
+              <p className="text-gray-900/70 mt-0.5 text-sm">
                 {isAssessmentMode
                   ? "Create and map assignments using your configured assessment plan"
                   : "Plan and configure assessment categories for your course"}
@@ -662,7 +662,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
             !isAssessmentMode && !isEditing ? (
               <button
                 onClick={handleEdit}
-                className="inline-flex items-center px-5 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all shadow-lg shadow-purple-900/10 font-semibold border border-white/20"
+                className="inline-flex items-center px-5 py-2.5 bg-white/20 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/30 transition-all shadow-lg shadow-blue-900/10 font-semibold border border-white/20"
               >
                 <Edit3 className="w-4 h-4 mr-2" />
                 Edit Plan
@@ -671,14 +671,14 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
               <div className="flex space-x-2">
                 <button
                   onClick={handleCancel}
-                  className="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-all font-semibold border border-white/20"
+                  className="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/20 transition-all font-semibold border border-white/20"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="inline-flex items-center px-5 py-2.5 bg-white text-purple-700 rounded-xl hover:bg-white/90 transition-all shadow-lg font-semibold"
+                  className="inline-flex items-center px-5 py-2.5 bg-white text-blue-700 rounded-xl hover:bg-white/90 transition-all shadow-lg font-semibold"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Save
@@ -690,21 +690,21 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
       </div>
 
       {/* Assessment Configuration */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-white rounded-2xl border border-gray-200 dark:border-gray-200 shadow-sm overflow-hidden">
         {/* Section Header with Gradient */}
-        <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600">
+        <div className="relative overflow-hidden px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
           <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
           <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-white" />
+                <BarChart3 className="w-5 h-5 text-gray-900" />
               </div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Continuous Assessment</h2>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight">Continuous Assessment</h2>
             </div>
             <div className="flex items-center gap-3">
               {/* Allocated marks gradient pill */}
-              <span className="px-3 py-1.5 text-xs font-bold text-white bg-white/20 rounded-full backdrop-blur-sm">
+              <span className="px-3 py-1.5 text-xs font-bold text-gray-900 bg-white/20 rounded-full backdrop-blur-sm">
                 {totalMarks}/{assessmentPlan.continuousAssessment} marks
               </span>
               {remainingMarks > 0 && (
@@ -723,13 +723,13 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
 
         <div className="p-6">
           {/* Table Header */}
-          <div className="grid grid-cols-6 gap-4 mb-4 px-3 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-700/30 border border-gray-200/60 dark:border-gray-600/40">
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Category</div>
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Number</div>
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Each of Marks</div>
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Marks Calculation Based on</div>
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">n</div>
-            <div className="font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider flex items-center">Total Marks</div>
+          <div className="grid grid-cols-6 gap-4 mb-4 px-3 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-700/30 border border-gray-200/60 dark:border-gray-300/40">
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">Category</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">Number</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">Each of Marks</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">Marks Calculation Based on</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">n</div>
+            <div className="font-semibold text-gray-600 dark:text-gray-600 text-xs uppercase tracking-wider flex items-center">Total Marks</div>
           </div>
 
           {/* Assessment Rows */}
@@ -744,7 +744,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
           ) : (
             <div className="space-y-2">
               {assessmentCategories.map((category, index) => (
-                <div key={category.id || category._id} className="py-3 px-3 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 rounded-lg transition-all duration-200 border border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:shadow-sm">
+                <div key={category.id || category._id} className="py-3 px-3 hover:bg-blue-50/50 dark:hover:bg-indigo-900/10 rounded-lg transition-all duration-200 border border-gray-100 dark:border-gray-200/50 hover:border-indigo-200 dark:hover:border-indigo-800/50 hover:shadow-sm">
                   <div className="grid grid-cols-6 gap-4 items-start">
                   {/* Category Dropdown */}
                   <div className="flex items-start">
@@ -753,7 +753,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         <select
                           value={category.category}
                           onChange={(e) => handleCategoryChange(category.id || category._id, e.target.value)}
-                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full p-2 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900"
                         >
                           {categoryOptions.map(option => (
                             <option key={option} value={option}>{option}</option>
@@ -762,7 +762,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                       </div>
                     ) : (
                       <div className="w-full flex flex-col">
-                        <span className="text-gray-800 dark:text-gray-200 font-medium text-sm">{category.category}</span>
+                        <span className="text-gray-800 dark:text-gray-700 font-medium text-sm">{category.category}</span>
                       </div>
                     )}
                   </div>
@@ -774,11 +774,11 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         type="number"
                         value={category.number}
                         onChange={(e) => updateCategory(category.id || category._id, 'number', e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900"
                         min="1"
                       />
                     ) : (
-                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.number}</span>
+                      <span className="text-gray-800 dark:text-gray-700 text-sm w-full">{category.number}</span>
                     )}
                   </div>
 
@@ -789,11 +789,11 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         type="number"
                         value={category.eachMarks}
                         onChange={(e) => updateCategory(category.id || category._id, 'eachMarks', e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900"
                         min="1"
                       />
                     ) : (
-                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.eachMarks}</span>
+                      <span className="text-gray-800 dark:text-gray-700 text-sm w-full">{category.eachMarks}</span>
                     )}
                   </div>
 
@@ -803,14 +803,14 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                       <select
                         value={category.calculationMethod}
                         onChange={(e) => updateCategory(category.id || category._id, 'calculationMethod', e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-900"
                       >
                         {calculationOptions.map(option => (
                           <option key={option} value={option}>{option}</option>
                         ))}
                       </select>
                     ) : (
-                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">{category.calculationMethod}</span>
+                      <span className="text-gray-800 dark:text-gray-700 text-sm w-full">{category.calculationMethod}</span>
                     )}
                   </div>
 
@@ -822,7 +822,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         value={isNDerivedFromNumber(category.calculationMethod) ? category.number : category.n}
                         onChange={(e) => updateCategory(category.id || category._id, 'n', e.target.value)}
                         disabled={isNDerivedFromNumber(category.calculationMethod)}
-                        className={`w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white ${
+                        className={`w-full p-2 border border-gray-300 dark:border-gray-300 rounded-lg text-sm text-gray-900 dark:text-gray-900 ${
                           isNDerivedFromNumber(category.calculationMethod)
                             ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
                             : "bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -830,7 +830,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         min="1"
                       />
                     ) : (
-                      <span className="text-gray-800 dark:text-gray-200 text-sm w-full">
+                      <span className="text-gray-800 dark:text-gray-700 text-sm w-full">
                         {isNDerivedFromNumber(category.calculationMethod) ? category.number : category.n}
                       </span>
                     )}
@@ -838,11 +838,11 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
 
                   {/* Total Marks Display */}
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-800 dark:text-gray-200 font-semibold text-sm">{category.totalMarks}</span>
+                    <span className="text-gray-800 dark:text-gray-700 font-semibold text-sm">{category.totalMarks}</span>
                     {isEditing && !readOnly && (
                       <button
                         onClick={() => deleteCategory(category.id || category._id)}
-                        className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors ml-2"
+                        className="p-1 text-red-500 dark:text-red-600 hover:bg-red-100 dark:hover:bg-red-50 rounded transition-colors ml-2"
                         title="Delete category"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -883,12 +883,12 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                                     disabled={readOnly || isCreated || !isNextSlot}
                                     className={`px-3 py-1.5 rounded-lg transition-all text-xs font-medium flex items-center gap-1.5 ${
                                       isCreated
-                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
                                         : readOnly
-                                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-600 cursor-not-allowed'
+                                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-300 cursor-not-allowed'
                                           : isNextSlot
-                                            ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm shadow-blue-500/25 hover:shadow-md cursor-pointer'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-600 cursor-not-allowed'
+                                            ? 'bg-blue-500 text-gray-900 hover:bg-blue-600 shadow-sm shadow-blue-500/25 hover:shadow-md cursor-pointer'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-300 cursor-not-allowed'
                                     }`}
                                     title={
                                       isCreated
@@ -921,7 +921,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                                   e.stopPropagation();
                                   handleViewCategoryAssignments(category);
                                 }}
-                                className="px-3 py-1.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5 text-xs font-medium"
+                                className="px-3 py-1.5 bg-gray-500 text-gray-900 rounded-lg hover:bg-gray-600 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5 text-xs font-medium"
                                 title="View All Assignments"
                               >
                                 <Eye className="w-3.5 h-3.5" />
@@ -935,11 +935,11 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                               <div className="mt-2 flex items-center gap-2">
                                 <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                   <div
-                                    className={`h-full rounded-full transition-all duration-500 ${allCreated ? 'bg-green-500' : 'bg-blue-500'}`}
+                                    className={`h-full rounded-full transition-all duration-500 ${allCreated ? 'bg-blue-500' : 'bg-blue-500'}`}
                                     style={{ width: `${Math.min((existingCount / totalSlots) * 100, 100)}%` }}
                                   />
                                 </div>
-                                <span className={`text-xs font-medium ${allCreated ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                <span className={`text-xs font-medium ${allCreated ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
                                   {existingCount}/{totalSlots}
                                 </span>
                               </div>
@@ -956,7 +956,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
 
           {/* Add More Category Button */}
           {isEditing && !readOnly && (
-            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-200">
               <button
                 onClick={addNewCategory}
                 className="inline-flex items-center px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
@@ -970,11 +970,11 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
       </div>
 
       {/* Summary Card with Gradient Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-white rounded-2xl border border-gray-200 dark:border-gray-200 shadow-sm overflow-hidden">
         <SectionHeader
           icon={Calculator}
           title="Continuous Assessment Summary"
-          gradient="bg-gradient-to-r from-emerald-500 to-green-600"
+          gradient="bg-gradient-to-r from-blue-500 to-blue-600"
         />
         <div className="p-6">
           <div className="flex items-center justify-between">
@@ -984,7 +984,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-gray-800 dark:text-white">{totalMarks}%</div>
+              <div className="text-2xl font-bold text-gray-800 dark:text-gray-900">{totalMarks}%</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">of {assessmentPlan.continuousAssessment}% allocated</div>
             </div>
           </div>
@@ -1003,8 +1003,8 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
           {remainingMarks < 0 && (
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg border-l-4 border-l-red-500">
               <div className="flex items-center">
-                <BarChart3 className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
-                <span className="text-red-800 dark:text-red-300 text-sm">
+                <BarChart3 className="w-5 h-5 text-red-600 dark:text-red-600 mr-2" />
+                <span className="text-red-800 dark:text-red-600 text-sm">
                   Total marks exceed the allocated {assessmentPlan.continuousAssessment}%. Please adjust your assessment plan.
                 </span>
               </div>
@@ -1012,10 +1012,10 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
           )}
 
           {remainingMarks === 0 && totalMarks > 0 && (
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg border-l-4 border-l-green-500">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg border-l-4 border-l-blue-500">
               <div className="flex items-center">
-                <Target className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
-                <span className="text-green-800 dark:text-green-300 text-sm font-medium">
+                <Target className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
+                <span className="text-blue-800 dark:text-blue-300 text-sm font-medium">
                   Perfect! All {assessmentPlan.continuousAssessment}% continuous assessment marks have been allocated.
                 </span>
               </div>
@@ -1027,17 +1027,17 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
       {/* Assignment Selection Modal */}
       {showAssignmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
             {/* Modal Gradient Header */}
-            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-sky-500 to-blue-600">
+            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-blue-500 to-blue-700">
               <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
               <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
               <div className="relative z-10 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-gray-900">
                     Select Assignments
                   </h3>
-                  <p className="text-sm text-white/70 mt-1">
+                  <p className="text-sm text-gray-900/70 mt-1">
                     Choose assignments to include in this category
                   </p>
                 </div>
@@ -1047,7 +1047,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                     setSelectedAssignments({});
                     setSelectedCategoryId(null);
                   }}
-                  className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-lg"
+                  className="text-gray-900/70 hover:text-gray-900 transition-colors p-1.5 hover:bg-white/20 rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -1078,7 +1078,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         handleAddNew(catId, nextSlot);
                       }
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Create New Assignment
                   </button>
@@ -1091,7 +1091,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                       className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedAssignments[assignment._id]
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          : 'border-gray-200 dark:border-gray-300 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-100'
                       }`}
                     >
                       <input
@@ -1101,7 +1101,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                         className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 focus:ring-2"
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900 dark:text-white">{assignment.title}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-900">{assignment.title}</div>
                         {assignment.description && (
                           <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                             {assignment.description}
@@ -1120,7 +1120,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
               )}
             </div>
 
-            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="p-6 border-t border-gray-200 dark:border-gray-200 flex justify-between items-center">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {Object.keys(selectedAssignments).filter(id => selectedAssignments[id]).length} assignment(s) selected
               </div>
@@ -1131,14 +1131,14 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                     setSelectedAssignments({});
                     setSelectedCategoryId(null);
                   }}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-600 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveSelectedAssignments}
                   disabled={Object.keys(selectedAssignments).filter(id => selectedAssignments[id]).length === 0}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-gray-900 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Save Selected ({Object.keys(selectedAssignments).filter(id => selectedAssignments[id]).length})
                 </button>
@@ -1151,16 +1151,16 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
       {/* View-only modal for category-specific assignments */}
       {showViewAssignmentsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
-            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-purple-500 to-indigo-600">
+          <div className="bg-white dark:bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+            <div className="relative overflow-hidden px-6 py-5 bg-gradient-to-r from-blue-500 to-blue-600">
               <div className="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full" />
               <div className="absolute -bottom-4 right-12 w-12 h-12 bg-white/5 rounded-full" />
               <div className="relative z-10 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-gray-900">
                     {viewCategoryName} - Assignments
                   </h3>
-                  <p className="text-sm text-white/70 mt-1">
+                  <p className="text-sm text-gray-900/70 mt-1">
                     Assignments linked to this category
                   </p>
                 </div>
@@ -1170,7 +1170,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                     setViewCategoryAssignments([]);
                     setViewCategoryName('');
                   }}
-                  className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/20 rounded-lg"
+                  className="text-gray-900/70 hover:text-gray-900 transition-colors p-1.5 hover:bg-white/20 rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -1180,7 +1180,7 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
             <div className="flex-1 overflow-y-auto p-6">
               {loadingAssignments ? (
                 <div className="text-center py-8 text-gray-600 dark:text-gray-400">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                   <p className="mt-2">Loading assignments...</p>
                 </div>
               ) : viewCategoryAssignments.length === 0 ? (
@@ -1197,10 +1197,10 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
                   {viewCategoryAssignments.map((assignment) => (
                     <div
                       key={assignment._id}
-                      className="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700"
+                      className="flex items-start gap-3 p-4 border-2 border-gray-200 dark:border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700"
                     >
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900 dark:text-white">{assignment.title}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-900">{assignment.title}</div>
                         {assignment.description && (
                           <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                             {assignment.description}
@@ -1219,14 +1219,14 @@ const ContinuousAssessment = ({ mode = "plan", readOnly = false }) => {
               )}
             </div>
 
-            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+            <div className="p-6 border-t border-gray-200 dark:border-gray-200 flex justify-end">
               <button
                 onClick={() => {
                   setShowViewAssignmentsModal(false);
                   setViewCategoryAssignments([]);
                   setViewCategoryName('');
                 }}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 text-gray-700 dark:text-gray-600 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Close
               </button>

@@ -8,7 +8,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
           key={i}
           className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
             answer === opt
-              ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
+              ? 'border-blue-500 bg-blue-50 text-blue-900'
               : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
           } ${readOnly ? 'cursor-default' : ''}`}
         >
@@ -19,7 +19,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
             checked={answer === opt}
             onChange={() => !readOnly && onAnswerChange(opt)}
             disabled={readOnly}
-            className="w-4 h-4 text-indigo-600"
+            className="w-4 h-4 text-blue-600"
           />
           <span className="text-sm">{opt}</span>
         </label>
@@ -37,7 +37,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
           className={`flex-1 py-3 px-6 rounded-xl border text-sm font-medium transition-all ${
             answer === opt
               ? opt === 'True'
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
                 : 'border-red-500 bg-red-50 text-red-700'
               : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
           }`}
@@ -55,7 +55,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
       onChange={(e) => !readOnly && onAnswerChange(e.target.value)}
       disabled={readOnly}
       placeholder="Type your answer..."
-      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     />
   );
 
@@ -66,7 +66,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
       disabled={readOnly}
       placeholder="Write your detailed answer..."
       rows={6}
-      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-y"
+      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
     />
   );
 
@@ -77,8 +77,31 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
       onChange={(e) => !readOnly && onAnswerChange(e.target.value)}
       disabled={readOnly}
       placeholder="Fill in the blank..."
-      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     />
+  );
+
+  const renderNumerical = () => (
+    <div className="space-y-2">
+      <input
+        type="text"
+        inputMode="decimal"
+        value={answer || ''}
+        onChange={(e) => {
+          const val = e.target.value;
+          // Allow numbers, decimal point, negative sign
+          if (val === '' || val === '-' || /^-?\d*\.?\d*$/.test(val)) {
+            !readOnly && onAnswerChange(val);
+          }
+        }}
+        disabled={readOnly}
+        placeholder="Enter numerical answer..."
+        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+      />
+      <p className="text-xs text-gray-400">
+        Enter a number (integer or decimal). Example: 42, -3.14, 0.5
+      </p>
+    </div>
   );
 
   const typeLabels = {
@@ -87,21 +110,23 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
     short_answer: 'Short Answer',
     long_answer: 'Long Answer',
     fill_in_blank: 'Fill in the Blank',
+    numerical: 'Numerical',
   };
 
   const typeColors = {
     mcq: 'bg-blue-100 text-blue-700',
-    true_false: 'bg-purple-100 text-purple-700',
+    true_false: 'bg-blue-100 text-blue-700',
     short_answer: 'bg-amber-100 text-amber-700',
-    long_answer: 'bg-emerald-100 text-emerald-700',
+    long_answer: 'bg-blue-100 text-blue-700',
     fill_in_blank: 'bg-pink-100 text-pink-700',
+    numerical: 'bg-blue-100 text-blue-700',
   };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1">
-          <span className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-sm font-bold">
+          <span className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">
             {index + 1}
           </span>
           <p className="text-gray-900 text-sm leading-relaxed pt-1">{question.question}</p>
@@ -122,6 +147,7 @@ const QuestionRenderer = ({ question, answer, onAnswerChange, index, readOnly = 
         {question.type === 'short_answer' && renderShortAnswer()}
         {question.type === 'long_answer' && renderLongAnswer()}
         {question.type === 'fill_in_blank' && renderFillInBlank()}
+        {question.type === 'numerical' && renderNumerical()}
       </div>
     </div>
   );

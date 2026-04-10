@@ -110,7 +110,7 @@ export default function CaptionOverlay({
         <button
           ref={gearRef}
           onClick={() => setShowSettings((prev) => !prev)}
-          className="p-1.5 rounded-full bg-black/50 hover:bg-black/70 text-white/70 hover:text-white transition-colors"
+          className="p-1.5 rounded-full bg-gray-50/20 hover:bg-black/70 text-gray-900/70 hover:text-gray-900 transition-colors"
           title="Caption settings"
         >
           <Settings size={16} />
@@ -120,7 +120,7 @@ export default function CaptionOverlay({
         {showSettings && (
           <div
             ref={popoverRef}
-            className="absolute right-0 bottom-full mb-2 w-56 rounded-xl bg-gray-900 border border-gray-700 shadow-xl p-4 space-y-4 text-sm"
+            className="absolute right-0 bottom-full mb-2 w-56 rounded-xl bg-gray-50 border border-gray-200 shadow-xl p-4 space-y-4 text-sm"
           >
             {/* Font Size */}
             <div>
@@ -134,8 +134,8 @@ export default function CaptionOverlay({
                     onClick={() => updateSettings({ fontSize: value })}
                     className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors ${
                       settings.fontSize === value
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        ? "bg-blue-600 text-gray-900"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     {label}
@@ -178,8 +178,8 @@ export default function CaptionOverlay({
                     onClick={() => updateSettings({ bgOpacity: value })}
                     className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors ${
                       settings.bgOpacity === value
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        ? "bg-blue-600 text-gray-900"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     {label}
@@ -200,8 +200,8 @@ export default function CaptionOverlay({
                     onClick={() => updateSettings({ position: value })}
                     className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors ${
                       settings.position === value
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        ? "bg-blue-600 text-gray-900"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     {label}
